@@ -27,7 +27,7 @@ class Controller(season.interfaces.wiz.controller.base):
         for c in category:
             menus.append({ 'title': c, 'url': f'/wiz/widget/list/{c}' , 'pattern': r'^/wiz/widget/list/' + c })
         if cate is None:
-            return framework.response.redirect('list/' + c)
+            return framework.response.redirect('list/' + category[0])
         
         self.nav(menus)
 
