@@ -1,0 +1,20 @@
+include wiz/theme/navbar
+include wiz/theme/component
+
+mixin layout()
+    doctype 5
+    html(ng-app="app")
+        head
+            +header
+            
+        body.antialiased
+            script(src='/resources/wiz/theme/libs/tabler/dist/libs/bootstrap/dist/js/bootstrap.bundle.min.js')
+            script(src='/resources/wiz/theme/libs/tabler/dist/libs/peity/jquery.peity.min.js')
+            script(src='/resources/wiz/theme/libs/tabler/dist/js/tabler.min.js')
+
+            .page(ng-controller="content")
+                +navbar
+                .content(ng-cloak)
+                    +content
+
+            +builder

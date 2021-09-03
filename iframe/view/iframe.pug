@@ -1,0 +1,31 @@
+mixin content()
+    .preview(ng-controller='widget-ui')
+        {$info['html']$}
+
+    script.
+        {$info['js']$}
+
+        try {
+            app.controller('widget-ui', wiz_controller);
+        } catch (e) {
+            app.controller('widget-ui', function () {});
+        }
+
+    style.
+        {$info['css']$}
+
+        html,
+        body {
+            overflow: auto;
+        }
+
+        body {
+            padding: 32px;
+        }
+
+        .page {
+            background: transparent;
+        }
+
+include theme/layout-wiz
++layout

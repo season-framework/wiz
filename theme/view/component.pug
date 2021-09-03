@@ -1,0 +1,91 @@
+mixin header()
+    title SEASON PORTAL
+
+    meta(charset='utf-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover')
+    meta(http-equiv='X-UA-Compatible' content='ie=edge')
+    meta(name='msapplication-TileColor' content='#206bc4')
+    meta(name='theme-color' content='#206bc4')
+    meta(name='apple-mobile-web-app-status-bar-style' content='black-translucent')
+    meta(name='apple-mobile-web-app-capable' content='yes')
+    meta(name='mobile-web-app-capable' content='yes')
+    meta(name='HandheldFriendly' content='True')
+    meta(name='MobileOptimized' content='320')
+
+    link(rel="shortcut icon" href="/resources/img/icon.ico")
+    link(data-n-head="ssr" rel="apple-touch-icon" href="/resources/img/icon_g.png")
+
+    //- fontawesome
+    link(href='/resources/wiz/theme/libs/fontawesome/css/all.min.css' rel='stylesheet') 
+
+    script(src='/resources/wiz/theme/libs/tabler/dist/libs/jquery/dist/jquery.slim.min.js')
+    script(src='/resources/wiz/theme/libs/jquery/jquery-3.5.1.min.js')
+    script(src='/resources/wiz/theme/libs/moment/moment-with-locales.min.js')
+
+    //- tabler
+    link(href='/resources/wiz/theme/libs/tabler/dist/css/tabler.min.css' rel='stylesheet')
+    link(href='/resources/wiz/theme/libs/tabler/dist/css/tabler-flags.min.css' rel='stylesheet')
+    link(href='/resources/wiz/theme/libs/tabler/dist/css/tabler-payments.min.css' rel='stylesheet')
+    link(href='/resources/wiz/theme/libs/tabler/dist/css/tabler-buttons.min.css' rel='stylesheet')
+    link(href='/resources/wiz/theme/libs/tabler/dist/css/demo.min.css' rel='stylesheet')
+
+    //- codemirror
+    link(href='/resources/wiz/theme/libs/codemirror/lib/codemirror.css' rel='stylesheet')
+    script(src='/resources/wiz/theme/libs/codemirror/lib/codemirror.js')
+    script(src='/resources/wiz/theme/libs/codemirror/mode/javascript/javascript.js')
+    script(src='/resources/wiz/theme/libs/codemirror/mode/python/python.js')
+    script(src='/resources/wiz/theme/libs/codemirror/mode/css/css.js')
+    script(src='/resources/wiz/theme/libs/codemirror/mode/htmlmixed/htmlmixed.js')
+    script(src='/resources/wiz/theme/libs/codemirror/mode/xml/xml.js')
+    script(src='/resources/wiz/theme/libs/codemirror/mode/clike/clike.js')
+    script(src='/resources/wiz/theme/libs/codemirror/addon/comment/comment.js')
+    script(src='/resources/wiz/theme/libs/codemirror/addon/comment/continuecomment.js')
+    script(src='/resources/wiz/theme/libs/codemirror/addon/display/autorefresh.js')
+    script(src='/resources/wiz/theme/libs/codemirror/addon/fold/brace-fold.js')
+    script(src='/resources/wiz/theme/libs/codemirror/addon/fold/comment-fold.js')
+    script(src='/resources/wiz/theme/libs/codemirror/addon/fold/foldgutter.js')
+    script(src='/resources/wiz/theme/libs/codemirror/addon/fold/indent-fold.js')
+    script(src='/resources/wiz/theme/libs/codemirror/addon/fold/foldcode.js')
+    script(src='/resources/wiz/theme/libs/codemirror/keymap/sublime.js')
+
+    //- chartjs
+    script(src='/resources/wiz/theme/libs/chartjs/Chart.min.js')
+
+    //- toastr
+    link(href='/resources/wiz/theme/libs/toastr/build/toastr.min.css' rel='stylesheet')
+    script(src='/resources/wiz/theme/libs/toastr/build/toastr.min.js')
+
+    //- prism
+    link(href='/resources/wiz/theme/libs/prism/prism.css' rel='stylesheet')
+    script(src='/resources/wiz/theme/libs/prism/prism.js')
+
+    //- tinymce
+    script(src='/resources/wiz/theme/libs/tinymce/tinymce.min.js')
+
+    //- angular
+    script(src='/resources/wiz/theme/libs/angular/angular.min.js')
+    script(src='/resources/wiz/theme/libs/angular/angular-sanitize.js')
+    script(src='/resources/wiz/theme/libs/angular/ui-codemirror.js')
+
+    //- theme
+    link(href='/resources/wiz/theme/less/theme.less' rel='stylesheet')
+
+    script(src='/resources/wiz/theme/js/base.js')
+    script(src='/resources/wiz/theme/js/drag.js')
+    script(src='/resources/wiz/theme/js/shortcut.js')
+    script(src='/resources/wiz/theme/js/app.js')
+
+    script(src='/resources/wiz/libs/wiz.js')
+    
+mixin builder()
+    - each url in css
+        link(href='/resources/{$ url $}' rel='stylesheet')
+        
+    - each k in exportjs
+        script(type='text/javascript').
+            var {$ k $} = {$ exportjs[k] $};
+
+    - each url in js
+        script(src='/resources/{$ url $}')
+
+    script(src='/resources/wiz/theme/js/build.js')

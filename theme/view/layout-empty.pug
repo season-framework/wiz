@@ -1,0 +1,17 @@
+mixin layout()
+    doctype 5
+    include theme/component
+
+    html(ng-app="app")
+        head
+            +header
+            
+        body.antialiased
+            script(src='/resources/theme/libs/tabler/dist/libs/bootstrap/dist/js/bootstrap.bundle.min.js')
+            script(src='/resources/theme/libs/tabler/dist/libs/peity/jquery.peity.min.js')
+            script(src='/resources/theme/libs/tabler/dist/js/tabler.min.js')
+
+            div.page(ng-controller="content" ng-cloak)
+                +content
+
+            +builder
