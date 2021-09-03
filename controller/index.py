@@ -40,6 +40,7 @@ class Controller(season.interfaces.wiz.controller.api):
         fn[fnname](framework)
 
     def export(self, framework):
+        if self.config.acl is not None: self.config.acl(framework)
         app_id = framework.request.segment.get(0, True)
         info = self.db.get(id=app_id)
         if info is None:

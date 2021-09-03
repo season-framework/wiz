@@ -56,6 +56,36 @@ class base:
             return value.strftime('%Y-%m-%d %H:%M:%S')
         return str(value).replace('<', '&lt;').replace('>', '&gt;')
 
+    def nav(self, menus):
+        framework = self.__framework__
+
+        for menu in menus:
+            pt = None
+            if 'pattern' in menu: pt = menu['pattern']
+            elif 'url' in menu: pt = menu['url']
+
+            if pt is not None:
+                if framework.request.match(pt): menu['class'] = 'active'
+                else: menu['class'] = ''
+
+            if 'child' in menu:
+                menu['show'] = 'show'
+                for i in range(len(menu['child'])):
+                    child = menu['child'][i]
+                    cpt = None
+                
+                    if 'pattern' in child: cpt = child['pattern']
+                    elif 'url' in child: cpt = child['url']
+
+                    if cpt is not None:
+                        if framework.request.match(cpt): 
+                            menu['child'][i]['class'] = 'active'
+                            menu['show'] = 'show'
+                        else: 
+                            menu['child'][i]['class'] = ''
+
+        framework.response.data.set(menus=menus)
+
 class api(base):
     def __startup__(self, framework):
         super().__startup__(framework)

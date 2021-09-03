@@ -4,36 +4,36 @@ mixin content()
             .row.align-items-center
                 .col-auto
                     .page-pretitle SEASON WIZ
-                    h2.page-title 위젯관리
+                    h2.page-title Interface Management
 
                 .col-auto.ml-auto.d-print-none
                     .d-flex
                         input.form-control(type="text" placeholder="검색" ng-model="search.text" ng-enter="event.search()")
                         a.btn.btn-light.ml-2.d-none.d-sm-inline-block(href='#' style="width: 200px;" ng-click="event.search()")
                             i.mr-2.fas.fa-search
-                            | 검색
-                        a.btn.btn-light.pr-4.pl-4.ml-2(href='editor/new' style="width: 200px;") 
+                            | Search
+                        a.btn.btn-light.pr-4.pl-4.ml-2(href='/wiz/widget/editor/new?category={$ category $}' style="width: 200px;") 
                             i.mr-2.fas.fa-plus
-                            | 생성하기
+                            | Create
 
         .overflow-x
             table.table.board-table.table-hover
                 thead 
                     tr
                         th.text-center.width-1 ID
-                        th.text-center.width-1 분류
-                        th.text-center 제목
-                        th.text-center.width-2 작성자
-                        th.text-center.width-2 등록일
+                        th.text-center.width-1 Category
+                        th.text-center Title
+                        th.text-center.width-2 User
+                        th.text-center.width-2 Created
 
                 tbody
                     tr(ng-repeat="item in list")
                         td.text-center.width-1
-                            a(ng-href="./editor/{$ng('item.id')$}")= ng('item.id.substring(0,8)')
+                            a(ng-href="/wiz/widget/editor/{$ng('item.id')$}")= ng('item.id.substring(0,8)')
                         td.text-center.width-1
-                            a(ng-href="./editor/{$ng('item.id')$}")= ng('item.category')
+                            a(ng-href="/wiz/widget/editor/{$ng('item.id')$}")= ng('item.category')
                         td
-                            a(ng-href="./editor/{$ng('item.id')$}")= ng('item.title')
+                            a(ng-href="/wiz/widget/editor/{$ng('item.id')$}")= ng('item.title')
                         td.text-center.width-2= ng('item.user_id')
                         td.text-center.width-2= ng('item.created.substring(0,10)')
             

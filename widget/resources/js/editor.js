@@ -3,6 +3,8 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.trustAsHtml = $sce.trustAsHtml;
     $scope.math = Math;
 
+    $scope.category = category;
+
     var API_URL = "/wiz/widget";
     var API = {
         INFO: API_URL + '/api/info/' + app_id,
@@ -42,7 +44,7 @@ var content_controller = function ($scope, $timeout, $sce) {
 
     $scope.event.delete = function () {
         $.get(API.DELETE, { app_id: app_id }, function (res) {
-            location.href = API.LIST;
+            location.href = API.LIST + "/list/" + $scope.info.category ;
         });
     }
 

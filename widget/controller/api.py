@@ -4,6 +4,7 @@ class Controller(season.interfaces.wiz.controller.api):
 
     def __startup__(self, framework):
         super().__startup__(framework)
+        if self.config.acl is not None: self.config.acl(framework)
 
     def info(self, framework):
         app_id = framework.request.segment.get(0, True)

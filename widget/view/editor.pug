@@ -43,7 +43,7 @@ mixin content()
                                 span.nav-link-title(style="font-size: 14px;") 저장하기
 
                         li.nav-item.p-0
-                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(href='/wiz/widget')
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(href='/wiz/widget/list/{{info.category}}')
                                 span.nav-link-title.bold(style="font-size: 14px;")
                                     i.fas.fa-times
 
@@ -52,33 +52,32 @@ mixin content()
             .menu-layout.p-3
                 h3.text-white.mb-3 
                     i.fas.fa-bars.mr-2(ng-click="event.toggle.sidemenu()")
-                    span.minify 앱 구성
+                    span.minify Component
 
                 .card.card-sm.mb-3.minify
                     .card-body
-                        label.form-label 앱 제목
+                        label.form-label Title
                         input.form-control(type='text' placeholder='App 제목' ng-model="info.title")
 
                 .card.card-sm.mb-3.minify
                     .card-body
-                        label.form-label NAMESPACE
+                        label.form-label Namespace
                         input.form-control(type='text' placeholder='NAMESPACE' ng-model="info.namespace")
 
                 .card.card-sm.mb-3.minify
                     .card-body
-                        label.form-label 앱 분류
+                        label.form-label Category
                         select.form-select(ng-model="info.category")
-                            option(value="widget") 위젯
-                            option(value="page") 페이지
+                            option(value="{{c}}" ng-repeat="c in category") {{c}}
 
                 .card.card-sm.mb-3.minify
                     .card-body
-                        label.form-label 앱 설명
+                        label.form-label Description
                         textarea.form-control(ng-model="info.content" rows=4)
 
                 .hr.bg-white.minify
                 
-                h3.text-white.minify 레이아웃
+                h3.text-white.minify Code Layout
 
                 .text-center.mb-4
                     .layout-selector.p-2(ng-class="options.layout == 1 ? 'active' : ''" ng-click="options.layout = 1")
@@ -146,11 +145,11 @@ mixin content()
                 .button-container
                     button.btn.btn-white.btn-block.mb-3(ng-click="event.select_file()") 
                         i.fas.fa-upload
-                        span.minify.ml-2 불러오기
+                        span.minify.ml-2 Import
 
                     a.btn.btn-white.btn-block.mb-3(href="/wiz/export/{{ info.id }}" target="_blank")
                         i.fas.fa-download
-                        span.minify.ml-2 내보내기
+                        span.minify.ml-2 Export
 
                 .display-none(style="display: none;")
                     input#import-file(type="file" accept=".json,application/json")
@@ -208,11 +207,11 @@ mixin content()
         .modal-dialog.modal-sm(role='document')
             .modal-content
                 .modal-body
-                    .modal-title 삭제
-                    div 삭제하면 복원할 수 없습니다. 정말 삭제하시겠습니까?
+                    .modal-title Delete
+                    div Once deleted, it cannot be restored. Are you sure you want to delete?
                 .modal-footer
-                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') 취소
-                    button.btn.btn-danger(type='button' ng-click="event.delete()") 삭제
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-danger(type='button' ng-click="event.delete()") Delete
 
 include wiz/theme/layout-empty
 +layout

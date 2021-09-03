@@ -77,9 +77,14 @@ def acl(framework):
     if framework.session['role'] not in ['admin']:
         framework.response.abort(401)
 
+def uid(framework):
+    return framework.session['id']
+
 config.acl = acl
+config.uid = uid
 config.home = "/"
 config.table = 'widget'
+config.category = ["widget", "page"]
 ```
 
 ### websrc/modules/theme/view/layout-wiz.pug

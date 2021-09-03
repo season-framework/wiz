@@ -13,10 +13,26 @@ class Controller(season.interfaces.wiz.controller.base):
         return response.redirect('list')
 
     def list(self, framework):
+        cate = framework.request.segment.get(0, None)
         self.js('js/list.js')
         search = framework.request.query()
-        self.exportjs(search=search, session=framework.session)
-        return framework.response.render('list.pug')
+        search['category'] = cate
+
+        category = ['widget', 'page']
+        try:
+            category = self.config.category
+        except:
+            pass
+        menus = []
+        for c in category:
+            menus.append({ 'title': c, 'url': f'/wiz/widget/list/{c}' , 'pattern': r'^/wiz/widget/list/' + c })
+        if cate is None:
+            return framework.response.redirect('list/' + c)
+        
+        self.nav(menus)
+
+        self.exportjs(search=search)
+        return framework.response.render('list.pug', category=cate)
 
     def editor(self, framework):
         self.js('js/editor.js')
@@ -25,10 +41,22 @@ class Controller(season.interfaces.wiz.controller.base):
         app_id = framework.request.segment.get(0, True)
         info = self.db.get(id=app_id)
 
+        category = ['widget', 'page']
+        try:
+            category = self.config.category
+        except:
+            pass
+
+        cate = framework.request.query("category", category[0])
+
         if info is None:
             info = dict()
-            info["title"] = "새로운 위젯"
-            info["user_id"] = framework.session['id']
+            info["title"] = "New Widget"
+            info["category"] = cate
+            try:
+                info["user_id"] = self.config.uid(framework)
+            except:
+                info["user_id"] = "unknown"
             newid = framework.lib.util.randomstring(32)
             res = self.db.get(id=newid)
             while res is not None:
@@ -40,5 +68,5 @@ class Controller(season.interfaces.wiz.controller.base):
             self.db.insert(info)
             framework.response.redirect("editor/" + newid)
         
-        self.exportjs(app_id=app_id)
-        framework.response.render('editor.pug')
+        self.exportjs(app_id=app_id, category=category)
+        framework.response.render('editor.pug', category=category)
