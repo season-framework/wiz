@@ -1,19 +1,8 @@
 mixin content()
-    .preview(ng-controller='widget-ui')
-        {$info['html']$}
-
-    script.
-        {$info['js']$}
-
-        try {
-            app.controller('widget-ui', wiz_controller);
-        } catch (e) {
-            app.controller('widget-ui', function () {});
-        }
+    .preview
+        {$ view $}
 
     style.
-        {$info['css']$}
-
         html,
         body {
             overflow: auto;

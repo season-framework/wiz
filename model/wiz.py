@@ -33,6 +33,6 @@ class Model(season.core.interfaces.model.MySQL):
         html = html[0] + f" id='wiz-{id}' ng-controller='wiz-{id}'>" + ">".join(html[1:])
 
         view = html
-        view = view + f"<script>function __init_{id}() {o} {js}; try {o} app.controller('wiz-{id}', wiz_controller); {e} catch (e) {o} app.controller('wiz-{id}', function() {o} {e} ); {e} {e}; __init_{id}();</script>"
+        view = view + f"<script>var wiz = season_wiz('{id}'); function __init_{id}() {o} {js}; try {o} app.controller('wiz-{id}', wiz_controller); {e} catch (e) {o} app.controller('wiz-{id}', function() {o} {e} ); {e} {e}; __init_{id}();</script>"
         view = view + f"<style>{css}</style>"
         return view
