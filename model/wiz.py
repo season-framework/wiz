@@ -1,15 +1,16 @@
 import season
 import lesscpy
 from six import StringIO
+import json
 
 class Model(season.core.interfaces.model.MySQL):
     def __init__(self, framework):
         super().__init__(framework)
         self.namespace = 'wiz'
         config = framework.config.load("wiz")
-        self.tablename = config.get("table", "wiz")        
+        self.tablename = config.get("table", "wiz")
 
-    def view(self, id):
+    def view(self, id, **kwargs):
         item = self.get(id=id)
         if item is None:
             item = self.get(namespace=id)
@@ -32,7 +33,9 @@ class Model(season.core.interfaces.model.MySQL):
         html = html.split(">")
         html = html[0] + f" id='wiz-{id}' ng-controller='wiz-{id}'>" + ">".join(html[1:])
 
+        kwargs = json.dumps(kwargs, default=season.json_default)
+
         view = html
-        view = view + f"<script>function __init_{id}() {o} var wiz = season_wiz('{id}'); {js}; try {o} app.controller('wiz-{id}', wiz_controller); {e} catch (e) {o} app.controller('wiz-{id}', function() {o} {e} ); {e} {e}; __init_{id}();</script>"
+        view = view + f"<script>function __init_{id}() {o} var wiz = season_wiz('{id}'); wiz.options = {kwargs}; {js}; try {o} app.controller('wiz-{id}', wiz_controller); {e} catch (e) {o} app.controller('wiz-{id}', function() {o} {e} ); {e} {e}; __init_{id}();</script>"
         view = view + f"<style>{css}</style>"
         return view

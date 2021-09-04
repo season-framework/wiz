@@ -2,11 +2,12 @@ import season
 import json
 import datetime
 
-class Controller(season.interfaces.controller.api):
+class Controller(season.interfaces.wiz.controller.base):
 
     def __startup__(self, framework):
         super().__startup__(framework)
         self.framework = framework
+        if self.config.acl is not None: self.config.acl(framework)
 
     def json_default(self, value):
         if isinstance(value, datetime.date): 
