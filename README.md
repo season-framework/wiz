@@ -85,6 +85,8 @@ config.uid = uid
 config.home = "/"
 config.table = 'widget'
 config.category = ["widget", "page"]
+config.wizsrc = '/<wiz-src-path>/wiz-src'
+config.topmenus = [{ 'title': 'HOME', 'url': '/' }, { 'title': 'sample', 'url': 'sample' }]
 ```
 
 ### websrc/modules/theme/view/layout-wiz.pug

@@ -64,10 +64,10 @@ var content_controller = function ($scope, $timeout, $sce) {
     };
 
     $scope.event.save = function (cb) {
-        $scope.info.html =  $scope.info.html.replace(/\\t/gim, '    '); 
-        $scope.info.css =  $scope.info.css.replace(/\\t/gim, '    '); 
-        $scope.info.js =  $scope.info.js.replace(/\\t/gim, '    '); 
-        $scope.info.api =  $scope.info.api.replace(/\\t/gim, '    '); 
+        $scope.info.html =  $scope.info.html.replace(/\t/gim, '    '); 
+        $scope.info.css =  $scope.info.css.replace(/\t/gim, '    '); 
+        $scope.info.js =  $scope.info.js.replace(/\t/gim, '    '); 
+        $scope.info.api =  $scope.info.api.replace(/\t/gim, '    '); 
 
         var data = angular.copy($scope.info);
         

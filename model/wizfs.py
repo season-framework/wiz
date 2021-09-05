@@ -11,6 +11,9 @@ class Model(season.core.interfaces.model.FileSystem):
     def set_namespace(self, namespace):
         self.namespace = namespace
 
+    def set_path(self, path):
+        self.config.path = path
+
     def read(self, source, default=""):
         try:
             return self.read_text(source)

@@ -13,6 +13,8 @@ class Controller(season.interfaces.wiz.controller.base):
         return response.redirect('list')
 
     def list(self, framework):
+        if 'topmenus' in self.config: self.topnav(self.config.topmenus)
+
         cate = framework.request.segment.get(0, None)
         self.js('js/list.js')
         search = framework.request.query()
@@ -46,7 +48,6 @@ class Controller(season.interfaces.wiz.controller.base):
             category = self.config.category
         except:
             pass
-
         cate = framework.request.query("category", category[0])
 
         if info is None:
