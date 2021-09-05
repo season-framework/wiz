@@ -1,5 +1,5 @@
 mixin codearea(tab)
-    textarea.form-control(ng-if="options.tab.{$tab$}_val == 'html'" ng-model="info.html" ui-codemirror-opts="codemirror('htmlmixed')" ui-codemirror)
+    textarea.form-control(ng-if="options.tab.{$tab$}_val == 'html'" ng-model="info.html" ui-codemirror-opts="codemirror('pug')" ui-codemirror)
     textarea.form-control(ng-if="options.tab.{$tab$}_val == 'js'" ng-model="info.js" ui-codemirror-opts="codemirror('javascript')" ui-codemirror)
     textarea.form-control(ng-if="options.tab.{$tab$}_val == 'css'" ng-model="info.css" ui-codemirror-opts="codemirror('css')" ui-codemirror)
     textarea.form-control(ng-if="options.tab.{$tab$}_val == 'api'" ng-model="info.api" ui-codemirror-opts="codemirror('python')" ui-codemirror)

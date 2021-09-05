@@ -30,11 +30,17 @@ class Controller(season.interfaces.wiz.controller.api):
     def api(self, framework):
         app_id = framework.request.segment.get(0, True)
         fnname = framework.request.segment.get(1, True)
-        info = self.db.get(id=app_id)
-        if info is None: info = self.db.get(namespace=app_id)
-        if info is None: self.status(404)
-        
-        view_api = info['api']
+        _, view_api = self.db.view(app_id)
+        if view_api is None: self.status(404)
+        fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner'}
+        exec(compile(view_api, 'season.Spawner', 'exec'), fn)
+        fn[fnname](framework)
+
+    def api_src(self, framework):
+        app_id = framework.request.segment.get(0, True)
+        fnname = framework.request.segment.get(1, True)
+        _, view_api = self.db.view_from_source(app_id)
+        if view_api is None: self.status(404)
         fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner'}
         exec(compile(view_api, 'season.Spawner', 'exec'), fn)
         fn[fnname](framework)
