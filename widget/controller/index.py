@@ -66,6 +66,11 @@ class Controller(season.interfaces.wiz.controller.base):
             info["id"] = newid
             info["namespace"] = newid
             info["created"] = datetime.datetime.now()
+            info["kwargs"] = ""
+            info["html"] = ".container\n    h3 New Widget"
+            info["js"] = "var wiz_controller = function ($sce, $scope, $timeout) {\n\n}" 
+            info["css"] = ""
+            info["api"] = 'def _status(framework, code, data):\n    res = dict()\n    res["code"] = code\n    res["data"] = data\n    framework.response.json(res)\n\ndef myfunc(framework):\n    _status(framework, 200, rows)'
             self.db.insert(info)
             framework.response.redirect("editor/" + newid)
         

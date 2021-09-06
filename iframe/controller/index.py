@@ -27,5 +27,7 @@ class Controller(season.interfaces.wiz.controller.base):
     def __default__(self, framework):
         app_id = framework.request.segment.get(0, True)
         db = framework.model("wiz", module="wiz")
+        db.set_update_view(True)
         view = db.render(app_id)
+        
         framework.response.render('iframe.pug', view=view, app_id=app_id)

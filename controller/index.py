@@ -2,6 +2,7 @@ import season
 import json
 import datetime
 import urllib
+import time
 
 class Controller(season.interfaces.wiz.controller.api):
 
@@ -30,7 +31,9 @@ class Controller(season.interfaces.wiz.controller.api):
     def api(self, framework):
         app_id = framework.request.segment.get(0, True)
         fnname = framework.request.segment.get(1, True)
-        _, view_api = self.db.view(app_id)
+        wiz = self.db.get(id=app_id, fields="api")
+        if wiz is None: self.status(404)
+        view_api = wiz['api']
         if view_api is None: self.status(404)
         fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner'}
         exec(compile(view_api, 'season.Spawner', 'exec'), fn)
