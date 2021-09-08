@@ -133,13 +133,13 @@ mixin content()
     .container.mt-4
         .row.row-deck.row-cards
             .col-md-4
-                {$ wiz.view("widget-commute") $}
+                {$ wiz.render("widget-commute") $}
 
             .col-md-4
-                {$ wiz.view("widget-monthly-worktime") $}
+                {$ wiz.render("widget-monthly-worktime") $}
 
             .col-md-4
-                {$ wiz.view("widget-vacation") $}
+                {$ wiz.render("widget-vacation") $}
     
 include theme/layout
 +layout
