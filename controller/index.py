@@ -29,6 +29,7 @@ class Controller(season.interfaces.wiz.controller.api):
         framework.response.redirect("widget")
 
     def api(self, framework):
+        framework.response.status = self.status
         app_id = framework.request.segment.get(0, True)
         fnname = framework.request.segment.get(1, True)
         wiz = self.db.get(id=app_id, fields="api")
@@ -37,15 +38,18 @@ class Controller(season.interfaces.wiz.controller.api):
         if view_api is None: self.status(404)
         fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner'}
         exec(compile(view_api, 'season.Spawner', 'exec'), fn)
+        if '__startup__' in fn: fn['__startup__'](framework)
         fn[fnname](framework)
 
     def api_src(self, framework):
+        framework.response.status = self.status
         app_id = framework.request.segment.get(0, True)
         fnname = framework.request.segment.get(1, True)
         _, view_api = self.db.view_from_source(app_id)
         if view_api is None: self.status(404)
         fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner'}
         exec(compile(view_api, 'season.Spawner', 'exec'), fn)
+        if '__startup__' in fn: fn['__startup__'](framework)
         fn[fnname](framework)
 
     def export(self, framework):
