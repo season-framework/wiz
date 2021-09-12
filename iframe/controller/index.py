@@ -28,7 +28,6 @@ class Controller(season.interfaces.wiz.controller.base):
         config = self.config
         app_id = framework.request.segment.get(0, True)
         db = framework.model("wiz", module="wiz")
-        db.set_update_view(True)
         view = db.render(app_id)
 
         if 'default' not in config.theme:

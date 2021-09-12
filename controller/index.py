@@ -23,7 +23,7 @@ class Controller(season.interfaces.wiz.controller.api):
         return self.__framework__.response.send(res, content_type='application/json')
 
     def __error__(self, framework, err):
-        self.status(500)
+        self.status(500, str(err))
 
     def __default__(self, framework):
         framework.response.redirect("widget")

@@ -34,6 +34,10 @@ class Controller(season.interfaces.wiz.controller.api):
             self.status(400, "Bad Request")
         info = self.db.get(id=_info['id'])
         stat, _ = self.db.upsert(_info)
+        
+        self.db.set_update_view(True)
+        self.db.render(info['id'])
+
         if stat: self.status(200, info['id'])
         self.status(500, info['id'])
 
