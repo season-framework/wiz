@@ -78,6 +78,7 @@ class Controller(season.interfaces.wiz.controller.base):
             info["namespace"] = newid
             info["created"] = datetime.datetime.now()
             info["kwargs"] = ""
+            info["viewuri"] = ""
             info["html"] = ".container\n    h3 New Widget"
             info["js"] = "var wiz_controller = function ($sce, $scope, $timeout) {\n\n}" 
             info["css"] = ""

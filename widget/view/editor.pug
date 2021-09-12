@@ -81,6 +81,11 @@ mixin content()
 
                 .card.card-sm.mb-3.minify
                     .card-body
+                        label.form-label View URI
+                        input.form-control(type='text' placeholder='/module/page' ng-model="info.viewuri")
+
+                .card.card-sm.mb-3.minify
+                    .card-body
                         label.form-label Description
                         textarea.form-control(ng-model="info.content" rows=4)
 
