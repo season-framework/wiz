@@ -89,7 +89,7 @@ class Model(season.core.interfaces.model.MySQL):
 
             try:
                 pugconfig = {}
-                if 'pug' in self.wizconfig: pugconfig = self.wizconfig.pug
+                if self.wizconfig.pug is not None: pugconfig = self.wizconfig.pug
                 pug = pypugjs.Parser(html)
                 pug = pug.parse()
                 html = pypugjs.ext.jinja.Compiler(pug, **pugconfig).compile()
@@ -137,7 +137,7 @@ class Model(season.core.interfaces.model.MySQL):
 
         try:
             pugconfig = {}
-            if 'pug' in self.wizconfig: pugconfig = self.wizconfig.pug
+            if self.wizconfig.pug is not None: pugconfig = self.wizconfig.pug
             pug = pypugjs.Parser(html)
             pug = pug.parse()
             html = pypugjs.ext.jinja.Compiler(pug, **pugconfig).compile()
