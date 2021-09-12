@@ -14,6 +14,7 @@ class Model(season.core.interfaces.model.MySQL):
         self.tablename = config.get("table", "wiz")
         self.wizsrc = config.get("wizsrc", os.path.join(framework.core.PATH.MODULES, "wiz", "wizsrc"))
         self.updateview = False
+        self.wizconfig = config
 
     def set_update_view(self, updateview):
         self.updateview = updateview
@@ -58,7 +59,6 @@ class Model(season.core.interfaces.model.MySQL):
         return view
 
     def view(self, id, **kwargs):
-        gconfig = self.framework.config.load()
         item = self.get(id=id)
         if item is None:
             item = self.get(namespace=id)
@@ -88,9 +88,11 @@ class Model(season.core.interfaces.model.MySQL):
             e = "}"
 
             try:
+                pugconfig = {}
+                if 'pug' in self.wizconfig: pugconfig = self.wizconfig.pug
                 pug = pypugjs.Parser(html)
                 pug = pug.parse()
-                html = pypugjs.ext.jinja.Compiler(pug, **gconfig).compile()
+                html = pypugjs.ext.jinja.Compiler(pug, **pugconfig).compile()
             except:
                 pass
             
@@ -109,7 +111,6 @@ class Model(season.core.interfaces.model.MySQL):
         return self._view(id, html, css, js, **kwargs), item['api']
 
     def view_from_source(self, id, **kwargs):
-        gconfig = self.framework.config.load()
         framework = self.framework
     
         html = ""
@@ -135,9 +136,11 @@ class Model(season.core.interfaces.model.MySQL):
         e = "}"
 
         try:
+            pugconfig = {}
+            if 'pug' in self.wizconfig: pugconfig = self.wizconfig.pug
             pug = pypugjs.Parser(html)
             pug = pug.parse()
-            html = pypugjs.ext.jinja.Compiler(pug, **gconfig).compile()
+            html = pypugjs.ext.jinja.Compiler(pug, **pugconfig).compile()
         except:
             pass
 
