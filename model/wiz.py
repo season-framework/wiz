@@ -58,6 +58,7 @@ class Model(season.core.interfaces.model.MySQL):
         return view
 
     def view(self, id, **kwargs):
+        gconfig = self.framework.config.load()
         item = self.get(id=id)
         if item is None:
             item = self.get(namespace=id)
@@ -89,7 +90,7 @@ class Model(season.core.interfaces.model.MySQL):
             try:
                 pug = pypugjs.Parser(html)
                 pug = pug.parse()
-                html = pypugjs.ext.jinja.Compiler(pug).compile()
+                html = pypugjs.ext.jinja.Compiler(pug, **gconfig).compile()
             except:
                 pass
             
@@ -108,6 +109,7 @@ class Model(season.core.interfaces.model.MySQL):
         return self._view(id, html, css, js, **kwargs), item['api']
 
     def view_from_source(self, id, **kwargs):
+        gconfig = self.framework.config.load()
         framework = self.framework
     
         html = ""
@@ -135,7 +137,7 @@ class Model(season.core.interfaces.model.MySQL):
         try:
             pug = pypugjs.Parser(html)
             pug = pug.parse()
-            html = pypugjs.ext.jinja.Compiler(pug).compile()
+            html = pypugjs.ext.jinja.Compiler(pug, **gconfig).compile()
         except:
             pass
 
