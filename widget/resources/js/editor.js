@@ -82,6 +82,7 @@ var content_controller = function($scope, $timeout, $sce) {
         $scope.info.css = $scope.info.css.replace(/\t/gim, '    ');
         $scope.info.js = $scope.info.js.replace(/\t/gim, '    ');
         $scope.info.api = $scope.info.api.replace(/\t/gim, '    ');
+        $scope.info.kwargs = $scope.info.kwargs.replace(/\t/gim, '    ');
 
         var data = angular.copy($scope.info);
 
