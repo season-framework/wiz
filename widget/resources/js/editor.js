@@ -110,6 +110,7 @@ var content_controller = function($scope, $timeout, $sce) {
             $scope.info.js = json.js;
             $scope.info.css = json.css;
             $scope.info.api = json.api;
+            $scope.info.kwargs = json.kwargs;
             $scope.event.save();
         };
         fr.readAsText($('#import-file').prop('files')[0]);
