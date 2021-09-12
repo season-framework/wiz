@@ -22,12 +22,24 @@ class Controller(season.interfaces.wiz.controller.base):
         return self.__framework__.response.send(res, content_type='application/json')
 
     def __error__(self, framework, err):
-        self.status(500)
+        raise err
 
     def __default__(self, framework):
+        config = self.config
         app_id = framework.request.segment.get(0, True)
         db = framework.model("wiz", module="wiz")
         db.set_update_view(True)
         view = db.render(app_id)
-        
-        framework.response.render('iframe.pug', view=view, app_id=app_id)
+
+        if 'default' not in config.theme:
+            config.theme.default = season.stdClass()
+            config.theme.default.module = "wiz/theme"
+            config.theme.default.view = "layout-wiz.pug"
+
+        theme = db.get(id=app_id, fields="theme")["theme"]
+        if theme not in config.theme:
+            for key in config.theme:
+                theme = key
+                break
+        theme = config.theme[theme]
+        framework.response.render(theme.view, module=theme.module, view=view, app_id=app_id)

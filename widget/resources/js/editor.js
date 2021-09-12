@@ -4,7 +4,11 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.math = Math;
 
     $scope.category = category;
-
+    $scope.theme = [];
+    for(var key in theme) {
+        $scope.theme.push(key);
+    }
+    
     var API_URL = "/wiz/widget";
     var API = {
         INFO: API_URL + '/api/info/' + app_id,
@@ -39,6 +43,9 @@ var content_controller = function ($scope, $timeout, $sce) {
 
     $.get(API.INFO, function (res) {
         $scope.info = res.data;
+        if (!$scope.info.theme) {
+            $scope.info.theme = "default";
+        }
         $timeout();
     });
 

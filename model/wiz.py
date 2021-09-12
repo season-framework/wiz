@@ -98,10 +98,9 @@ class Model(season.core.interfaces.model.MySQL):
             css = str(css)
 
             data = dict()
-            data['id'] = id
             data['build_html'] = html
             data['build_css'] = css
-            self.upsert(data)
+            self.update(data, id=id)
         else:
             html = item['build_html']
             css = item['build_css']

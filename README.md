@@ -29,6 +29,7 @@ CREATE TABLE `widget` (
   `kwargs` longtext,
   `build_html` longtext,
   `build_css` longtext,
+  `theme` varchar(32) DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `namespace` (`namespace`),
   KEY `title` (`title`),
@@ -90,26 +91,54 @@ config.table = 'widget'
 config.category = ["widget", "page"]
 config.wizsrc = '/<wiz-src-path>/wiz-src'
 config.topmenus = [{ 'title': 'HOME', 'url': '/' }, { 'title': 'sample', 'url': 'sample' }]
+
+def themeobj(module, view):
+    obj = stdClass()
+    obj.module = module
+    obj.view = view
+    return obj
+
+config.theme = stdClass()
+config.theme.default = themeobj("<modulename>", "<viewname>.pug")
+config.theme.default = themeobj("theme", "layout-wiz.pug")
 ```
 
-### websrc/modules/theme/view/layout-wiz.pug
+### custom theme
 
-- setup base theme layout for wiz
+- setup base theme layout for wiz (eg. websrc/modules/theme/view/layout-wiz.pug)
 
 ```pug
-mixin layout()
-    doctype 5
-    include theme/component
+doctype 5
+include wiz/theme/component
 
-    html(ng-app="app")
-        head
-            +header
-            
-        body.antialiased
-            div.page(ng-controller="content" ng-cloak)
-                +content
+html(ng-app="app")
+    head
+        +header
+        
+    body.antialiased
+        script(src='/resources/wiz/theme/libs/tabler/dist/libs/bootstrap/dist/js/bootstrap.bundle.min.js')
+        script(src='/resources/wiz/theme/libs/tabler/dist/libs/peity/jquery.peity.min.js')
+        script(src='/resources/wiz/theme/libs/tabler/dist/js/tabler.min.js')
 
-            +builder
+        .page(ng-controller="content" ng-cloak)
+            .preview
+                {$ view $}
+
+            style.
+                html,
+                body {
+                    overflow: auto;
+                }
+
+                body {
+                    padding: 32px;
+                }
+
+                .page {
+                    background: transparent;
+                }
+
+        +builder
 ```
 
 ## Usage

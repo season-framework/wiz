@@ -75,6 +75,12 @@ mixin content()
 
                 .card.card-sm.mb-3.minify
                     .card-body
+                        label.form-label Base Theme
+                        select.form-select(ng-model="info.theme")
+                            option(value="{{c}}" ng-repeat="c in theme") {{c}}
+
+                .card.card-sm.mb-3.minify
+                    .card-body
                         label.form-label Description
                         textarea.form-control(ng-model="info.content" rows=4)
 
