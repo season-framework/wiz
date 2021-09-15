@@ -22,7 +22,6 @@ function uiMonacoDirective($timeout, uiMonacoConfig) {
         );
 
         ngModel.$render = function () {
-            if (!ngModel.$viewValue) return;
             monacoOptions.value = ngModel.$viewValue;
             newMonacoEditor(iElement, monacoOptions, function (editor) {
                 configNgModelLink(editor, ngModel, scope);
@@ -51,7 +50,6 @@ function uiMonacoDirective($timeout, uiMonacoConfig) {
         require(['vs/editor/editor.main'], function () {
             $(iElement).css("height", "100%");
             var editor = monaco.editor.create($(iElement)[0], monacoOptions);
-
 
             window.onresize = function () {
                 editor.layout();
