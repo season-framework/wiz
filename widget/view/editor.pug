@@ -1,7 +1,7 @@
 mixin codearea(tab)
     div(ng-show="options.tab.{$tab$}_val == 'html'" ng-model="info.html" ui-monaco-opts="monaco('pug')" ui-monaco)
     div(ng-show="options.tab.{$tab$}_val == 'js'" ng-model="info.js" ui-monaco-opts="monaco('javascript')" ui-monaco)
-    div(ng-show="options.tab.{$tab$}_val == 'css'" ng-model="info.css" ui-monaco-opts="monaco('css')" ui-monaco)
+    div(ng-show="options.tab.{$tab$}_val == 'css'" ng-model="info.css" ui-monaco-opts="monaco('less')" ui-monaco)
     div(ng-show="options.tab.{$tab$}_val == 'api'" ng-model="info.api" ui-monaco-opts="monaco('python')" ui-monaco)
     div(ng-show="options.tab.{$tab$}_val == 'kwargs'" ng-model="info.kwargs" ui-monaco-opts="monaco('python')" ui-monaco)
     .code-preview(ng-if="options.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: 100%;")
