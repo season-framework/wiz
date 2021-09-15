@@ -10,6 +10,10 @@ mixin layout()
             script(src='/resources/theme/libs/tabler/dist/libs/bootstrap/dist/js/bootstrap.bundle.min.js')
             script(src='/resources/theme/libs/tabler/dist/libs/peity/jquery.peity.min.js')
             script(src='/resources/theme/libs/tabler/dist/js/tabler.min.js')
+            script(src='/resources/wiz/theme/libs/monaco/min/vs/loader.js')
+            
+            script.
+                require.config({ paths: { vs: '/resources/wiz/theme/libs/monaco/min/vs' } });
 
             div.page(ng-controller="content" ng-cloak)
                 +content

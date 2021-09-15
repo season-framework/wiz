@@ -24,6 +24,18 @@ var _builder = function ($scope, $timeout) {
         $timeout();
     }
 
+    $scope.monaco = function (language) {
+        var opt = {
+            value: '',
+            language: language,
+            theme: "vs",
+            fontSize: 14,
+            automaticLayout: true 
+        };
+
+        return opt;
+    }
+
     $scope.codemirror = function (language) {
         var opt = {
             lineNumbers: true,
@@ -52,7 +64,7 @@ var cache_builder = function (version) {
         update: function (value) {
             localStorage[version] = JSON.stringify(angular.copy(value));
         },
-        claer: function() {
+        claer: function () {
             delete localStorage[version];
         }
     };
@@ -61,5 +73,5 @@ var cache_builder = function (version) {
 try {
     app.controller('content', content_controller);
 } catch (e) {
-    app.controller('content', function() {});
+    app.controller('content', function () { });
 }

@@ -19,12 +19,15 @@ class Model(season.core.interfaces.model.MySQL):
     def set_update_view(self, updateview):
         self.updateview = updateview
 
-    def render(self, id, render="webadmin", **kwargs):
-        kwargs['render'] = render
+    def render(self, *args, **kwargs):
+        if len(args) == 0: return ""
+        if 'render' not in kwargs: kwargs['render'] = "webadmin"
+        render = kwargs['render']
         if render == 'source':
-            view, _ = self.view_from_source(id, **kwargs)
+            view, _ = self.view_from_source(*args, **kwargs)
         else:
-            view, _ = self.view(id, **kwargs)
+            view, _ = self.view(*args, **kwargs)
+
         return view
 
     def json_default(self, value):
@@ -32,10 +35,9 @@ class Model(season.core.interfaces.model.MySQL):
             return value.strftime('%Y-%m-%d %H:%M:%S')
         return ""
 
-    def _view(self, id, html, css, js, **kwargs):
+    def _view(self, namespace, id, html, css, js, **kwargs):
         framework = self.framework
         kwargs['query'] = framework.request.query()
-
         fn_id = id + '_' + self.framework.lib.util.randomstring(12)
 
         html = html.split(">")
@@ -54,11 +56,13 @@ class Model(season.core.interfaces.model.MySQL):
         kwargs = json.dumps(kwargs, default=self.json_default)
 
         view = html
-        view = view + f"<script src='/resources/wiz/libs/wiz.js'></script><script>function __init_{fn_id}() {o} var wiz = season_wiz('{id}'); wiz.options = {kwargs}; {js}; try {o} app.controller('wiz-{fn_id}', wiz_controller); {e} catch (e) {o} app.controller('wiz-{fn_id}', function() {o} {e} ); {e} {e}; __init_{fn_id}();</script>"
+        view = view + f"<script src='/resources/wiz/libs/wiz.js'></script><script>function __init_{fn_id}() {o} var wiz = season_wiz.load('{id}', '{fn_id}', '{namespace}'); wiz.options = {kwargs}; {js}; try {o} app.controller('wiz-{fn_id}', wiz_controller); {e} catch (e) {o} app.controller('wiz-{fn_id}', function() {o} {e} ); {e} {e}; __init_{fn_id}();</script>"
         view = view + f"<style>{css}</style>"
         return view
 
-    def view(self, id, **kwargs):
+    def view(self, *args, **kwargs):
+        id = args[0]
+        namespace = id + ""
         item = self.get(id=id)
         if item is None:
             item = self.get(namespace=id)
@@ -108,9 +112,12 @@ class Model(season.core.interfaces.model.MySQL):
             html = item['build_html']
             css = item['build_css']
 
-        return self._view(id, html, css, js, **kwargs), item['api']
+        if len(args) > 1: namespace = args[1]
+        return self._view(namespace, id, html, css, js, **kwargs), item['api']
 
-    def view_from_source(self, id, **kwargs):
+    def view_from_source(self, *args, **kwargs):
+        id = args[0]
+        namespace = args[0]
         framework = self.framework
     
         html = ""
@@ -121,7 +128,7 @@ class Model(season.core.interfaces.model.MySQL):
         basepath = os.path.join(self.wizsrc, id)
 
         if os.path.isdir(basepath) == False:
-            return self._view(id, html, css, js, **kwargs), api
+            return self._view(namespace, id, html, css, js, **kwargs), api
 
         wizfs = framework.model("wizfs", module="wiz")
         wizfs.set_namespace(id)
@@ -153,4 +160,5 @@ class Model(season.core.interfaces.model.MySQL):
         css = lesscpy.compile(StringIO(css), minify=True)
         css = str(css)
 
-        return self._view(id, html, css, js, **kwargs), api
+        if len(args) > 1: namespace = args[1]
+        return self._view(namespace, id, html, css, js, **kwargs), api

@@ -10,6 +10,9 @@ class Controller(season.interfaces.wiz.controller.api):
         super().__startup__(framework)
         self.framework = framework
 
+    def test(self, framework):
+        framework.response.render("test.html", module="wiz/theme")
+
     def json_default(self, value):
         if isinstance(value, datetime.date): 
             return value.strftime('%Y-%m-%d %H:%M:%S')
