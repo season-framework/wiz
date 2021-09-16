@@ -49,7 +49,9 @@ function uiMonacoDirective($timeout, uiMonacoConfig) {
         iElement.html('');
         require(['vs/editor/editor.main'], function () {
             $(iElement).css("height", "100%");
-            var editor = monaco.editor.create($(iElement)[0], monacoOptions);
+            $(iElement).html("<div style='height: 100%; width: 100%;'></div>")
+            var div = $(iElement).find("div")[0];
+            var editor = monaco.editor.create(div, monacoOptions);
 
             window.onresize = function () {
                 editor.layout();
