@@ -76,18 +76,22 @@ class Controller(season.interfaces.wiz.controller.base):
         cate = framework.request.segment.get(0, None)
         self.js('js/list.js')
         search = framework.request.query()
-        search['category'] = cate
+        if cate is not None:
+            search['category'] = cate
 
+        menus = [{"title":"ALL", "url": '/wiz/widget/list', 'pattern': r'^/wiz/widget/list$' }]
         category = ['widget', 'page']
         try:
             category = self.config.category
         except:
             pass
-        menus = []
         for c in category:
-            menus.append({ 'title': c, 'url': f'/wiz/widget/list/{c}' , 'pattern': r'^/wiz/widget/list/' + c })
-        if cate is None:
-            return framework.response.redirect('list/' + category[0])
+            if type(c) == str:
+                menus.append({ 'title': c, 'url': f'/wiz/widget/list/{c}' , 'pattern': r'^/wiz/widget/list/' + c + "$" })
+            else:
+                ctitle = c['title']
+                c = c['id']
+                menus.append({ 'title': ctitle, 'url': f'/wiz/widget/list/{c}' , 'pattern': r'^/wiz/widget/list/' + c + "$" })
         
         self.nav(menus)
 

@@ -18,7 +18,7 @@ mixin codeselect(tab)
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'js'" ng-class="options.tab.{$tab$}_val == 'js' ? 'btn-white' : 'btn-dark'") JS
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'css'" ng-class="options.tab.{$tab$}_val == 'css' ? 'btn-white' : 'btn-dark'") CSS
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'api'" ng-class="options.tab.{$tab$}_val == 'api' ? 'btn-white' : 'btn-dark'") API
-        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'kwargs'" ng-class="options.tab.{$tab$}_val == 'kwargs' ? 'btn-white' : 'btn-dark'") KWARGS
+        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'kwargs'" ng-class="options.tab.{$tab$}_val == 'kwargs' ? 'btn-white' : 'btn-dark'") Controller
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'preview'; event.iframe();" ng-class="options.tab.{$tab$}_val == 'preview' ? 'btn-white' : 'btn-dark'") Preview
     - else
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'preview'; event.iframe();" ng-class="options.tab.{$tab$}_val == 'preview' ? 'btn-white' : 'btn-dark'") Preview
@@ -39,11 +39,11 @@ mixin content()
                     .navbar-nav.flex-row.order-md-last.mr-2(style="align-items: center;")
                         li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="event.modal.delete()")
-                                span.nav-link-title(style="font-size: 14px;") 삭제하기
+                                span.nav-link-title(style="font-size: 14px;") Delete
 
                         li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="event.save()")
-                                span.nav-link-title(style="font-size: 14px;") 저장하기
+                                span.nav-link-title(style="font-size: 14px;") Save
 
                         li.nav-item.p-0
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(href='/wiz/widget/list/{{info.category}}')
