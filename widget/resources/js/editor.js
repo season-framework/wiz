@@ -1,4 +1,4 @@
-var content_controller = function($scope, $timeout, $sce) {
+var content_controller = function ($scope, $timeout, $sce) {
     _builder($scope, $timeout);
     $scope.trustAsHtml = $sce.trustAsHtml;
     $scope.math = Math;
@@ -9,6 +9,14 @@ var content_controller = function($scope, $timeout, $sce) {
         $scope.theme.push(key);
     }
 
+    $scope.tinymce_opt = $scope.tinymce({});
+    $scope.tinymce_opt.onLoad = function (editor) {
+        editor.addShortcut('meta+S', 'Save', function () {
+            $scope.event.save();
+        });
+    }
+
+
     var API_URL = "/wiz/widget";
     var API = {
         INFO: API_URL + '/api/info/' + app_id,
@@ -16,7 +24,7 @@ var content_controller = function($scope, $timeout, $sce) {
         UPDATE: API_URL + '/api/update/' + app_id,
         UPLOAD: API_URL + '/api/upload',
         LIST: API_URL,
-        IFRAME: function(app_id) {
+        IFRAME: function (app_id) {
             if ($scope.info) {
                 if ($scope.info.viewuri) {
                     return $scope.info.viewuri;
@@ -34,20 +42,20 @@ var content_controller = function($scope, $timeout, $sce) {
         $scope.options.layout = 2;
         $scope.options.tab = {};
         $scope.options.tab['tab1_val'] = 'html';
-        $scope.options.tab['tab2_val'] = 'preview';
+        $scope.options.tab['tab2_val'] = 'readme';
         $scope.options.tab['tab5_val'] = 'preview';
         $scope.options.infotab = 1;
         $scope.options.sidemenu = true;
     }
 
-    $scope.$watch("options", function() {
+    $scope.$watch("options", function () {
         var opt = angular.copy($scope.options);
         localStorage["season.wiz.option"] = JSON.stringify(opt);
     }, true);
 
     $scope.event = {};
 
-    $.get(API.INFO, function(res) {
+    $.get(API.INFO, function (res) {
         $scope.info = res.data;
         if (!$scope.info.theme) {
             $scope.info.theme = "default";
@@ -56,28 +64,28 @@ var content_controller = function($scope, $timeout, $sce) {
         $timeout();
     });
 
-    $scope.event.delete = function() {
-        $.get(API.DELETE, { app_id: app_id }, function(res) {
+    $scope.event.delete = function () {
+        $.get(API.DELETE, { app_id: app_id }, function (res) {
             location.href = API.LIST + "/list/" + $scope.info.category;
         });
     }
 
     $scope.event.modal = {};
-    $scope.event.modal.delete = function() {
+    $scope.event.modal.delete = function () {
         $('#modal-delete').modal('show');
     }
 
-    $scope.event.iframe = function(findurl) {
+    $scope.event.iframe = function (findurl) {
         var url = API.IFRAME(app_id, app_id);
         if (findurl) {
             return url;
         }
-        $timeout(function() {
+        $timeout(function () {
             $('iframe.preview').attr('src', url);
         });
     };
 
-    $scope.event.save = function(cb) {
+    $scope.event.save = function (cb) {
         $scope.info.html = $scope.info.html.replace(/\t/gim, '    ');
         $scope.info.css = $scope.info.css.replace(/\t/gim, '    ');
         $scope.info.js = $scope.info.js.replace(/\t/gim, '    ');
@@ -86,7 +94,7 @@ var content_controller = function($scope, $timeout, $sce) {
 
         var data = angular.copy($scope.info);
 
-        $.post(API.UPDATE, data, function(res) {
+        $.post(API.UPDATE, data, function (res) {
             $scope.event.iframe();
             if (cb) return cb(res);
             if (res.code == 200) {
@@ -97,13 +105,13 @@ var content_controller = function($scope, $timeout, $sce) {
     }
 
     // import from file
-    $scope.event.select_file = function() {
+    $scope.event.select_file = function () {
         $('#import-file').click();
     }
 
-    $('#import-file').change(function() {
+    $('#import-file').change(function () {
         var fr = new FileReader();
-        fr.onload = function() {
+        fr.onload = function () {
             var data = fr.result;
             var json = JSON.parse(data);
             $scope.info.html = json.html;
@@ -118,11 +126,11 @@ var content_controller = function($scope, $timeout, $sce) {
 
     // shortcut
     shortcutjs(window, {
-        'control s': function(ev) {
+        'control s': function (ev) {
             ev.preventDefault();
             $scope.event.save();
         },
-        'default': function(ev, name) {}
+        'default': function (ev, name) { }
     });
 
     // drag event
@@ -131,7 +139,7 @@ var content_controller = function($scope, $timeout, $sce) {
     var vh50 = window.innerHeight / 2;
     $scope.status_drag = '';
     $scope.event.drag = {
-        onstart: function(self) {
+        onstart: function (self) {
             $scope.status_drag = 'unselectable';
             $timeout();
 
@@ -163,7 +171,7 @@ var content_controller = function($scope, $timeout, $sce) {
             if ($scope.options.layout < 5) return;
             dragbaseheight = $('.tab-5').height();
         },
-        onmove: function(self, pos) {
+        onmove: function (self, pos) {
             var target = $(self.element).attr('target');
 
             if (target == 'tab-5') {
@@ -193,13 +201,13 @@ var content_controller = function($scope, $timeout, $sce) {
 
             $('.' + target).width(dragbasewidth + move_x - 1);
         },
-        onend: function(self) {
+        onend: function (self) {
             $scope.status_drag = '';
             $timeout();
         }
     };
 
-    $timeout(function() {
+    $timeout(function () {
         if ($scope.options.layout > 4) {
             var resize_h = 300;
             var hstr = 'calc(100vh - 130px - ' + resize_h + 'px)';
@@ -214,18 +222,18 @@ var content_controller = function($scope, $timeout, $sce) {
         }
     })
 
-    $scope.$watch('options.tab', function() {
+    $scope.$watch('options.tab', function () {
         try {
             var hstr = $('.code-top td')[0].style.height;
-            $timeout(function() {
+            $timeout(function () {
                 $('.h-half .code-top td .code-input').height(hstr);
                 $('.h-half .code-top td .code-input .CodeMirror').height(hstr);
             });
-        } catch (e) {}
+        } catch (e) { }
     }, true);
 
     $scope.event.toggle = {};
-    $scope.event.toggle.sidemenu = function() {
+    $scope.event.toggle.sidemenu = function () {
         $scope.options.sidemenu = !$scope.options.sidemenu;
         $timeout();
     }
