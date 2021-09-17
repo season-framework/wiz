@@ -4,7 +4,7 @@ mixin codearea(tab)
     div(ng-show="options.tab.{$tab$}_val == 'css'" ng-model="info.css" ui-monaco-opts="monaco('less')" ui-monaco)
     div(ng-show="options.tab.{$tab$}_val == 'api'" ng-model="info.api" ui-monaco-opts="monaco('python')" ui-monaco)
     div(ng-show="options.tab.{$tab$}_val == 'kwargs'" ng-model="info.kwargs" ui-monaco-opts="monaco('python')" ui-monaco)
-    div(ng-show="options.tab.{$tab$}_val == 'readme'" ng-model="info.readme" ui-tinymce-opts="tinymce_opt" ui-tinymce)
+    div(ng-show="options.tab.{$tab$}_val == 'readme'" ng-model="info.content" ui-tinymce-opts="tinymce_opt" ui-tinymce)
     .code-preview(ng-if="options.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: 100%;")
         iframe.preview(style="height: 100%;" ng-hide="status_drag == 'unselectable'")
         table(ng-if="status_drag == 'unselectable'" style="width: 100%; height: 100%;")
@@ -90,11 +90,6 @@ mixin content()
                     .card-body
                         label.form-label View URI
                         input.form-control(type='text' placeholder='/module/page' ng-model="info.viewuri")
-
-                .card.card-sm.mb-3.minify
-                    .card-body
-                        label.form-label Description
-                        textarea.form-control(ng-model="info.content" rows=4)
 
                 .hr.bg-white.minify
                 
