@@ -36,7 +36,7 @@ class Controller(season.interfaces.wiz.controller.api):
         if wiz is None: self.status(404)
         view_api = wiz['api']
         if view_api is None: self.status(404)
-        fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner'}
+        fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner', 'framework': framework}
         exec(compile(view_api, 'season.Spawner', 'exec'), fn)
         if '__startup__' in fn: fn['__startup__'](framework)
         fn[fnname](framework)
