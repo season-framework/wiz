@@ -30,6 +30,8 @@ class Model(season.core.interfaces.model.MySQL):
         app_id = None
         theme = None
         finded = False
+        requri = framework.request.uri()
+
         for route in routes:
             app_id = route['id']
             theme  = route['theme']
@@ -41,7 +43,7 @@ class Model(season.core.interfaces.model.MySQL):
             if route[-1] == "*": 
                 route = route[:-1]
             else: 
-                if route[-1] != "/": route = route + "/"
+                if route[-1] != "/" and requri[-1] == "/": route = route + "/"
                 route = route + "$"
             route = "^" + route
 
@@ -56,7 +58,7 @@ class Model(season.core.interfaces.model.MySQL):
             return
 
         p = re.compile(route)
-        requri = framework.request.uri()
+        
         e = p.search(requri).end()
         requri = requri[e:]
 
