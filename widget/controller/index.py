@@ -1,6 +1,64 @@
 import season
 import datetime
 
+WIZ_JS = """var wiz_controller = function ($sce, $scope, $timeout) {
+    // call api
+    wiz.API.function('status', {}, function(res) {
+        console.log(res);
+    });
+
+    // bind event. allow access form another wiz
+    /*
+    // response to caller, when event end.
+    $scope.myevent = function() {
+        var data = "hello";
+        $scope.wiz_callback(data);
+    };
+
+    wiz.bind("event-name", function (data, callback) {
+        $scope.wiz_callback = callback;
+    });
+    */
+
+    // call another wiz's event.
+    /*
+    wiz.connect("wiz-namespace")
+        // set data to send
+        .data({ title: "My Title" }) 
+        // call event and get response
+        .event("event-name", function (data) {
+            $scope.data = data;
+            $timeout();
+        });
+    */
+}
+"""
+
+WIZ_API = """def __startup__(framework):
+    # TODO: Setup Access Level, etc.
+    pass
+
+def status(framework):
+    # build response
+    framework.response.status(200, 'hello')
+"""
+
+WIZ_KWARGS = """# use framework controller
+# controller = season.interfaces.controller.admin.view()
+# controller.__startup__(framework)
+
+# TODO: Setup Access Level
+if 'id' not in framework.session:
+    framework.response.abort(401)
+
+# TODO: Build view variables
+kwargs['message'] = "Hello, World!"
+"""
+
+WIZ_PUG = """.container
+    h3= message
+"""
+
 class Controller(season.interfaces.wiz.controller.base):
 
     def __startup__(self, framework):
@@ -77,12 +135,13 @@ class Controller(season.interfaces.wiz.controller.base):
             info["id"] = newid
             info["namespace"] = newid
             info["created"] = datetime.datetime.now()
-            info["kwargs"] = ""
+            info["kwargs"] = WIZ_KWARGS
             info["viewuri"] = ""
-            info["html"] = ".container\n    h3 New Widget"
-            info["js"] = "var wiz_controller = function ($sce, $scope, $timeout) {\n\n}" 
+            info["route"] = ""
+            info["html"] = WIZ_PUG
+            info["js"] = WIZ_JS
             info["css"] = ""
-            info["api"] = 'def _status(framework, code, data):\n    res = dict()\n    res["code"] = code\n    res["data"] = data\n    framework.response.json(res)\n\ndef myfunc(framework):\n    _status(framework, 200, rows)'
+            info["api"] = WIZ_API
             self.db.insert(info)
             framework.response.redirect("editor/" + newid)
         

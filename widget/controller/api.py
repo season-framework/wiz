@@ -37,6 +37,7 @@ class Controller(season.interfaces.wiz.controller.api):
         
         self.db.set_update_view(True)
         self.db.render(info['id'])
+        self.db.routes()
 
         if stat: self.status(200, info['id'])
         self.status(500, info['id'])

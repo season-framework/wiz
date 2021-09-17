@@ -30,7 +30,8 @@ CREATE TABLE `widget` (
   `build_html` longtext,
   `build_css` longtext,
   `theme` varchar(32) DEFAULT NULL,
-  `viewuri` text,
+  `viewuri` text DEFAULT NULL,
+  `route` varchar(192) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `namespace` (`namespace`),
   KEY `title` (`title`),
@@ -102,6 +103,10 @@ def themeobj(module, view):
 config.theme = stdClass()
 config.theme.default = themeobj("<modulename>", "<viewname>.pug")
 config.theme.default = themeobj("theme", "layout-wiz.pug")
+
+config.pug = stdClass()
+config.pug.variable_start_string = "{$"
+config.pug.variable_end_string = "$}"
 ```
 
 ### custom theme
@@ -151,6 +156,7 @@ html(ng-app="app")
 ```python
 framework.wiz = framework.model("wiz", module="wiz")
 framework.response.data.set(wiz=framework.wiz)
+framework.wiz.route(framework)
 ```
 
 ### in Templates

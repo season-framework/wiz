@@ -14,7 +14,7 @@ mixin codearea(tab)
 
 mixin codeselect(tab)
     - if tab != 'tab5'
-        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'html'" ng-class="options.tab.{$tab$}_val == 'html' ? 'btn-white' : 'btn-dark'") HTML
+        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'html'" ng-class="options.tab.{$tab$}_val == 'html' ? 'btn-white' : 'btn-dark'") PUG
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'js'" ng-class="options.tab.{$tab$}_val == 'js' ? 'btn-white' : 'btn-dark'") JS
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'css'" ng-class="options.tab.{$tab$}_val == 'css' ? 'btn-white' : 'btn-dark'") CSS
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'api'" ng-class="options.tab.{$tab$}_val == 'api' ? 'btn-white' : 'btn-dark'") API
@@ -78,7 +78,12 @@ mixin content()
                         label.form-label Base Theme
                         select.form-select(ng-model="info.theme")
                             option(value="{{c}}" ng-repeat="c in theme") {{c}}
-
+                
+                .card.card-sm.mb-3.minify
+                    .card-body
+                        label.form-label Route
+                        input.form-control(type='text' placeholder='^/dashboard' ng-model="info.route")
+                
                 .card.card-sm.mb-3.minify
                     .card-body
                         label.form-label View URI

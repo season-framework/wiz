@@ -5,11 +5,16 @@ import json
 import os
 import pypugjs
 import datetime
+import re
 
 class Model(season.core.interfaces.model.MySQL):
     def __init__(self, framework):
         super().__init__(framework)
         self.namespace = 'wiz'
+
+        self.cache = framework.cache
+        if 'wiz' not in self.cache: self.cache.wiz = season.stdClass()
+
         config = framework.config.load("wiz")
         self.tablename = config.get("table", "wiz")
         self.wizsrc = config.get("wizsrc", os.path.join(framework.core.PATH.MODULES, "wiz", "wizsrc"))
@@ -19,6 +24,67 @@ class Model(season.core.interfaces.model.MySQL):
     def set_update_view(self, updateview):
         self.updateview = updateview
 
+    def route(self, framework):
+        routes = self.routes()
+        
+        app_id = None
+        theme = None
+        finded = False
+        for route in routes:
+            app_id = route['id']
+            theme  = route['theme']
+            route  = route['route']
+            
+            if route is None: continue
+            if len(route) == 0: continue
+
+            if route[-1] == "*": 
+                route = route[:-1]
+            else: 
+                route = route + "$"
+            route = "^" + route
+
+            p = re.compile(route)
+            match = framework.request.match(p)
+            if match == False: continue
+            else:
+                finded = True
+                break
+
+        if app_id is None or finded == False:
+            return
+
+        p = re.compile(route)
+        requri = framework.request.uri()
+        e = p.search(requri).end()
+        requri = requri[e:]
+        framework.segmentpath = requri
+        framework.request = season.core.CLASS.REQUEST(framework)
+        framework.request.segment = season.core.CLASS.SEGMENT(framework)
+        
+        view = self.render(app_id)
+        config = framework.config.load("wiz")
+        if 'default' not in config.theme:
+            config.theme.default = season.stdClass()
+            config.theme.default.module = "wiz/theme"
+            config.theme.default.view = "layout-wiz.pug"
+        
+        if theme not in config.theme:
+            for key in config.theme:
+                theme = key
+                break
+        
+        theme = config.theme[theme]
+
+        framework.response.render(theme.view, module=theme.module, view=view, app_id=app_id)
+
+    def routes(self):
+        if 'routes' in self.cache.wiz and self.updateview==False:
+            return self.cache.wiz.routes
+        routes = self.select(fields="id,route,theme")
+        self.cache.wiz.routes = routes
+        return routes
+        
     def render(self, *args, **kwargs):
         if len(args) == 0: return ""
         if 'render' not in kwargs: kwargs['render'] = "webadmin"
@@ -27,7 +93,6 @@ class Model(season.core.interfaces.model.MySQL):
             view, _ = self.view_from_source(*args, **kwargs)
         else:
             view, _ = self.view(*args, **kwargs)
-
         return view
 
     def json_default(self, value):
@@ -63,6 +128,13 @@ class Model(season.core.interfaces.model.MySQL):
     def view(self, *args, **kwargs):
         id = args[0]
         namespace = id + ""
+
+        if namespace in self.cache.wiz and self.updateview==False:
+            namespace, id, html, css, js, api, fn = self.cache.wiz[namespace]
+            _kwargs = fn['get'](self.framework, kwargs)
+            kwargs = _kwargs
+            return self._view(namespace, id, html, css, js, **kwargs), api
+
         item = self.get(id=id)
         if item is None:
             item = self.get(namespace=id)
@@ -73,6 +145,7 @@ class Model(season.core.interfaces.model.MySQL):
         html = item["html"]
         js = item["js"]
         css = item["css"]
+
         try:
             kwargs_code = "import season\nkwargs = season.stdClass()\ndef get(framework, kwargs):\n"
             kwargs_code_lines = item["kwargs"].split("\n")
@@ -81,10 +154,11 @@ class Model(season.core.interfaces.model.MySQL):
             kwargs_code = kwargs_code + "\n    return kwargs"
             fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner'}
             exec(compile(kwargs_code, 'season.Spawner', 'exec'), fn)
-            _kwargs = fn['get'](self.framework, kwargs)
-            kwargs = _kwargs
         except Exception as e:
             pass
+
+        _kwargs = fn['get'](self.framework, kwargs)
+        kwargs = _kwargs
 
         # build
         if item['build_html'] is None or self.updateview == True:
@@ -112,6 +186,7 @@ class Model(season.core.interfaces.model.MySQL):
             html = item['build_html']
             css = item['build_css']
 
+        self.cache.wiz[namespace] = (namespace, id, html, css, js, item['api'], fn)
         if len(args) > 1: namespace = args[1]
         return self._view(namespace, id, html, css, js, **kwargs), item['api']
 
@@ -119,6 +194,10 @@ class Model(season.core.interfaces.model.MySQL):
         id = args[0]
         namespace = args[0]
         framework = self.framework
+
+        if namespace in self.cache.wiz and self.updateview==False:
+            namespace, id, html, css, js, api = self.cache.wiz[namespace]
+            return self._view(namespace, id, html, css, js, **kwargs), api
     
         html = ""
         css = ""
@@ -161,4 +240,6 @@ class Model(season.core.interfaces.model.MySQL):
         css = str(css)
 
         if len(args) > 1: namespace = args[1]
+
+        self.cache.wiz[namespace] = (namespace, id, html, css, js, api)
         return self._view(namespace, id, html, css, js, **kwargs), api
