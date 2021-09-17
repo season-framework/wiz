@@ -26,7 +26,7 @@ class Model(season.core.interfaces.model.MySQL):
 
     def route(self, framework):
         routes = self.routes()
-        
+
         app_id = None
         theme = None
         finded = False
@@ -41,6 +41,7 @@ class Model(season.core.interfaces.model.MySQL):
             if route[-1] == "*": 
                 route = route[:-1]
             else: 
+                if route[-1] != "/": route = route + "/"
                 route = route + "$"
             route = "^" + route
 
@@ -58,6 +59,7 @@ class Model(season.core.interfaces.model.MySQL):
         requri = framework.request.uri()
         e = p.search(requri).end()
         requri = requri[e:]
+
         framework.segmentpath = requri
         framework.request = season.core.CLASS.REQUEST(framework)
         framework.request.segment = season.core.CLASS.SEGMENT(framework)
@@ -75,7 +77,6 @@ class Model(season.core.interfaces.model.MySQL):
                 break
         
         theme = config.theme[theme]
-
         framework.response.render(theme.view, module=theme.module, view=view, app_id=app_id)
 
     def routes(self):
