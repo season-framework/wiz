@@ -21,18 +21,27 @@ function uiTinymceDirective($timeout, uiTinymceConfig) {
             scope.$eval(iAttrs.uiTinymceOpts)
         );
 
+        var latest = new Date().getTime();
+        var diffmax = 200;
         ngModel.$render = function () {
             options.value = ngModel.$viewValue;
             ngModel.$render = function () {
                 var safeViewValue = ngModel.$viewValue || '';
-                newEditor(iElement, options, ngModel, scope, safeViewValue, function (editor) {
-                    editor.on("change", function () {
-                        var newValue = editor.getContent();
-                        if (newValue !== ngModel.$viewValue) {
-                            scope.$evalAsync(function () {
-                                ngModel.$setViewValue(newValue);
-                            });
-                        }
+                newEditor(iElement, options, safeViewValue, function (editor) {
+                    editor.on("keyup", function () {
+                        var diff = new Date().getTime() - latest;
+                        latest = new Date().getTime();
+
+                        setTimeout(function () {
+                            diff = new Date().getTime() - latest;
+                            if (diff < diffmax) return;
+                            var newValue = editor.getContent();
+                            if (newValue !== ngModel.$viewValue) {
+                                scope.$evalAsync(function () {
+                                    ngModel.$setViewValue(newValue);
+                                });
+                            }
+                        }, diffmax);
                     });
 
                     scope.$on('Tinymce', function (event, callback) {
@@ -51,7 +60,7 @@ function uiTinymceDirective($timeout, uiTinymceConfig) {
         };
     }
 
-    function newEditor(iElement, options, ngModel, scope, safeViewValue, cb) {
+    function newEditor(iElement, options, safeViewValue, cb) {
         iElement.html('');
         $(iElement).css("height", "100%");
         $(iElement).css("width", "100%");

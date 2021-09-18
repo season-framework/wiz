@@ -15,12 +15,13 @@ mixin codearea(tab)
 
 mixin codeselect(tab)
     - if tab != 'tab5'
+        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'readme'; event.iframe();" ng-class="options.tab.{$tab$}_val == 'readme' ? 'btn-white' : 'btn-dark'") README
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'html'" ng-class="options.tab.{$tab$}_val == 'html' ? 'btn-white' : 'btn-dark'") PUG
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'js'" ng-class="options.tab.{$tab$}_val == 'js' ? 'btn-white' : 'btn-dark'") JS
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'css'" ng-class="options.tab.{$tab$}_val == 'css' ? 'btn-white' : 'btn-dark'") CSS
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'api'" ng-class="options.tab.{$tab$}_val == 'api' ? 'btn-white' : 'btn-dark'") API
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'kwargs'" ng-class="options.tab.{$tab$}_val == 'kwargs' ? 'btn-white' : 'btn-dark'") Controller
-        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'readme'; event.iframe();" ng-class="options.tab.{$tab$}_val == 'readme' ? 'btn-white' : 'btn-dark'") README
+        
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'preview'; event.iframe();" ng-class="options.tab.{$tab$}_val == 'preview' ? 'btn-white' : 'btn-dark'") Preview
     - else
         button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'preview'; event.iframe();" ng-class="options.tab.{$tab$}_val == 'preview' ? 'btn-white' : 'btn-dark'") Preview
@@ -73,7 +74,7 @@ mixin content()
                     .card-body
                         label.form-label Category
                         select.form-select(ng-model="info.category")
-                            option(value="{{c}}" ng-repeat="c in category") {{c}}
+                            option(value="{{c.id ? c.id : c}}" ng-repeat="c in category") {{c.title ? c.title : (c.id ? c.id : c)}}
 
                 .card.card-sm.mb-3.minify
                     .card-body
@@ -84,12 +85,12 @@ mixin content()
                 .card.card-sm.mb-3.minify
                     .card-body
                         label.form-label Route
-                        input.form-control(type='text' placeholder='^/dashboard' ng-model="info.route")
+                        input.form-control(type='text' placeholder='/board/<category>/list' ng-model="info.route")
                 
                 .card.card-sm.mb-3.minify
                     .card-body
                         label.form-label View URI
-                        input.form-control(type='text' placeholder='/module/page' ng-model="info.viewuri")
+                        input.form-control(type='text' placeholder='/board/notice/list' ng-model="info.viewuri")
 
                 .hr.bg-white.minify
                 

@@ -51,6 +51,12 @@ WIZ_KWARGS = """# use framework controller
 if 'id' not in framework.session:
     framework.response.abort(401)
 
+# use segments
+# Route: /board/<category>/list
+# View URI: /board/notice/list
+segment = framework.request.segment
+framework.log(segment)
+
 # TODO: Build view variables
 kwargs['message'] = "Hello, World!"
 """

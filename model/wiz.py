@@ -6,10 +6,12 @@ import os
 import pypugjs
 import datetime
 import re
+from werkzeug.routing import Map, Rule
 
 class Model(season.core.interfaces.model.MySQL):
     def __init__(self, framework):
         super().__init__(framework)
+        self.framework = framework 
         self.namespace = 'wiz'
 
         self.cache = framework.cache
@@ -24,47 +26,33 @@ class Model(season.core.interfaces.model.MySQL):
     def set_update_view(self, updateview):
         self.updateview = updateview
 
-    def route(self, framework):
+    def upsert(self, values, **format):
+        res = super().upsert(values, **format)
+        self.set_update_view(True)
+
+        if 'route' not in values or len(values['route']) == 0:
+            self.render(values['id'])
+        else:
+            self.routes()
+            self.route()
+            self.framework.request.segment = season.stdClass()
+            self.render(values['id'])
+
+        return res
+
+    def route(self):
+        framework = self.framework
         routes = self.routes()
 
         app_id = None
         theme = None
-        finded = False
         requri = framework.request.uri()
 
-        for route in routes:
-            app_id = route['id']
-            theme  = route['theme']
-            route  = route['route']
-            
-            if route is None: continue
-            if len(route) == 0: continue
-
-            if route[-1] == "*": 
-                route = route[:-1]
-            else: 
-                if route[-1] != "/" and requri[-1] == "/": route = route + "/"
-                route = route + "$"
-            route = "^" + route
-
-            p = re.compile(route)
-            match = framework.request.match(p)
-            if match == False: continue
-            else:
-                finded = True
-                break
-
-        if app_id is None or finded == False:
+        app_id, theme, segment = routes(requri)
+        if app_id is None:
             return
 
-        p = re.compile(route)
-        
-        e = p.search(requri).end()
-        requri = requri[e:]
-
-        framework.segmentpath = requri
-        framework.request = season.core.CLASS.REQUEST(framework)
-        framework.request.segment = season.core.CLASS.SEGMENT(framework)
+        framework.request.segment = season.stdClass(segment)
         
         view = self.render(app_id)
         config = framework.config.load("wiz")
@@ -84,9 +72,29 @@ class Model(season.core.interfaces.model.MySQL):
     def routes(self):
         if 'routes' in self.cache.wiz and self.updateview==False:
             return self.cache.wiz.routes
-        routes = self.select(fields="id,route,theme")
-        self.cache.wiz.routes = routes
-        return routes
+            
+        routes = self.select(fields="id,route,theme", orderby="`updated` DESC")
+        url_map = []
+        for i in range(len(routes)):
+            info = routes[i]
+            route = info['route']
+            if route is None: continue
+            if len(route) == 0: continue
+            url_map.append(Rule(info['route'], endpoint=info['id'] + ":" + info['theme']))
+
+        url_map = Map(url_map)
+        url_map = url_map.bind("", "/")
+        
+        def matcher(url):
+            try:
+                endpoint, kwargs = url_map.match(url, "GET")
+                endpoint = endpoint.split(":")
+                return endpoint[0], endpoint[1], kwargs
+            except:
+                return None, None, {}
+
+        self.cache.wiz.routes = matcher
+        return self.cache.wiz.routes
         
     def render(self, *args, **kwargs):
         if len(args) == 0: return ""
@@ -160,8 +168,9 @@ class Model(season.core.interfaces.model.MySQL):
         except Exception as e:
             pass
 
-        _kwargs = fn['get'](self.framework, kwargs)
-        kwargs = _kwargs
+        if self.updateview==False:
+            _kwargs = fn['get'](self.framework, kwargs)
+            kwargs = _kwargs
 
         # build
         if item['build_html'] is None or self.updateview == True:

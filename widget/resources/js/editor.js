@@ -12,10 +12,12 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.tinymce_opt = $scope.tinymce({});
     $scope.tinymce_opt.onLoad = function (editor) {
         editor.addShortcut('meta+S', 'Save', function () {
-            $scope.event.save();
+            setTimeout(function () {
+                console.log("call save");
+                $scope.event.save();
+            }, 300);
         });
     }
-
 
     var API_URL = "/wiz/widget";
     var API = {
@@ -41,8 +43,8 @@ var content_controller = function ($scope, $timeout, $sce) {
         $scope.options = {};
         $scope.options.layout = 2;
         $scope.options.tab = {};
-        $scope.options.tab['tab1_val'] = 'html';
-        $scope.options.tab['tab2_val'] = 'readme';
+        $scope.options.tab['tab1_val'] = 'readme';
+        $scope.options.tab['tab2_val'] = 'pug';
         $scope.options.tab['tab5_val'] = 'preview';
         $scope.options.infotab = 1;
         $scope.options.sidemenu = true;
