@@ -65,7 +65,6 @@ if (!window.season_wiz) {
             obj.__cache__[namespace] = wiz;
             obj.__cache__[wiz_id] = wiz;
 
-            console.log(namespace, wiz_id);
             return wiz;
         }
 
