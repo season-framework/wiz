@@ -81,7 +81,11 @@ class Model(season.core.interfaces.model.MySQL):
             route = info['route']
             if route is None: continue
             if len(route) == 0: continue
-            url_map.append(Rule(info['route'], endpoint=info['id'] + ":" + info['theme']))
+            if route[-1] == "/":
+                url_map.append(Rule(route[:-1], endpoint=info['id'] + ":" + info['theme']))
+                url_map.append(Rule(route, endpoint=info['id'] + ":" + info['theme']))
+            else:
+                url_map.append(Rule(route, endpoint=info['id'] + ":" + info['theme']))
 
         url_map = Map(url_map)
         url_map = url_map.bind("", "/")
