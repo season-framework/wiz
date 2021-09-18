@@ -207,10 +207,10 @@ mixin content()
                                 +codearea('tab4')
 
                     tr.gutter.g-t(ng-if="[5,6,7,8].includes(options.layout)" target="tab-5" ng-drag="event.drag")
-                        td(colspan="{$ng('(options.layout - 4) + (options.layout - 5)')$}")
+                        td(colspan="{{(options.layout - 4) + (options.layout - 5)}}")
 
                     tr.code-tr.code-bottom(ng-if="[5,6,7,8].includes(options.layout)")
-                        td.tab-5(colspan="{$ng('(options.layout - 4) + (options.layout - 5)')$}")
+                        td.tab-5(colspan="{{(options.layout - 4) + (options.layout - 5)}}")
                             .code-input(style='height: 100%;')
                                 +codearea('tab5')
 

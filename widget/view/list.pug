@@ -30,15 +30,15 @@ mixin content()
                 tbody
                     tr(ng-repeat="item in list")
                         td.width-1
-                            a(ng-href="/wiz/widget/editor/{$ng('item.id')$}")= ng('item.id.substring(0,8)')
+                            a(ng-href="/wiz/widget/editor/{{item.id}}") {{item.id.substring(0,8)}}
                         td.text-center.width-1
-                            a(ng-href="/wiz/widget/editor/{$ng('item.id')$}")= ng('item.category')
+                            a(ng-href="/wiz/widget/editor/{{item.id}}") {{item.category}}
                         td
-                            a(ng-href="/wiz/widget/editor/{$ng('item.id')$}")= ng('item.title')
-                        td.text-center.width-2= ng('item.user_id')
+                            a(ng-href="/wiz/widget/editor/{{item.id}}") {{item.title}}
+                        td.text-center.width-2 {{item.user_id}}
                         td.text-center.width-1
                             span.badge.bg-green(ng-if="item.route")
-                        td.text-center.width-2= ng('item.created.substring(0,10)')
+                        td.text-center.width-2 {{item.created.substring(0,10)}}
             
             .pagenation.text-center(ng-if="facet.pages.length > 0")
                 button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(1)")
@@ -46,7 +46,7 @@ mixin content()
                 button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(search.page*1-1)")
                     i.fas.fa-angle-left
 
-                button.btn.btn-square.btn-sm(ng-repeat="page in facet.pages" ng-class="page == search.page ? 'btn-dark' : ''" ng-click="event.page(page)")= ng('page')
+                button.btn.btn-square.btn-sm(ng-repeat="page in facet.pages" ng-class="page == search.page ? 'btn-dark' : ''" ng-click="event.page(page)") {{page}}
 
                 button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(search.page*1+1)")
                     i.fas.fa-angle-right
