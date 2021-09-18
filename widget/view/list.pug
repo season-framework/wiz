@@ -8,11 +8,11 @@ mixin content()
 
                 .col-auto.ml-auto.d-print-none
                     .d-flex
-                        input.form-control(type="text" placeholder="검색" ng-model="search.text" ng-enter="event.search()")
-                        a.btn.btn-light.ml-2.d-none.d-sm-inline-block(href='#' style="width: 200px;" ng-click="event.search()")
+                        input.form-control(type="text" placeholder="검색" ng-model="search.text" ng-enter="event.search()" style="width: 240px;")
+                        a.btn.btn-light.ml-2.d-none.d-sm-inline-block(href='#' style="width: 140px;" ng-click="event.search()")
                             i.mr-2.fas.fa-search
                             | Search
-                        a.btn.btn-light.pr-4.pl-4.ml-2(href='/wiz/widget/editor/new?category={$ category $}' style="width: 200px;") 
+                        a.btn.btn-light.pr-4.pl-4.ml-2(href='/wiz/widget/editor/new?category={$ category $}' style="width: 140px;") 
                             i.mr-2.fas.fa-plus
                             | Create
 
