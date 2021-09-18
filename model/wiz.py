@@ -29,6 +29,7 @@ class Model(season.core.interfaces.model.MySQL):
     def upsert(self, values, **format):
         res = super().upsert(values, **format)
         self.set_update_view(True)
+        self.cache.wiz = season.stdClass()
 
         if 'route' not in values or len(values['route']) == 0:
             self.render(values['id'])
@@ -199,6 +200,7 @@ class Model(season.core.interfaces.model.MySQL):
 
         ns = namespace
         if len(args) > 1: ns = args[1]
+
         self.cache.wiz[namespace] = (ns, id, html, css, js, item['api'], fn)
         return self._view(ns, id, html, css, js, **kwargs), item['api']
 
