@@ -130,7 +130,6 @@ class Model(season.core.interfaces.model.MySQL):
         o = "{"
         e = "}"
         kwargs = json.dumps(kwargs, default=self.json_default)
-
         view = html
         view = view + f"<script src='/resources/wiz/libs/wiz.js'></script><script>function __init_{fn_id}() {o} var wiz = season_wiz.load('{id}', '{fn_id}', '{namespace}'); wiz.options = {kwargs}; {js}; try {o} app.controller('wiz-{fn_id}', wiz_controller); {e} catch (e) {o} app.controller('wiz-{fn_id}', function() {o} {e} ); {e} {e}; __init_{fn_id}();</script>"
         view = view + f"<style>{css}</style>"
@@ -198,9 +197,10 @@ class Model(season.core.interfaces.model.MySQL):
             html = item['build_html']
             css = item['build_css']
 
-        self.cache.wiz[namespace] = (namespace, id, html, css, js, item['api'], fn)
-        if len(args) > 1: namespace = args[1]
-        return self._view(namespace, id, html, css, js, **kwargs), item['api']
+        ns = namespace
+        if len(args) > 1: ns = args[1]
+        self.cache.wiz[namespace] = (ns, id, html, css, js, item['api'], fn)
+        return self._view(ns, id, html, css, js, **kwargs), item['api']
 
     def view_from_source(self, *args, **kwargs):
         id = args[0]
