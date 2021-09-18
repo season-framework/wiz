@@ -24,17 +24,20 @@ mixin content()
                         th.text-center.width-1 Category
                         th.text-center Title
                         th.text-center.width-2 User
+                        th.text-center.width-1 Route
                         th.text-center.width-2 Created
 
                 tbody
                     tr(ng-repeat="item in list")
-                        td.text-center.width-1
+                        td.width-1
                             a(ng-href="/wiz/widget/editor/{$ng('item.id')$}")= ng('item.id.substring(0,8)')
                         td.text-center.width-1
                             a(ng-href="/wiz/widget/editor/{$ng('item.id')$}")= ng('item.category')
                         td
                             a(ng-href="/wiz/widget/editor/{$ng('item.id')$}")= ng('item.title')
                         td.text-center.width-2= ng('item.user_id')
+                        td.text-center.width-1
+                            span.badge.bg-green(ng-if="item.route")
                         td.text-center.width-2= ng('item.created.substring(0,10)')
             
             .pagenation.text-center(ng-if="facet.pages.length > 0")
