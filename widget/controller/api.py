@@ -20,6 +20,7 @@ class Controller(season.interfaces.wiz.controller.api):
         if 'text' in data:
             if len(data['text']) > 0:
                 data['or']['title'] = data['text']
+                data['or']['namespace'] = data['text']
                 data['or']['app_id'] = data['text']
                 data['or']['category'] = data['text']
                 data['or']['html'] = data['text']
@@ -29,7 +30,7 @@ class Controller(season.interfaces.wiz.controller.api):
                 data['or']['kwargs'] = data['text']
                 
             del data['text']
-        data['like'] = 'title,app_id,html,js,css,api,kwargs'
+        data['like'] = 'title,app_id,html,js,css,api,kwargs,namespace'
         data['orderby'] = '`title` ASC'
         rows = self.db.search(**data)
         return self.status(200, rows)
