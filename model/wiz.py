@@ -151,8 +151,11 @@ class Model(season.core.interfaces.model.MySQL):
         id = args[0]
         namespace = id + ""
 
-        if namespace in self.cache.wiz and self.updateview==False:
-            namespace, id, html, css, js, api, fn = self.cache.wiz[namespace]
+        ns = namespace
+        if len(args) > 1: ns = args[1]
+
+        if ns in self.cache.wiz and self.updateview==False:
+            namespace, id, html, css, js, api, fn = self.cache.wiz[ns]
             _kwargs = fn['get'](self.framework, kwargs)
             kwargs = _kwargs
             return self._view(namespace, id, html, css, js, **kwargs), api
@@ -209,10 +212,7 @@ class Model(season.core.interfaces.model.MySQL):
             html = item['build_html']
             css = item['build_css']
 
-        ns = namespace
-        if len(args) > 1: ns = args[1]
-
-        self.cache.wiz[namespace] = (ns, id, html, css, js, item['api'], fn)
+        self.cache.wiz[ns] = (ns, id, html, css, js, item['api'], fn)
         return self._view(ns, id, html, css, js, **kwargs), item['api']
 
     def view_from_source(self, *args, **kwargs):
