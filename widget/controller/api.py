@@ -22,8 +22,14 @@ class Controller(season.interfaces.wiz.controller.api):
                 data['or']['title'] = data['text']
                 data['or']['app_id'] = data['text']
                 data['or']['category'] = data['text']
+                data['or']['html'] = data['text']
+                data['or']['js'] = data['text']
+                data['or']['css'] = data['text']
+                data['or']['api'] = data['text']
+                data['or']['kwargs'] = data['text']
+                
             del data['text']
-        data['like'] = 'title,app_id'
+        data['like'] = 'title,app_id,html,js,css,api,kwargs'
         data['orderby'] = '`title` ASC'
         rows = self.db.search(**data)
         return self.status(200, rows)

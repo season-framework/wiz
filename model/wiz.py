@@ -143,8 +143,8 @@ class Model(season.core.interfaces.model.MySQL):
         e = "}"
         kwargs = json.dumps(kwargs, default=self.json_default)
         view = html
-        view = view + f"<script src='/resources/wiz/libs/wiz.js'></script><script>function __init_{fn_id}() {o} var wiz = season_wiz.load('{id}', '{fn_id}', '{namespace}'); wiz.options = {kwargs}; {js}; try {o} app.controller('wiz-{fn_id}', wiz_controller); {e} catch (e) {o} app.controller('wiz-{fn_id}', function() {o} {e} ); {e} {e}; __init_{fn_id}();</script>"
-        view = view + f"<style>{css}</style>"
+        view = view + f"\n<script src='/resources/wiz/libs/wiz.js'></script>\n<script type='text/javascript'>\n<!--\nfunction __init_{fn_id}() {o} var wiz = season_wiz.load('{id}', '{fn_id}', '{namespace}');\n\n\nwiz.options = {kwargs};\n\n\n{js};\ntry {o} app.controller('wiz-{fn_id}', wiz_controller); {e} catch (e) {o} app.controller('wiz-{fn_id}', function() {o} {e} ); {e} {e}; __init_{fn_id}();\n-->\n</script>"
+        view = view + f"\n<style>{css}</style>"
         return view
 
     def view(self, *args, **kwargs):
