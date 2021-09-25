@@ -197,8 +197,8 @@ class Model(season.core.interfaces.model.MySQL):
                 pug = pypugjs.Parser(html)
                 pug = pug.parse()
                 html = pypugjs.ext.jinja.Compiler(pug, **pugconfig).compile()
-            except:
-                pass
+            except Exception as e:
+                self.framework.log(e)
             
             css = f"#wiz-{id} {o} {css} {e}"
             css = lesscpy.compile(StringIO(css), minify=True)
