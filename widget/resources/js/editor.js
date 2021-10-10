@@ -10,6 +10,7 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.monaco_properties = { tab: {} };
 
     $scope.loaded = false;
+    $scope.loading = true;
     $scope.activetab = null;
 
     $scope.event.active = function (tab) {
@@ -17,18 +18,25 @@ var content_controller = function ($scope, $timeout, $sce) {
     }
 
     $scope.event.treeitem = function (item) {
-        $scope.info = item;
-        app_id = $scope.info.id;
-        if (typeof ($scope.info.properties) == 'string') {
-            $scope.info.properties = JSON.parse($scope.info.properties);
-        }
-        if (!$scope.info.properties) $scope.info.properties = {};
-        if (!$scope.info.properties.html) $scope.info.properties.html = 'pug';
-        if (!$scope.info.properties.js) $scope.info.properties.js = 'javascript';
-        if (!$scope.info.properties.css) $scope.info.properties.css = 'less';
-
-        $scope.event.iframe();
+        app_id = item.id;
+        $scope.loading = false;
         $timeout();
+        $.get(API_URL + '/api/info/' + app_id, function (res) {
+            if (res.data.id != app_id) return;
+            $scope.info = res.data;
+            if (typeof ($scope.info.properties) == 'string') {
+                $scope.info.properties = JSON.parse($scope.info.properties);
+            }
+            if (!$scope.info.properties) $scope.info.properties = {};
+            if (!$scope.info.properties.html) $scope.info.properties.html = 'pug';
+            if (!$scope.info.properties.js) $scope.info.properties.js = 'javascript';
+            if (!$scope.info.properties.css) $scope.info.properties.css = 'less';
+
+            $scope.event.iframe();
+            $scope.loading = true;
+            $scope.editors[$scope.activetab].focus();
+            $timeout();
+        });
     }
 
     function langselect(tab) {
@@ -241,10 +249,14 @@ var content_controller = function ($scope, $timeout, $sce) {
             $scope.event.iframe();
             if (cb) return cb(res);
             if (res.code == 200) {
-                return toastr.success('저장되었습니다');
+                return toastr.success('Saved');
             }
-            toastr.error('오류가 발생하였습니다.');
+            toastr.error(res.error ? res.error : 'Error');
         });
+    }
+
+    $scope.event.keymaps = function () {
+        $('#modal-keymaps').modal('show');
     }
 
     // import from file
@@ -269,6 +281,12 @@ var content_controller = function ($scope, $timeout, $sce) {
 
     $.get(API.TREE, function (res) {
         $scope.tree = res.data;
+        $scope.treedata = [];
+        for (var i = 0; i < $scope.tree.length; i++) {
+            for (var j = 0; j < $scope.tree[i].data.length; j++) {
+                $scope.treedata.push($scope.tree[i].data[j].id);
+            }
+        }
         $timeout();
     });
 
@@ -337,19 +355,43 @@ var content_controller = function ($scope, $timeout, $sce) {
             bindonload('tab' + i);
 
         $timeout(function () {
+            $scope.loaded = true;
             $timeout(function () {
                 $scope.event.layout($scope.options.layout);
-                $scope.loaded = true;
-                $timeout(function () {
-                    $scope.event.iframe();
-                }, 100);
+                $scope.event.iframe();
             }, 1000);
         }, 1000);
 
         // shortcut
 
         function shortcuts() {
+            $(window).unbind();
             shortcutjs(window, {
+                'Alt Digit1': function (ev) {
+                    $scope.options.panel = 'component';
+                    $timeout();
+                    ev.preventDefault();
+                },
+                'Alt Digit2': function (ev) {
+                    $scope.options.panel = 'tree';
+                    $timeout();
+                    ev.preventDefault();
+                },
+                'Alt KeyJ': function (ev) {
+                    ev.preventDefault();
+                    $(window).focus();
+                    var appidx = $scope.treedata.indexOf(app_id) - 1;
+                    if (appidx < 0) appidx = $scope.treedata.length - 1
+                    appidx = $scope.treedata[appidx];
+                    $scope.event.treeitem({ id: appidx });
+                },
+                'Alt KeyK': function (ev) {
+                    ev.preventDefault();
+                    $(window).focus();
+                    var appidx = ($scope.treedata.indexOf(app_id) + 1) % $scope.treedata.length;
+                    appidx = $scope.treedata[appidx];
+                    $scope.event.treeitem({ id: appidx });
+                },
                 'Ctrl KeyS': function (ev) {
                     $scope.event.save();
                     ev.preventDefault();

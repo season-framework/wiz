@@ -34,12 +34,26 @@ class Model(season.core.interfaces.model.MySQL):
         self.cache.wiz = season.stdClass()
 
         if 'route' not in values or len(values['route']) == 0:
-            self.render(values['id'])
+            try:
+                self.render(values['id'])
+            except:
+                pass
         else:
-            self.routes()
-            self.route()
+            try:
+                self.routes()
+            except: 
+                pass
+            
+            try:
+                self.route()
+            except:
+                pass
+
             self.framework.request.segment = season.stdClass()
-            self.render(values['id'])
+            try:
+                self.render(values['id'])
+            except:
+                pass
 
         return res
 

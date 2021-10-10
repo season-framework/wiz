@@ -31,9 +31,9 @@ mixin content()
                 .navbar-brand.navbar-brand-autodark.d-none-navbar-horizontal.pr-0.pr-md-3
                     div(style='color: #7d7c83;')
                         img.mr-2(src='/resources/theme/img/logo-white.png' style='height: 32px;')
-                        span.text-white.mr-1 {{info.title}}
-                        span.text-white.mr-1 /
-                        span.text-white.mr-1 {{info.namespace}}
+
+                input.form-control.mr-2.text-white.if-desktop(type="text" ng-model="info.title" style="width: 160px; display: inline-block;")
+                input.form-control.mr-2.text-white.if-desktop(type="text" ng-model="info.namespace" style="width: 160px; display: inline-block;")
 
                 #navbar-menu.navbar.navbar-collapse.collapse
                     ul.navbar-nav
@@ -72,7 +72,7 @@ mixin content()
                                     i.fas.fa-plus
 
                         .sub(ng-if="!options.panel_status[item.id]")
-                            .sub-title(ng-repeat="sub in item.data" class="{{sub.namespace == info.namespace ? 'active' : ''}}" ng-click="event.treeitem(sub)")
+                            .sub-title(ng-repeat="sub in item.data" class="{{sub.id == info.id ? 'active' : ''}}" ng-click="event.treeitem(sub)")
                                 i.fas.fa-code.mr-2
                                 | {{sub.title}}
                             .mb-2
@@ -156,7 +156,12 @@ mixin content()
                                     .layout-column
                                 .layout-row
                                     .layout-column
-                        
+
+                    .button-container
+                        button.btn.btn-white.btn-block.mb-3(ng-click="event.keymaps()") 
+                            i.fas.fa-keyboard
+                            span.ml-2 Shortcuts
+
                     .hr.bg-white
 
                     .button-container
@@ -190,7 +195,9 @@ mixin content()
                 div(data-split-pane-divider data-height="3px")
                 div(data-split-pane-component data-height="0")
                     +codearea('tab4')
-                    
+
+            .bg-dark.text-center(ng-if="!loading" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 99999; padding-top: 40vh;")
+                .spinner-grow.text-white(style="width: 60px; height: 60px;")       
 
     #modal-delete.modal.fade(tabindex="-1")
         .modal-dialog.modal-sm(role='document')
@@ -201,6 +208,67 @@ mixin content()
                 .modal-footer
                     button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
                     button.btn.btn-danger(type='button' ng-click="event.delete()") Delete
+
+    #modal-keymaps.modal.fade(tabindex="-1")
+        .modal-dialog(role='document' style="max-width: 720px;")
+            .modal-content
+                .modal-header
+                    .modal-title Shortcuts
+                .modal-body.m-0
+                    table.table.table-bordered.table-hover 
+                        thead 
+                            th.text-center Shortcut
+                            th.text-center Description
+                        tbody
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Ctrl(CMD)
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark S
+                                td.text-center Save
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Ctrl(CMD)
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark Shift
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark
+                                        i.fas.fa-arrow-left
+                                        span.mr-1.ml-1 /
+                                        i.fas.fa-arrow-right
+                                td.text-center move previous/next code view
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Ctrl(CMD)
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark 1 ~ 4
+                                td.text-center move tab 1 ~ 4
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Alt
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark 1
+                                td.text-center Component Panel
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Alt
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark 2
+                                td.text-center Tree Panel
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Alt
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark J
+                                td.text-center Previous wiz component
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Alt
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark K
+                                td.text-center Next wiz component
+                .modal-footer
+                    button.btn.btn-link.link-secondary.ml-auto(type='button' data-dismiss='modal') Cancel
 
 include wiz/theme/layout-empty
 +layout

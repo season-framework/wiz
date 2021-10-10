@@ -264,3 +264,7 @@ body {
 .tree-container .root-title:hover {
     background: rgba(255, 255, 255, .1);
 }
+
+th.text-center {
+    white-space: nowrap;
+}
