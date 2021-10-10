@@ -10,11 +10,7 @@ if (!window.season_wiz) {
 
             wiz.API = {
                 url: function (fnname) {
-                    if (wiz.options.render == 'webadmin') {
-                        return '/wiz/api/' + app_id + '/' + fnname;
-                    } else {
-                        return '/wiz/api_src/' + app_id + '/' + fnname;
-                    }
+                    return '/wiz/api/' + app_id + '/' + fnname;
                 },
                 function: function (fnname, data, cb, opts) {
                     var _url = wiz.API.url(fnname);

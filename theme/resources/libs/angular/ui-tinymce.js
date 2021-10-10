@@ -25,38 +25,36 @@ function uiTinymceDirective($timeout, uiTinymceConfig) {
         var diffmax = 200;
         ngModel.$render = function () {
             options.value = ngModel.$viewValue;
-            ngModel.$render = function () {
-                var safeViewValue = ngModel.$viewValue || '';
-                newEditor(iElement, options, safeViewValue, function (editor) {
-                    editor.on("keyup", function () {
-                        var diff = new Date().getTime() - latest;
-                        latest = new Date().getTime();
+            var safeViewValue = ngModel.$viewValue || '';
+            newEditor(iElement, options, safeViewValue, function (editor) {
+                editor.on("keyup", function () {
+                    var diff = new Date().getTime() - latest;
+                    latest = new Date().getTime();
 
-                        setTimeout(function () {
-                            diff = new Date().getTime() - latest;
-                            if (diff < diffmax) return;
-                            var newValue = editor.getContent();
-                            if (newValue !== ngModel.$viewValue) {
-                                scope.$evalAsync(function () {
-                                    ngModel.$setViewValue(newValue);
-                                });
-                            }
-                        }, diffmax);
-                    });
-
-                    scope.$on('Tinymce', function (event, callback) {
-                        if (angular.isFunction(callback)) {
-                            callback(editor);
-                        } else {
-                            throw new Error('the Tinymce event requires a callback function');
+                    setTimeout(function () {
+                        diff = new Date().getTime() - latest;
+                        if (diff < diffmax) return;
+                        var newValue = editor.getContent();
+                        if (newValue !== ngModel.$viewValue) {
+                            scope.$evalAsync(function () {
+                                ngModel.$setViewValue(newValue);
+                            });
                         }
-                    });
+                    }, diffmax);
+                });
 
-                    if (angular.isFunction(options.onLoad)) {
-                        options.onLoad(editor);
+                scope.$on('Tinymce', function (event, callback) {
+                    if (angular.isFunction(callback)) {
+                        callback(editor);
+                    } else {
+                        throw new Error('the Tinymce event requires a callback function');
                     }
                 });
-            };
+
+                if (angular.isFunction(options.onLoad)) {
+                    options.onLoad(editor);
+                }
+            });
         };
     }
 

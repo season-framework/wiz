@@ -6,7 +6,7 @@ mixin layout()
         head
             +header
             
-        body.antialiased
+        body.antialiased(ng-controller="content")
             script(src='/resources/theme/libs/tabler/dist/libs/bootstrap/dist/js/bootstrap.bundle.min.js')
             script(src='/resources/theme/libs/tabler/dist/libs/peity/jquery.peity.min.js')
             script(src='/resources/theme/libs/tabler/dist/js/tabler.min.js')
@@ -15,7 +15,6 @@ mixin layout()
             script.
                 require.config({ paths: { vs: '/resources/wiz/theme/libs/monaco/min/vs' } });
 
-            div.page(ng-controller="content" ng-cloak)
-                +content
+            +content
 
             +builder

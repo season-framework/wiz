@@ -30,7 +30,7 @@ mixin content()
                 tbody
                     tr(ng-repeat="item in list")
                         td.width-1
-                            a(ng-href="/wiz/widget/editor/{{item.id}}") {{item.id.substring(0,8)}}
+                            a(ng-href="/wiz/widget/editor/{{item.id}}") {{item.namespace ? item.namespace : item.id.substring(0,8)}}
                         td.text-center.width-1
                             a(ng-href="/wiz/widget/editor/{{item.id}}") {{item.category}}
                         td

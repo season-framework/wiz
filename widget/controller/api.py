@@ -14,6 +14,17 @@ class Controller(season.interfaces.wiz.controller.api):
             self.status(404)
         self.status(200, info)
 
+    def tree(self, framework):
+        category = ['widget', 'page']
+        try:
+            category = self.config.category
+        except:
+            pass
+        db = framework.model('wiz', module='wiz')
+        for i in range(len(category)):
+            category[i]['data'] = db.select(category=category[i]['id'], orderby="namespace ASC")
+        self.status(200, category)
+
     def search(self, framework):
         data = framework.request.query()
         data['or'] = dict()

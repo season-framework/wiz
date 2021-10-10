@@ -1,17 +1,14 @@
 var shortcutjs = function (element, config) {
     return new (function () {
         var self = this;
-
         self.holdings = {};
-        var ismac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-        self.translate = {
-            'meta': ismac ? 'control' : 'meta',
-            'control': ismac ? 'meta' : 'control',
-            'shift': 'shift',
-            'alt': 'alt'
-        };
-
         if (!config) config = {};
+
+        var isMacLike = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
+        var KEYMOD = { 'OSLeft': 'meta', 'OSRight': 'meta', 'ControlLeft': 'ctrl', 'ControlRight': 'ctrl', 'AltLeft': 'alt', 'AltRight': 'alt', 'ShiftLeft': 'shift', 'ShiftRight': 'shift' };
+        if (isMacLike) {
+            KEYMOD = { 'OSLeft': 'ctrl', 'OSRight': 'ctrl', 'ControlLeft': 'meta', 'ControlRight': 'meta', 'AltLeft': 'alt', 'AltRight': 'alt', 'ShiftLeft': 'shift', 'ShiftRight': 'shift' };
+        }
 
         self.shortcut = {};
 
@@ -19,7 +16,11 @@ var shortcutjs = function (element, config) {
             name = name.toLowerCase();
             name = name.split('|');
             for (var i = 0; i < name.length; i++) {
-                _name = name[i].replace(/  /gim, ' ').trim().split(' ');
+                var _name = name[i].replace(/  /gim, ' ').trim().split(' ');
+                if (_name == 'default') {
+                    self.shortcut[_name] = fn;
+                    continue;
+                }
                 _name.sort();
                 _name = _name.join(' ');
                 self.shortcut[_name] = fn;
@@ -31,39 +32,37 @@ var shortcutjs = function (element, config) {
         }
 
         $(element).keydown(function (ev) {
-            var keyname = ev.key.toLowerCase();
-            if (!self.translate[keyname]) {
-                self.holdings = {};
-                self.holdings[keyname] = true;
-            }
+            var keycode = ev.code;
+            self.holdings[keycode] = true;
 
             var keynamespace = [];
-            for (var key in self.holdings) keynamespace.push(key);
-            for (var key in self.translate) {
-                if (ev[key + 'Key']) {
-                    keynamespace.push(self.translate[key]);
+            for (var key in self.holdings) {
+                if (KEYMOD[key]) {
+                    keynamespace.push(KEYMOD[key].toLowerCase());
+                } else {
+                    keynamespace.push(key.toLowerCase());
                 }
             }
 
             keynamespace.sort();
-            var keylens = keynamespace.length;
             keynamespace = keynamespace.join(' ');
+            keynamespace = keynamespace.toLowerCase();
+
             if (self.shortcut[keynamespace]) {
+                delete self.holdings[keycode];
                 self.shortcut[keynamespace](ev, keynamespace);
-                self.holdings = {};
                 ev.proceed = true;
             }
 
             if (self.shortcut['default']) {
                 self.shortcut['default'](ev, keynamespace);
-            } else {
-                ev.preventDefault();
             }
         });
 
         $(element).keyup(function (ev) {
-            var keyname = ev.key.toLowerCase();
-            delete self.holdings[keyname];
+            var keycode = ev.code;
+            if (self.holdings[keycode])
+                delete self.holdings[keycode];
         });
     });
 }

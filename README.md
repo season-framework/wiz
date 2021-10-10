@@ -6,6 +6,7 @@
 
 ```bash
 sf module import wiz --uri https://github.com/season-framework/season-flask-wiz
+pip install libsass
 ```
 
 ## Configuration
@@ -27,11 +28,10 @@ CREATE TABLE `widget` (
   `created` datetime NOT NULL,
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `kwargs` longtext,
-  `build_html` longtext,
-  `build_css` longtext,
   `theme` varchar(32) DEFAULT NULL,
   `viewuri` text DEFAULT NULL,
   `route` varchar(192) DEFAULT NULL,
+  `properties` text DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `namespace` (`namespace`),
   KEY `title` (`title`),

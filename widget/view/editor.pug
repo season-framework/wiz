@@ -1,30 +1,25 @@
 mixin codearea(tab)
-    div(ng-show="options.tab.{$tab$}_val == 'html'" ng-model="info.html" ui-monaco-opts="monaco('pug')" ui-monaco)
-    div(ng-show="options.tab.{$tab$}_val == 'js'" ng-model="info.js" ui-monaco-opts="monaco('javascript')" ui-monaco)
-    div(ng-show="options.tab.{$tab$}_val == 'css'" ng-model="info.css" ui-monaco-opts="monaco('less')" ui-monaco)
-    div(ng-show="options.tab.{$tab$}_val == 'api'" ng-model="info.api" ui-monaco-opts="monaco('python')" ui-monaco)
-    div(ng-show="options.tab.{$tab$}_val == 'kwargs'" ng-model="info.kwargs" ui-monaco-opts="monaco('python')" ui-monaco)
-    div(ng-show="options.tab.{$tab$}_val == 'readme'" ng-model="info.content" ui-tinymce-opts="tinymce_opt" ui-tinymce)
-    .code-preview(ng-if="options.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: 100%;")
-        iframe.preview(style="height: 100%;" ng-hide="status_drag == 'unselectable'")
-        table(ng-if="status_drag == 'unselectable'" style="width: 100%; height: 100%;")
-            tr 
-                td(style="text-align: center; vertical-align: middle;")
-                    .spinner-grow.text-blue(style="width: 120px; height: 120px;")
-                    
+    div(style="overflow: hidden; height: 100%; width: 100%;" ng-if="loaded" ng-cloak ng-click="event.active('{$tab$}')")
+        .code-select.bg-dark.d-flex(style="margin-top: -2px;")
+            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'kwargs')" ng-class="options.tab.{$tab$}_val == 'kwargs' ? 'btn-white' : 'btn-dark'") Controller
+            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'api')" ng-class="options.tab.{$tab$}_val == 'api' ? 'btn-white' : 'btn-dark'") API
+            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'html')" ng-class="options.tab.{$tab$}_val == 'html' ? 'btn-white' : 'btn-dark'") PUG
+            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'js')" ng-class="options.tab.{$tab$}_val == 'js' ? 'btn-white' : 'btn-dark'") JS
+            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'css')" ng-class="options.tab.{$tab$}_val == 'css' ? 'btn-white' : 'btn-dark'") CSS
+            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'preview')" ng-class="options.tab.{$tab$}_val == 'preview' ? 'btn-white' : 'btn-dark'") Preview
+            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'readme')" ng-class="options.tab.{$tab$}_val == 'readme' ? 'btn-white' : 'btn-dark'") README
+            select.form-select.form-select-sm.m-1.ml-auto(style="width: 120px;" ng-model="info.properties[options.tab.{$tab$}_val]" ng-if="codetypes[options.tab.{$tab$}_val].length > 0")
+                option(ng-repeat="code in codetypes[options.tab.{$tab$}_val]" value="{{code}}") {{code}}
 
-mixin codeselect(tab)
-    - if tab != 'tab5'
-        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'readme'; event.iframe();" ng-class="options.tab.{$tab$}_val == 'readme' ? 'btn-white' : 'btn-dark'") README
-        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'html'" ng-class="options.tab.{$tab$}_val == 'html' ? 'btn-white' : 'btn-dark'") PUG
-        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'js'" ng-class="options.tab.{$tab$}_val == 'js' ? 'btn-white' : 'btn-dark'") JS
-        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'css'" ng-class="options.tab.{$tab$}_val == 'css' ? 'btn-white' : 'btn-dark'") CSS
-        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'api'" ng-class="options.tab.{$tab$}_val == 'api' ? 'btn-white' : 'btn-dark'") API
-        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'kwargs'" ng-class="options.tab.{$tab$}_val == 'kwargs' ? 'btn-white' : 'btn-dark'") Controller
-        
-        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'preview'; event.iframe();" ng-class="options.tab.{$tab$}_val == 'preview' ? 'btn-white' : 'btn-dark'") Preview
-    - else
-        button.btn.btn-square.btn-sm.mr-1(ng-click="options.tab.{$tab$}_val = 'preview'; event.iframe();" ng-class="options.tab.{$tab$}_val == 'preview' ? 'btn-white' : 'btn-dark'") Preview
+        div(style="height: calc(100% - 36px);")
+            div(ng-if="!status.tab.{$tab$}" ng-show="['preview', 'readme'].includes(options.tab.{$tab$}_val) == false" ng-model="info[options.tab.{$tab$}_val]" ui-monaco-opts="monaco_properties.tab['{$tab$}']" ui-monaco)
+            div(ng-show="options.tab.{$tab$}_val == 'readme'" ng-model="info.content" ui-tinymce-opts="tinymce_opt" ui-tinymce)
+            .code-preview(ng-if="options.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: 100%;")
+                iframe.preview(style="height: 100%;" ng-show="!iframe_load")
+                table(ng-if="iframe_load" style="width: 100%; height: 100%;")
+                    tr 
+                        td(style="text-align: center; vertical-align: middle;")
+                            .spinner-grow.text-dark(style="width: 120px; height: 120px;")
 
 mixin content()
     .fixed-top
@@ -33,9 +28,12 @@ mixin content()
                 button.navbar-toggler(type='button' data-toggle='collapse' data-target='#navbar-menu')
                     span.navbar-toggler-icon
 
-                a.navbar-brand.navbar-brand-autodark.d-none-navbar-horizontal.pr-0.pr-md-3
+                .navbar-brand.navbar-brand-autodark.d-none-navbar-horizontal.pr-0.pr-md-3
                     div(style='color: #7d7c83;')
                         img.mr-2(src='/resources/theme/img/logo-white.png' style='height: 32px;')
+                        span.text-white.mr-1 {{info.title}}
+                        span.text-white.mr-1 /
+                        span.text-white.mr-1 {{info.namespace}}
 
                 #navbar-menu.navbar.navbar-collapse.collapse
                     ul.navbar-nav
@@ -52,174 +50,148 @@ mixin content()
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(href='/wiz/widget/list/{{info.category}}')
                                 span.nav-link-title.bold(style="font-size: 14px;")
                                     i.fas.fa-times
-
-    .panel-layout(class="{{options.sidemenu ? 'sidemenu-on' : 'sidemenu-off'}}" ng-class="status_drag")
-        .panel-menu.bg-dark
+    
+    .bg-dark.text-center(ng-if="!loaded" style="width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 99999; padding-top: 40vh;")
+        .spinner-grow.text-white(style="width: 60px; height: 60px;")
+        
+    div(data-split-pane data-split-pane-properties="properties.root")
+        .bg-dark(data-split-pane-component data-width="360px")
             .menu-layout.p-3
-                h3.text-white.mb-3 
-                    i.fas.fa-bars.mr-2(ng-click="event.toggle.sidemenu()")
-                    span.minify Component
+                .btn-group.w-100.mb-3
+                    button.btn(type="button" style="width: 50%;" class="{{options.panel != 'tree' ? 'btn-white' : 'btn-dark'}}" ng-click="options.panel='component'") Component
+                    button.btn(type="button" style="width: 50%;" class="{{options.panel == 'tree' ? 'btn-white' : 'btn-dark'}}" ng-click="options.panel='tree'") Tree
 
-                .card.card-sm.mb-3.minify
-                    .card-body
-                        label.form-label Title
-                        input.form-control(type='text' placeholder='App 제목' ng-model="info.title")
+                .tree-container(ng-show="options.panel == 'tree'")
+                    .root-tree(ng-repeat="item in tree")
+                        .root-title
+                            .d-flex
+                                span(ng-click="options.panel_status[item.id] = (options.panel_status[item.id] ? false : true)")
+                                    i.fas.fa-layer-group.mr-2
+                                    | {{item.title}}
+                                a.ml-auto.text-white(href="/wiz/widget/editor/new?category={{item.id}}")
+                                    i.fas.fa-plus
 
-                .card.card-sm.mb-3.minify
-                    .card-body
-                        label.form-label Namespace
-                        input.form-control(type='text' placeholder='NAMESPACE' ng-model="info.namespace")
+                        .sub(ng-if="!options.panel_status[item.id]")
+                            .sub-title(ng-repeat="sub in item.data" class="{{sub.namespace == info.namespace ? 'active' : ''}}" ng-click="event.treeitem(sub)")
+                                i.fas.fa-code.mr-2
+                                | {{sub.title}}
+                            .mb-2
 
-                .card.card-sm.mb-3.minify
-                    .card-body
-                        label.form-label Category
-                        select.form-select(ng-model="info.category")
-                            option(value="{{c.id ? c.id : c}}" ng-repeat="c in category") {{c.title ? c.title : (c.id ? c.id : c)}}
+                div(ng-show="options.panel != 'tree'")
+                    .card.card-sm.mb-3
+                        .card-body
+                            label.form-label Title
+                            input.form-control(type='text' placeholder='App 제목' ng-model="info.title")
 
-                .card.card-sm.mb-3.minify
-                    .card-body
-                        label.form-label Base Theme
-                        select.form-select(ng-model="info.theme")
-                            option(value="{{c}}" ng-repeat="c in theme") {{c}}
-                
-                .card.card-sm.mb-3.minify
-                    .card-body
-                        label.form-label Route
-                        input.form-control(type='text' placeholder='/board/<category>/list' ng-model="info.route")
-                
-                .card.card-sm.mb-3.minify
-                    .card-body
-                        label.form-label View URI
-                        input.form-control(type='text' placeholder='/board/notice/list' ng-model="info.viewuri")
+                    .card.card-sm.mb-3
+                        .card-body
+                            label.form-label Namespace
+                            input.form-control(type='text' placeholder='NAMESPACE' ng-model="info.namespace")
 
-                .hr.bg-white.minify
-                
-                h3.text-white.minify Code Layout
+                    .card.card-sm.mb-3
+                        .card-body
+                            label.form-label Category
+                            select.form-select(ng-model="info.category")
+                                option(value="{{c.id ? c.id : c}}" ng-repeat="c in category") {{c.title ? c.title : (c.id ? c.id : c)}}
 
-                .text-center.mb-4
-                    .layout-selector.p-2(ng-class="options.layout == 1 ? 'active' : ''" ng-click="options.layout = 1")
-                        .layout-icon
-                            .layout-row
-                                .layout-column
-
-                    .layout-selector.p-2(ng-class="options.layout == 2 ? 'active' : ''" ng-click="options.layout = 2")
-                        .layout-icon
-                            .layout-row
-                                .layout-column
-                                .layout-column
-
-                    .layout-selector.p-2(ng-class="options.layout == 3 ? 'active' : ''" ng-click="options.layout = 3")
-                        .layout-icon
-                            .layout-row
-                                .layout-column
-                                .layout-column
-                                .layout-column
+                    .card.card-sm.mb-3
+                        .card-body
+                            label.form-label Base Theme
+                            select.form-select(ng-model="info.theme")
+                                option(value="{{c}}" ng-repeat="c in theme") {{c}}
                     
-                    .layout-selector.p-2(ng-class="options.layout == 4 ? 'active' : ''" ng-click="options.layout = 4")
-                        .layout-icon
-                            .layout-row
-                                .layout-column
-                                .layout-column
-                                .layout-column
-                                .layout-column
-
-                    .layout-selector.p-2(ng-class="options.layout == 5 ? 'active' : ''" ng-click="options.layout = 5; event.iframe();")
-                        .layout-icon.rows-2
-                            .layout-row
-                                .layout-column
-                            .layout-row
-                                .layout-column
-
-                    .layout-selector.p-2(ng-class="options.layout == 6 ? 'active' : ''" ng-click="options.layout = 6; event.iframe();")
-                        .layout-icon.rows-2
-                            .layout-row
-                                .layout-column
-                                .layout-column
-                            .layout-row
-                                .layout-column
-
-                    .layout-selector.p-2(ng-class="options.layout == 7 ? 'active' : ''" ng-click="options.layout = 7; event.iframe();")
-                        .layout-icon.rows-2
-                            .layout-row
-                                .layout-column
-                                .layout-column
-                                .layout-column
-                            .layout-row
-                                .layout-column
-
-                    .layout-selector.p-2(ng-class="options.layout == 8 ? 'active' : ''" ng-click="options.layout = 8; event.iframe();")
-                        .layout-icon.rows-2
-                            .layout-row
-                                .layout-column
-                                .layout-column
-                                .layout-column
-                                .layout-column
-                            .layout-row
-                                .layout-column
+                    .card.card-sm.mb-3
+                        .card-body
+                            label.form-label Route
+                            input.form-control(type='text' placeholder='/board/<category>/list' ng-model="info.route")
                     
-                .hr.bg-white.minify
+                    .card.card-sm.mb-3
+                        .card-body
+                            label.form-label View URI
+                            input.form-control(type='text' placeholder='/board/notice/list' ng-model="info.viewuri")
 
-                .button-container
-                    button.btn.btn-white.btn-block.mb-3(ng-click="event.select_file()") 
-                        i.fas.fa-upload
-                        span.minify.ml-2 Import
+                    .hr.bg-white
+                    
+                    h3.text-white Code Layout
 
-                    a.btn.btn-white.btn-block.mb-3(href="/wiz/export/{{ info.id }}" target="_blank")
-                        i.fas.fa-download
-                        span.minify.ml-2 Export
+                    .text-center.mb-4
+                        .layout-selector.p-2(ng-class="options.layout == 1 ? 'active' : ''" ng-click="event.layout(1)")
+                            .layout-icon
+                                .layout-row
+                                    .layout-column
+
+                        .layout-selector.p-2(ng-class="options.layout == 2 ? 'active' : ''" ng-click="event.layout(2)")
+                            .layout-icon
+                                .layout-row
+                                    .layout-column
+                                    .layout-column
+
+                        .layout-selector.p-2(ng-class="options.layout == 3 ? 'active' : ''" ng-click="event.layout(3)")
+                            .layout-icon
+                                .layout-row
+                                    .layout-column
+                                    .layout-column
+                                    .layout-column
+                        br
+                        .layout-selector.p-2(ng-class="options.layout == 4 ? 'active' : ''" ng-click="event.layout(4)")
+                            .layout-icon.rows-2
+                                .layout-row
+                                    .layout-column
+                                .layout-row
+                                    .layout-column
+
+                        .layout-selector.p-2(ng-class="options.layout == 5 ? 'active' : ''" ng-click="event.layout(5)")
+                            .layout-icon.rows-2
+                                .layout-row
+                                    .layout-column
+                                    .layout-column
+                                .layout-row
+                                    .layout-column
+
+                        .layout-selector.p-2(ng-class="options.layout == 6 ? 'active' : ''" ng-click="event.layout(6)")
+                            .layout-icon.rows-2
+                                .layout-row
+                                    .layout-column
+                                    .layout-column
+                                    .layout-column
+                                .layout-row
+                                    .layout-column
+                        
+                    .hr.bg-white
+
+                    .button-container
+                        button.btn.btn-white.btn-block.mb-3(ng-click="event.select_file()") 
+                            i.fas.fa-upload
+                            span.ml-2 Import
+
+                        a.btn.btn-white.btn-block.mb-3(href="/wiz/export/{{ info.id }}" target="_blank")
+                            i.fas.fa-download
+                            span.ml-2 Export
 
                 .display-none(style="display: none;")
                     input#import-file(type="file" accept=".json,application/json")
-                
-        .panel-context
-            .p-0.pt-2.bg-dark
-                table.w-100.code-tabs.code-tabs-top
-                    tr
-                        td.tab-1.text-center(ng-if="[1,2,3,4,5,6,7,8].includes(options.layout)")
-                            +codeselect('tab1')
-                        td.tab-2.text-center(ng-if="[2,3,4,6,7,8].includes(options.layout)")
-                            +codeselect('tab2')
-                        td.tab-3.text-center(ng-if="[3,4,7,8].includes(options.layout)")
-                            +codeselect('tab3')
-                        td.tab-4.text-center(ng-if="[4,8].includes(options.layout)")
-                            +codeselect('tab4')
 
-            .code-container(ng-class="[5,6,7,8].includes(options.layout) ? 'h-half' : 'h-full'")
-                table.w-100.code-table
-                    tr.code-tr.code-top
-                        td.tab-1.bg-white(ng-if="[1,2,3,4,5,6,7,8].includes(options.layout)")
-                            .code-input(style='height: 100%;')
-                                +codearea('tab1')
+        div(data-split-pane-divider data-width="0px")
+        
+        #editor-area(data-split-pane-component)
+            div(data-split-pane data-split-pane-properties="properties.horizonal")
+                div(data-split-pane-component data-height="100%")
+                    div(data-split-pane data-split-pane-properties="properties.vertical_1_1")
+                        div(data-split-pane-component data-width="34%")
+                            +codearea('tab1')
+                        div(data-split-pane-divider data-width="3px")
+                        div(data-split-pane-component data-width="66%")
+                            div(data-split-pane data-split-pane-properties="properties.vertical_1_2")
+                                div(data-split-pane-component data-width="50%")
+                                    +codearea('tab2')
+                                div(data-split-pane-divider data-width="3px")
+                                div(data-split-pane-component data-width="50%")
+                                    +codearea('tab3')
+                div(data-split-pane-divider data-height="3px")
+                div(data-split-pane-component data-height="0")
+                    +codearea('tab4')
+                    
 
-                        td.gutter.g-1(ng-if="[2,3,4,6,7,8].includes(options.layout)" target="tab-1" ng-drag="event.drag")
-                        td.tab-2.bg-white(ng-if="[2,3,4,6,7,8].includes(options.layout)")
-                            .code-input(style='height: 100%;')
-                                +codearea('tab2')
-
-                        td.gutter.g-2(ng-if="[3,4,7,8].includes(options.layout)" target="tab-2" ng-drag="event.drag")
-                        td.tab-3.bg-white(ng-if="[3,4,7,8].includes(options.layout)")
-                            .code-input(style='height: 100%;')
-                                +codearea('tab3')
-
-                        td.gutter.g-3(ng-if="[4,8].includes(options.layout)" target="tab-3" ng-drag="event.drag")
-                        td.tab-4.bg-white(ng-if="[4,8].includes(options.layout)")
-                            .code-input(style='height: 100%;')
-                                +codearea('tab4')
-
-                    tr.gutter.g-t(ng-if="[5,6,7,8].includes(options.layout)" target="tab-5" ng-drag="event.drag")
-                        td(colspan="{{(options.layout - 4) + (options.layout - 5)}}")
-
-                    tr.code-tr.code-bottom(ng-if="[5,6,7,8].includes(options.layout)")
-                        td.tab-5(colspan="{{(options.layout - 4) + (options.layout - 5)}}")
-                            .code-input(style='height: 100%;')
-                                +codearea('tab5')
-
-            .p-0.pt-2.bg-dark
-                table.w-100.code-tabs
-                    tr
-                        td.tab-5.text-right(ng-if="[5,6,7,8].includes(options.layout)")
-                            +codeselect('tab5')
-    
     #modal-delete.modal.fade(tabindex="-1")
         .modal-dialog.modal-sm(role='document')
             .modal-content
