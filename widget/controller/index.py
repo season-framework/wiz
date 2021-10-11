@@ -155,5 +155,8 @@ class Controller(season.interfaces.wiz.controller.base):
             self.db.insert(info)
             framework.response.redirect("editor/" + newid)
         
-        self.exportjs(app_id=app_id, category=category, theme=theme)
+        thememodule = None
+        if 'thememodule' in self.config:
+            thememodule = self.config.thememodule
+        self.exportjs(app_id=app_id, category=category, theme=theme, thememodule=thememodule)
         framework.response.render('editor.pug', category=category, theme=theme)

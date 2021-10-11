@@ -1,62 +1,111 @@
 import season
+import os
+import shutil
 
 class Controller(season.interfaces.wiz.controller.api):
 
     def __startup__(self, framework):
         super().__startup__(framework)
         if self.config.acl is not None: self.config.acl(framework)
-
-    def info(self, framework):
-        app_id = framework.request.segment.get(0, True)
-        db = framework.model('wiz', module='wiz')
-        info = db.get(id=app_id)
-        if info is None:
-            self.status(404)
-        self.status(200, info)
-
-    def tree(self, framework):
-        category = ['widget', 'page']
-        try:
-            category = self.config.category
-        except:
-            pass
-        db = framework.model('wiz', module='wiz')
-        for i in range(len(category)):
-            category[i]['data'] = db.select(fields="id,title", category=category[i]['id'], orderby="title ASC")
-        self.status(200, category)
-
-    def search(self, framework):
-        data = framework.request.query()
-        data['or'] = dict()
-        if 'text' in data:
-            if len(data['text']) > 0:
-                data['or']['title'] = data['text']
-                data['or']['namespace'] = data['text']
-                data['or']['app_id'] = data['text']
-                data['or']['category'] = data['text']
-                data['or']['html'] = data['text']
-                data['or']['js'] = data['text']
-                data['or']['css'] = data['text']
-                data['or']['api'] = data['text']
-                data['or']['kwargs'] = data['text']
-                
-            del data['text']
-        data['like'] = 'title,app_id,html,js,css,api,kwargs,namespace'
-        data['orderby'] = '`title` ASC'
-        rows = self.db.search(**data)
-        return self.status(200, rows)
-
-    def update(self, framework):
-        _info = framework.request.query()
-        if 'id' not in _info or _info['id'] == 'new':
-            self.status(400, "Bad Request")
-
-        info = self.db.get(id=_info['id'])
-        stat, _ = self.db.upsert(_info)
-        if stat: self.status(200, info['id'])
-        self.status(500, info['id'])
+        self.fs = framework.model("wizfs", module="wiz")
 
     def delete(self, framework):
-        app_id = framework.request.query('app_id', True)
-        self.db.delete(id=app_id)
-        return self.status(200, True)
+        path = framework.request.query("path", True)
+        name = framework.request.query("name", True)
+        fs = self.fs.use(path)
+        fs.delete(name)
+        self.status(200, True)
+
+    def rename(self, framework):
+        path = framework.request.query("path", True)
+        name = framework.request.query("name", True)
+        rename = framework.request.query("rename", True)
+        ftype = framework.request.query("type", "folder")
+
+        fs = self.fs.use(path)
+        if len(name) > 0:
+            if os.path.isfile(fs.abspath(name)) or os.path.isdir(fs.abspath(name)):
+                shutil.move(fs.abspath(name), fs.abspath(rename))
+                self.status(200, True)
+        
+        if len(rename) > 0:
+            newtarget = fs.abspath(rename)
+            if os.path.isfile(newtarget) or os.path.isdir(newtarget):
+                self.status(401, "Already Exists")
+
+            if ftype == 'file':
+                ext = os.path.splitext(rename)[1]
+                extmap = {}
+                extmap[".py"] = "python"
+                extmap[".js"] = "javascript"
+                extmap[".ts"] = "typescript"
+                extmap[".css"] = "css"
+                extmap[".less"] = "less"
+                extmap[".sass"] = "scss"
+                extmap[".scss"] = "scss"
+                extmap[".html"] = "html"
+                extmap[".pug"] = "pug"
+                if ext in extmap:
+                    fs.write(rename, "")
+                else:
+                    self.status(401, "Not Supported File Name")
+            else:
+                os.makedirs(newtarget)
+            self.status(200, True)
+
+        self.status(404, "Error")
+
+    def update(self, framework):
+        path = framework.request.query("path", True)
+        name = framework.request.query("name", True)
+        text = framework.request.query("text", True)
+        
+        fs = self.fs.use(path)
+        fs.write(name, text)
+
+        self.status(200, True)
+
+    def tree(self, framework):
+        path = framework.request.query("path", True)
+        name = framework.request.query("name", True)
+        _type = framework.request.query("type", "folder")
+        if path.startswith("/"):
+            path = path[1:]
+
+        if _type == 'file':
+            ext = os.path.splitext(name)[1]
+            extmap = {}
+            extmap[".py"] = "python"
+            extmap[".js"] = "javascript"
+            extmap[".ts"] = "typescript"
+            extmap[".css"] = "css"
+            extmap[".less"] = "less"
+            extmap[".sass"] = "scss"
+            extmap[".scss"] = "scss"
+            extmap[".html"] = "html"
+            extmap[".pug"] = "pug"
+            if ext in extmap:
+                fs = self.fs.use(path)
+                self.status(201, {"text": fs.read(name), "path": path, "name": name, "language": extmap[ext]})
+            else:
+                self.status(404, "not support file")
+
+        namespace = os.path.join(path, name)
+        fs = self.fs.use(namespace)
+        if os.path.isfile(fs.abspath(".")) == False and os.path.isdir(fs.abspath(".")) == False:
+            self.status(404, [])
+
+        files = fs.list()
+
+        rows = []
+        for file in files:
+            obj = dict()
+            obj["path"] = namespace
+            obj["name"] = file
+            obj["sub"] = []
+            obj["type"] = "folder"
+            if os.path.isfile(fs.abspath(file)):
+                obj["type"] = "file"
+            rows.append(obj)
+
+        self.status(200, rows)
