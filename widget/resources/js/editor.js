@@ -398,13 +398,23 @@ var content_controller = function ($scope, $timeout, $sce) {
             $(window).unbind();
             shortcutjs(window, {
                 'Alt Digit1': function (ev) {
+                    var pre = $scope.options.panel;
                     $scope.options.panel = 'component';
-                    $timeout();
+                    $timeout(function () {
+                        if (pre == 'sf') {
+                            $scope.event.layout($scope.options.layout);
+                        }
+                    });
                     ev.preventDefault();
                 },
                 'Alt Digit2': function (ev) {
+                    var pre = $scope.options.panel;
                     $scope.options.panel = 'tree';
-                    $timeout();
+                    $timeout(function () {
+                        if (pre == 'sf') {
+                            $scope.event.layout($scope.options.layout);
+                        }
+                    });
                     ev.preventDefault();
                 },
                 'Alt Digit3': function (ev) {
