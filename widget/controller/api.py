@@ -22,7 +22,7 @@ class Controller(season.interfaces.wiz.controller.api):
             pass
         db = framework.model('wiz', module='wiz')
         for i in range(len(category)):
-            category[i]['data'] = db.select(fields="id,title", category=category[i]['id'], orderby="title ASC")
+            category[i]['data'] = db.select(fields="id,title,namespace", category=category[i]['id'], orderby="title ASC")
         self.status(200, category)
 
     def search(self, framework):

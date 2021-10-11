@@ -6,7 +6,7 @@
 
 ```bash
 sf module import wiz --uri https://github.com/season-framework/season-flask-wiz
-pip install libsass
+pip install libsass dukpy
 ```
 
 ## Configuration

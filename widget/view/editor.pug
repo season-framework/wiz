@@ -73,8 +73,14 @@ mixin content()
 
                         .sub(ng-if="!options.panel_status[item.id]")
                             .sub-title(ng-repeat="sub in item.data" class="{{sub.id == info.id ? 'active' : ''}}" ng-click="event.treeitem(sub)")
-                                i.fas.fa-code.mr-2
-                                | {{sub.title}}
+                                table 
+                                    tr 
+                                        td.w-1(style="vertical-align: top;")
+                                            i.fas.fa-code.mr-2
+                                        td(style="line-height: 1;")
+                                            span {{sub.title}}
+                                            br
+                                            span.namespace {{sub.namespace}}
                             .mb-2
 
                 div(ng-show="options.panel != 'tree'")
