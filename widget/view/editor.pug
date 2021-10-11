@@ -224,8 +224,9 @@ mixin content()
         div(data-split-pane-divider data-width="0px")
         
         #editor-area(data-split-pane-component)
-            div(ng-if="framework.item" ng-show="options.panel == 'sf'" style="height: 100%;")
-                div(ng-model="framework.item.text" ui-monaco-opts="monaco_properties.framework" ui-monaco)
+            div(ng-if="options.panel == 'sf'" style="height: 100%;")
+                div(ng-if="framework.editorshow" style="height: 100%;")
+                    div(ng-model="framework.item.text" ui-monaco-opts="monaco_properties.framework" ui-monaco)
 
             div(data-split-pane data-split-pane-properties="properties.horizonal" ng-show="options.panel != 'sf'")
                 div(data-split-pane-component data-height="100%")

@@ -482,6 +482,7 @@ var content_controller = function ($scope, $timeout, $sce) {
 
         // framework editor
         $scope.framework = {};
+        $scope.framework.editorshow = false;
         $scope.monaco_properties.framework = $scope.monaco("python");
 
         $scope.framework.tree = [];
@@ -583,11 +584,14 @@ var content_controller = function ($scope, $timeout, $sce) {
 
             $.post('/wiz/widget/sf/tree', { path: item.path, name: item.name, type: item.type }, function (res) {
                 if (res.code == 201) {
-                    $scope.monaco_properties.framework = $scope.monaco(res.data.language);
-                    $scope.framework.item = null;
+                    $scope.monaco_properties.framework.language = res.data.language;
+                    $scope.framework.editorshow = false;
                     $timeout(function () {
                         $scope.framework.item = res.data;
-                        $timeout();
+                        $timeout(function () {
+                            $scope.framework.editorshow = true;
+                            $timeout();
+                        });
                     });
                     return cb(res);
                 }
