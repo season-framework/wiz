@@ -24,10 +24,8 @@ class Controller(season.interfaces.wiz.controller.api):
         for i in range(len(category)):
             c = category[i]
             if type(c) == str:
-                c = category[i]
-            else:
-                c = category[i]['id']
-            category[i]['data'] = db.select(fields="id,title,namespace", category=c, orderby="title ASC")
+                category[i] = {"id": category[i]}
+            category[i]['data'] = db.select(fields="id,title,namespace", category=category[i]['id'], orderby="title ASC")
         self.status(200, category)
 
     def search(self, framework):
