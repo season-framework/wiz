@@ -11,7 +11,7 @@ var content_controller = function ($scope, $timeout, $sce) {
 
     $scope.loaded = false;
     $scope.loading = true;
-    $scope.activetab = null;
+    $scope.activetab = 'tab1';
 
     // wiz
 
@@ -332,9 +332,11 @@ var content_controller = function ($scope, $timeout, $sce) {
     $.get(API.TREE, function (res) {
         $scope.tree = res.data;
         $scope.treedata = [];
+        $scope.treedataobj = []
         for (var i = 0; i < $scope.tree.length; i++) {
             for (var j = 0; j < $scope.tree[i].data.length; j++) {
                 $scope.treedata.push($scope.tree[i].data[j].id);
+                $scope.treedataobj.push($scope.tree[i].data[j]);
             }
         }
         $timeout();
@@ -450,6 +452,12 @@ var content_controller = function ($scope, $timeout, $sce) {
                     $(window).focus();
                     var appidx = $scope.treedata.indexOf(app_id) - 1;
                     if (appidx < 0) appidx = $scope.treedata.length - 1
+                    var cnt = 0;
+                    while ($scope.treedataobj[appidx].hide) {
+                        appidx = appidx - 1;
+                        cnt++;
+                        if (cnt > $scope.treedata.length) return;
+                    }
                     appidx = $scope.treedata[appidx];
                     $scope.event.treeitem({ id: appidx });
                 },
@@ -457,6 +465,12 @@ var content_controller = function ($scope, $timeout, $sce) {
                     ev.preventDefault();
                     $(window).focus();
                     var appidx = ($scope.treedata.indexOf(app_id) + 1) % $scope.treedata.length;
+                    var cnt = 0;
+                    while ($scope.treedataobj[appidx].hide) {
+                        appidx = (appidx + 1) % $scope.treedata.length;
+                        cnt++;
+                        if (cnt > $scope.treedata.length) return;
+                    }
                     appidx = $scope.treedata[appidx];
                     $scope.event.treeitem({ id: appidx });
                 },
