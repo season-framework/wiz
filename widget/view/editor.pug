@@ -101,6 +101,14 @@ mixin content()
                     .root-tree(ng-repeat="item in framework.tree" ng-include="'tree.html'")
 
                 .tree-container(ng-show="options.panel == 'tree'")
+                    .input-icon.mb-3
+                        input.form-control#search(type="text" placeholder="Search…" style="color: #545d6d !important;" ng-model="searchvalue" ng-change="event.search(searchvalue)")
+                        span.input-icon-addon
+                            svg.icon(xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round")
+                                path(stroke="none" d="M0 0h24v24H0z")
+                                circle(cx="10" cy="10" r="7")
+                                line(x1="21" y1="21" x2="15" y2="15")
+
                     .root-tree(ng-repeat="item in tree")
                         .root-title
                             .d-flex
@@ -111,7 +119,7 @@ mixin content()
                                     i.fas.fa-plus
 
                         .sub(ng-if="!options.panel_status[item.id]")
-                            .sub-title(ng-repeat="sub in item.data" class="{{sub.id == info.id ? 'active' : ''}}" ng-click="event.treeitem(sub)")
+                            .sub-title(ng-repeat="sub in item.data" class="{{sub.id == info.id ? 'active' : ''}}" ng-click="event.treeitem(sub)" ng-if="!sub.hide")
                                 table 
                                     tr 
                                         td.w-1(style="vertical-align: top;")
@@ -309,6 +317,12 @@ mixin content()
                                     i.fas.fa-plus.ml-1.mr-1
                                     button.btn.btn-sm.btn-dark J, K
                                 td.text-center Previous/Next wiz component
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Alt
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark F
+                                td.text-center Find Widgets (in widgets tab)
                             
                 .modal-footer
                     button.btn.btn-link.link-secondary.ml-auto(type='button' data-dismiss='modal') Cancel

@@ -40,18 +40,16 @@ mixin content()
                             span.badge.bg-green(ng-if="item.route")
                         td.text-center.width-2 {{item.created.substring(0,10)}}
             
-            .pagenation.text-center(ng-if="facet.pages.length > 0")
-                button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(1)")
-                    i.fas.fa-angle-double-left
-                button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(search.page*1-1)")
-                    i.fas.fa-angle-left
-
-                button.btn.btn-square.btn-sm(ng-repeat="page in facet.pages" ng-class="page == search.page ? 'btn-dark' : ''" ng-click="event.page(page)") {{page}}
-
-                button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(search.page*1+1)")
-                    i.fas.fa-angle-right
-                button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(facet.lastpage)")
-                    i.fas.fa-angle-double-right
+        .pagenation.text-center(ng-if="facet.pages.length > 0")
+            button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(1)")
+                i.fas.fa-angle-double-left
+            button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(search.page*1-1)")
+                i.fas.fa-angle-left
+            button.btn.btn-square.btn-sm.pt-1.pb-1(ng-repeat="page in facet.pages" ng-class="page == search.page ? 'btn-dark' : ''" ng-click="event.page(page)") {{page}}
+            button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(search.page*1+1)")
+                i.fas.fa-angle-right
+            button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(facet.lastpage)")
+                i.fas.fa-angle-double-right
                 
                        
 include wiz/theme/layout

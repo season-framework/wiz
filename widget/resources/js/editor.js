@@ -289,6 +289,26 @@ var content_controller = function ($scope, $timeout, $sce) {
         $('#modal-keymaps').modal('show');
     }
 
+    $scope.event.search = function (val) {
+        for (var i = 0; i < $scope.tree.length; i++) {
+            try {
+                for (var j = 0; j < $scope.tree[i].data.length; j++) {
+                    var ns = $scope.tree[i].data[j].namespace;
+                    var title = $scope.tree[i].data[j].title;
+                    $scope.tree[i].data[j].hide = true;
+                    if (ns.includes(val) || title.includes(val)) {
+                        $scope.tree[i].data[j].hide = false;
+                    }
+
+                    if (val.length == 0) {
+                        $scope.tree[i].data[j].hide = false;
+                    }
+                }
+            } catch (e) {
+            }
+        }
+    }
+
     // import from file
     $scope.event.select_file = function () {
         $('#import-file').click();
@@ -442,6 +462,10 @@ var content_controller = function ($scope, $timeout, $sce) {
                 },
                 'Ctrl KeyS': function (ev) {
                     $scope.event.save();
+                    ev.preventDefault();
+                },
+                'Alt KeyF': function (ev) {
+                    $('#search').focus();
                     ev.preventDefault();
                 },
                 'Alt KeyZ': function (ev) {
