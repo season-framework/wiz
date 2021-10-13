@@ -695,11 +695,10 @@ var content_controller = function ($scope, $timeout, $sce) {
     var socket = io("/wiz");
     socket.on("connect", function (data) {
     });
-    socket.on("disconnect", function (data) {
-    });
 
     socket.on("log", function (data) {
-        data = ansi_up.ansi_to_html(data).replace(/\n/gim, '<br>');
+        data = data.replace(/ /gim, "__SEASONWIZPADDING__");
+        data = ansi_up.ansi_to_html(data).replace(/\n/gim, '<br>').replace(/__SEASONWIZPADDING__/gim, '<div style="width: 6px; display: inline-block;"></div>');
         $scope.debuglog = $scope.debuglog + data;
         $timeout(function () {
             var element = $('.debug-messages')[0];

@@ -31,7 +31,7 @@ mixin codearea(tab)
                         td(style="text-align: center; vertical-align: middle;")
                             .spinner-grow.text-dark(style="width: 120px; height: 120px;")
             - if tab == "tab4"
-                .debug-messages(ng-if="options.tab.{$tab$}_val == 'debug'" style="overflow: auto; max-width: none; width: 100%; height: 100%; background: #000; color: #fff; padding: 8px;" ng-bind-html="trustAsHtml(debuglog)")
+                .debug-messages(ng-if="options.tab.{$tab$}_val == 'debug'" style="overflow: auto; max-width: none; width: 100%; height: 100%; background: #000; color: #fff; padding: 8px; line-height: 1;" ng-bind-html="trustAsHtml(debuglog)")
             div(ng-if="activetab != '{$tab$}' && ['preview'].includes(options.tab.{$tab$}_val) == false" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: rgba(0,0,0,.05); z-index: 9999;")
 
 mixin content()

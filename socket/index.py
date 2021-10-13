@@ -2,15 +2,14 @@ import sys
 
 class Controller:
     def __init__(self, framework):
-        # syslog capture
         _stdout = sys.stdout
         class stdout():
             def __init__(self, socketio):
                 self.socketio = socketio
                 
             def write(self, string):
-                self.socketio.emit("log", string, namespace="/wiz", broadcast=True)
                 _stdout.write(string)
+                self.socketio.emit("log", string, namespace="/wiz", broadcast=True)
 
             def flush(self):
                 _stdout.flush()
