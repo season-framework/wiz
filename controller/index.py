@@ -31,10 +31,16 @@ class Controller(season.interfaces.wiz.controller.api):
         framework.response.status = self.status
         app_id = framework.request.segment.get(0, True)
         fnname = framework.request.segment.get(1, True)
-        wiz = self.db.get(id=app_id, fields="api")
+        wiz = self.db.get(id=app_id, fields="api,namespace")
         if wiz is None: self.status(404)
         view_api = wiz['api']
         if view_api is None: self.status(404)
+
+        _prelogger = framework.log
+        def _logger(*args):
+            _prelogger(f"[{wiz['namespace']}]", *args)
+        framework.log = _logger
+
         fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner', 'framework': framework}
         exec(compile(view_api, 'season.Spawner', 'exec'), fn)
         if '__startup__' in fn: fn['__startup__'](framework)

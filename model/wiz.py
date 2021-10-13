@@ -229,6 +229,6 @@ class Model(season.core.interfaces.model.MySQL):
         if item['properties']['js'] == 'typescript':
             js = dukpy.typescript_compile(js)
             js = str(js)
-
+        
         self.cache.wiz[ns] = (ns, id, html, css, js, item['api'], fn)
         return self._view(ns, id, html, css, js, **kwargs), item['api']
