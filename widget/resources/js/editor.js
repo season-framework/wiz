@@ -271,12 +271,12 @@ var content_controller = function ($scope, $timeout, $sce) {
             return;
         }
 
-        $scope.info.html = $scope.info.html.replace(/\t/gim, '    ');
-        $scope.info.css = $scope.info.css.replace(/\t/gim, '    ');
-        $scope.info.js = $scope.info.js.replace(/\t/gim, '    ');
-        $scope.info.api = $scope.info.api.replace(/\t/gim, '    ');
-        $scope.info.kwargs = $scope.info.kwargs.replace(/\t/gim, '    ');
-        $scope.info.socketio = $scope.info.socketio.replace(/\t/gim, '    ');
+        if ($scope.info.html) $scope.info.html = $scope.info.html.replace(/\t/gim, '    ');
+        if ($scope.info.css) $scope.info.css = $scope.info.css.replace(/\t/gim, '    ');
+        if ($scope.info.js) $scope.info.js = $scope.info.js.replace(/\t/gim, '    ');
+        if ($scope.info.api) $scope.info.api = $scope.info.api.replace(/\t/gim, '    ');
+        if ($scope.info.kwargs) $scope.info.kwargs = $scope.info.kwargs.replace(/\t/gim, '    ');
+        if ($scope.info.socketio) $scope.info.socketio = $scope.info.socketio.replace(/\t/gim, '    ');
 
         var data = angular.copy($scope.info);
         data.properties = JSON.stringify(data.properties);
