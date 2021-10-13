@@ -1,5 +1,6 @@
 var content_controller = function ($scope, $timeout, $sce) {
     _builder($scope, $timeout);
+    $scope.trustAsHtml = $sce.trustAsHtml;
     $scope.event = {};
     $scope.orgappid = app_id;
 
@@ -14,7 +15,6 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.activetab = 'tab1';
 
     // wiz
-
     $scope.event.active = function (tab) {
         $scope.activetab = tab;
         $timeout();
@@ -61,6 +61,7 @@ var content_controller = function ($scope, $timeout, $sce) {
         $scope.options.tab[targettab + '_val'] = view;
         if (view == 'preview') { $timeout(); return $scope.event.iframe() }
         if (view == 'iframe') { $timeout(); return };
+        if (view == 'debug') { $timeout(); return };
 
         var language = $scope.monaco_properties.tab[targettab].language = langselect(targettab);
         if ($scope.editors[targettab]) {
@@ -81,6 +82,7 @@ var content_controller = function ($scope, $timeout, $sce) {
         $scope.options.tab['tab1_val'] = 'kwargs';
         $scope.options.tab['tab2_val'] = 'html';
         $scope.options.tab['tab3_val'] = 'preview';
+        $scope.options.tab['tab4_val'] = 'debug';
         $scope.options.infotab = 1;
         $scope.options.sidemenu = true;
     }
@@ -126,18 +128,20 @@ var content_controller = function ($scope, $timeout, $sce) {
         } else if (layout == 3) {
             $scope.accessable_tab = ['tab1', 'tab2', 'tab3'];
         } else if (layout == 4) {
-            $scope.accessable_tab = ['tab1', 'tab4'];
+            $scope.accessable_tab = ['tab1'];
         } else if (layout == 5) {
-            $scope.accessable_tab = ['tab1', 'tab2', 'tab4'];
+            $scope.accessable_tab = ['tab1', 'tab2'];
         } else if (layout == 6) {
-            $scope.accessable_tab = ['tab1', 'tab2', 'tab3', 'tab4'];
+            $scope.accessable_tab = ['tab1', 'tab2', 'tab3'];
         }
 
         var _height = $('#editor-area').height();
         var _width = $('#editor-area').width();
 
         function _horizonal_split() {
-            $scope.properties.horizonal.lastComponentSize = Math.round(_height / 2);
+            var h = Math.round(_height / 3);
+            if (h > 400) h = 400;
+            $scope.properties.horizonal.lastComponentSize = h;
         }
 
         function _horizonal_top() {
@@ -379,7 +383,6 @@ var content_controller = function ($scope, $timeout, $sce) {
         $scope.monaco_properties.tab.tab1 = $scope.monaco(langselect('tab1'));
         $scope.monaco_properties.tab.tab2 = $scope.monaco(langselect('tab2'));
         $scope.monaco_properties.tab.tab3 = $scope.monaco(langselect('tab3'));
-        $scope.monaco_properties.tab.tab4 = $scope.monaco(langselect('tab4'));
 
         function bindonload(targettab) {
             $scope.monaco_properties.tab[targettab].onLoad = function (editor) {
@@ -392,18 +395,30 @@ var content_controller = function ($scope, $timeout, $sce) {
                     }
 
                     $scope.event.change(targettab, prev);
+                    shortcuts();
                 });
 
                 editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.KEY_S, function () {
                     var next = tabs[(tabs.indexOf($scope.options.tab[targettab + "_val"]) + 1) % tabs.length];
                     $scope.event.change(targettab, next);
+                    shortcuts();
+                });
+
+                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, function () {
+                    $scope.event.save();
+                    shortcuts();
+                });
+
+                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_K, function () {
+                    $scope.event.clear_debug();
+                    shortcuts();
                 });
 
                 $scope.editors[targettab] = editor;
             }
         }
 
-        for (var i = 1; i <= 4; i++)
+        for (var i = 1; i <= 3; i++)
             bindonload('tab' + i);
 
         $timeout(function () {
@@ -415,7 +430,6 @@ var content_controller = function ($scope, $timeout, $sce) {
         }, 1000);
 
         // shortcut
-
         function shortcuts() {
             $(window).unbind();
             shortcutjs(window, {
@@ -476,6 +490,10 @@ var content_controller = function ($scope, $timeout, $sce) {
                 },
                 'Ctrl KeyS': function (ev) {
                     $scope.event.save();
+                    ev.preventDefault();
+                },
+                'Ctrl KeyK': function (ev) {
+                    $scope.event.clear_debug();
                     ev.preventDefault();
                 },
                 'Alt KeyF': function (ev) {
@@ -650,7 +668,7 @@ var content_controller = function ($scope, $timeout, $sce) {
                     if (a.type == 'folder' && b.type != 'folder') return -1;
                     if (a.type != 'folder' && b.type == 'folder') return 1;
                     return a.name.localeCompare(b.name);
-                })
+                });
                 item.sub = res.data;
 
                 for (var i = 0; i < item.sub.length; i++) {
@@ -661,5 +679,29 @@ var content_controller = function ($scope, $timeout, $sce) {
                 cb(res);
             });
         }
+    });
+
+    $scope.debuglog = "";
+
+    $scope.event.clear_debug = function () {
+        $scope.debuglog = "";
+        $timeout();
+    }
+
+    var ansi_up = new AnsiUp();
+    var socket = io("/wiz");
+    socket.on("connect", function (data) {
+    });
+    socket.on("disconnect", function (data) {
+    });
+
+    socket.on("log", function (data) {
+        data = ansi_up.ansi_to_html(data).replace(/\n/gim, '<br>');
+        $scope.debuglog = $scope.debuglog + data;
+        $timeout(function () {
+            var element = $('.debug-messages')[0];
+            if (!element) return;
+            element.scrollTop = element.scrollHeight - element.clientHeight;
+        });
     });
 };

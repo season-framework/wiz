@@ -4,7 +4,6 @@ import base64
 import lesscpy
 import sass
 import dukpy
-
 from six import StringIO
 import json
 import os
@@ -62,7 +61,6 @@ class Model(season.core.interfaces.model.MySQL):
     def route(self):
         framework = self.framework
         routes = self.routes()
-
         app_id = None
         theme = None
         requri = framework.request.uri()
@@ -70,9 +68,9 @@ class Model(season.core.interfaces.model.MySQL):
         app_id, theme, segment = routes(requri)
         if app_id is None:
             return
-
-        framework.request.segment = season.stdClass(segment)
         
+        framework.request.segment = season.stdClass(segment)
+
         view = self.render(app_id)
         config = framework.config.load("wiz")
         if 'default' not in config.theme:

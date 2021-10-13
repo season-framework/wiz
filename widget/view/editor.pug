@@ -1,18 +1,27 @@
 mixin codearea(tab)
     div(style="overflow: hidden; height: 100%; width: 100%;" ng-if="loaded" ng-cloak ng-click="event.active('{$tab$}')")
         .code-select.bg-dark.d-flex(style="margin-top: -2px;")
-            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'kwargs')" ng-class="options.tab.{$tab$}_val == 'kwargs' ? 'btn-white' : 'btn-dark'") Controller
-            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'api')" ng-class="options.tab.{$tab$}_val == 'api' ? 'btn-white' : 'btn-dark'") API
-            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'html')" ng-class="options.tab.{$tab$}_val == 'html' ? 'btn-white' : 'btn-dark'") PUG
-            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'js')" ng-class="options.tab.{$tab$}_val == 'js' ? 'btn-white' : 'btn-dark'") JS
-            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'css')" ng-class="options.tab.{$tab$}_val == 'css' ? 'btn-white' : 'btn-dark'") CSS
-            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'preview')" ng-class="options.tab.{$tab$}_val == 'preview' ? 'btn-white' : 'btn-dark'") Preview
+            - if tab != "tab4"
+                a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'kwargs')" ng-class="options.tab.{$tab$}_val == 'kwargs' ? 'btn-white' : 'btn-dark'") Controller
+                a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'api')" ng-class="options.tab.{$tab$}_val == 'api' ? 'btn-white' : 'btn-dark'") API
+                a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'html')" ng-class="options.tab.{$tab$}_val == 'html' ? 'btn-white' : 'btn-dark'") PUG
+                a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'js')" ng-class="options.tab.{$tab$}_val == 'js' ? 'btn-white' : 'btn-dark'") JS
+                a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'css')" ng-class="options.tab.{$tab$}_val == 'css' ? 'btn-white' : 'btn-dark'") CSS
+                a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'preview')" ng-class="options.tab.{$tab$}_val == 'preview' ? 'btn-white' : 'btn-dark'") Preview
             a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'readme')" ng-class="options.tab.{$tab$}_val == 'readme' ? 'btn-white' : 'btn-dark'") README
-            select.form-select.form-select-sm.m-1.ml-auto(style="width: 120px;" ng-model="info.properties[options.tab.{$tab$}_val]" ng-if="codetypes[options.tab.{$tab$}_val].length > 0")
-                option(ng-repeat="code in codetypes[options.tab.{$tab$}_val]" value="{{code}}") {{code}}
+            - if tab == "tab4"
+                a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'debug')" ng-class="options.tab.{$tab$}_val == 'debug' ? 'btn-white' : 'btn-dark'") DEBUG
+
+            - if tab != "tab4"
+                select.form-select.form-select-sm.m-1.ml-auto(style="width: 120px;" ng-model="info.properties[options.tab.{$tab$}_val]" ng-if="codetypes[options.tab.{$tab$}_val].length > 0")
+                    option(ng-repeat="code in codetypes[options.tab.{$tab$}_val]" value="{{code}}") {{code}}
+            
+            - if tab == "tab4"
+                a.btn.btn-square.btn-dark.btn-sm.p-2.ml-auto(href="" ng-if="options.tab.{$tab$}_val == 'debug'" ng-click="event.clear_debug()") CLEAR
 
         div(style="height: calc(100% - 36px);")
-            div(ng-show="['preview', 'readme'].includes(options.tab.{$tab$}_val) == false" ng-model="info[options.tab.{$tab$}_val]" ui-monaco-opts="monaco_properties.tab['{$tab$}']" ui-monaco)
+            - if tab != "tab4"
+                div(ng-show="['preview', 'readme'].includes(options.tab.{$tab$}_val) == false" ng-model="info[options.tab.{$tab$}_val]" ui-monaco-opts="monaco_properties.tab['{$tab$}']" ui-monaco)
             div(ng-show="options.tab.{$tab$}_val == 'readme'" ng-model="info.content" ui-tinymce-opts="tinymce_opt" ui-tinymce)
             .code-preview(ng-if="options.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: 100%;")
                 iframe.preview(style="height: 100%;" ng-show="!iframe_load")
@@ -20,6 +29,8 @@ mixin codearea(tab)
                     tr 
                         td(style="text-align: center; vertical-align: middle;")
                             .spinner-grow.text-dark(style="width: 120px; height: 120px;")
+            - if tab == "tab4"
+                .debug-messages(ng-if="options.tab.{$tab$}_val == 'debug'" style="overflow: auto; max-width: none; width: 100%; height: 100%; background: #000; color: #fff; padding: 8px;" ng-bind-html="trustAsHtml(debuglog)")
             div(ng-if="activetab != '{$tab$}' && ['preview'].includes(options.tab.{$tab$}_val) == false" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: rgba(0,0,0,.05); z-index: 9999;")
 
 mixin content()

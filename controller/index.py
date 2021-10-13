@@ -2,7 +2,6 @@ import season
 import json
 import datetime
 import urllib
-import time
 
 class Controller(season.interfaces.wiz.controller.api):
 

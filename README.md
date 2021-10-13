@@ -47,8 +47,28 @@ CREATE TABLE `widget` (
 import season
 config = season.stdClass()
 
-# ...
+# set build config (socketio)
+def build(app, socketio):
+    app.debug = True
+    app.secret_key = "portal.season.co.kr.c9d9ciDd9cav"
+    
+    _stdout = sys.stdout
 
+    class stdout():
+        def __init__(self, socketio):
+            self.socketio = socketio
+            
+        def write(self, string):
+            self.socketio.emit("log", string, namespace="/wiz", broadcast=True)
+            _stdout.write(string)
+
+        def flush(self):
+            _stdout.flush()
+
+    sys.stdout = stdout(socketio)
+config.build = build
+
+# set jinja variable
 config.jinja_variable_start_string = "{$"
 config.jinja_variable_end_string = "$}"
 ```
