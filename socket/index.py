@@ -1,13 +1,5 @@
 import sys
 
-class ControllerSub:
-    def __startup__(self, framework):
-        framework.socket.emit("startup /wiz/testme socket")
-        framework.session = framework.lib.session.to_dict()
-
-    def response(self, framework, data):
-        framework.socket.emit("hello world")
-
 class Controller:
     def __init__(self, framework):
         # syslog capture
@@ -25,13 +17,8 @@ class Controller:
 
         sys.stdout = stdout(framework.socketio)
 
-        # set namespaces
-        self.namespaces = {}
-        self.namespaces["testme"] = ControllerSub()
-
     def __startup__(self, framework):
-        framework.socket.emit("startup /wiz socket")
-        framework.session = framework.lib.session.to_dict()
+        pass
 
     def response(self, framework, data):
-        framework.socket.emit("hello world")
+        pass

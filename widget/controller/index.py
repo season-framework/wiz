@@ -1,6 +1,24 @@
 import season
 import datetime
 
+WIZ_SOCKETAPI = """class Controller:
+    def __init__(self, framework):
+        # init something
+        pass
+
+    def __startup__(self, framework):
+        # localized socket emit
+        framework.socket.emit("startup /wiz socket")
+
+        # global socket emit
+        framework.socketio.emit("event name", "data", namespace="", to="")
+
+        # use framework
+        framework.session = framework.lib.session.to_dict()
+
+    def response(self, framework, data):
+        framework.socket.emit("hello world")"""
+
 WIZ_JS = """var wiz_controller = function ($sce, $scope, $timeout) {
     // call api
     wiz.API.function('status', {}, function(res) {
@@ -30,6 +48,20 @@ WIZ_JS = """var wiz_controller = function ($sce, $scope, $timeout) {
             $scope.data = data;
             $timeout();
         });
+    */
+
+    /*
+    var socket = wiz.socket.get();    
+    socket.on("connect", function (data) {
+        socket.emit("response", "hello");
+    });
+
+    socket.on("disconnect", function (data) {
+    });
+
+    socket.on("response", function (data) {
+        console.log("response", data);
+    });
     */
 }
 """
@@ -152,6 +184,7 @@ class Controller(season.interfaces.wiz.controller.base):
             info["js"] = WIZ_JS
             info["css"] = ""
             info["api"] = WIZ_API
+            info["socketio"] = WIZ_SOCKETAPI
             self.db.insert(info)
             framework.response.redirect("editor/" + newid)
         

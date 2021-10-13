@@ -25,6 +25,7 @@ CREATE TABLE `widget` (
   `js` longtext,
   `css` longtext,
   `api` longtext,
+  `socketio` longtext,
   `created` datetime NOT NULL,
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `kwargs` longtext,

@@ -144,7 +144,8 @@ class Model(season.core.interfaces.model.MySQL):
             data['properties'] = {"html": "pug", "css": "less", "js": "javascript"}
         return data
 
-    def _view(self, namespace, id, html, css, js, **kwargs):
+    def _view(self, item, namespace, id, html, css, js, **kwargs):
+        namespace = item['namespace']
         framework = self.framework
         kwargs['query'] = framework.request.query()
         fn_id = id + '_' + self.framework.lib.util.randomstring(12)
@@ -177,10 +178,10 @@ class Model(season.core.interfaces.model.MySQL):
         if len(args) > 1: ns = args[1]
 
         if ns in self.cache.wiz and self.updateview==False:
-            namespace, id, html, css, js, api, fn = self.cache.wiz[ns]
+            item, namespace, id, html, css, js, api, fn = self.cache.wiz[ns]
             _kwargs = fn['get'](self.framework, kwargs)
             kwargs = _kwargs
-            return self._view(namespace, id, html, css, js, **kwargs), api
+            return self._view(item, namespace, id, html, css, js, **kwargs), api
 
         item = self.get(id=id)
         if item is None:
@@ -230,5 +231,5 @@ class Model(season.core.interfaces.model.MySQL):
             js = dukpy.typescript_compile(js)
             js = str(js)
         
-        self.cache.wiz[ns] = (ns, id, html, css, js, item['api'], fn)
-        return self._view(ns, id, html, css, js, **kwargs), item['api']
+        self.cache.wiz[ns] = (item, ns, id, html, css, js, item['api'], fn)
+        return self._view(item, ns, id, html, css, js, **kwargs), item['api']

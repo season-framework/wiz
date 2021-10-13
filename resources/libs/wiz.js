@@ -8,6 +8,18 @@ if (!window.season_wiz) {
             wiz.id = app_id;
             wiz.namespace = namespace;
 
+            wiz.socket = {}
+            wiz.socket.active = false;
+
+            if (window.io) {
+                wiz.socket.active = true;
+                wiz.socket.get = function (socketnamespace) {
+                    var socketns = "/wiz/api/" + wiz.namespace;
+                    if (socketnamespace) socketns = "/wiz/api/" + socketnamespace;
+                    return window.io(socketns);
+                }
+            }
+
             wiz.API = {
                 url: function (fnname) {
                     return '/wiz/api/' + app_id + '/' + fnname;

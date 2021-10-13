@@ -4,6 +4,7 @@ mixin codearea(tab)
             - if tab != "tab4"
                 a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'kwargs')" ng-class="options.tab.{$tab$}_val == 'kwargs' ? 'btn-white' : 'btn-dark'") Controller
                 a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'api')" ng-class="options.tab.{$tab$}_val == 'api' ? 'btn-white' : 'btn-dark'") API
+                a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'socketio')" ng-class="options.tab.{$tab$}_val == 'socketio' ? 'btn-white' : 'btn-dark'") Socket API
                 a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'html')" ng-class="options.tab.{$tab$}_val == 'html' ? 'btn-white' : 'btn-dark'") PUG
                 a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'js')" ng-class="options.tab.{$tab$}_val == 'js' ? 'btn-white' : 'btn-dark'") JS
                 a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'css')" ng-class="options.tab.{$tab$}_val == 'css' ? 'btn-white' : 'btn-dark'") CSS

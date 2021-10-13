@@ -4,7 +4,7 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.event = {};
     $scope.orgappid = app_id;
 
-    var tabs = ['kwargs', 'api', 'html', 'js', 'css'];
+    var tabs = ['kwargs', 'api', 'socketio', 'html', 'js', 'css'];
 
     $scope.status = {};
     $scope.editors = {};
@@ -46,6 +46,7 @@ var content_controller = function ($scope, $timeout, $sce) {
         var obj = $scope.options.tab[tab + '_val'];
         if (obj == 'kwargs') return 'python';
         if (obj == 'api') return 'python';
+        if (obj == 'socketio') return 'python';
         if ($scope.info.properties[$scope.options.tab[tab + '_val']]) {
             return $scope.info.properties[$scope.options.tab[tab + '_val']];
         }
@@ -275,6 +276,7 @@ var content_controller = function ($scope, $timeout, $sce) {
         $scope.info.js = $scope.info.js.replace(/\t/gim, '    ');
         $scope.info.api = $scope.info.api.replace(/\t/gim, '    ');
         $scope.info.kwargs = $scope.info.kwargs.replace(/\t/gim, '    ');
+        $scope.info.socketio = $scope.info.socketio.replace(/\t/gim, '    ');
 
         var data = angular.copy($scope.info);
         data.properties = JSON.stringify(data.properties);
@@ -328,6 +330,7 @@ var content_controller = function ($scope, $timeout, $sce) {
             $scope.info.css = json.css;
             $scope.info.api = json.api;
             $scope.info.kwargs = json.kwargs;
+            $scope.info.socketio = json.socketio;
             $scope.event.save();
         };
         fr.readAsText($('#import-file').prop('files')[0]);

@@ -1,4 +1,5 @@
 import season
+import datetime
 
 class Controller(season.interfaces.wiz.controller.api):
 
@@ -56,6 +57,11 @@ class Controller(season.interfaces.wiz.controller.api):
 
         info = self.db.get(id=_info['id'])
         stat, _ = self.db.upsert(_info)
+
+        if info['socketio'] != _info['socketio']:
+            fs = framework.model("wizfs", module="wiz")
+            fs.write(".timestamp", datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+
         if stat: self.status(200, info['id'])
         self.status(500, info['id'])
 
