@@ -165,8 +165,15 @@ class Model(season.core.interfaces.model.MySQL):
         kwargs = base64.b64encode(kwargs)
         kwargs = kwargs.decode('ascii')
 
+        reloaderjs = ""
+        try:
+            config = framework.config.load("wiz")
+            if config.devtools:
+                reloaderjs = '<script>try { var socket = io("/wiz/devtools/reload/' + id + '"); socket.on("reload", function (data) { location.reload() })} catch(e) {}</script>'
+        except:
+            pass
         view = html
-        view = view + f"\n<script src='/resources/wiz/libs/wiz.js'></script>\n<script type='text/javascript'>\nfunction __init_{fn_id}() {o} var wiz = season_wiz.load('{id}', '{fn_id}', '{namespace}');\n\n\nwiz.options = JSON.parse(atob('{kwargs}'));\n\n\n{js};\ntry {o} app.controller('wiz-{fn_id}', wiz_controller); {e} catch (e) {o} app.controller('wiz-{fn_id}', function() {o} {e} ); {e} {e}; __init_{fn_id}();\n</script>"
+        view = view + f"\n{reloaderjs}<script src='/resources/wiz/libs/wiz.js'></script>\n<script type='text/javascript'>\nfunction __init_{fn_id}() {o} var wiz = season_wiz.load('{id}', '{fn_id}', '{namespace}');\n\n\nwiz.options = JSON.parse(atob('{kwargs}'));\n\n\n{js};\ntry {o} app.controller('wiz-{fn_id}', wiz_controller); {e} catch (e) {o} app.controller('wiz-{fn_id}', function() {o} {e} ); {e} {e}; __init_{fn_id}();\n</script>"
         view = view + f"\n<style>{css}</style>"
         return view
 
