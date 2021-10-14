@@ -62,6 +62,15 @@ class Controller(season.interfaces.wiz.controller.api):
             fs = framework.model("wizfs", module="wiz")
             fs.write(".timestamp", datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
 
+        try:
+            viewuri = info["viewuri"]
+            if viewuri[-1] == "/":
+                viewuri = viewuri[:-1]
+            viewuri = "/wiz/devtools" + viewuri
+            framework.socketio.emit("reload", True, namespace=viewuri)
+        except:
+            pass
+
         if stat: self.status(200, info['id'])
         self.status(500, info['id'])
 
