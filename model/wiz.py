@@ -145,11 +145,9 @@ class Model(season.core.interfaces.model.MySQL):
         return data
 
     def _view(self, item, namespace, id, html, css, js, **kwargs):
-        namespace = item['namespace']
         framework = self.framework
         kwargs['query'] = framework.request.query()
         fn_id = id + '_' + self.framework.lib.util.randomstring(12)
-
         html = html.split(">")
         if len(html) > 1:
             html = html[0] + f" id='wiz-{id}' ng-controller='wiz-{fn_id}'>" + ">".join(html[1:])
@@ -179,13 +177,12 @@ class Model(season.core.interfaces.model.MySQL):
 
     def view(self, *args, **kwargs):
         id = args[0]
+
         namespace = id + ""
+        if len(args) > 1: namespace = args[1]
 
-        ns = namespace
-        if len(args) > 1: ns = args[1]
-
-        if ns in self.cache.wiz and self.updateview==False:
-            item, namespace, id, html, css, js, api, fn = self.cache.wiz[ns]
+        if namespace in self.cache.wiz and self.updateview==False:
+            item, namespace, id, html, css, js, api, fn = self.cache.wiz[namespace]
             _kwargs = fn['get'](self.framework, kwargs)
             kwargs = _kwargs
             return self._view(item, namespace, id, html, css, js, **kwargs), api
@@ -237,6 +234,6 @@ class Model(season.core.interfaces.model.MySQL):
         if item['properties']['js'] == 'typescript':
             js = dukpy.typescript_compile(js)
             js = str(js)
-        
-        self.cache.wiz[ns] = (item, ns, id, html, css, js, item['api'], fn)
-        return self._view(item, ns, id, html, css, js, **kwargs), item['api']
+
+        self.cache.wiz[namespace] = (item, namespace, id, html, css, js, item['api'], fn)
+        return self._view(item, namespace, id, html, css, js, **kwargs), item['api']
