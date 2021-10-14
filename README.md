@@ -180,3 +180,19 @@ mixin content()
 include theme/layout
 +layout
 ```
+
+## Dev Tools
+
+- global javascript
+
+```js
+var namespace = window.location.pathname;
+if (namespace.endsWith("/") && namespace.length > 1) {
+    namespace = namespace.substring(0, namespace.length - 1);
+}
+namespace = "/wiz/devtools" + namespace;
+var socket = io(namespace);
+socket.on("reload", function (data) {
+    location.reload();
+});
+```
