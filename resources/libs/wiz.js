@@ -39,8 +39,22 @@ if (!window.season_wiz) {
                     }
 
                     $.ajax(ajax).always(function (a, b, c) {
-                        if (a.log && API && API.logger) API.logger(a.code, a.log);
                         cb(a, b, c);
+                    });
+                },
+                async: (fnname, data, opts = {}) => {
+                    const _url = wiz.API.url(fnname);
+                    let ajax = {
+                        url: _url,
+                        type: "POST",
+                        data: data,
+                        ...opts,
+                    };
+
+                    return new Promise((resolve) => {
+                        $.ajax(ajax).always(function (a, b, c) {
+                            resolve(a, b, c);
+                        });
                     });
                 }
             };
