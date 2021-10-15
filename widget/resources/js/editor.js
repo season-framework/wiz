@@ -287,7 +287,7 @@ var content_controller = function ($scope, $timeout, $sce) {
 
         $.post(API.UPDATE, data, function (res) {
             $scope.event.iframe();
-            
+
             for (var i = 0; i < tabs.length; i++) {
                 var tab = tabs[i];
                 socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });

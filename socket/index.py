@@ -75,6 +75,7 @@ class Controller:
         self.room_connection[room][sid] = user_id
         
         msg = self.__status__(framework, room)
+        msg['join'] = room
         framework.socket.emit("message", msg, to=room, broadcast=True)
 
     def edit(self, framework, data):
