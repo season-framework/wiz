@@ -11,6 +11,30 @@ import pypugjs
 import datetime
 from werkzeug.routing import Map, Rule
 
+RELOADJS = """<script>
+function wiz_devtools() {
+    try {
+        var socket = io("/wiz/devtools/reload/__ID__");
+        socket._reload = false;
+        socket.on("connect", function () {
+            if (socket._reload) {
+                location.reload();
+            }
+        });
+        socket.on("reload", function (data) {
+            if (data) {
+                socket._reload = true;
+                return;
+            }
+            location.reload()
+        })
+    } catch (e) {
+    }
+}
+wiz_devtools();
+</script>
+"""
+
 class Model(season.core.interfaces.model.MySQL):
     def __init__(self, framework):
         super().__init__(framework)
@@ -167,7 +191,7 @@ class Model(season.core.interfaces.model.MySQL):
         try:
             config = framework.config.load("wiz")
             if config.devtools:
-                reloaderjs = '<script>try { var socket = io("/wiz/devtools/reload/' + id + '"); socket.on("reload", function (data) { location.reload() })} catch(e) {}</script>'
+                reloaderjs = RELOADJS.replace("__ID__", id)
         except:
             pass
         view = html

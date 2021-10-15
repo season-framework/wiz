@@ -58,15 +58,22 @@ class Controller(season.interfaces.wiz.controller.api):
         info = self.db.get(id=_info['id'])
         stat, _ = self.db.upsert(_info)
 
-        if info['socketio'] != _info['socketio']:
-            fs = framework.model("wizfs", module="wiz")
-            fs.write(".timestamp", datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+        try:
+            if info['socketio'] != _info['socketio']:
+                fs = framework.model("wizfs", module="wiz")
+                fs.write(".timestamp", datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+        except:
+            pass
 
         try:
-            config = framework.config.load("wiz")
-            if config.devtools:
-                namespace = "/wiz/devtools/reload/" + info["id"]
-                framework.socketio.emit("reload", True, namespace=namespace, broadcast=True)
+            if info['html'] != _info['html'] or info['js'] != _info['js'] or info['css'] != _info['css'] or info['kwargs'] != _info['kwargs'] or info['socketio'] != _info['socketio']:
+                config = framework.config.load("wiz")
+                if config.devtools:
+                    namespace = "/wiz/devtools/reload/" + info["id"]
+                    if info['socketio'] != _info['socketio']:
+                        framework.socketio.emit("reload", True, namespace=namespace, broadcast=True)
+                    else:
+                        framework.socketio.emit("reload", False, namespace=namespace, broadcast=True)
         except:
             pass
 
