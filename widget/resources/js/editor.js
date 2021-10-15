@@ -13,6 +13,7 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.loaded = false;
     $scope.loading = true;
     $scope.activetab = 'tab1';
+    $scope.updating = true;
 
     // wiz
     $scope.event.active = function (tab) {
@@ -21,6 +22,7 @@ var content_controller = function ($scope, $timeout, $sce) {
     }
 
     $scope.event.treeitem = function (item) {
+        $scope.updating = true;
         app_id = item.id;
         $scope.loading = false;
         $timeout();
@@ -38,7 +40,9 @@ var content_controller = function ($scope, $timeout, $sce) {
             $scope.event.iframe();
             $scope.loading = true;
             $scope.editors[$scope.activetab].focus();
-            $timeout();
+            $timeout(function () {
+                $scope.updating = false;
+            }, 100);
         });
     }
 
@@ -283,6 +287,12 @@ var content_controller = function ($scope, $timeout, $sce) {
 
         $.post(API.UPDATE, data, function (res) {
             $scope.event.iframe();
+            
+            for (var i = 0; i < tabs.length; i++) {
+                var tab = tabs[i];
+                socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
+            }
+
             if (cb) return cb(res);
             if (res.code == 200) {
                 return toastr.success('Saved');
@@ -350,6 +360,7 @@ var content_controller = function ($scope, $timeout, $sce) {
     });
 
     $.get(API.INFO, function (res) {
+        $scope.updating = true;
         $scope.info = res.data;
         if (!$scope.info.theme) $scope.info.theme = "default";
 
@@ -429,6 +440,7 @@ var content_controller = function ($scope, $timeout, $sce) {
             $timeout(function () {
                 $scope.event.layout($scope.options.layout);
                 $scope.event.iframe();
+                $scope.updating = false;
             }, 1000);
         }, 1000);
 
@@ -691,9 +703,75 @@ var content_controller = function ($scope, $timeout, $sce) {
         $timeout();
     }
 
+    // socketio
     var ansi_up = new AnsiUp();
     var socket = io("/wiz");
+
     socket.on("connect", function (data) {
+        if (!data) return;
+        $scope.session.id = data.sid;
+        socket.emit("join", { id: app_id });
+    });
+
+    $scope.session = {};
+    $scope.session.cache = {};
+
+    var doupdate = function () {
+        var keys = Object.keys($scope.session.cache);
+        if (keys.length == 0) {
+            setTimeout(doupdate, 200);
+            return;
+        }
+
+        $scope.updating = true;
+
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i]
+            var code = $scope.session.cache[key];
+            $scope.info[key] = code;
+            delete $scope.session.cache[key];
+        }
+
+        $timeout(function () {
+            $timeout(function () {
+                $scope.updating = false;
+                doupdate();
+            });
+        });
+    }
+
+    doupdate();
+
+    for (var i = 0; i < tabs.length; i++) {
+        function watcher(tab) {
+            $scope.$watch("info." + tab, function () {
+                if (!$scope.info) return;
+                if ($scope.updating) return;
+                socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
+            });
+        }
+        var tab = tabs[i];
+        watcher(tab);
+    }
+
+    $scope.$watch("info.id", function (next, prev) {
+        if (!prev) return;
+        if (!$scope.info) return;
+        socket.emit("leave", { id: prev });
+        socket.emit("join", { id: next });
+    });
+
+    socket.on("message", function (data) {
+        if (data.type == "status") {
+            $scope.session.users = data.users;
+            $timeout();
+        } else if (data.type == "edit") {
+            if (data.room != app_id) return;
+            if (data.sid == $scope.session.id) return;
+            var tab = data.tab;
+            var code = data.data;
+            $scope.session.cache[tab] = code;
+        }
     });
 
     socket.on("log", function (data) {

@@ -51,6 +51,10 @@ mixin content()
                 #navbar-menu.navbar.navbar-collapse.collapse
                     ul.navbar-nav
                     .navbar-nav.flex-row.order-md-last.mr-2(style="align-items: center;")
+                        li.nav-item.p-0.pr-2(ng-repeat="(user, count) in session.users")
+                            a.nav-link.p-1
+                                span.nav-link-title(style="font-size: 10px;") {{user}}({{count}})
+
                         li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="event.modal.delete()")
                                 span.nav-link-title(style="font-size: 14px;") Delete
