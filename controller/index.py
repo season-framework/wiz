@@ -41,7 +41,7 @@ class Controller(season.interfaces.wiz.controller.api):
             _prelogger(f"[{wiz['namespace']}]", *args)
         framework.log = _logger
 
-        fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner', 'framework': framework}
+        fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner', 'framework': framework, 'print': _logger}
         exec(compile(view_api, 'season.Spawner', 'exec'), fn)
         if '__startup__' in fn: fn['__startup__'](framework)
         fn[fnname](framework)

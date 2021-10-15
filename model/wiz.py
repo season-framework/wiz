@@ -183,6 +183,12 @@ class Model(season.core.interfaces.model.MySQL):
 
         if namespace in self.cache.wiz and self.updateview==False:
             item, namespace, id, html, css, js, api, fn = self.cache.wiz[namespace]
+
+            _prelogger = self.framework.log
+            def _logger(*args):
+                _prelogger(f"[{namespace}]", *args)
+            self.framework.log = _logger
+
             _kwargs = fn['get'](self.framework, kwargs)
             kwargs = _kwargs
             return self._view(item, namespace, id, html, css, js, **kwargs), api
@@ -192,6 +198,12 @@ class Model(season.core.interfaces.model.MySQL):
             item = self.get(namespace=id)
         if item is None:
             return None
+
+        if namespace == id: namespace = item['namespace']
+        _prelogger = self.framework.log
+        def _logger(*args):
+            _prelogger(f"[{namespace}]", *args)
+        self.framework.log = _logger
 
         id = item['id']
         html = item["html"]
@@ -204,7 +216,7 @@ class Model(season.core.interfaces.model.MySQL):
         for tmp in kwargs_code_lines:
             kwargs_code = kwargs_code + "\n    " +  tmp
         kwargs_code = kwargs_code + "\n    return kwargs"
-        fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner'}
+        fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner', 'print': _logger}
         exec(compile(kwargs_code, 'season.Spawner', 'exec'), fn)
         
         if self.updateview==False:
