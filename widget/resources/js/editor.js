@@ -742,12 +742,29 @@ var content_controller = function ($scope, $timeout, $sce) {
 
     doupdate();
 
+    socket.time = 0;
+    socket.limit = 2000;
+
     for (var i = 0; i < tabs.length; i++) {
         function watcher(tab) {
             $scope.$watch("info." + tab, function () {
                 if (!$scope.info) return;
                 if ($scope.updating) return;
-                socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
+                var isstart = new Date().getTime() - socket.time;
+                if (isstart > socket.limit) {
+                    socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
+                    socket.time = new Date().getTime();
+                    return;    
+                }
+                
+                socket.time = new Date().getTime();
+                $timeout(function () {
+                    var now = new Date().getTime();
+                    var diff = now - socket.time;
+                    if (diff > socket.limit) {
+                        socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
+                    }
+                }, socket.limit);
             });
         }
         var tab = tabs[i];
