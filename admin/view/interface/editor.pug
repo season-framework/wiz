@@ -5,7 +5,7 @@ mixin codearea(tab)
                 a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'kwargs')" ng-class="options.tab.{$tab$}_val == 'kwargs' ? 'btn-white' : 'btn-dark'") Controller
                 a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'api')" ng-class="options.tab.{$tab$}_val == 'api' ? 'btn-white' : 'btn-dark'") API
                 a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'socketio')" ng-class="options.tab.{$tab$}_val == 'socketio' ? 'btn-white' : 'btn-dark'") Socket API
-                a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'html')" ng-class="options.tab.{$tab$}_val == 'html' ? 'btn-white' : 'btn-dark'") PUG
+                a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'html')" ng-class="options.tab.{$tab$}_val == 'html' ? 'btn-white' : 'btn-dark'") HTML
                 a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'js')" ng-class="options.tab.{$tab$}_val == 'js' ? 'btn-white' : 'btn-dark'") JS
                 a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'css')" ng-class="options.tab.{$tab$}_val == 'css' ? 'btn-white' : 'btn-dark'") CSS
                 a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.change('{$tab$}', 'preview')" ng-class="options.tab.{$tab$}_val == 'preview' ? 'btn-white' : 'btn-dark'") Preview
@@ -24,7 +24,7 @@ mixin codearea(tab)
             - if tab != "tab4"
                 div(ng-show="['preview', 'readme'].includes(options.tab.{$tab$}_val) == false" ng-model="info[options.tab.{$tab$}_val]" ui-monaco-opts="monaco_properties.tab['{$tab$}']" ui-monaco)
             div(ng-show="options.tab.{$tab$}_val == 'readme'" ng-model="info.content" ui-tinymce-opts="tinymce_opt" ui-tinymce)
-            .code-preview(ng-if="options.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: 100%;")
+            .code-preview(ng-if="options.tab.{$tab$}_val == 'preview' && options.panel != 'commit'" style="max-width: none; width: 100%; height: 100%;")
                 iframe.preview(style="height: 100%;" ng-show="!iframe_load")
                 table(ng-if="iframe_load" style="width: 100%; height: 100%;")
                     tr 
@@ -55,6 +55,10 @@ mixin content()
                             a.nav-link.p-1
                                 span.nav-link-title(style="font-size: 10px;") {{user}}({{count}})
 
+                        li.nav-item.p-0.pr-2(ng-if="commit.target.diff.id && options.panel == 'commit'")
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="commit.revert()")
+                                span.nav-link-title(style="font-size: 14px;") Revert
+
                         li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="event.modal.delete()")
                                 span.nav-link-title(style="font-size: 14px;") Delete
@@ -77,44 +81,26 @@ mixin content()
                 .btn-group.w-100.mb-3
                     button.btn(type="button" style="width: 50%;" class="{{options.panel == 'component' ? 'btn-white' : 'btn-dark'}}" ng-click="options.panel='component'") Config
                     button.btn(type="button" style="width: 50%;" class="{{options.panel == 'tree' ? 'btn-white' : 'btn-dark'}}" ng-click="options.panel='tree'") Widgets
-                    button.btn(type="button" style="width: 50%;" class="{{options.panel == 'sf' ? 'btn-white' : 'btn-dark'}}" ng-click="options.panel='sf'") Framework
+                    button.btn(type="button" style="width: 50%;" class="{{options.panel == 'commit' ? 'btn-white' : 'btn-dark'}}" ng-click="options.panel='commit'") Commit
 
-                script(type="text/ng-template" id="tree.html").
-                    <div class="filetree">
-                        <div class="title d-flex {{framework.item.name == item.name && framework.item.path == item.path ? 'active' : '' }}">
-                            <span ng-if="!item.edit" ng-click="framework.loader(item)">
-                                <i class="fas fa-layer-group mr-1" ng-if="item.type == 'folder' && item.root"></i>
-                                <i class="fas fa-folder mr-1" ng-if="item.type == 'folder' && !item.root"></i>
-                                <i class="fas fa-file mr-1" ng-if="item.type == 'file'"></i>
-                                <span>{{item.name}}</span>
-                            </span>
-                            
-                            <input ng-if="item.edit" class="form-control form-control-sm text-dark" ng-model="framework.selected.rename" style="color: #000 !important;" ng-enter="framework.save_name(framework.item)"/>
+                .tree-container(ng-show="options.panel == 'commit'")
+                    .card.card-sm.mb-4
+                        .card-body.text-dark
+                            label.form-label New Commit
+                            input.form-control.mb-1(type='text' placeholder='Version Name' ng-model="commit.data.version_name" ng-enter="commit.event.save(commit.data)")
+                            textarea.mb-2.form-control(placeholder='Commit Message' ng-model="commit.data.version_message" rows=3)
+                            button.btn.btn-dark.btn-block(ng-click="commit.event.save(commit.data)") Commit
 
-                            <span class="ml-auto"></span>
-                            <span class="text-white" ng-if="!item.root" style="font-size: 12px; width: 14px;" ng-click="framework.change_name(item)">
-                                <i class="fas fa-heading"></i>
-                            </span>
+                    .card.card-sm.mb-3
+                        table.table.board-table.table-hover.mb-0
+                            tbody
+                                tr.cursor-pointer(ng-repeat="item in commit.logs" class="{{item.version == commit.target.selected.version ? 'bg-green-lt' : (item.version == commit.target.diff.version ? 'bg-red-lt' : '')}}")
+                                    td.w-1.p-1.pl-3.text-dark(style="font-size: 14px;")
+                                        input(type="checkbox" ng-checked="commit.target.diff.version == item.version" ng-click="commit.event.diff(item)")
+                                    td.w-1.p-1.pr-3.text-dark(style="font-size: 14px;" ng-click="commit.event.item(item)") {{item.version_name ? item.version_name : item.version}}
+                                    td.p-1.pr-3.pl-3.text-dark(style="font-size: 14px; white-space: nowrap; overflow: hidden;" ng-click="commit.event.item(item)")
+                                        span.text-muted {{item.version_message}}
 
-                            <span class="text-white ml-1" ng-if="item.type == 'folder'" style="font-size: 12px; width: 14px;" ng-click="framework.create(item, 'folder')">
-                                <i class="fas fa-folder"></i>
-                            </span>
-
-                            <span class="text-white ml-1" ng-if="item.type == 'folder'" style="font-size: 12px; width: 14px;" ng-click="framework.create(item, 'file')">
-                                <i class="fas fa-file"></i>
-                            </span>
-
-                            <span class="text-white ml-1" ng-if="!item.root" style="font-size: 12px; width: 14px;" ng-click="framework.modal_delete(item)">
-                                <i class="fas fa-trash"></i>
-                            </span>
-                        </div>
-                        <div class="sub">
-                            <div ng-repeat="item in item.sub" ng-include="'tree.html'"></div>
-                        </div>
-                    </div>
-                
-                .tree-container(ng-show="options.panel == 'sf'")
-                    .root-tree(ng-repeat="item in framework.tree" ng-include="'tree.html'")
 
                 .tree-container(ng-show="options.panel == 'tree'")
                     .input-icon.mb-3
@@ -150,7 +136,7 @@ mixin content()
                     .card.card-sm.mb-3
                         .card-body
                             label.form-label Title
-                            input.form-control(type='text' placeholder='App 제목' ng-model="info.title")
+                            input.form-control(type='text' placeholder='App Title' ng-model="info.title")
 
                     .card.card-sm.mb-3
                         .card-body
@@ -248,11 +234,19 @@ mixin content()
         div(data-split-pane-divider data-width="0px")
         
         #editor-area(data-split-pane-component)
-            div(ng-if="options.panel == 'sf'" style="height: 100%;")
-                div(ng-if="framework.editorshow" style="height: 100%;")
-                    div(ng-model="framework.item.text" ui-monaco-opts="monaco_properties.framework" ui-monaco)
+            div(ng-show="options.panel == 'commit'" style="height: 100%;")
+                div(style="height: 100%;")
+                    .code-select.bg-dark.d-flex(style="margin-top: -2px;")
+                        a.btn.btn-square.btn-sm.p-2(href="" ng-click="commit.change('kwargs')" ng-class="commit.view == 'kwargs' ? 'btn-white' : 'btn-dark'") Controller
+                        a.btn.btn-square.btn-sm.p-2(href="" ng-click="commit.change('api')" ng-class="commit.view == 'api' ? 'btn-white' : 'btn-dark'") API
+                        a.btn.btn-square.btn-sm.p-2(href="" ng-click="commit.change('socketio')" ng-class="commit.view == 'socketio' ? 'btn-white' : 'btn-dark'") Socket API
+                        a.btn.btn-square.btn-sm.p-2(href="" ng-click="commit.change('html')" ng-class="commit.view == 'html' ? 'btn-white' : 'btn-dark'") HTML
+                        a.btn.btn-square.btn-sm.p-2(href="" ng-click="commit.change('js')" ng-class="commit.view == 'js' ? 'btn-white' : 'btn-dark'") JS
+                        a.btn.btn-square.btn-sm.p-2(href="" ng-click="commit.change('css')" ng-class="commit.view == 'css' ? 'btn-white' : 'btn-dark'") CSS
 
-            div(data-split-pane data-split-pane-properties="properties.horizonal" ng-show="options.panel != 'sf'")
+                    div(ng-model="commit.diff" ui-monaco-opts="commit.monaco" ui-monaco-diff)
+
+            div(data-split-pane data-split-pane-properties="properties.horizonal" ng-show="options.panel != 'commit'")
                 div(data-split-pane-component data-height="100%")
                     div(data-split-pane data-split-pane-properties="properties.vertical_1_1")
                         div(data-split-pane-component data-width="34%")

@@ -42,21 +42,40 @@ class Model(season.core.interfaces.model.MySQL):
         self.namespace = 'wiz'
 
         self.cache = framework.cache
-        if 'wiz' not in self.cache: self.cache.wiz = season.stdClass()
+        if 'wiz' not in self.cache: 
+            self.cache.wiz = season.stdClass()
+            self.cache.wiz.dev = season.stdClass()
+            self.cache.wiz.prod = season.stdClass()
 
         config = framework.config.load("wiz")
         self.tablename = config.get("table", "wiz")
         self.wizsrc = config.get("wizsrc", os.path.join(framework.core.PATH.MODULES, "wiz", "wizsrc"))
+        try:
+            self.DEVMODE = framework.request.cookies("season-wiz-devmode", "false")
+            if self.DEVMODE == "false": self.DEVMODE = False
+            else: self.DEVMODE = True
+        except:
+            self.DEVMODE = False
         self.updateview = False
         self.wizconfig = config
 
     def set_update_view(self, updateview):
         self.updateview = updateview
+    
+    def is_dev(self):
+        return self.DEVMODE
+
+    def set_dev(self, DEVMODE):
+        self.framework.response.cookies.set("season-wiz-devmode", DEVMODE)
+        if DEVMODE == "false": self.DEVMODE = False
+        else: DEVMODE = True
 
     def upsert(self, values, **format):
         res = super().upsert(values, **format)
         self.set_update_view(True)
         self.cache.wiz = season.stdClass()
+        self.cache.wiz.dev = season.stdClass()
+        self.cache.wiz.prod = season.stdClass()
 
         if 'route' not in values or len(values['route']) == 0:
             try:
@@ -116,8 +135,12 @@ class Model(season.core.interfaces.model.MySQL):
         framework.response.render(theme.view, module=theme.module, view=view, app_id=app_id)
 
     def routes(self):
-        if 'routes' in self.cache.wiz and self.updateview==False:
-            return self.cache.wiz.routes
+        if self.DEVMODE:
+            if 'routes' in self.cache.wiz.dev and self.updateview==False:
+                return self.cache.wiz.dev.routes
+        else:
+            if 'routes' in self.cache.wiz.prod and self.updateview==False:
+                return self.cache.wiz.prod.routes
             
         routes = self.select(fields="id,route,theme", orderby="`updated` DESC")
         url_map = []
@@ -150,8 +173,12 @@ class Model(season.core.interfaces.model.MySQL):
             except:
                 return None, None, {}
 
-        self.cache.wiz.routes = matcher
-        return self.cache.wiz.routes
+        if self.DEVMODE:
+            self.cache.wiz.dev.routes = matcher
+            return self.cache.wiz.dev.routes
+        else:
+            self.cache.wiz.prod.routes = matcher
+            return self.cache.wiz.prod.routes
         
     def render(self, *args, **kwargs):
         if len(args) == 0: return ""
@@ -164,13 +191,27 @@ class Model(season.core.interfaces.model.MySQL):
         return ""
 
     def get(self, **kwargs):
-        data = super().get(**kwargs)
-        if data is None:
+        if 'version' not in kwargs:
+            if self.DEVMODE:
+                kwargs['version'] = 'master'
+                data = super().get(**kwargs)
+            else:
+                kwargs['version'] = {"op": "!=", "value": "master"}
+                data = super().get(**kwargs, orderby="`version` DESC")
+                if data is None: 
+                    kwargs['version'] = 'master'
+                    data = super().get(**kwargs)
+        else:
+            data = super().get(**kwargs)
+
+        if data is None: 
             return None
+
         try:
             data['properties'] = json.loads(data['properties'])
         except:
             data['properties'] = {"html": "pug", "css": "less", "js": "javascript"}
+
         return data
 
     def _view(self, item, namespace, id, html, css, js, **kwargs):
@@ -206,12 +247,14 @@ class Model(season.core.interfaces.model.MySQL):
 
     def view(self, *args, **kwargs):
         id = args[0]
-
         namespace = id + ""
         if len(args) > 1: namespace = args[1]
 
-        if namespace in self.cache.wiz and self.updateview==False:
-            item, namespace, id, html, css, js, api, fn = self.cache.wiz[namespace]
+        if self.DEVMODE: cache = self.cache.wiz.dev
+        else: cache = self.cache.wiz.prod
+
+        if namespace in cache and self.updateview==False:
+            item, namespace, id, html, css, js, api, fn = cache[namespace]
 
             _prelogger = self.framework.log
             def _logger(*args):
@@ -276,5 +319,6 @@ class Model(season.core.interfaces.model.MySQL):
             js = dukpy.typescript_compile(js)
             js = str(js)
 
-        self.cache.wiz[namespace] = (item, namespace, id, html, css, js, item['api'], fn)
+        cache[namespace] = (item, namespace, id, html, css, js, item['api'], fn)
+        cache[id] = (item, namespace, id, html, css, js, item['api'], fn)
         return self._view(item, namespace, id, html, css, js, **kwargs), item['api']

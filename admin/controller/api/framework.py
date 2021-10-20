@@ -71,6 +71,7 @@ class Controller(season.interfaces.wiz.admin.api):
                 extmap[".scss"] = "scss"
                 extmap[".html"] = "html"
                 extmap[".pug"] = "pug"
+                extmap[".svg"] = "html"
                 if ext in extmap:
                     fs.write(rename, "")
                 else:
@@ -94,6 +95,10 @@ class Controller(season.interfaces.wiz.admin.api):
     def tree(self, framework):
         path = framework.request.query("path", True)
         name = framework.request.query("name", True)
+
+        if path == "_system":
+            self.status(300, {"path": path, "name": name})
+
         _type = framework.request.query("type", "folder")
         if path.startswith("/"):
             path = path[1:]
@@ -113,6 +118,7 @@ class Controller(season.interfaces.wiz.admin.api):
             extmap[".html"] = "html"
             extmap[".pug"] = "pug"
             extmap[".json"] = "json"
+            extmap[".svg"] = "html"
             if ext in extmap:
                 fs = self.fs.use(path)
                 self.status(201, {"text": fs.read(name), "path": path, "name": name, "language": extmap[ext]})
@@ -124,7 +130,6 @@ class Controller(season.interfaces.wiz.admin.api):
             extmap[".jpg"] = "image"
             extmap[".ico"] = "image"
             extmap[".icon"] = "image"
-            extmap[".svg"] = "image"
             if ext in extmap:
                 target = path + "/" + name
                 if target.startswith("."): target = target[1:]

@@ -3,6 +3,10 @@ mixin content()
         form#file-form
             input#file-upload.form-control(type='file' name='file[]' multiple)
 
+    .bg-dark.text-center(ng-if="!loaded" style="width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 99999; padding-top: 40vh;")
+        .spinner-grow.text-white(style="width: 60px; height: 60px;")
+    
+
     .main-panel.container.p-0(style="height: calc(100% - 112px);")
         div(data-split-pane data-split-pane-properties="properties.root")
             div(data-split-pane-component data-width="360px")
@@ -15,7 +19,7 @@ mixin content()
                                         <i class="fas fa-layer-group mr-1" ng-if="item.type == 'folder' && item.root"></i>
                                         <i class="fas fa-folder mr-1" ng-if="item.type == 'folder' && !item.root"></i>
                                         <i class="far fa-file mr-1" ng-if="item.type == 'file'"></i>
-                                        <span>{{item.name}}</span>
+                                        <span>{{item.display ? item.display : item.name}}</span>
                                     </span>
                                 </div>
                                 <div class="sub">
@@ -29,13 +33,10 @@ mixin content()
             div(data-split-pane-divider data-width="1px")
             
             div(data-split-pane-component style="height: 100%; overflow: hidden;")
-                .panel-header.pl-2.pr-2.pt-1.pb-1.bg-dark.text-white
-                    .d-flex
-                        span.mr-auto {{data.item.path[0] == '.' ? data.item.path.substring(1) : data.item.path }}/{{data.item.name}}
-
-                .panel-header.p-1.pr-0.pl-2
+                .panel-header.p-1.pr-0.pl-2(ng-if="status.view != 'system'")
                     .d-flex 
                         input(ng-if="status.view == 'folder'" type="checkbox" ng-click="event.check_items(data.item)" ng-model="data.item.checked")
+                        span.ml-2.if-desktop.text-muted {{data.item.path[0] == '.' ? data.item.path.substring(1) : data.item.path }}/{{data.item.name}}
                         span.mr-auto &nbsp;
 
                         button.btn.btn-sm.btn-light.pt-1.pb-1.cursor-pointer.mr-1(ng-click="event.modal_delete(data.item, true)" style="height: 20px;" ng-if="status.view == 'folder'")
@@ -96,6 +97,28 @@ mixin content()
 
                 .panel-editor(ng-if="status.view == 'monaco' && status.editor" style="height: 100%; overflow: hidden;")
                     div(ng-model="data.item.text" ui-monaco-opts="monaco_properties" ui-monaco)
+
+                .panel-editor(ng-if="status.view == 'system' && data.item.name == 'config'" style="height: 100%; overflow: auto;")
+                    .p-4.pr-6.pl-6
+                        .page-header
+                            .row.align-items-center
+                                .col-auto
+                                    h2.page-title System Configuration
+
+                        .info-form.row.first-child
+                            .col-md-3 
+                                h4 Mode
+                            .col-md-9
+                                - if is_dev
+                                    a.btn.btn-outline-dark.btn-block(href="?devmode=true") Development
+                                - else
+                                    a.btn.btn-block.btn-outline-dark(href="?devmode=true") Production
+
+                        .info-form.row
+                            .col-md-3 
+                                h4 Build
+                            .col-md-9
+                                button.btn.btn-block.btn-outline-dark(ng-click="event.build_wiz()") Build WIZ Interfaces
 
     #modal-delete-file.modal.fade(tabindex="-1")
         .modal-dialog.modal-sm(role='document')

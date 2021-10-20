@@ -145,6 +145,9 @@ class Controller(season.interfaces.wiz.admin.base):
             info["namespace"] = newid
             info["created"] = datetime.datetime.now()
             info["kwargs"] = WIZ_KWARGS
+            info["version"] = "master"
+            info["version_name"] = "master"
+            info["version_message"] = ""
             info["viewuri"] = ""
             info["route"] = ""
             info["html"] = WIZ_PUG

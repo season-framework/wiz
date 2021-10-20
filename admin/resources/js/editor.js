@@ -5,6 +5,7 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.event = {};
     $scope.status = {};
     $scope.data = {};
+    $scope.loaded = true;
 
     // split pane properties
     try {
@@ -42,7 +43,7 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.data.parents = {};
     $scope.data.tree = [];
     for (var i = 0; i < target.length; i++)
-        $scope.data.tree.push({ path: target[i].path, name: target[i].name, sub: [], type: 'folder', root: true });
+        $scope.data.tree.push({ path: target[i].path, name: target[i].name, display: target[i].display, sub: [], type: 'folder', root: true });
 
     $scope.event.save = function () {
         var data = angular.copy($scope.data.item);
@@ -176,6 +177,14 @@ var content_controller = function ($scope, $timeout, $sce) {
                 $timeout();
             }
 
+            if (res.code == 300) {
+                $scope.status.editor = false;
+                $scope.status.view = "system";
+                $scope.data.item = res.data;
+                $timeout();
+            }
+
+
             if (res.code != 200) return cb(res);
 
             if (init) {
@@ -285,6 +294,15 @@ var content_controller = function ($scope, $timeout, $sce) {
         fd.append("name", $scope.data.item.name);
         uploadfile(fd);
     };
+
+    $scope.event.build_wiz = function () {
+        $scope.loaded = false;
+        $timeout();
+        $.post('/wiz/admin/api/wiz/build', {}, function (res) {
+            $scope.loaded = true;
+            $timeout();
+        });
+    }
 
     for (var i = 0; i < $scope.data.tree.length; i++)
         $scope.event.loader($scope.data.tree[i], null, i === 0, true);

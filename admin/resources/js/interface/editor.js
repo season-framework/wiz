@@ -43,6 +43,9 @@ var content_controller = function ($scope, $timeout, $sce) {
             $scope.event.iframe();
             $scope.loading = true;
             $scope.editors[$scope.activetab].focus();
+
+            $scope.commit.load();
+
             $timeout(function () {
                 $scope.updating = false;
             }, 100);
@@ -273,11 +276,6 @@ var content_controller = function ($scope, $timeout, $sce) {
     };
 
     $scope.event.save = function (cb) {
-        if ($scope.options.panel == 'sf') {
-            $scope.framework.save();
-            return;
-        }
-
         if ($scope.info.html) $scope.info.html = $scope.info.html.replace(/\t/gim, '    ');
         if ($scope.info.css) $scope.info.css = $scope.info.css.replace(/\t/gim, '    ');
         if ($scope.info.js) $scope.info.js = $scope.info.js.replace(/\t/gim, '    ');
@@ -338,7 +336,6 @@ var content_controller = function ($scope, $timeout, $sce) {
         fr.onload = function () {
             var data = fr.result;
             var json = JSON.parse(data);
-            console.log(json);
             $scope.info.html = json.html;
             $scope.info.js = json.js;
             $scope.info.css = json.css;
@@ -461,7 +458,7 @@ var content_controller = function ($scope, $timeout, $sce) {
                     var pre = $scope.options.panel;
                     $scope.options.panel = 'component';
                     $timeout(function () {
-                        if (pre == 'sf') {
+                        if (pre == 'commit') {
                             $scope.event.layout($scope.options.layout);
                         }
                     });
@@ -471,18 +468,15 @@ var content_controller = function ($scope, $timeout, $sce) {
                     var pre = $scope.options.panel;
                     $scope.options.panel = 'tree';
                     $timeout(function () {
-                        if (pre == 'sf') {
+                        if (pre == 'commit') {
                             $scope.event.layout($scope.options.layout);
                         }
                     });
                     ev.preventDefault();
                 },
                 'Alt Digit3': function (ev) {
-                    $scope.options.panel = 'sf';
-                    $timeout(function () {
-                        if ($scope.framework.editor)
-                            $scope.framework.editor.focus();
-                    });
+                    $scope.options.panel = 'commit';
+                    $timeout();
                     ev.preventDefault();
                 },
                 'Alt KeyJ': function (ev) {
@@ -570,139 +564,111 @@ var content_controller = function ($scope, $timeout, $sce) {
         shortcuts();
         window.addEventListener("focus", shortcuts, false);
 
-        // framework editor
-        $scope.framework = {};
-        $scope.framework.editorshow = false;
-        $scope.monaco_properties.framework = $scope.monaco("python");
+        // commit control
+        $scope.commit = {};
+        $scope.commit.data = {};
+        $scope.commit.diff = {};
+        $scope.commit.diff.main = {};
+        $scope.commit.diff.compare = {};
+        $scope.commit.target = {};
 
-        $scope.framework.tree = [];
-        $scope.framework.tree.push({ path: 'app', name: 'config', sub: [], type: 'folder', root: true });
-        $scope.framework.tree.push({ path: 'app', name: 'filter', sub: [], type: 'folder', root: true });
-        $scope.framework.tree.push({ path: 'app', name: 'interfaces', sub: [], type: 'folder', root: true });
-        $scope.framework.tree.push({ path: 'app', name: 'model', sub: [], type: 'folder', root: true });
-        if (thememodule)
-            $scope.framework.tree.push({ path: 'modules', name: thememodule, sub: [], type: 'folder', root: true });
-        $scope.framework.parents = {};
+        $scope.commit.monaco = { enableSplitViewResizing: false, fontSize: 14 };
+        $scope.commit.view = "kwargs";
 
-        $scope.framework.save = function () {
-            var data = angular.copy($scope.framework.item);
-            $.post('/wiz/admin/sf/update', data, function (res) {
-                if (res.code == 200) {
-                    return toastr.success('Saved');
-                }
-
-                return toastr.error('Error');
-            });
-        }
-
-        $scope.framework.delete = function () {
-            var data = angular.copy($scope.framework.selected_delete);
-            var parent = $scope.framework.parents[data.path + "/" + data.name];
-            $.post('/wiz/admin/sf/delete', data, function (res) {
-                $scope.framework.selected_delete = null;
-                $scope.framework.loader(parent, function (resp) { });
-                $timeout();
-            });
-            $('#modal-delete-file').modal('hide');
-        }
-
-        $scope.framework.modal_delete = function (item) {
-            $scope.framework.selected_delete = item;
-            $('#modal-delete-file').modal('show');
-        }
-
-        $scope.framework.create = function (item, ftype) {
-            if (item.type != 'folder') {
-                return;
+        $scope.commit.revert = function () {
+            if ($scope.commit.target.diff) {
+                $scope.info = angular.copy($scope.commit.target.diff);
+                $scope.info.version = "master";
+                $scope.info.version_name = "master";
+                $scope.info.version_message = "";
+                $scope.commit.target.selected = $scope.info;
+                $scope.commit.change();                        
             }
-
-            $scope.framework.loader(item, function () {
-                var obj = {};
-                obj.path = item.path + "/" + item.name;
-                obj.type = ftype;
-                obj.name = "";
-                item.sub.push(obj);
-                $scope.framework.parent = item;
-                $timeout(function () {
-                    $scope.framework.change_name(item.sub[item.sub.length - 1]);
-                });
-            });
-        }
-
-        $scope.framework.save_name = function () {
-            var data = angular.copy($scope.framework.selected);
-            $.post('/wiz/admin/api/framework/rename', data, function (res) {
-                if (res.code != 200) {
-                    toastr.error(res.data);
-                    return;
-                }
-                $scope.framework.selected.edit = false;
-                $scope.framework.selected.name = $scope.framework.selected.rename;
-
-                if ($scope.framework.parent) {
-                    $scope.framework.loader($scope.framework.parent, function (resp) { });
-                    $scope.framework.parent = null;
-                    $timeout();
-                } else {
-                    $scope.framework.loader($scope.framework.selected, function (resp) { });
-                }
-
-                $timeout();
-            });
-        }
-
-        $scope.framework.change_name = function (item) {
-            if ($scope.framework.selected) {
-                $scope.framework.selected.edit = false;
-            }
-
-            item.edit = true;
-            item.rename = item.name + "";
-            $scope.framework.selected = item;
+                
             $timeout();
         }
 
-        $scope.framework.loader = function (item, cb) {
-            if (!cb) {
-                if (item.sub.length > 0) {
-                    item.sub = [];
-                    $timeout();
-                    return;
-                }
-                cb = function () { };
+        $scope.commit.change = function (view) {
+            if (view) $scope.commit.view = view;
+            else view = $scope.commit.view;
+
+            if (!$scope.commit.target.selected) {
+                $timeout();
+                return;
+            }
+            if (!$scope.commit.target.diff) {
+                $scope.commit.target.diff = { properties: {} };
             }
 
-            $.post('/wiz/admin/api/framework/tree', { path: item.path, name: item.name, type: item.type }, function (res) {
-                if (res.code == 201) {
-                    $scope.monaco_properties.framework.language = res.data.language;
-                    $scope.framework.editorshow = false;
-                    $timeout(function () {
-                        $scope.framework.item = res.data;
-                        $timeout(function () {
-                            $scope.framework.editorshow = true;
-                            $timeout();
-                        });
-                    });
-                    return cb(res);
+            var lang1 = "python";
+            try {
+                lang1 = $scope.commit.target.selected.properties[view]
+            } catch (e) {
+            }
+            if (!lang1) lang1 = "python";
+
+            var lang2 = "python";
+            try {
+                lang2 = $scope.commit.target.diff.properties[view]
+            } catch (e) {
+            }
+            if (!lang2) lang2 = "python";
+
+            $scope.commit.diff = {
+                main: {
+                    code: $scope.commit.target.selected[view],
+                    language: lang1
+                },
+                compare: {
+                    code: $scope.commit.target.diff[view],
+                    language: lang2
                 }
+            }
 
-                if (res.code != 200) return cb(res);
+            $timeout();
+        }
 
-                res.data.sort(function (a, b) {
-                    if (a.type == 'folder' && b.type != 'folder') return -1;
-                    if (a.type != 'folder' && b.type == 'folder') return 1;
-                    return a.name.localeCompare(b.name);
-                });
-                item.sub = res.data;
-
-                for (var i = 0; i < item.sub.length; i++) {
-                    $scope.framework.parents[item.sub[i].path + "/" + item.sub[i].name] = item;
-                }
-
+        $scope.commit.load = function () {
+            $.post("/wiz/admin/api/wiz/commit_log", { id: app_id }, function (res) {
+                $scope.commit.logs = res.data;
+                $scope.commit.target = {};
+                $scope.commit.event.item($scope.commit.logs[0]);
                 $timeout();
-                cb(res);
             });
         }
+
+        $scope.commit.event = {};
+
+        $scope.commit.event.item = function (item) {
+            $.post("/wiz/admin/api/wiz/commit_get", item, function (res) {
+                $scope.commit.target.selected = res.data;
+                $scope.commit.change();
+            });
+        }
+
+        $scope.commit.event.diff = function (item) {
+            if ($scope.commit.target.diff.version == item.version) {
+                $scope.commit.target.diff = null;
+                $scope.commit.change();
+                return;
+            }
+            $.post("/wiz/admin/api/wiz/commit_get", item, function (res) {
+                $scope.commit.target.diff = res.data;
+                $scope.commit.change();
+            });
+        }
+
+        $scope.commit.event.save = function (data) {
+            var pd = angular.copy($scope.info);
+            pd.version_name = data.version_name;
+            pd.version_message = data.version_message;
+            $.post("/wiz/admin/api/wiz/commit", pd, function (res) {
+                $scope.commit.data = {};
+                $scope.commit.load();
+            });
+        };
+
+        $scope.commit.load();
     });
 
     $scope.debuglog = "";
