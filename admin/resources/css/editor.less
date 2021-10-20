@@ -1,0 +1,67 @@
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.main-panel {
+    width: 100%;
+}
+
+.filetree {
+    position: relative;
+
+    .title {
+        cursor: pointer;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+
+        .file-actions {
+            background: white;
+            display: inline-block;
+            position: absolute;
+            right: 0;
+        }
+    }
+
+    .title:hover {
+        text-decoration: underline;
+    }
+
+    .title.active {
+        font-family: MAIN-EB;
+    }
+
+    .sub {
+        padding-left: 16px;
+    }
+}
+
+.main-panel {
+    border: 1px solid #aaa;
+
+    .panel-header {
+        width: 100%;
+        border-bottom: 1px solid #aaa;
+    }
+}
+
+.split-pane-divider {
+    background: #aaa;
+}
+
+.panel-editor {
+    i {
+        width: 14px;
+    }
+
+    span {
+        cursor: pointer;
+    }
+
+    .target-file:hover span.title {
+        border-bottom: 1px solid #000;
+    }
+}

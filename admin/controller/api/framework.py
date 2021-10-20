@@ -1,19 +1,45 @@
 import season
 import os
 import shutil
+import json
 
-class Controller(season.interfaces.wiz.controller.api):
+class Controller(season.interfaces.wiz.admin.api):
 
     def __startup__(self, framework):
         super().__startup__(framework)
-        if self.config.acl is not None: self.config.acl(framework)
         self.fs = framework.model("wizfs", module="wiz")
+
+    def upload(self, framework):
+        files = framework.request.files()
+        path = framework.request.query("path", True)
+        name = framework.request.query("name", True)
+        fs = self.fs.use(path + "/" + name)
+        for file in files:
+            try:
+                if len(file.filename) == 0: continue
+                filename = file.filename
+                fs.write(filename, file)
+            except Exception as e:
+                pass
+
+        return self.status(200, True)
 
     def delete(self, framework):
         path = framework.request.query("path", True)
         name = framework.request.query("name", True)
         fs = self.fs.use(path)
         fs.delete(name)
+        self.status(200, True)
+
+    def delete_bulk(self, framework):
+        data = framework.request.query("data", True)
+        data = json.loads(data)
+
+        for item in data:
+            path = item['path']
+            name = item['name']
+            fs = self.fs.use(path)
+            fs.delete(name)
         self.status(200, True)
 
     def rename(self, framework):
@@ -48,7 +74,7 @@ class Controller(season.interfaces.wiz.controller.api):
                 if ext in extmap:
                     fs.write(rename, "")
                 else:
-                    self.status(401, "Not Supported File Name")
+                    self.status(402, "Not Supported File Name")
             else:
                 os.makedirs(newtarget)
             self.status(200, True)
@@ -73,7 +99,9 @@ class Controller(season.interfaces.wiz.controller.api):
             path = path[1:]
 
         if _type == 'file':
-            ext = os.path.splitext(name)[1]
+            ext = os.path.splitext(name)[1].lower()
+
+            # vscode
             extmap = {}
             extmap[".py"] = "python"
             extmap[".js"] = "javascript"
@@ -84,11 +112,25 @@ class Controller(season.interfaces.wiz.controller.api):
             extmap[".scss"] = "scss"
             extmap[".html"] = "html"
             extmap[".pug"] = "pug"
+            extmap[".json"] = "json"
             if ext in extmap:
                 fs = self.fs.use(path)
                 self.status(201, {"text": fs.read(name), "path": path, "name": name, "language": extmap[ext]})
-            else:
-                self.status(404, "not support file")
+            
+            # image view
+            extmap = {}
+            extmap[".png"] = "image"
+            extmap[".jpeg"] = "image"
+            extmap[".jpg"] = "image"
+            extmap[".ico"] = "image"
+            extmap[".icon"] = "image"
+            extmap[".svg"] = "image"
+            if ext in extmap:
+                target = path + "/" + name
+                if target.startswith("."): target = target[1:]
+                self.status(202, {"path": path, "name": name, "url": target})
+
+            self.status(404, "not support file")
 
         namespace = os.path.join(path, name)
         fs = self.fs.use(namespace)

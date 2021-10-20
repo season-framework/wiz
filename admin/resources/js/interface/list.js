@@ -1,6 +1,6 @@
 var content_controller = function ($sce, $scope, $timeout) {
     var API = {
-        SEARCH: '/wiz/widget/api/search'
+        SEARCH: '/wiz/admin/api/wiz/search'
     };
 
     $scope.category = {

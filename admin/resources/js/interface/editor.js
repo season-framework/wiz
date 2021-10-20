@@ -21,12 +21,15 @@ var content_controller = function ($scope, $timeout, $sce) {
         $timeout();
     }
 
+    $scope.tree_selected = {};
+
     $scope.event.treeitem = function (item) {
+        $scope.tree_selected = item;
         $scope.updating = true;
         app_id = item.id;
         $scope.loading = false;
         $timeout();
-        $.get(API_URL + '/api/info/' + app_id, function (res) {
+        $.get(API_URL + '/wiz/info/' + app_id, function (res) {
             if (res.data.id != app_id) return;
             $scope.info = res.data;
             if (typeof ($scope.info.properties) == 'string') {
@@ -203,13 +206,13 @@ var content_controller = function ($scope, $timeout, $sce) {
         });
     }
 
-    var API_URL = "/wiz/widget";
+    var API_URL = "/wiz/admin/api";
     var API = {
-        INFO: API_URL + '/api/info/' + app_id,
-        DELETE: API_URL + '/api/delete',
-        UPDATE: API_URL + '/api/update/' + app_id,
-        UPLOAD: API_URL + '/api/upload',
-        TREE: API_URL + '/api/tree',
+        INFO: API_URL + '/wiz/info/' + app_id,
+        DELETE: API_URL + '/wiz/delete',
+        UPDATE: API_URL + '/wiz/update/' + app_id,
+        UPLOAD: API_URL + '/wiz/upload',
+        TREE: API_URL + '/wiz/tree',
         LIST: API_URL,
         IFRAME: function (app_id) {
             if ($scope.info) {
@@ -228,7 +231,7 @@ var content_controller = function ($scope, $timeout, $sce) {
                 if ($scope.tree[i].id == $scope.info.category) {
                     for (var j = 0; j < $scope.tree[i].data.length; j++) {
                         if ($scope.tree[i].data[j].id != $scope.orgappid) {
-                            location.href = "/wiz/widget/editor/" + $scope.tree[i].data[j].id;
+                            location.href = "/wiz/admin/editor/" + $scope.tree[i].data[j].id;
                             return;
                         }
                     }
@@ -238,7 +241,7 @@ var content_controller = function ($scope, $timeout, $sce) {
             for (var i = 0; i < $scope.tree.length; i++) {
                 for (var j = 0; j < $scope.tree[i].data.length; j++) {
                     if ($scope.tree[i].data[j].id != $scope.orgappid) {
-                        location.href = "/wiz/widget/editor/" + $scope.tree[i].data[j].id;
+                        location.href = "/wiz/admin/editor/" + $scope.tree[i].data[j].id;
                         return;
                     }
                 }
@@ -335,6 +338,7 @@ var content_controller = function ($scope, $timeout, $sce) {
         fr.onload = function () {
             var data = fr.result;
             var json = JSON.parse(data);
+            console.log(json);
             $scope.info.html = json.html;
             $scope.info.js = json.js;
             $scope.info.css = json.css;
@@ -349,11 +353,16 @@ var content_controller = function ($scope, $timeout, $sce) {
     $.get(API.TREE, function (res) {
         $scope.tree = res.data;
         $scope.treedata = [];
-        $scope.treedataobj = []
+        $scope.treedataobj = [];
+
         for (var i = 0; i < $scope.tree.length; i++) {
             for (var j = 0; j < $scope.tree[i].data.length; j++) {
                 $scope.treedata.push($scope.tree[i].data[j].id);
-                $scope.treedataobj.push($scope.tree[i].data[j]);
+                var treeobj = $scope.tree[i].data[j];
+                $scope.treedataobj.push(treeobj);
+                if ($scope.tree[i].data[j].id == app_id) {
+                    $scope.tree_selected = treeobj;
+                }
             }
         }
         $timeout();
@@ -577,7 +586,7 @@ var content_controller = function ($scope, $timeout, $sce) {
 
         $scope.framework.save = function () {
             var data = angular.copy($scope.framework.item);
-            $.post('/wiz/widget/sf/update', data, function (res) {
+            $.post('/wiz/admin/sf/update', data, function (res) {
                 if (res.code == 200) {
                     return toastr.success('Saved');
                 }
@@ -589,7 +598,7 @@ var content_controller = function ($scope, $timeout, $sce) {
         $scope.framework.delete = function () {
             var data = angular.copy($scope.framework.selected_delete);
             var parent = $scope.framework.parents[data.path + "/" + data.name];
-            $.post('/wiz/widget/sf/delete', data, function (res) {
+            $.post('/wiz/admin/sf/delete', data, function (res) {
                 $scope.framework.selected_delete = null;
                 $scope.framework.loader(parent, function (resp) { });
                 $timeout();
@@ -622,7 +631,7 @@ var content_controller = function ($scope, $timeout, $sce) {
 
         $scope.framework.save_name = function () {
             var data = angular.copy($scope.framework.selected);
-            $.post('/wiz/widget/sf/rename', data, function (res) {
+            $.post('/wiz/admin/api/framework/rename', data, function (res) {
                 if (res.code != 200) {
                     toastr.error(res.data);
                     return;
@@ -663,7 +672,7 @@ var content_controller = function ($scope, $timeout, $sce) {
                 cb = function () { };
             }
 
-            $.post('/wiz/widget/sf/tree', { path: item.path, name: item.name, type: item.type }, function (res) {
+            $.post('/wiz/admin/api/framework/tree', { path: item.path, name: item.name, type: item.type }, function (res) {
                 if (res.code == 201) {
                     $scope.monaco_properties.framework.language = res.data.language;
                     $scope.framework.editorshow = false;
@@ -754,9 +763,9 @@ var content_controller = function ($scope, $timeout, $sce) {
                 if (isstart > socket.limit) {
                     socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
                     socket.time = new Date().getTime();
-                    return;    
+                    return;
                 }
-                
+
                 socket.time = new Date().getTime();
                 $timeout(function () {
                     var now = new Date().getTime();
@@ -776,6 +785,18 @@ var content_controller = function ($scope, $timeout, $sce) {
         if (!$scope.info) return;
         socket.emit("leave", { id: prev });
         socket.emit("join", { id: next });
+    });
+
+    $scope.$watch("info.title", function (next, prev) {
+        if (!$scope.tree_selected) return;
+        $scope.tree_selected.title = next;
+        $timeout();
+    });
+
+    $scope.$watch("info.namespace", function (next, prev) {
+        if (!$scope.tree_selected) return;
+        $scope.tree_selected.namespace = next;
+        $timeout();
     });
 
     socket.on("message", function (data) {

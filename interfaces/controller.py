@@ -86,6 +86,20 @@ class base:
 
         framework.response.data.set(menus=menus)
 
+    def subnav(self, menus):
+        framework = self.__framework__
+
+        for menu in menus:
+            pt = None
+            if 'pattern' in menu: pt = menu['pattern']
+            elif 'url' in menu: pt = menu['url']
+
+            if pt is not None:
+                if framework.request.match(pt): menu['class'] = 'bg-dark text-white'
+                else: menu['class'] = ''
+
+        framework.response.data.set(submenus=menus)
+
     def topnav(self, menus):
         framework = self.__framework__
 

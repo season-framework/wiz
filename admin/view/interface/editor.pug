@@ -64,7 +64,7 @@ mixin content()
                                 span.nav-link-title(style="font-size: 14px;") Save
 
                         li.nav-item.p-0
-                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(href='/wiz/widget/list/{{info.category}}')
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(href='/wiz/admin/list/{{info.category}}')
                                 span.nav-link-title.bold(style="font-size: 14px;")
                                     i.fas.fa-times
     
@@ -131,7 +131,7 @@ mixin content()
                                 span(ng-click="options.panel_status[item.id] = (options.panel_status[item.id] ? false : true)")
                                     i.fas.fa-layer-group.mr-2
                                     | {{item.title}}
-                                a.ml-auto.text-white(href="/wiz/widget/editor/new?category={{item.id}}")
+                                a.ml-auto.text-white(href="/wiz/admin/editor/new?category={{item.id}}")
                                     i.fas.fa-plus
 
                         .sub(ng-if="!options.panel_status[item.id]")

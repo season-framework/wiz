@@ -7,14 +7,15 @@ mixin layout()
         head
             +header
             
-        body.antialiased
+        body.antialiased(ng-controller="content" style="background: white;" ng-cloak)
             script(src='/resources/wiz/theme/libs/tabler/dist/libs/bootstrap/dist/js/bootstrap.bundle.min.js')
             script(src='/resources/wiz/theme/libs/tabler/dist/libs/peity/jquery.peity.min.js')
             script(src='/resources/wiz/theme/libs/tabler/dist/js/tabler.min.js')
 
-            .page(ng-controller="content")
-                +navbar
-                .content(ng-cloak)
-                    +content
+            script(src='/resources/wiz/theme/libs/monaco/min/vs/loader.js')
+            script.
+                require.config({ paths: { vs: '/resources/wiz/theme/libs/monaco/min/vs' } });
 
+            +navbar
+            +content
             +builder

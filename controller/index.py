@@ -25,7 +25,7 @@ class Controller(season.interfaces.wiz.controller.api):
         self.status(500, str(err))
 
     def __default__(self, framework):
-        framework.response.redirect("widget")
+        framework.response.redirect("admin")
 
     def api(self, framework):
         framework.response.status = self.status

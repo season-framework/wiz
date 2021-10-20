@@ -97,48 +97,15 @@ WIZ_PUG = """.container
     h3= message
 """
 
-class Controller(season.interfaces.wiz.controller.base):
+class Controller(season.interfaces.wiz.admin.base):
 
     def __startup__(self, framework):
         super().__startup__(framework)
-        self.css('css/main.less')
-        if self.config.acl is not None: self.config.acl(framework)
+        self.css('css/interface/main.less')
 
     def __default__(self, framework):
-        response = framework.response
-        return response.redirect('list')
-
-    def list(self, framework):
-        if 'topmenus' in self.config: self.topnav(self.config.topmenus)
-
-        cate = framework.request.segment.get(0, None)
-        self.js('js/list.js')
-        search = framework.request.query()
-        if cate is not None:
-            search['category'] = cate
-
-        menus = [{"title":"ALL", "url": '/wiz/widget/list', 'pattern': r'^/wiz/widget/list$' }]
-        category = ['widget', 'page']
-        try:
-            category = self.config.category
-        except:
-            pass
-        for c in category:
-            if type(c) == str:
-                menus.append({ 'title': c, 'url': f'/wiz/widget/list/{c}' , 'pattern': r'^/wiz/widget/list/' + c + "$" })
-            else:
-                ctitle = c['title']
-                c = c['id']
-                menus.append({ 'title': ctitle, 'url': f'/wiz/widget/list/{c}' , 'pattern': r'^/wiz/widget/list/' + c + "$" })
-        
-        self.nav(menus)
-
-        self.exportjs(search=search)
-        return framework.response.render('list.pug', category=cate)
-
-    def editor(self, framework):
-        self.js('js/editor.js')
-        self.css('css/editor.css')
+        self.js('js/interface/editor.js')
+        self.css('css/interface/editor.css')
         
         app_id = framework.request.segment.get(0, True)
         info = self.db.get(id=app_id)
@@ -192,4 +159,4 @@ class Controller(season.interfaces.wiz.controller.base):
         if 'thememodule' in self.config:
             thememodule = self.config.thememodule
         self.exportjs(app_id=app_id, category=category, theme=theme, thememodule=thememodule)
-        framework.response.render('editor.pug', category=category, theme=theme)
+        framework.response.render('interface/editor.pug', category=category, theme=theme)

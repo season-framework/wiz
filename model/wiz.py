@@ -84,11 +84,16 @@ class Model(season.core.interfaces.model.MySQL):
 
     def route(self):
         framework = self.framework
-        routes = self.routes()
+        
+        requri = framework.request.uri()
         app_id = None
         theme = None
-        requri = framework.request.uri()
 
+        if requri.startswith("/wiz/"):
+            return
+
+        routes = self.routes()
+        
         app_id, theme, segment = routes(requri)
         if app_id is None:
             return

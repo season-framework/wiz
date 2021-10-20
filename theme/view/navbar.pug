@@ -41,6 +41,6 @@ mixin navbar()
     
     - if submenus
         .subnav.bg-dark-lt.text-center.p-3(style="overflow-x: auto; white-space: nowrap;")
-            .container-xl.text-center
+            .text-center
                 - each menu in submenus
                     a.p-2.pr-4.pl-4(href=menu['url'] target=menu['target'] class=menu['class'] style="color: #354052;")= menu['title']

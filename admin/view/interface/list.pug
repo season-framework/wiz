@@ -4,7 +4,7 @@ mixin content()
             .row.align-items-center
                 .col-auto
                     .page-pretitle SEASON WIZ
-                    h2.page-title Interface Management
+                    h2.page-title Interfaces
 
                 .col-auto.ml-auto.d-print-none
                     .d-flex
@@ -12,12 +12,12 @@ mixin content()
                         a.btn.btn-light.ml-2.d-none.d-sm-inline-block(href='#' style="width: 140px;" ng-click="event.search()")
                             i.mr-2.fas.fa-search
                             | Search
-                        a.btn.btn-light.pr-4.pl-4.ml-2(href='/wiz/widget/editor/new?category={$ category $}' style="width: 140px;") 
+                        a.btn.btn-light.pr-4.pl-4.ml-2(href='/wiz/admin/editor/new?category={$ category $}' style="width: 140px;") 
                             i.mr-2.fas.fa-plus
                             | Create
 
         .overflow-x
-            table.table.board-table.table-hover
+            table.table.board-table.table-hover.mb-0
                 thead 
                     tr
                         th.text-center.width-1 ID
@@ -30,17 +30,17 @@ mixin content()
                 tbody
                     tr(ng-repeat="item in list")
                         td.width-1
-                            a(ng-href="/wiz/widget/editor/{{item.id}}") {{item.namespace ? item.namespace : item.id.substring(0,8)}}
+                            a(ng-href="/wiz/admin/editor/{{item.id}}") {{item.namespace ? item.namespace : item.id.substring(0,8)}}
                         td.text-center.width-1
-                            a(ng-href="/wiz/widget/editor/{{item.id}}") {{item.category}}
+                            a(ng-href="/wiz/admin/editor/{{item.id}}") {{item.category}}
                         td
-                            a(ng-href="/wiz/widget/editor/{{item.id}}") {{item.title}}
+                            a(ng-href="/wiz/admin/editor/{{item.id}}") {{item.title}}
                         td.text-center.width-2 {{item.user_id}}
                         td.text-center.width-1
                             span.badge.bg-green(ng-if="item.route")
                         td.text-center.width-2 {{item.created.substring(0,10)}}
             
-        .pagenation.text-center(ng-if="facet.pages.length > 0")
+        .pagenation.text-center.mt-3(ng-if="facet.pages.length > 0")
             button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(1)")
                 i.fas.fa-angle-double-left
             button.btn.btn-square.btn-sm.btn-light.pt-1.pb-1(ng-click="event.page(search.page*1-1)")
