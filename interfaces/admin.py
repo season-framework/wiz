@@ -21,7 +21,7 @@ class base(season.interfaces.wiz.controller.base):
         
         menus = []
         menus.append({"title": "Interfaces", "url": '/wiz/admin/list', 'pattern': r'^/wiz/admin/list' })
-        menus.append({"title": "Theme", "url": '/wiz/admin/theme', 'pattern': r'^/wiz/admin/theme' })
+        # menus.append({"title": "Theme", "url": '/wiz/admin/theme', 'pattern': r'^/wiz/admin/theme' })
         menus.append({"title": "Model", "url": '/wiz/admin/model', 'pattern': r'^/wiz/admin/model' })
         menus.append({"title": "Resources", "url": '/wiz/admin/res', 'pattern': r'^/wiz/admin/res' })
         menus.append({"title": "System", "url": '/wiz/admin/system', 'pattern': r'^/wiz/admin/system' })
