@@ -662,6 +662,7 @@ var content_controller = function ($scope, $timeout, $sce) {
             var pd = angular.copy($scope.info);
             pd.version_name = data.version_name;
             pd.version_message = data.version_message;
+            pd.properties = JSON.stringify(pd.properties);
             $.post("/wiz/admin/api/wiz/commit", pd, function (res) {
                 $scope.commit.data = {};
                 $scope.commit.load();
