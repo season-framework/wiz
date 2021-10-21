@@ -48,7 +48,7 @@ class Controller(season.interfaces.wiz.admin.api):
     def info(self, framework):
         app_id = framework.request.segment.get(0, True)
         db = self.wiz
-        info = db.get(id=app_id)
+        info = db.get(id=app_id, version="master")
         if info is None:
             self.status(404)
         self.status(200, info)
