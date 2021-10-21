@@ -16,7 +16,13 @@ class base:
         self.__framework__.response.data.set(session=dict(framework.session))
 
         self.config = framework.config.load('wiz').data
-        self.db = framework.model("wiz", module="wiz")
+        self.wiz = self.db = framework.model("wiz", module="wiz")
+
+        isdevmode = framework.request.query("dev", None)
+        if isdevmode is not None:
+            if isdevmode == "false" : self.wiz.set_dev("false")
+            else: self.wiz.set_dev("true")
+            framework.response.redirect(framework.request.uri())
     
     def status(self, status_code=200, data=dict()):
         res = season.stdClass()

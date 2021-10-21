@@ -669,6 +669,14 @@ var content_controller = function ($scope, $timeout, $sce) {
             });
         };
 
+        $scope.$watch('options.panel', function(next) {
+            if (next == "commit") {
+                $timeout(function() {
+                    $scope.commit.change();
+                });
+            }
+        });
+
         $scope.commit.load();
     });
 

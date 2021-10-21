@@ -10,13 +10,6 @@ class base(season.interfaces.wiz.controller.base):
         menus = []
         if 'topmenus' in self.config:
             menus = list(self.config.topmenus)
-
-        isdevmode = framework.request.query("devmode", None)
-        if isdevmode is not None:
-            is_dev = self.wiz.is_dev()
-            if is_dev: self.wiz.set_dev("false")
-            else: self.wiz.set_dev("true")
-            framework.response.redirect("/wiz/admin/system")
         self.topnav(menus)
         
         menus = []

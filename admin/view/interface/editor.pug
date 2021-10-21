@@ -234,8 +234,8 @@ mixin content()
         div(data-split-pane-divider data-width="0px")
         
         #editor-area(data-split-pane-component)
-            div(ng-show="options.panel == 'commit'" style="height: 100%;")
-                div(style="height: 100%;")
+            div(ng-if="options.panel == 'commit'" style="width: 100%; height: 100%;")
+                div(style="width: 100%; height: 100%;")
                     .code-select.bg-dark.d-flex(style="margin-top: -2px;")
                         a.btn.btn-square.btn-sm.p-2(href="" ng-click="commit.change('kwargs')" ng-class="commit.view == 'kwargs' ? 'btn-white' : 'btn-dark'") Controller
                         a.btn.btn-square.btn-sm.p-2(href="" ng-click="commit.change('api')" ng-class="commit.view == 'api' ? 'btn-white' : 'btn-dark'") API

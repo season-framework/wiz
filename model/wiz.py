@@ -34,7 +34,7 @@ function wiz_devtools() {
 wiz_devtools();
 </script>
 """
-
+        
 class Model(season.core.interfaces.model.MySQL):
     def __init__(self, framework):
         super().__init__(framework)
@@ -42,6 +42,7 @@ class Model(season.core.interfaces.model.MySQL):
         self.namespace = 'wiz'
 
         self.cache = framework.cache
+
         if 'wiz' not in self.cache: 
             self.cache.wiz = season.stdClass()
             self.cache.wiz.dev = season.stdClass()
@@ -58,6 +59,11 @@ class Model(season.core.interfaces.model.MySQL):
             self.DEVMODE = False
         self.updateview = False
         self.wizconfig = config
+
+    def flush(self):
+        self.cache.wiz = season.stdClass()
+        self.cache.wiz.dev = season.stdClass()
+        self.cache.wiz.prod = season.stdClass()
 
     def set_update_view(self, updateview):
         self.updateview = updateview
@@ -235,8 +241,7 @@ class Model(season.core.interfaces.model.MySQL):
 
         reloaderjs = ""
         try:
-            config = framework.config.load("wiz")
-            if config.devtools:
+            if self.is_dev():
                 reloaderjs = RELOADJS.replace("__ID__", id)
         except:
             pass
@@ -250,8 +255,10 @@ class Model(season.core.interfaces.model.MySQL):
         namespace = id + ""
         if len(args) > 1: namespace = args[1]
 
-        if self.DEVMODE: cache = self.cache.wiz.dev
-        else: cache = self.cache.wiz.prod
+        if self.is_dev(): 
+            cache = self.cache.wiz.dev
+        else: 
+            cache = self.cache.wiz.prod
 
         if namespace in cache and self.updateview==False:
             item, namespace, id, html, css, js, api, fn = cache[namespace]

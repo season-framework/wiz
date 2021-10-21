@@ -7,6 +7,7 @@ class Controller(season.interfaces.wiz.admin.api):
         super().__startup__(framework)
 
     def build(self, framework):
+        self.wiz.flush()
         rows = self.wiz.rows(fields="id,namespace", groupby="id,version")
         is_dev = self.wiz.is_dev()
         if is_dev: is_dev = "true"
