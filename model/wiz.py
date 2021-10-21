@@ -38,7 +38,7 @@ wiz_devtools();
 class Model(season.core.interfaces.model.MySQL):
     def __init__(self, framework):
         super().__init__(framework)
-        self.VERSION = "0.1.0"
+        self.VERSION = "0.1.1"
         self.framework = framework 
         self.namespace = 'wiz'
 
@@ -107,27 +107,30 @@ class Model(season.core.interfaces.model.MySQL):
         self.set_update_view(True)
         self.cache.wiz.dev = season.stdClass()
 
-        if 'route' not in values or len(values['route']) == 0:
-            try:
-                self.render(values['id'])
-            except:
-                pass
-        else:
-            try:
-                self.routes()
-            except: 
-                pass
-            
-            try:
-                self.route()
-            except:
-                pass
+        try:
+            if 'route' not in values or len(values['route']) == 0:
+                try:
+                    self.render(values['id'])
+                except:
+                    pass
+            else:
+                try:
+                    self.routes()
+                except: 
+                    pass
+                
+                try:
+                    self.route()
+                except:
+                    pass
 
-            self.framework.request.segment = season.stdClass()
-            try:
-                self.render(values['id'])
-            except:
-                pass
+                self.framework.request.segment = season.stdClass()
+                try:
+                    self.render(values['id'])
+                except:
+                    pass
+        except:
+            pass
 
         return res
 

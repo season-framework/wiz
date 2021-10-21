@@ -58,13 +58,14 @@ class Controller(season.interfaces.wiz.admin.api):
         version = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
         rows = self.wiz.rows(version="master")
-        for row in rows:
+        for i in range(len(rows)):
+            row = rows[i]
             row['version'] = version
             row['version_name'] = version_name
             row['version_message'] = version_message
             del row['updated']
             self.wiz.upsert(row)
-
+            
         self.wiz.flush()
         self.wiz.deploy_version(version)
         self.status(200, True)
