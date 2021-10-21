@@ -19,3 +19,13 @@ mixin layout()
             +navbar
             +content
             +builder
+
+            #modal-message.modal.fade(tabindex="-1")
+                .modal-dialog.modal-sm(role='document')
+                    .modal-content
+                        .modal-body
+                            .modal-title {{modal.config.title}}
+                            div {{modal.config.message}}
+                        .modal-footer
+                            button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Close
+                            button.btn(type='button' class="{{modal.config.btn_class}}" ng-click="modal.config.oncancel()") {{modal.config.btn_title}}

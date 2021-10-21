@@ -38,6 +38,7 @@ wiz_devtools();
 class Model(season.core.interfaces.model.MySQL):
     def __init__(self, framework):
         super().__init__(framework)
+        self.VERSION = "0.1.0"
         self.framework = framework 
         self.namespace = 'wiz'
 
@@ -60,10 +61,35 @@ class Model(season.core.interfaces.model.MySQL):
         self.updateview = False
         self.wizconfig = config
 
+        if 'wiz_deploy_version' not in self.cache:
+            versions = self.rows(groupby="version", orderby="`version` DESC", fields="version,count(*) AS cnt")
+            for i in range(len(versions)):
+                if versions[i]['cnt'] <= 1: continue
+                if versions[i]['version'] == 'master': continue
+                self.cache.wiz_deploy_version = versions[i]['version']
+                break
+            
+    def deploy_version(self, version=None):
+        if version is None:
+            if 'wiz_deploy_version' not in self.cache:
+                return 'master'
+            return self.cache.wiz_deploy_version
+        else:
+            self.cache.wiz_deploy_version = version
+
     def flush(self):
         self.cache.wiz = season.stdClass()
         self.cache.wiz.dev = season.stdClass()
         self.cache.wiz.prod = season.stdClass()
+        
+        versions = self.rows(groupby="version", orderby="`version` DESC", fields="version,count(*) AS cnt")
+        if 'wiz_deploy_version' not in self.cache:
+            versions = self.rows(groupby="version", orderby="`version` DESC", fields="version,count(*) AS cnt")
+            for i in range(len(versions)):
+                if versions[i]['cnt'] <= 1: continue
+                if versions[i]['version'] == 'master': continue
+                self.cache.wiz_deploy_version = versions[i]['version']
+                break
 
     def set_update_view(self, updateview):
         self.updateview = updateview
@@ -79,9 +105,7 @@ class Model(season.core.interfaces.model.MySQL):
     def upsert(self, values, **format):
         res = super().upsert(values, **format)
         self.set_update_view(True)
-        self.cache.wiz = season.stdClass()
         self.cache.wiz.dev = season.stdClass()
-        self.cache.wiz.prod = season.stdClass()
 
         if 'route' not in values or len(values['route']) == 0:
             try:
@@ -202,8 +226,14 @@ class Model(season.core.interfaces.model.MySQL):
                 kwargs['version'] = 'master'
                 data = super().get(**kwargs)
             else:
-                kwargs['version'] = {"op": "!=", "value": "master"}
-                data = super().get(**kwargs, orderby="`version` DESC")
+                _version = self.deploy_version()
+                if _version == 'master':
+                    kwargs['version'] = {"op": "!=", "value": "master"}
+                    data = super().get(**kwargs, orderby="`version` DESC")
+                else:
+                    kwargs['version'] = _version
+                    data = super().get(**kwargs, orderby="`version` DESC")
+
                 if data is None: 
                     kwargs['version'] = 'master'
                     data = super().get(**kwargs)
@@ -326,6 +356,9 @@ class Model(season.core.interfaces.model.MySQL):
             js = dukpy.typescript_compile(js)
             js = str(js)
 
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        item['cachetime'] = timestamp
         cache[namespace] = (item, namespace, id, html, css, js, item['api'], fn)
         cache[id] = (item, namespace, id, html, css, js, item['api'], fn)
+
         return self._view(item, namespace, id, html, css, js, **kwargs), item['api']

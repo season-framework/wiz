@@ -1,0 +1,21 @@
+mixin setting_nav()
+    div(style="height: 100%;")
+        .card-body.p-3(style="height: 100%; overflow: auto;")
+            .tree-container
+                - if settingmenus
+                    - each menu in settingmenus
+                        .root-tree
+                            a.filetree.text-dark(href=menu['url'])
+                                .title.d-flex(class=menu['class'])
+                                    span 
+                                        i.mr-1(class=menu['icon'] style="width: 18px; text-align: center;")
+                                        span= menu['title']
+                            
+                                - if menu.sub
+                                    .sub
+                                        - each sub in menu.sub
+                                            a.filetree.text-dark(href=sub['url'])
+                                                .title.d-flex(class=sub['class'])
+                                                    span 
+                                                        i.mr-1(class=sub['icon'] style="width: 18px; text-align: center;")
+                                                        span= sub['title']

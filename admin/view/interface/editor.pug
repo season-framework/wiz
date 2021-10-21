@@ -35,6 +35,9 @@ mixin codearea(tab)
             div(ng-if="activetab != '{$tab$}' && ['preview'].includes(options.tab.{$tab$}_val) == false" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: rgba(0,0,0,.05); z-index: 9999;")
 
 mixin content()
+    .display-none(style="display: none;")
+        input#import-file(type="file" accept=".json,application/json")
+
     .fixed-top
         header.navbar.navbar-expand-md.navbar-dark
             .container(style="max-width: none;")
@@ -227,9 +230,6 @@ mixin content()
                         a.btn.btn-white.btn-block.mb-3(href="/wiz/export/{{ info.id }}" target="_blank")
                             i.fas.fa-download
                             span.ml-2 Export
-
-                .display-none(style="display: none;")
-                    input#import-file(type="file" accept=".json,application/json")
 
         div(data-split-pane-divider data-width="0px")
         

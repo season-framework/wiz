@@ -13,11 +13,18 @@ class Controller(season.interfaces.wiz.admin.api):
         files = framework.request.files()
         path = framework.request.query("path", True)
         name = framework.request.query("name", True)
+        filepath = framework.request.query("filepath", True)
+        filepath = json.loads(filepath)
+
+        if len(filepath) != len(files):
+            return self.status(400, True)
+
         fs = self.fs.use(path + "/" + name)
-        for file in files:
+        for i in range(len(files)):
             try:
+                file = files[i]
                 if len(file.filename) == 0: continue
-                filename = file.filename
+                filename = filepath[i]
                 fs.write(filename, file)
             except Exception as e:
                 pass
@@ -96,7 +103,7 @@ class Controller(season.interfaces.wiz.admin.api):
         path = framework.request.query("path", True)
         name = framework.request.query("name", True)
 
-        if path == "_system":
+        if path.split("/")[0] == "_system":
             self.status(300, {"path": path, "name": name})
 
         _type = framework.request.query("type", "folder")

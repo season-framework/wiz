@@ -73,6 +73,8 @@ var app = angular.module(
         });
 
         function getFilesWebkitDataTransferItems(dataTransferItems) {
+            let files = [];
+
             function traverseFileTreePromise(item, path = '') {
                 return new Promise(resolve => {
                     if (item.isFile) {
@@ -93,14 +95,15 @@ var app = angular.module(
                 })
             }
 
-            let files = []
+
             return new Promise((resolve, reject) => {
                 let entriesPromises = []
                 for (let it of dataTransferItems)
-                    entriesPromises.push(traverseFileTreePromise(it.webkitGetAsEntry()))
+                    entriesPromises.push(traverseFileTreePromise(it.webkitGetAsEntry()));
+
                 Promise.all(entriesPromises)
                     .then(entries => {
-                        resolve(files)
+                        resolve(files);
                     })
             })
         }

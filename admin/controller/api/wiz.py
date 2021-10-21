@@ -33,6 +33,8 @@ class Controller(season.interfaces.wiz.admin.api):
         if 'id' not in info or info['id'] == 'new':
             self.status(400, "Bad Request")
         info['version'] = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        if 'updated' in info:
+            del info['updated']
         stat, _ = self.db.upsert(info)
         if stat: self.status(200, info['id'])
         self.status(500, info['id'])
