@@ -5,17 +5,19 @@ mixin setting_nav()
                 - if settingmenus
                     - each menu in settingmenus
                         .root-tree
-                            a.filetree.text-dark(href=menu['url'])
-                                .title.d-flex(class=menu['class'])
+                            .filetree.text-dark(class=menu['class'])
+                                .title.d-flex(onclick="location.href='{$ menu.url $}'")
                                     span 
                                         i.mr-1(class=menu['icon'] style="width: 18px; text-align: center;")
                                         span= menu['title']
-                            
-                                - if menu.sub
-                                    .sub
+
+                                .sub
+                                    - if menu.sub
                                         - each sub in menu.sub
-                                            a.filetree.text-dark(href=sub['url'])
-                                                .title.d-flex(class=sub['class'])
-                                                    span 
-                                                        i.mr-1(class=sub['icon'] style="width: 18px; text-align: center;")
-                                                        span= sub['title']
+                                            .root-tree
+                                                .filetree.text-dark(class=sub['class'])
+                                                    .title.d-flex(onclick="location.href='{$ sub.url $}'")
+                                                        span 
+                                                            - if sub['icon']
+                                                                i.mr-1(class=sub['icon'] style="width: 18px; text-align: center;")
+                                                            span= sub['title']

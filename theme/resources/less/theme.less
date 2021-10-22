@@ -392,10 +392,32 @@ iframe {
     white-space: initial;
 }
 
-.page > .content {
+.page>.content {
     min-height: 60vh;
 }
 
 .tox.tox-tinymce.tox-tinymce--toolbar-sticky-off {
     border: none;
+}
+
+*::-webkit-scrollbar-track {
+    background-color: #F5F5F5 !important;
+}
+
+*::-webkit-scrollbar {
+    height: 10px !important;
+    width: 10px !important;
+    background-color: #F5F5F5 !important;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: #354052 !important;
+    background-image: -webkit-linear-gradient(45deg,
+            rgba(255, 255, 255, .2) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, .2) 50%,
+            rgba(255, 255, 255, .2) 75%,
+            transparent 75%,
+            transparent) !important;
 }

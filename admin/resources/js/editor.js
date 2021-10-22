@@ -177,26 +177,6 @@ var content_controller = function ($scope, $timeout, $sce) {
                 $timeout();
             }
 
-            if (res.code == 300) {
-                $scope.status.editor = false;
-                $scope.status.view = "system";
-                if (init) {
-                    if (res.data.name == "config") {
-                        $scope.data.item = res.data;
-                    }
-                } else {
-                    $scope.data.item = res.data;
-                }
-
-                if ($scope.data.item) {
-                    if ($scope.data.item.name == "deployment") {
-                        $scope.event.sysconfig.deployment_list();
-                    }
-                }
-
-                $timeout();
-            }
-
             if (res.code != 200) return cb(res);
 
             if (init) {
@@ -310,29 +290,6 @@ var content_controller = function ($scope, $timeout, $sce) {
         fd.append("name", $scope.data.item.name);
         uploadfile(fd);
     };
-
-
-    // System Configurations
-    $scope.system = {};
-    $scope.system.deployment = {};
-
-    $scope.event.build_wiz = function () {
-        $scope.loaded = false;
-        $timeout();
-        $.post('/wiz/admin/api/wiz/build', {}, function (res) {
-            $scope.loaded = true;
-            $timeout();
-        });
-    }
-
-    $scope.event.sysconfig = {};
-    $scope.event.sysconfig.deployment_list = function () {
-        $.post('/wiz/admin/api/config/deployment_list', {}, function (res) {
-            $scope.system.deployment.history = res.data;
-            $timeout();
-        });
-    }
-
 
     // Initialize
     for (var i = 0; i < $scope.data.tree.length; i++)

@@ -1,0 +1,115 @@
+include wiz/admin/setting/navi
+
+mixin content()
+    .main-panel.container.p-0(style="height: calc(100% - 112px);")
+        div(data-split-pane data-split-pane-properties="properties.root")
+            div(data-split-pane-component data-width="250px")
+                +setting_nav
+
+            div(data-split-pane-divider data-width="1px")
+            
+            div(data-split-pane-component style="height: 100%; overflow: hidden;")
+                .panel-editor(style="height: 100%; overflow: auto;")
+                    .p-4.pr-6.pl-6
+                        .page-header
+                            .row.align-items-center
+                                .col-auto
+                                    h2.page-title Framework Setting
+                                .col-auto.ml-auto.d-print-none
+                                    button.btn.btn-light.ml-2(ng-click="event.save()") Save
+                                    button.btn.btn-light.ml-2(ng-click="event.apply()") Apply
+
+                        .info-form.row.first-child
+                            .col-md-4 
+                                h4.mb-0 Host
+                                span.text-muted Development server host. Defaults to '0.0.0.0'.
+                            .col-md-8.pt-3
+                                input.form-control.text-center(type="text" ng-model="data.framework.host" placeholder="0.0.0.0")
+
+                        .info-form.row
+                            .col-md-4 
+                                h4.mb-0 Port
+                                span.text-muted Development server port. Default to '3000'.
+                            .col-md-8.pt-3
+                                input.form-control.text-center(type="text" ng-model="data.framework.port" placeholder="3000")
+
+                        .info-form.row
+                            .col-md-4 
+                                h4.mb-0 app.secret_key
+                                span.text-muted Session secret key for flask app. Default to 'season-wiz'.
+                            .col-md-8.pt-3
+                                input.form-control.text-center(type="text" ng-model="data.framework.secret_key" placeholder="season-wiz")
+
+                        .info-form.row
+                            .col-md-4 
+                                h4.mb-0 Watch Filter
+                                span.text-muted Whitelist file name pattern for restart server. Defaults to '*'.
+                            .col-md-8.pt-3
+                                input.form-control.text-center(type="text" ng-model="data.framework.watch.pattern" placeholder="*")
+
+                        .info-form.row
+                            .col-md-4 
+                                h4.mb-0 Watch Ignore
+                                span.text-muted Blacklist file name pattern for restart server. Defaults to 'None'.
+                            .col-md-8.pt-3
+                                input.form-control.text-center(type="text" ng-model="data.framework.watch.ignore" placeholder="app/config,websrc/wiz.json")
+
+                        .info-form.row
+                            .col-md-4 
+                                h4.mb-0 Developer Mode
+                                span.text-muted If you set developer mode, wiz devtools activated and socketio using master version. Default to 'False'.
+                            .col-md-8.pt-3.text-center
+                                input(type="checkbox" ng-model="data.framework.dev" ng-true-value="'True'" ng-false-value="'False'")
+
+                        .info-form.row
+                            .col-md-4 
+                                h4.mb-0 Log Level
+                                span.text-muted If you don’t configure logging, default log level is usually ‘warning’.
+                            .col-md-8.pt-3
+                                select.form-select.text-center(ng-model="data.framework.log_level")
+                                    option(value=0) DEBUG
+                                    option(value=1) INFO
+                                    option(value=2) DEV
+                                    option(value=3) WARNING
+                                    option(value=4) ERROR
+                                    option(value=5) CRITICAL
+
+                        .info-form.row.first-child
+                            .col-md-12
+                                h4.mr-2 Build Handler
+                                .text-muted Custom defination for handling build flask app and socketio. 
+                                .text-muted you can use `app` (flask app object) and `socketio` in code area.
+                        
+                        .info-form.row
+                            .col-md-12.pt-3(style="height: 60vh; overflow: hidden;")
+                                div(ng-model="data.framework.build" ui-monaco-opts="monaco_properties" ui-monaco)
+
+                        .info-form.row.first-child
+                            .col-md-12
+                                h4.mr-2 Error Handler
+                                .text-muted Custom defination for handling error. `def error(framework, err)`. 
+                                .text-muted you can use `framework` (season flask object) and err (Python Exception Object) in code area.
+
+                        .info-form.row
+                            .col-md-12.pt-3(style="height: 60vh; overflow: hidden;")
+                                div(ng-model="data.framework.on_error" ui-monaco-opts="monaco_properties" ui-monaco)
+
+                        .info-form.row.first-child
+                            .col-md-12
+                                h4.mr-2 Resource Handler
+                                .text-muted Custom defination for handling resources. 
+                                .text-muted define `def build_resource(resource_dirpath, resource_filepath): return FlaskResponse` method in code area.
+
+                        .info-form.row
+                            .col-md-12.pt-3(style="height: 60vh; overflow: hidden;")
+                                div(ng-model="data.framework.build_resource" ui-monaco-opts="monaco_properties" ui-monaco)
+
+                        .text-center.mt-4
+                            button.btn.btn-light.ml-2(ng-click="event.save()") Save
+                            button.btn.btn-light.ml-2(ng-click="event.apply()") Apply
+
+    .bg-dark.text-center(ng-if="!loaded" style="width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 99999; padding-top: 40vh;")
+        .spinner-grow.text-white(style="width: 60px; height: 60px;")
+                               
+include wiz/theme/layout
++layout

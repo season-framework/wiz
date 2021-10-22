@@ -10,6 +10,7 @@ class Controller(season.interfaces.wiz.admin.api):
         res['deploy_version'] = framework.cache.wiz_deploy_version
         res['prod'] = []
         res['dev'] = []
+        res['etc'] = []
 
         if 'wiz' in framework.cache:
             if 'prod' in framework.cache.wiz:
@@ -40,5 +41,13 @@ class Controller(season.interfaces.wiz.admin.api):
                     obj['key'] = key
                     obj['cachetime'] = item['cachetime']
                     res['dev'].append(obj)
-            
+        
+        for key in framework.cache:
+            if key in ['wiz', 'wiz_deploy_version']:
+                continue
+            obj = dict()
+            obj['key'] = key
+            obj['type'] = type(framework.cache[key])
+            res['etc'].append(obj)
+
         self.status(200, res)

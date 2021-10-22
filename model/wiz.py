@@ -38,7 +38,13 @@ wiz_devtools();
 class Model(season.core.interfaces.model.MySQL):
     def __init__(self, framework):
         super().__init__(framework)
-        self.VERSION = "0.1.1"
+        try:
+            fs = framework.model("wizfs", module="wiz").use("modules/wiz")
+            opts = fs.read_json("wiz-package.json")
+        except:
+            opts = {}
+        self.package = season.stdClass(opts)
+
         self.framework = framework 
         self.namespace = 'wiz'
 
@@ -51,7 +57,6 @@ class Model(season.core.interfaces.model.MySQL):
 
         config = framework.config.load("wiz")
         self.tablename = config.get("table", "wiz")
-        self.wizsrc = config.get("wizsrc", os.path.join(framework.core.PATH.MODULES, "wiz", "wizsrc"))
         try:
             self.DEVMODE = framework.request.cookies("season-wiz-devmode", "false")
             if self.DEVMODE == "false": self.DEVMODE = False
@@ -91,6 +96,22 @@ class Model(season.core.interfaces.model.MySQL):
                 self.cache.wiz_deploy_version = versions[i]['version']
                 break
 
+    def build(self):
+        rows = self.rows(fields="id,namespace", groupby="id")
+        is_dev = self.is_dev()
+        if is_dev: is_dev = "true"
+        else: is_dev = "false"
+        self.set_dev("false")
+        self.set_update_view(True)
+        for row in rows:
+            try:
+                namespace = row['namespace']
+                self.render(namespace)
+            except:
+                pass
+        self.set_dev(is_dev)
+        return True
+
     def set_update_view(self, updateview):
         self.updateview = updateview
     
@@ -102,8 +123,13 @@ class Model(season.core.interfaces.model.MySQL):
         if DEVMODE == "false": self.DEVMODE = False
         else: DEVMODE = True
 
+    def upsert_notbuild(self, values, **format):
+        res = super().upsert(values, **format)
+        return res
+
     def upsert(self, values, **format):
         res = super().upsert(values, **format)
+
         self.set_update_view(True)
         self.cache.wiz.dev = season.stdClass()
 
@@ -293,16 +319,18 @@ class Model(season.core.interfaces.model.MySQL):
         else: 
             cache = self.cache.wiz.prod
 
+        _prelogger = self.framework.log
+        def _logger(*args):
+            _prelogger(f"\033[94m[{namespace}]\033[0m", *args)
+        self.framework.log = _logger
+
         if namespace in cache and self.updateview==False:
             item, namespace, id, html, css, js, api, fn = cache[namespace]
 
-            _prelogger = self.framework.log
-            def _logger(*args):
-                _prelogger(f"[{namespace}]", *args)
-            self.framework.log = _logger
-
             _kwargs = fn['get'](self.framework, kwargs)
             kwargs = _kwargs
+
+            self.framework.log = _prelogger
             return self._view(item, namespace, id, html, css, js, **kwargs), api
 
         item = self.get(id=id)
@@ -312,10 +340,6 @@ class Model(season.core.interfaces.model.MySQL):
             return None
 
         if namespace == id: namespace = item['namespace']
-        _prelogger = self.framework.log
-        def _logger(*args):
-            _prelogger(f"[{namespace}]", *args)
-        self.framework.log = _logger
 
         id = item['id']
         html = item["html"]
@@ -364,4 +388,5 @@ class Model(season.core.interfaces.model.MySQL):
         cache[namespace] = (item, namespace, id, html, css, js, item['api'], fn)
         cache[id] = (item, namespace, id, html, css, js, item['api'], fn)
 
+        self.framework.log = _prelogger
         return self._view(item, namespace, id, html, css, js, **kwargs), item['api']

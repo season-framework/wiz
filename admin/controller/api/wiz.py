@@ -8,19 +8,7 @@ class Controller(season.interfaces.wiz.admin.api):
 
     def build(self, framework):
         self.wiz.flush()
-        rows = self.wiz.rows(fields="id,namespace", groupby="id,version")
-        is_dev = self.wiz.is_dev()
-        if is_dev: is_dev = "true"
-        else: is_dev = "false"
-        self.wiz.set_dev("false")
-        for row in rows:
-            try:
-                namespace = row['namespace']
-                self.wiz.render(namespace)
-            except:
-                pass
-
-        self.wiz.set_dev(is_dev)
+        self.wiz.build()
         self.status(200, True)
 
     def commit_log(self, framework):

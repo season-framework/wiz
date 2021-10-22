@@ -3,7 +3,7 @@ include wiz/admin/setting/navi
 mixin content()
     .main-panel.container.p-0(style="height: calc(100% - 112px);")
         div(data-split-pane data-split-pane-properties="properties.root")
-            div(data-split-pane-component data-width="360px")
+            div(data-split-pane-component data-width="250px")
                 +setting_nav
 
             div(data-split-pane-divider data-width="1px")
@@ -51,6 +51,24 @@ mixin content()
                                     td.text-center.width-1 {{item.version_name}}
                                         span.text-muted.ml-1 ({{item.version}})
                                     td.text-center.width-1 {{item.cachetime}}
+                                    td
+
+                        .page-header.mt-5
+                            .row.align-items-center
+                                .col-auto
+                                    h2.page-title Framework Cache
+                        
+                        table.table.table-hover.board-table
+                            thead 
+                                tr
+                                    th.text-center.width-1.pr-5.pl-5 Cache Key
+                                    th.text-center.width-1 Variable Type
+                                    th.text-center
+
+                            tbody
+                                tr(ng-repeat="item in data.status.etc")
+                                    td.width-1 {{item.key}}
+                                    td.text-center.width-1(ng-bind-html="item.type")
                                     td
                                     
                         

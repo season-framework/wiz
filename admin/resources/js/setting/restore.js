@@ -36,7 +36,17 @@ var content_controller = function ($scope, $timeout, $sce) {
             $scope.modal.message({ title: 'Error', message: 'Version Name required', btn_class: "btn-red", btn_title: "Submit", oncancel: $scope.modal.message.hide });
             return;
         }
-        $('#import-file').click();
+
+        if ($scope.data.restore.version_name == 'master') {
+            $scope.modal.message({
+                title: 'Restore Master', message: "Are you sure to restore 'master' version?", btn_class: "btn-red", btn_title: "Restore", oncancel: function () {
+                    $('#import-file').click();
+                }
+            });
+        } else {
+            $('#import-file').click();
+        }
+
     }
 
     $scope.event.set_version = function (item) {
@@ -58,7 +68,6 @@ var content_controller = function ($scope, $timeout, $sce) {
                 });
             }
         });
-
     }
 
     $scope.event.deployment_list();

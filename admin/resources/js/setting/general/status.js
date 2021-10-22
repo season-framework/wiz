@@ -5,8 +5,6 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.status = {};
     $scope.data = {};
 
-
-
     $scope.event.build_wiz = function () {
         $scope.loaded = false;
         $timeout();
@@ -17,6 +15,4 @@ var content_controller = function ($scope, $timeout, $sce) {
     }
 
     $scope.data.backup = "master";
-
-
 };

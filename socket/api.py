@@ -1,9 +1,13 @@
 class Controller:
     def __init__(self, framework):
-        # set namespaces
         self.namespaces = {}
+        dev = framework.config.load().get("dev", False)
         wiz = framework.model("wiz", module="wiz")
-        wizsocs = wiz.rows(fields="namespace,socketio", where="`socketio` is not Null")
+        if dev:
+            version = "master"
+        else:
+            version = wiz.deploy_version()
+        wizsocs = wiz.rows(version=version, fields="namespace,socketio", where="`socketio` is not Null")
         
         _prelogger = framework.log
 
@@ -24,7 +28,5 @@ class Controller:
                     ctrl = fn['Controller']
                 except:
                     ctrl = None
-            self.namespaces[namespace] = ctrl
-
-    def response(self, framework, data):
-        pass
+            if ctrl is not None:
+                self.namespaces[namespace] = ctrl

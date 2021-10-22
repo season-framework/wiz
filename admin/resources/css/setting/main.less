@@ -30,14 +30,20 @@ body {
         text-decoration: underline;
     }
 
-    .title.active {
+    &.active>.title {
         font-family: MAIN-EB;
     }
 
     .sub {
+        // display: none;
         padding-left: 16px;
     }
+
+    &.active .sub {
+        // display: block;
+    }
 }
+
 
 .main-panel {
     border: 1px solid #aaa;

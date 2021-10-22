@@ -11,7 +11,10 @@ class Controller(season.interfaces.wiz.admin.api):
     def restore(self, framework):
         version_name = framework.request.query("version_name", True)
         version_message = framework.request.query("version_message", "")
-        version = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        if version_name == 'master':
+            version = 'master'
+        else:
+            version = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 
         rows = framework.request.query("data", True)
         rows = json.loads(rows)
@@ -21,10 +24,12 @@ class Controller(season.interfaces.wiz.admin.api):
             row['version_name'] = version_name
             row['version_message'] = version_message
             del row['updated']
-            self.wiz.upsert(row)
+            self.wiz.upsert_notbuild(row)
 
-        self.wiz.flush()
-        self.wiz.deploy_version(version)
+        if version != "master":
+            self.wiz.flush()
+            self.wiz.deploy_version(version)
+            self.wiz.build()
 
         self.status(200, True)
 
@@ -64,10 +69,11 @@ class Controller(season.interfaces.wiz.admin.api):
             row['version_name'] = version_name
             row['version_message'] = version_message
             del row['updated']
-            self.wiz.upsert(row)
+            self.wiz.upsert_notbuild(row)
             
         self.wiz.flush()
         self.wiz.deploy_version(version)
+        self.wiz.build()
         self.status(200, True)
 
     def delete(self, framework):
