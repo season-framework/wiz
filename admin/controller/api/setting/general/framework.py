@@ -117,7 +117,7 @@ class Controller(season.interfaces.wiz.admin.api):
         # error handler
         code = package.framework["on_error"]
         code = addtabs(code, 1)
-        script = "def on_error(framework, e):\n"
+        script = "def on_error(framework, err):\n"
         script += code + "\n"
         script += "    pass"
         configpy.append(script)

@@ -26,7 +26,7 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.event.apply = function () {
         var data = angular.copy($scope.data);
         $.post('/wiz/admin/api/setting/general/framework/update', { data: JSON.stringify(data, null, 4) }, function (res) {
-            $.post('/wiz/admin/api/setting/general/apply', {}, function (res) {
+            $.post('/wiz/admin/api/setting/general/framework/apply', {}, function (res) {
                 toastr.success("Applied");
             });
         });
