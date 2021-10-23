@@ -23,6 +23,19 @@ var content_controller = function ($scope, $timeout, $sce) {
         });
     }
 
+    function shortcuts() {
+        $(window).unbind();
+        shortcutjs(window, {
+            'Ctrl KeyS': function (ev) {
+                $scope.event.save();
+                ev.preventDefault();
+            }
+        });
+    }
+
+    shortcuts();
+    window.addEventListener("focus", shortcuts, false);
+    
     $scope.event.apply = function () {
         var data = angular.copy($scope.data);
         $.post('/wiz/admin/api/setting/general/framework/update', { data: JSON.stringify(data, null, 4) }, function (res) {
