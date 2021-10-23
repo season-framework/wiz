@@ -117,16 +117,7 @@ class Controller(season.interfaces.wiz.admin.base):
             pass
         cate = framework.request.query("category", category[0])
 
-        theme = season.stdClass()
-        try:
-            theme = self.config.theme
-        except:
-            pass
-
-        if 'default' not in theme:
-            theme.default = season.stdClass()
-            theme.default.module = "wiz/theme"
-            theme.default.view = "layout-wiz.pug"
+        theme = framework.model("wiz", module="wiz").themes()
 
         if info is None:
             info = dict()
@@ -158,8 +149,5 @@ class Controller(season.interfaces.wiz.admin.base):
             self.db.insert(info)
             framework.response.redirect("editor/" + newid)
         
-        thememodule = None
-        if 'thememodule' in self.config:
-            thememodule = self.config.thememodule
-        self.exportjs(app_id=app_id, category=category, theme=theme, thememodule=thememodule)
+        self.exportjs(app_id=app_id, category=category, theme=theme)
         framework.response.render('interface/editor.pug', category=category, theme=theme)

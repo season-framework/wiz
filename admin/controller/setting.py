@@ -1,5 +1,7 @@
 import season
 import sys
+import requests
+import json
 
 class Controller(season.interfaces.wiz.admin.base):
 
@@ -10,8 +12,8 @@ class Controller(season.interfaces.wiz.admin.base):
         menus = []
         menus.append({"url": "/wiz/admin/setting/general_status", "icon": "fas fa-cog", "title": "General", 'pattern': r'^/wiz/admin/setting/general', "sub": [
             {"url": "/wiz/admin/setting/general_status", "icon": "fas fa-caret-right", "title": "System Status"},
-            {"url": "/wiz/admin/setting/general_framework", "icon": "fas fa-caret-right", "title": "Framework Setting"}
-            # {"url": "/wiz/admin/setting/general_wiz", "icon": "fas fa-caret-right", "title": "WIZ Setting"}
+            {"url": "/wiz/admin/setting/general_framework", "icon": "fas fa-caret-right", "title": "Framework Setting"},
+            {"url": "/wiz/admin/setting/general_wiz", "icon": "fas fa-caret-right", "title": "WIZ Setting"}
         ]})
         menus.append({"url": "/wiz/admin/setting/deploy", "icon": "fas fa-cloud-download-alt", "title": "Deploy & Backup"})
         menus.append({"url": "/wiz/admin/setting/restore", "icon": "fas fa-history", "title": "Restore"})
@@ -31,7 +33,25 @@ class Controller(season.interfaces.wiz.admin.base):
 
     def general_status(self, framework):
         self.js('js/setting/general/status.js')
-        framework.response.render('setting/general/status.pug', is_dev=self.wiz.is_dev())
+        isupdate = False
+        latest_version = "Unknown"
+        try:
+            packageinfo = json.loads(requests.get("https://raw.githubusercontent.com/season-framework/season-flask-wiz/main/wiz-package.json").text)
+            latest_version = packageinfo['version']
+            versioninfo = packageinfo['version'].split(".")
+            wizversion = self.db.package.version.split(".")
+            if int(wizversion[0]) < int(versioninfo[0]):
+                isupdate = True
+            if int(wizversion[0]) == int(versioninfo[0]):
+                if int(wizversion[1]) < int(versioninfo[1]):
+                    isupdate = True
+                if int(wizversion[1]) == int(versioninfo[1]):
+                    if int(wizversion[2]) < int(versioninfo[2]):
+                        isupdate = True
+        except:
+            pass
+        
+        framework.response.render('setting/general/status.pug', is_dev=self.wiz.is_dev(), latest_version=latest_version, isupdate=isupdate)
 
     def general_framework(self, framework):
         self.js('js/setting/general/framework.js')
@@ -39,8 +59,8 @@ class Controller(season.interfaces.wiz.admin.base):
 
     def general_wiz(self, framework):
         self.js('js/setting/general/wiz.js')
+        self.exportjs(themes=self.db.themes())
         framework.response.render('setting/general/wiz.pug', is_dev=self.wiz.is_dev())
-
 
     def deploy(self, framework):
         self.js('js/setting/deploy.js')

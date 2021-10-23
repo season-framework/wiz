@@ -13,10 +13,12 @@ class base:
         self.__framework__.response.data.set(css=self._css)
         self.__framework__.response.data.set(js=self._js)
         self.__framework__.response.data.set(exportjs=self._exportjs)
-        self.__framework__.response.data.set(session=dict(framework.session))
 
-        self.config = framework.config.load('wiz').data
+        self._config = framework.config.load('wiz')
+        self.config = self._config.data
         self.wiz = self.db = framework.model("wiz", module="wiz")
+
+        self.exportjs(DEVTOOLS=self._config.get("devtools", False))
 
         isdevmode = framework.request.query("dev", None)
         if isdevmode is not None:

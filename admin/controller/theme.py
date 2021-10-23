@@ -1,4 +1,6 @@
+import os
 import season
+import shutil
 
 class Controller(season.interfaces.wiz.admin.base):
 
@@ -6,10 +8,20 @@ class Controller(season.interfaces.wiz.admin.base):
         super().__startup__(framework)
 
     def __default__(self, framework):
-        response = framework.response
-        return response.redirect('/wiz/admin/theme/list')
+        self.css('css/editor.less')
+        self.js('js/theme/editor.js')
+        BASEPATH = framework.config().load("wiz").get("themepath", "themes")
+        fs = framework.model("wizfs", module="wiz").use(BASEPATH)
 
-    def list(self, framework):
-        self.css('css/theme/list.less')
-        self.js('js/theme/list.js')
-        return framework.response.render('theme/list.pug')
+        try:
+            os.makedirs(fs.abspath("."))
+        except:
+            pass
+
+        themes = fs.list()
+        
+        target = []
+        for theme in themes:
+            target.append({"path": BASEPATH, "name": theme})
+        self.exportjs(target=target, BASEPATH=BASEPATH)
+        return framework.response.render('theme/editor.pug')

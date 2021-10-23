@@ -22,13 +22,17 @@ mixin content()
                             .col-md-8.text-center
                                 a(href="https://github.com/season-framework/season-flask-wiz" target="_blank")
                                     h4= wiz.package.version
+                                        - if isupdate
+                                            span.text-muted.ml-2
+                                                i.fas.fa-arrow-circle-right
+                                            span.text-muted.ml-2 {$ latest_version $}
 
                         .info-form.row
                             .col-md-4 
                                 h4 SEASON Flask Framework
                             .col-md-8.text-center
                                 a(href="https://github.com/season-framework/season-flask" target="_blank")
-                                    h4= SEASON_VERSION
+                                    h4 SEASON_VERSION
 
                         .info-form.row
                             .col-md-4 

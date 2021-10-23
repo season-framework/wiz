@@ -23,7 +23,8 @@ class Controller:
         self.room_connection = dict()
 
     def __startup__(self, framework, _):
-        config = framework.config.load("wiz")
+        self.config = config = framework.config.load("wiz")
+        self.devtools = config.get("devtools", False)
         try:
             config.acl(framework)
         except:
@@ -49,7 +50,7 @@ class Controller:
         return msg
 
     def connect(self, framework, _):
-        config = framework.config.load("wiz")
+        config = self.config
         sid = framework.flask.request.sid
         self.session[sid] = season.stdClass()
         self.session[sid].sid = sid
@@ -57,11 +58,13 @@ class Controller:
         msg = dict()
         msg["type"] = "connect"
         msg["sid"] = sid
-        framework.socket.emit("connect", msg, to=sid)
+
+        if self.devtools:
+            framework.socket.emit("connect", msg, to=sid)
 
     def join(self, framework, data):
-        if framework.flask.request.sid not in self.session:
-            return
+        if framework.flask.request.sid not in self.session: return
+        if self.devtools: return
         
         sid = framework.flask.request.sid
         room = data["id"]
@@ -79,6 +82,7 @@ class Controller:
         framework.socket.emit("message", msg, to=room, broadcast=True)
 
     def edit(self, framework, data):
+        if self.devtools: return
         sid = framework.flask.request.sid
         if sid not in self.session:
             return
@@ -88,6 +92,7 @@ class Controller:
         framework.socket.emit("message", data, to=room, broadcast=True)
 
     def leave(self, framework, data):
+        if self.devtools: return
         if framework.flask.request.sid not in self.session:
             return
         
@@ -104,6 +109,7 @@ class Controller:
         framework.socket.emit("message", msg, to=room, broadcast=True)
 
     def disconnect(self, framework, _):
+        if self.devtools: return
         if framework.flask.request.sid not in self.session:
             return
         

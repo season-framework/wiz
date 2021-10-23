@@ -1,5 +1,7 @@
 import season
-import datetime
+from werkzeug.exceptions import HTTPException
+import flask
+import flask_socketio
 
 build_resource = """cache = season.cache
 if 'resources' not in cache:
@@ -151,10 +153,21 @@ class Controller(season.interfaces.wiz.admin.api):
         package = season.stdClass(package)
 
         fs = framework.model("wizfs", module="wiz").use("app/config")
+        configpy = None
         try:
             configpy = self.configpy(package)
-            fs.write("config.py", configpy)
         except Exception as e:
             self.status(500, str(e))
-        
+
+        if configpy is None:
+            self.status(500, "wiz.py not created")
+
+        try:
+            _tmp = {'config': None}
+            exec(configpy, _tmp)
+            configtest = _tmp['config']
+        except Exception as e:
+            self.status(500, str(e))
+
+        fs.write("config.py", configpy)
         self.status(200, True)

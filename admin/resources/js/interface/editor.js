@@ -195,10 +195,7 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.math = Math;
 
     $scope.category = category;
-    $scope.theme = [];
-    for (var key in theme) {
-        $scope.theme.push(key);
-    }
+    $scope.theme = theme;
 
     $scope.tinymce_opt = $scope.tinymce({});
     $scope.tinymce_opt.onLoad = function (editor) {
@@ -291,7 +288,8 @@ var content_controller = function ($scope, $timeout, $sce) {
 
             for (var i = 0; i < tabs.length; i++) {
                 var tab = tabs[i];
-                socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
+                if (DEVTOOLS)
+                    socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
             }
 
             if (cb) return cb(res);
@@ -582,9 +580,9 @@ var content_controller = function ($scope, $timeout, $sce) {
                 $scope.info.version_name = "master";
                 $scope.info.version_message = "";
                 $scope.commit.target.selected = $scope.info;
-                $scope.commit.change();                        
+                $scope.commit.change();
             }
-                
+
             $timeout();
         }
 
@@ -669,9 +667,9 @@ var content_controller = function ($scope, $timeout, $sce) {
             });
         };
 
-        $scope.$watch('options.panel', function(next) {
+        $scope.$watch('options.panel', function (next) {
             if (next == "commit") {
-                $timeout(function() {
+                $timeout(function () {
                     $scope.commit.change();
                 });
             }
@@ -691,99 +689,14 @@ var content_controller = function ($scope, $timeout, $sce) {
     var ansi_up = new AnsiUp();
     var socket = io("/wiz");
 
-    socket.on("connect", function (data) {
-        if (!data) return;
-        $scope.session.id = data.sid;
-        socket.emit("join", { id: app_id });
-    });
-
     $scope.session = {};
     $scope.session.cache = {};
 
-    var doupdate = function () {
-        var keys = Object.keys($scope.session.cache);
-        if (keys.length == 0) {
-            setTimeout(doupdate, 200);
-            return;
-        }
-
-        $scope.updating = true;
-
-        for (var i = 0; i < keys.length; i++) {
-            var key = keys[i]
-            var code = $scope.session.cache[key];
-            $scope.info[key] = code;
-            delete $scope.session.cache[key];
-        }
-
-        $timeout(function () {
-            $timeout(function () {
-                $scope.updating = false;
-                doupdate();
-            });
-        });
-    }
-
-    doupdate();
-
-    socket.time = 0;
-    socket.limit = 2000;
-
-    for (var i = 0; i < tabs.length; i++) {
-        function watcher(tab) {
-            $scope.$watch("info." + tab, function () {
-                if (!$scope.info) return;
-                if ($scope.updating) return;
-                var isstart = new Date().getTime() - socket.time;
-                if (isstart > socket.limit) {
-                    socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
-                    socket.time = new Date().getTime();
-                    return;
-                }
-
-                socket.time = new Date().getTime();
-                $timeout(function () {
-                    var now = new Date().getTime();
-                    var diff = now - socket.time;
-                    if (diff > socket.limit) {
-                        socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
-                    }
-                }, socket.limit);
-            });
-        }
-        var tab = tabs[i];
-        watcher(tab);
-    }
-
-    $scope.$watch("info.id", function (next, prev) {
-        if (!prev) return;
-        if (!$scope.info) return;
-        socket.emit("leave", { id: prev });
-        socket.emit("join", { id: next });
-    });
-
-    $scope.$watch("info.title", function (next, prev) {
-        if (!$scope.tree_selected) return;
-        $scope.tree_selected.title = next;
-        $timeout();
-    });
-
-    $scope.$watch("info.namespace", function (next, prev) {
-        if (!$scope.tree_selected) return;
-        $scope.tree_selected.namespace = next;
-        $timeout();
-    });
-
-    socket.on("message", function (data) {
-        if (data.type == "status") {
-            $scope.session.users = data.users;
-            $timeout();
-        } else if (data.type == "edit") {
-            if (data.room != app_id) return;
-            if (data.sid == $scope.session.id) return;
-            var tab = data.tab;
-            var code = data.data;
-            $scope.session.cache[tab] = code;
+    socket.on("connect", function (data) {
+        if (!data) return;
+        $scope.session.id = data.sid;
+        if (DEVTOOLS) {
+            socket.emit("join", { id: app_id });
         }
     });
 
@@ -797,4 +710,94 @@ var content_controller = function ($scope, $timeout, $sce) {
             element.scrollTop = element.scrollHeight - element.clientHeight;
         });
     });
+
+    if (DEVTOOLS) {
+        var doupdate = function () {
+            var keys = Object.keys($scope.session.cache);
+            if (keys.length == 0) {
+                setTimeout(doupdate, 200);
+                return;
+            }
+
+            $scope.updating = true;
+
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i]
+                var code = $scope.session.cache[key];
+                $scope.info[key] = code;
+                delete $scope.session.cache[key];
+            }
+
+            $timeout(function () {
+                $timeout(function () {
+                    $scope.updating = false;
+                    doupdate();
+                });
+            });
+        }
+
+        doupdate();
+
+        socket.time = 0;
+        socket.limit = 2000;
+
+        for (var i = 0; i < tabs.length; i++) {
+            function watcher(tab) {
+                $scope.$watch("info." + tab, function () {
+                    if (!$scope.info) return;
+                    if ($scope.updating) return;
+                    var isstart = new Date().getTime() - socket.time;
+                    if (isstart > socket.limit) {
+                        socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
+                        socket.time = new Date().getTime();
+                        return;
+                    }
+
+                    socket.time = new Date().getTime();
+                    $timeout(function () {
+                        var now = new Date().getTime();
+                        var diff = now - socket.time;
+                        if (diff > socket.limit) {
+                            socket.emit("edit", { tab: tab, data: $scope.info[tab], room: app_id });
+                        }
+                    }, socket.limit);
+                });
+            }
+            var tab = tabs[i];
+            watcher(tab);
+        }
+
+        $scope.$watch("info.id", function (next, prev) {
+            if (!prev) return;
+            if (!$scope.info) return;
+            socket.emit("leave", { id: prev });
+            socket.emit("join", { id: next });
+        });
+
+        $scope.$watch("info.title", function (next, prev) {
+            if (!$scope.tree_selected) return;
+            $scope.tree_selected.title = next;
+            $timeout();
+        });
+
+        $scope.$watch("info.namespace", function (next, prev) {
+            if (!$scope.tree_selected) return;
+            $scope.tree_selected.namespace = next;
+            $timeout();
+        });
+
+        socket.on("message", function (data) {
+            if (data.type == "status") {
+                $scope.session.users = data.users;
+                $timeout();
+            } else if (data.type == "edit") {
+                if (data.room != app_id) return;
+                if (data.sid == $scope.session.id) return;
+                var tab = data.tab;
+                var code = data.data;
+                $scope.session.cache[tab] = code;
+            }
+        });
+    }
+
 };

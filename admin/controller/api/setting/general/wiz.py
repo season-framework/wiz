@@ -1,5 +1,7 @@
 import season
-
+import pymysql
+import json
+from werkzeug.exceptions import HTTPException
 
 class Controller(season.interfaces.wiz.admin.api):
 
@@ -35,70 +37,103 @@ class Controller(season.interfaces.wiz.admin.api):
 
         # config/config.py
         configpy = []
-        configpy.append(f"import flask")
         configpy.append(f"import season")
-        configpy.append(f"import os")
-        configpy.append(f"")
         configpy.append(f"config = season.stdClass()")
         configpy.append(f"")
-        configpy.append(f"config.dev = {package.framework.dev}")
-        configpy.append(f"config.host = '{package.framework.host}'")
-        configpy.append(f"config.port = {package.framework.port}")
-        configpy.append(f"config.log_level = {package.framework.log_level}")
+        configpy.append(f"config.devtools = {package.wiz.devtools}")
+        configpy.append(f"config.themepath = 'modules/themes'")
+        try:
+            if package.wiz.theme.default is not None:
+                configpy.append(f"config.theme_default = '{package.wiz.theme.default}'")
+        except:
+            pass
         configpy.append(f"")
-        configpy.append("config.jinja_variable_start_string = '{$'")
-        configpy.append("config.jinja_variable_end_string = '$}'")
+        configpy.append(f"config.database = season.stdClass()")
+        configpy.append(f"config.database.type = 'mysql'")
+        configpy.append(f"config.database.host = '{package.wiz.database.host}'")
+        configpy.append(f"config.database.port = {package.wiz.database.port}")
+        configpy.append(f"config.database.user = '{package.wiz.database.user}'")
+        configpy.append(f"config.database.password = '{package.wiz.database.password}'")
+        configpy.append(f"config.database.database = '{package.wiz.database.database}'")
+        configpy.append(f"config.database.charset = '{package.wiz.database.charset}'")
+        configpy.append(f"config.database.prefix = '{package.wiz.database.prefix}'")
         configpy.append(f"")
-        configpy.append(f"config.watch = season.stdClass()")
-        configpy.append(f"config.watch.pattern = '{package.framework.watch.pattern.replace(' ', '')}'")
-        configpy.append(f"config.watch.ignore = '{package.framework.watch.ignore.replace(' ', '')}'")
-        configpy.append(f"")
-        configpy.append(f"config.filter = ['indexfilter']")
+        configpy.append("config.pug = season.stdClass()")
+        configpy.append("config.pug.variable_start_string = '{$'")
+        configpy.append("config.pug.variable_end_string = '$}'")
         configpy.append(f"")
 
-        # build hanlder
-        secret_key = package.framework['secret_key']
-        if secret_key is None or len(secret_key) == 0: secret_key = "season-wiz"
-        code = package.framework["build"]
-        code = addtabs(code, 2)
-        script = "def build(app, socketio):\n"
-        script = script + f"    try:\n{code}\n    except:\n        pass\n"
-        script = script + f"    app.secret_key = '{secret_key}'"
-        configpy.append(script)
-        configpy.append("config.build = build")
+
+        category = package.wiz.category.split("\n")
+        makecategory = []
+        for cate in category:
+            _cate = cate.split(":")
+            if len(_cate) == 1:
+                _cate[0] = _cate[0].strip()
+                makecategory.append({"id": _cate[0], "title": _cate[0]})
+            if len(_cate) == 2:
+                _cate[0] = _cate[0].strip()
+                _cate[1] = _cate[1].strip()
+                makecategory.append({"id": _cate[0], "title": _cate[1]})
+        category = json.dumps(makecategory)
+        configpy.append(f"config.category = {category}")
+        configpy.append(f"")
+
+        topmenus = package.wiz.topmenus.split("\n")
+        maketopmenus = []
+        for topmenu in topmenus:
+            _topmenu = topmenu.split(":")
+            if len(_topmenu) == 1:
+                _topmenu[0] = _topmenu[0].strip()
+                maketopmenus.append({"title": _topmenu[0], "url": ""})
+            if len(_topmenu) == 2:
+                _topmenu[0] = _topmenu[0].strip()
+                _topmenu[1] = _topmenu[1].strip()
+                maketopmenus.append({"title": _topmenu[0], "url": _topmenu[1]})
+        topmenus = json.dumps(maketopmenus)
+        configpy.append(f"config.topmenus = {topmenus}")
+        configpy.append(f"")
+
+        code = package.wiz.uid
+        configpy.append(code)
+        configpy.append("config.uid = uid")
         configpy.append("")
 
-        # error handler
-        code = package.framework["on_error"]
-        code = addtabs(code, 1)
-        script = "def on_error(framework, e):\n"
-        script += code + "\n"
-        script += "    pass"
-        configpy.append(script)
-        configpy.append("config.on_error = on_error")
+        code = package.wiz.acl
+        configpy.append(code)
+        configpy.append("config.acl = acl")
         configpy.append("")
 
-        # resource handler
-        code = package.framework["build_resource"]
-        code = addtabs(code, 2)
-        script  = f"def get_resource_handler():\n"
-        script += f"    try:\n"
-        script += code + "\n"
-        script += f"        return build_resource\n"
-        script += f"    except:\n"
-        script += f"        pass\n"
-        script += f"    return None\n"
-        
-        configpy.append(script)
-        configpy.append("config.build_resource = get_resource_handler()")
-        configpy.append("")
-        
         configpy = "\n".join(configpy)
         return configpy
 
-    def apply(self, framework):
-        self.status(200, True)
-        
+    def connect_test(self, framework):
+        config = framework.request.query()
+        config = season.stdClass(config)
+        dbconfig = season.stdClass()
+        dbconfig.host = config.host
+        dbconfig.port = int(config.port)
+        dbconfig.user = config.user
+        dbconfig.password = config.password
+        dbconfig.charset = config.charset
+        dbconfig.database = config.database
+        tablename = config.prefix
+
+        err = None
+        rows = []
+        try:
+            con = pymysql.connect(**dbconfig)
+            cursor = con.cursor(pymysql.cursors.DictCursor)
+            cursor.execute(f"SHOW CREATE TABLE `{tablename}`")
+            rows = cursor.fetchall()
+            rows = rows[0]
+        except Exception as e:
+            err = e
+        if err is not None:  
+            self.status(500, err)
+        self.status(200, rows)
+
+    def apply(self, framework):        
         try:
             fs = framework.model("wizfs", module="wiz").use(".")
             package = fs.read_json("wiz.json")
@@ -107,10 +142,35 @@ class Controller(season.interfaces.wiz.admin.api):
         package = season.stdClass(package)
 
         fs = framework.model("wizfs", module="wiz").use("app/config")
+        configpy = None
         try:
             configpy = self.configpy(package)
-            fs.write("config.py", configpy)
         except Exception as e:
             self.status(500, str(e))
-        
+
+        if configpy is None:
+            self.status(500, "wiz.py not created")
+
+        try:
+            _tmp = {'config': None}
+            exec(configpy, _tmp)
+            configtest = _tmp['config']
+
+            try:
+                configtest.uid(framework)
+            except Exception as e1:
+                raise e1
+
+            try:
+                configtest.acl(framework)
+            except season.core.CLASS.RESPONSE.STATUS as _:
+                pass
+            except HTTPException as _:
+                pass
+            except Exception as e1:
+                raise e1
+        except Exception as e:
+            self.status(500, str(e))
+
+        fs.write("wiz.py", configpy)
         self.status(200, True)

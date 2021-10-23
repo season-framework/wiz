@@ -10,6 +10,8 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.event = {};
     $scope.status = {};
     $scope.data = {};
+    $scope.themes = themes;
+    console.log($scope.themes);
 
     $.post('/wiz/admin/api/setting/general/wiz/packageinfo', {}, function (res) {
         $scope.data = res.data;
@@ -26,9 +28,22 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.event.apply = function () {
         var data = angular.copy($scope.data);
         $.post('/wiz/admin/api/setting/general/wiz/update', { data: JSON.stringify(data, null, 4) }, function (res) {
-            $.post('/wiz/admin/api/setting/general/apply', {}, function (res) {
-                toastr.success("Applied");
+            $.post('/wiz/admin/api/setting/general/wiz/apply', {}, function (res) {
+                if (res.code == 200) {
+                    return toastr.success("Applied");
+                }
+                return toastr.error(res.data);
             });
+        });
+    }
+
+    $scope.event.connect_test = function () {
+        var data = angular.copy($scope.data.wiz.database);
+        $.post('/wiz/admin/api/setting/general/wiz/connect_test', data, function (res) {
+            if (res.code == 200) {
+                return toastr.success("Database connected");
+            }
+            return toastr.error(res.data);
         });
     }
 };

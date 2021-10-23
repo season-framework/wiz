@@ -6,6 +6,7 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.status = {};
     $scope.data = {};
     $scope.loaded = true;
+    $scope.BASEPATH = BASEPATH;
 
     // split pane properties
     try {
@@ -21,7 +22,6 @@ var content_controller = function ($scope, $timeout, $sce) {
         var opt = angular.copy($scope.properties);
         localStorage["season.wiz.resources.properties"] = JSON.stringify(opt);
     }, true);
-
 
     // shortcut
     function shortcuts() {
@@ -53,7 +53,7 @@ var content_controller = function ($scope, $timeout, $sce) {
 
     $scope.event.save = function () {
         var data = angular.copy($scope.data.item);
-        $.post('/wiz/admin/api/framework/update', data, function (res) {
+        $.post('/wiz/admin/api/theme/update', data, function (res) {
             if (res.code == 200) {
                 return toastr.success('Saved');
             }
@@ -64,6 +64,7 @@ var content_controller = function ($scope, $timeout, $sce) {
 
     $scope.event.delete = function () {
         var data = angular.copy($scope.data.selected_delete);
+        var isreload = data.reload;
         var parent = $scope.data.parents[data.path + "/" + data.name];
         if (data.bulk) {
             parent = data;
@@ -74,13 +75,17 @@ var content_controller = function ($scope, $timeout, $sce) {
                 }
             }
 
-            $.post('/wiz/admin/api/framework/delete_bulk', { data: JSON.stringify(sub) }, function (res) {
+            $.post('/wiz/admin/api/theme/delete_bulk', { data: JSON.stringify(sub) }, function (res) {
                 $scope.data.selected_delete = null;
                 $scope.event.loader(parent, null, true);
                 $timeout();
             });
         } else {
-            $.post('/wiz/admin/api/framework/delete', data, function (res) {
+            $.post('/wiz/admin/api/theme/delete', data, function (res) {
+                if (isreload) {
+                    location.reload();
+                    return;
+                }
                 $scope.data.selected_delete = null;
                 $scope.event.loader(parent, null, true);
                 $timeout();
@@ -90,14 +95,38 @@ var content_controller = function ($scope, $timeout, $sce) {
         $('#modal-delete-file').modal('hide');
     }
 
-    $scope.event.modal_delete = function (item, bulk) {
+    $scope.event.modal_delete = function (item, bulk, reload) {
         $scope.data.selected_delete = item;
         if (bulk) $scope.data.selected_delete.bulk = true;
+        if (reload) $scope.data.selected_delete.reload = true;
         $('#modal-delete-file').modal('show');
     }
 
+    $scope.event.create_theme_modal = function () {
+        $scope.data.theme = {};
+        $timeout();
+        $('#modal-new-theme').modal('show');
+    }
+
+    $scope.event.create_theme = function (title) {
+        $.post('/wiz/admin/api/theme/rename', { path: BASEPATH, name: title, rename: title }, function (res) {
+            $('#modal-new-theme').modal('hide');
+            if (res.code == 402) {
+                toastr.error(res.data);
+                return;
+            }
+
+            if (res.code == 401) {
+                toastr.error(res.data);
+                return;
+            }
+
+            location.reload();
+        });
+    }
+
     $scope.event.create = function (item, ftype) {
-        if (item.type != 'folder') {
+        if (!['folder', 'layout'].includes(item.type)) {
             return;
         }
 
@@ -115,7 +144,7 @@ var content_controller = function ($scope, $timeout, $sce) {
 
     $scope.event.save_name = function () {
         var data = angular.copy($scope.data.selected);
-        $.post('/wiz/admin/api/framework/rename', data, function (res) {
+        $.post('/wiz/admin/api/theme/rename', data, function (res) {
             if (res.code == 402) {
                 toastr.error(res.data);
                 return;
@@ -165,7 +194,7 @@ var content_controller = function ($scope, $timeout, $sce) {
             cb = function () { };
         }
 
-        $.post('/wiz/admin/api/framework/tree', { path: item.path, name: item.name, type: item.type }, function (res) {
+        $.post('/wiz/admin/api/theme/tree', { path: item.path, name: item.name, type: item.type }, function (res) {
             if (res.code == 201) {
                 $scope.monaco_properties.language = res.data.language;
                 $scope.status.view = "monaco";
@@ -196,18 +225,26 @@ var content_controller = function ($scope, $timeout, $sce) {
                     $scope.status.view = "folder";
                 }
             } else {
-                if ($scope.status.view == 'folder' || refresh) {
+                if (item.type == 'layout') {
                     $scope.data.item = item;
                     $scope.data.item.checked = false;
-                    $scope.status.view = "folder";
+                    $scope.status.view = 'layout'
+                    $timeout();
+                } else {
+                    if (['folder', 'layout'].includes($scope.status.view) || refresh) {
+                        $scope.data.item = item;
+                        $scope.data.item.checked = false;
+                        $scope.status.view = "folder";
+                    }
                 }
             }
 
-            res.data.sort(function (a, b) {
-                if (a.type == 'folder' && b.type != 'folder') return -1;
-                if (a.type != 'folder' && b.type == 'folder') return 1;
-                return a.name.localeCompare(b.name);
-            });
+            if (!item.root)
+                res.data.sort(function (a, b) {
+                    if (a.type == 'folder' && b.type != 'folder') return -1;
+                    if (a.type != 'folder' && b.type == 'folder') return 1;
+                    return a.name.localeCompare(b.name);
+                });
             item.sub = res.data;
 
             for (var i = 0; i < item.sub.length; i++) {
@@ -244,7 +281,7 @@ var content_controller = function ($scope, $timeout, $sce) {
         $scope.status.upload = true;
         $scope.status.upload_process = 0;
         $.ajax({
-            url: "/wiz/admin/api/framework/upload",
+            url: "/wiz/admin/api/theme/upload",
             type: 'POST',
             xhr: function () {
                 var myXhr = $.ajaxSettings.xhr();
