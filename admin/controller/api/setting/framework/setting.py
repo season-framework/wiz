@@ -152,7 +152,46 @@ class Controller(season.interfaces.wiz.admin.api):
             package = {}
         package = season.stdClass(package)
 
-        fs = framework.model("wizfs", module="wiz").use("app/config")
+        def addtabs(v, size=1):
+            for i in range(size):
+                v =  "    " + "\n    ".join(v.split("\n"))
+            return v
+
+        # create filter
+        filterpy = None
+        try:
+            code = package.framework.filter
+            code = addtabs(code, 2)
+
+            filterpy = []
+            filterpy.append(f"def process(framework):")
+            filterpy.append(f"    def _process():")
+            filterpy.append(code)
+            filterpy.append(f'    _process()')
+
+            filtertest = "\n".join(filterpy)
+            try:
+                _tmp = {'config': None}
+                exec(filtertest, _tmp)
+                _tmp['process'](framework)
+            except season.core.CLASS.RESPONSE.STATUS as e:
+                pass
+            except HTTPException as e:
+                pass
+            except Exception as e:
+                raise e
+
+            filterpy.append("")
+            filterpy.append(f'    framework.wiz = framework.model("wiz", module="wiz")')
+            filterpy.append(f'    framework.response.data.set(wiz=framework.wiz)')
+            filterpy.append(f'    framework.wiz.route()')
+            filterpy.append("")
+
+            filterpy = "\n".join(filterpy)
+        except Exception as e:
+            self.status(500, str(e))
+
+        # create config.py
         configpy = None
         try:
             configpy = self.configpy(package)
@@ -165,9 +204,14 @@ class Controller(season.interfaces.wiz.admin.api):
         try:
             _tmp = {'config': None}
             exec(configpy, _tmp)
-            configtest = _tmp['config']
+            _tmp['config']
         except Exception as e:
             self.status(500, str(e))
 
+        # update filter
+        fs = framework.model("wizfs", module="wiz").use("app/config")
         fs.write("config.py", configpy)
+        fs = framework.model("wizfs", module="wiz").use("app/filter")
+        fs.write("indexfilter.py", filterpy)
+
         self.status(200, True)

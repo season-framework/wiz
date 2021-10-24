@@ -11,7 +11,6 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.status = {};
     $scope.data = {};
     $scope.themes = themes;
-    console.log($scope.themes);
 
     $.post('/wiz/admin/api/setting/general/wiz/packageinfo', {}, function (res) {
         $scope.data = res.data;

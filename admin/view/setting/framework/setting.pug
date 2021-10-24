@@ -128,6 +128,24 @@ mixin content()
                             .col-md-12.pt-3(style="height: 400px; overflow: hidden;")
                                 div(ng-model="data.framework.build_resource" ui-monaco-opts="monaco_properties" ui-monaco)
 
+
+                        .page-header.mt-6
+                            .row.align-items-center
+                                .col-auto
+                                    h2.page-title Request Filter
+                                .col-auto.ml-auto.d-print-none
+                                    button.btn.btn-light.ml-2(ng-click="event.save()") Save
+                                    button.btn.btn-light.ml-2(ng-click="event.apply()") Apply
+
+                        .info-form.row.first-child
+                            .col-md-12
+                                .text-muted Custom defination for handling request. 
+                                .text-muted define `def process(framework)` method in code area.
+
+                        .info-form.row
+                            .col-md-12.pt-3(style="height: 400px; overflow: hidden;")
+                                div(ng-model="data.framework.filter" ui-monaco-opts="monaco_properties" ui-monaco)
+
                         .text-center.mt-4
                             button.btn.btn-light.ml-2(ng-click="event.save()") Save
                             button.btn.btn-light.ml-2(ng-click="event.apply()") Apply

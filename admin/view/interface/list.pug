@@ -8,7 +8,7 @@ mixin content()
 
                 .col-auto.ml-auto.d-print-none
                     .d-flex
-                        input.form-control(type="text" placeholder="검색" ng-model="search.text" ng-enter="event.search()" style="width: 240px;")
+                        input.form-control(type="text" placeholder="Search..." ng-model="search.text" ng-enter="event.search()" style="width: 240px;")
                         a.btn.btn-light.ml-2.d-none.d-sm-inline-block(href='#' style="width: 140px;" ng-click="event.search()")
                             i.mr-2.fas.fa-search
                             | Search
