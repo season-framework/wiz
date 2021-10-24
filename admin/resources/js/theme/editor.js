@@ -8,6 +8,26 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.loaded = true;
     $scope.BASEPATH = BASEPATH;
 
+    $scope.filepathgen = function (data) {
+        try {
+            var path = data.item.path.substring(BASEPATH.length);
+            var filename = data.item.name;
+            var themename = path.split("/")[1];
+            var target = path.split("/")[2];
+            if (target == "resources") {
+                path = path.substring(themename.length + target.length + 2);
+                var fullpath = "/resources/themes/" + themename + path + "/" + filename;
+                if (!path) {
+                    fullpath = "/resources/themes/" + themename + "/" + filename;
+                }
+                return fullpath;
+            }
+            return path + "/" + filename;
+        } catch (e) {
+        }
+        return "";
+    }
+
     // split pane properties
     try {
         var properties = JSON.parse(localStorage["season.wiz.resources.properties"]);

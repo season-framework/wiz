@@ -42,7 +42,8 @@ mixin content()
                 .panel-header.p-1.pr-0.pl-2
                     .d-flex 
                         input(ng-if="!data.item.root && status.view == 'folder'" type="checkbox" ng-click="event.check_items(data.item)" ng-model="data.item.checked")
-                        span.ml-2.if-desktop.text-muted {{data.item.path.substring(BASEPATH.length)}}/{{data.item.name}}
+                        a.ml-2.if-desktop.text-muted(ng-if="filepathgen(data).startsWith('/resources')" href="{{filepathgen(data)}}" target="_blank") {{filepathgen(data)}}
+                        span.ml-2.if-desktop.text-muted(ng-if="!filepathgen(data).startsWith('/resources')") {{filepathgen(data)}}
                         span.mr-auto &nbsp;
 
                         span(ng-if="data.item.root")
@@ -110,7 +111,7 @@ mixin content()
                                     i.fas.fa-trash
 
                 .panel-editor(ng-if="status.view == 'image'" style="height: 100%; overflow: auto;")
-                    img(src="{{data.item.url}}" style="width: 100%;")
+                    img(src="{{filepathgen(data)}}" style="width: 100%;")
 
                 .panel-editor(ng-if="status.view == 'monaco' && status.editor" style="height: 100%; overflow: hidden;")
                     div(ng-model="data.item.text" ui-monaco-opts="monaco_properties" ui-monaco)
