@@ -25,20 +25,22 @@ class Controller(season.interfaces.wiz.controller.base):
         raise err
 
     def __default__(self, framework):
-        config = self.config
         app_id = framework.request.segment.get(0, True)
         db = framework.model("wiz", module="wiz")
+        info = db.get(id=app_id)
         view = db.render(app_id)
 
-        if 'default' not in config.theme:
-            config.theme.default = season.stdClass()
-            config.theme.default.module = "wiz/theme"
-            config.theme.default.view = "layout-wiz.pug"
+        theme = info['theme']
+        if theme is not None:
+            theme = theme.split("/")
+        else:
+            theme = []
 
-        theme = db.get(id=app_id, fields="theme")["theme"]
-        if theme not in config.theme:
-            for key in config.theme:
-                theme = key
-                break
-        theme = config.theme[theme]
-        framework.response.render(theme.view, module=theme.module, view=view, app_id=app_id)
+        if len(theme) != 2:
+            theme = framework.config().load('wiz').get("theme_default", None)
+            if theme is None:
+                raise Exception("Theme Not Found")
+            theme = theme.split("/")
+
+        view = db.__theme__(theme[0], theme[1], view)
+        framework.response.send(view, "text/html")
