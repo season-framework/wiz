@@ -45,14 +45,14 @@ mixin content()
                                 h4.mb-0 Watch Filter
                                 span.text-muted Whitelist file name pattern for restart server. Defaults to '*'.
                             .col-md-8.pt-3
-                                input.form-control.text-center(type="text" ng-model="data.framework.watch.pattern" placeholder="*")
+                                textarea.form-control.text-center(rows=5 ng-model="data.framework.watch.pattern" placeholder="*")
 
                         .info-form.row
                             .col-md-4 
                                 h4.mb-0 Watch Ignore
                                 span.text-muted Blacklist file name pattern for restart server. Defaults to 'None'.
                             .col-md-8.pt-3
-                                input.form-control.text-center(type="text" ng-model="data.framework.watch.ignore" placeholder="app/config,websrc/wiz.json")
+                                textarea.form-control.text-center(rows=5 ng-model="data.framework.watch.ignore" placeholder="websrc/app/config/*")
 
                         .info-form.row
                             .col-md-4 

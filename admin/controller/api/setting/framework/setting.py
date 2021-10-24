@@ -1,27 +1,47 @@
 import season
 from werkzeug.exceptions import HTTPException
-import flask
-import flask_socketio
+import json
 
-build_resource = """cache = season.cache
+CODE_FILTER = """def ng(name):
+    return '{{' + str(name) + '}}'
+
+request_uri = framework.request.uri()
+if request_uri == '/':
+    return framework.response.redirect("/dashboard")
+
+lang = framework.request.query("lang", None)
+if lang is not None:
+    lang = lang.upper()
+    framework.response.language(lang)
+    framework.dic.set_language(framework.request.language())
+
+framework.response.data.set(ng=ng)
+
+framework.session = framework.lib.session.to_dict()
+framework.response.data.set(session=framework.session)
+"""
+
+CODE_BUILD_RESOURCE = """import lesscpy
+from six import StringIO
+
+cache = season.cache
 if 'resources' not in cache:
     cache.resources = season.stdClass()
 
-def build_resource(resource_dirpath, resource_filepath):
-    _, ext = os.path.splitext(resource_filepath)
-    filepath = os.path.join(resource_dirpath, resource_filepath)
-    if filepath in cache.resources:
-        return cache.resources[filepath]
-    
-    if ext == '.less':
-        f = open(filepath, 'r')
-        lessfile = f.read()
-        f.close()
-        cssfile = lesscpy.compile(StringIO(lessfile), minify=True)
-        response = flask.Response(str(cssfile))
-        response.headers['Content-Type'] = 'text/css'
-        cache.resources[filepath] = response
-        return cache.resources[filepath]
+_, ext = os.path.splitext(resource_filepath)
+filepath = os.path.join(resource_dirpath, resource_filepath)
+if filepath in cache.resources:
+    return cache.resources[filepath]
+
+if ext == '.less':
+    f = open(filepath, 'r')
+    lessfile = f.read()
+    f.close()
+    cssfile = lesscpy.compile(StringIO(lessfile), minify=True)
+    response = flask.Response(str(cssfile))
+    response.headers['Content-Type'] = 'text/css'
+    cache.resources[filepath] = response
+    return cache.resources[filepath]
 """
 
 class Controller(season.interfaces.wiz.admin.api):
@@ -57,9 +77,10 @@ class Controller(season.interfaces.wiz.admin.api):
             package.framework["jinja_variable_start_string"] = config.get("jinja_variable_start_string", "{$")
             package.framework["jinja_variable_end_string"] = config.get("jinja_variable_end_string", "$}")
             package.framework["log_level"] = str(config.get("log_level", 2))
-            package.framework["on_error"] = "def on_error(framework, err):\n    framework.response.redirect('/')"
-            package.framework["build"] = "def build(app, socketio):\n    app.debug = True\n    app.secret_key = 'season.wiz'"
-            package.framework["build_resource"] = build_resource
+            package.framework["on_error"] = "framework.response.redirect('/')"
+            package.framework["build"] = "app.debug = True"
+            package.framework["filter"] = CODE_FILTER
+            package.framework["build_resource"] = CODE_BUILD_RESOURCE
 
         self.status(200, package)
 
@@ -98,8 +119,17 @@ class Controller(season.interfaces.wiz.admin.api):
         configpy.append("config.jinja_variable_end_string = '$}'")
         configpy.append(f"")
         configpy.append(f"config.watch = season.stdClass()")
-        configpy.append(f"config.watch.pattern = '{package.framework.watch.pattern.replace(' ', '')}'")
-        configpy.append(f"config.watch.ignore = '{package.framework.watch.ignore.replace(' ', '')}'")
+
+        patterns = package.framework.watch.pattern.replace(' ', '').replace('\t', '')
+        patterns = patterns.split("\n")
+        patterns = json.dumps(patterns)
+        configpy.append(f"config.watch.pattern = {patterns}")
+
+        ignores = package.framework.watch.ignore.replace(' ', '').replace('\t', '')
+        ignores = ignores.split("\n")
+        ignores = json.dumps(ignores)
+        configpy.append(f"config.watch.ignore = {ignores}")
+
         configpy.append(f"")
         configpy.append(f"config.filter = ['indexfilter']")
         configpy.append(f"")
