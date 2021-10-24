@@ -1,23 +1,20 @@
+mixin navs(menu)
+    .root-tree
+        .filetree.text-dark(class=menu['class'])
+            .title.d-flex(onclick="location.href='{$ menu.url $}'")
+                span 
+                    i.mr-1(class=menu['icon'] style="width: 18px; text-align: center;")
+                    span= menu['title']
+
+            .sub
+                - if menu.sub
+                    - each sub in menu.sub
+                        +navs(sub)
+
 mixin setting_nav()
     div(style="height: 100%;")
-        .card-body.p-3(style="height: 100%; overflow: auto;")
+        .card-body.p-3(style="height: 100%; overflow: auto;")            
             .tree-container
                 - if settingmenus
                     - each menu in settingmenus
-                        .root-tree
-                            .filetree.text-dark(class=menu['class'])
-                                .title.d-flex(onclick="location.href='{$ menu.url $}'")
-                                    span 
-                                        i.mr-1(class=menu['icon'] style="width: 18px; text-align: center;")
-                                        span= menu['title']
-
-                                .sub
-                                    - if menu.sub
-                                        - each sub in menu.sub
-                                            .root-tree
-                                                .filetree.text-dark(class=sub['class'])
-                                                    .title.d-flex(onclick="location.href='{$ sub.url $}'")
-                                                        span 
-                                                            - if sub['icon']
-                                                                i.mr-1(class=sub['icon'] style="width: 18px; text-align: center;")
-                                                            span= sub['title']
+                        +navs(menu)

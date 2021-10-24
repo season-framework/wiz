@@ -16,6 +16,16 @@ class Controller(season.interfaces.wiz.admin.base):
         ]})
         menus.append({"url": "/wiz/admin/setting/framework_general", "icon": "fas fa-rocket", "title": "Framework", 'pattern': r'^/wiz/admin/setting/framework', "sub": [
             {"url": "/wiz/admin/setting/framework_general", "icon": "fas fa-caret-right", "title": "Settings"},
+            {"url": "/wiz/admin/setting/framework_handler/build", "icon": "fas fa-caret-right", "title": "Handler", 'pattern': r'^/wiz/admin/setting/framework_handler', 
+                "sub": [
+                    {"url": "/wiz/admin/setting/framework_handler/build", "icon": "fas fa-caret-right", "title": "Build Handler"},
+                    {"url": "/wiz/admin/setting/framework_handler/filter", "icon": "fas fa-caret-right", "title": "Request Filter"},
+                    {"url": "/wiz/admin/setting/framework_handler/before_request", "icon": "fas fa-caret-right", "title": "Before Request Handler"},
+                    {"url": "/wiz/admin/setting/framework_handler/after_request", "icon": "fas fa-caret-right", "title": "After Request Handler"},
+                    {"url": "/wiz/admin/setting/framework_handler/error", "icon": "fas fa-caret-right", "title": "Error Handler"},
+                    {"url": "/wiz/admin/setting/framework_handler/resource", "icon": "fas fa-caret-right", "title": "Resource Handler"}
+                ]
+            },
             {"url": "/wiz/admin/setting/framework_config", "icon": "fas fa-caret-right", "title": "Config Files"},
             {"url": "/wiz/admin/setting/framework_lib", "icon": "fas fa-caret-right", "title": "Library"},
             {"url": "/wiz/admin/setting/framework_dic", "icon": "fas fa-caret-right", "title": "Dictionary"}
@@ -69,6 +79,30 @@ class Controller(season.interfaces.wiz.admin.base):
         self.js('js/setting/framework/setting.js')
         framework.response.render('setting/framework/setting.pug', is_dev=self.wiz.is_dev())
 
+    def framework_handler(self, framework):
+        handler = framework.request.segment.get(0, True)
+        opt = {}
+        if handler == 'build':
+            opt = { 'title': 'Build Handler', 'data': 'build', 'desc': ['Custom defination for handling build flask app and socketio. ', 'you can use `app` (flask app object) and `socketio` in code area.'] }
+
+        if handler == 'filter':
+            opt = { 'title': 'Request Filter', 'data': 'filter', 'desc': ['Custom defination for handling request.', 'you can use `framework` (season flask object) in code area.'] }
+
+        if handler == 'before_request':
+            opt = { 'title': 'Before Request Handler', 'data': 'before_request', 'desc': ['Custom defination for handling before request.'] }
+        
+        if handler == 'after_request':
+            opt = { 'title': 'After Request Handler', 'data': 'after_request', 'desc': ['Custom defination for handling after request.', 'you can use `response` (flask response object) in code area.'] }
+
+        if handler == 'resource':
+            opt = { 'title': 'Resource Handler', 'data': 'build_resource', 'desc': ['Custom defination for handling resources. ', 'you can use `resource_dirpath` and `resource_filepath` in code area and must return FlaskResponse'] }
+
+        if handler == 'error':
+            opt = { 'title': 'Error Handler', 'data': 'on_error', 'desc': ['Custom defination for handling error. `def error(framework, err)`.', 'you can use `framework` (season flask object) and err (Python Exception Object) in code area.'] }
+
+        self.js('js/setting/framework/handler.js')
+        framework.response.render(f'setting/framework/handler.pug', is_dev=self.wiz.is_dev(), opt=opt)
+
     def framework_config(self, framework):
         self.exportjs(target=[{"path": "app", "name": "config"}])
         self.js('js/setting/framework/config.js')
@@ -100,23 +134,19 @@ class Controller(season.interfaces.wiz.admin.base):
     def setting_nav(self, menus):
         framework = self.__framework__
 
-        for menu in menus:
+        def itermenu(menu):
             pt = None
             if 'pattern' in menu: pt = menu['pattern']
             elif 'url' in menu: pt = menu['url']
-
             if pt is not None:
                 if framework.request.match(pt): menu['class'] = 'active'
                 else: menu['class'] = ''
-
+            
             if 'sub' in menu:
                 for sub in menu['sub']:
-                    pt = None
-                    if 'pattern' in sub: pt = sub['pattern']
-                    elif 'url' in sub: pt = sub['url']
+                    itermenu(sub)
 
-                    if pt is not None:
-                        if framework.request.match(pt): sub['class'] = 'active'
-                        else: sub['class'] = ''
+        for menu in menus:
+            itermenu(menu)
 
         framework.response.data.set(settingmenus=menus)

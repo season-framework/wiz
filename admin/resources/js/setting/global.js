@@ -30,5 +30,4 @@ var setting_builder = function ($scope, $timeout, $sce) {
         $timeout();
         $('#modal-message').modal('hide');
     }
-
 }

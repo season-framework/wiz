@@ -117,29 +117,66 @@ class Controller(season.interfaces.wiz.admin.api):
         configpy.append("")
 
         # error handler
-        code = package.framework["on_error"]
-        code = addtabs(code, 1)
-        script = "def on_error(framework, err):\n"
-        script += code + "\n"
-        script += "    pass"
-        configpy.append(script)
-        configpy.append("config.on_error = on_error")
-        configpy.append("")
+        try:
+            code = package.framework["on_error"]
+            code = addtabs(code, 1)
+            script = "def on_error(framework, err):\n"
+            script += code + "\n"
+            script += "    pass"
+            configpy.append(script)
+            configpy.append("config.on_error = on_error")
+            configpy.append("")
+        except:
+            pass
+
+        # before request
+        try:
+            code = package.framework["before_request"]
+            if len(code) > 0:
+                code = addtabs(code, 1)
+                script = "def before_request():\n"
+                script += code + "\n"
+                script += "    pass"
+                configpy.append(script)
+                configpy.append("config.before_request = before_request")
+                configpy.append("")
+        except:
+            pass
+
+        # after request
+        try:
+            code = package.framework["after_request"]
+            if len(code) > 0:
+                code = addtabs(code, 2)
+                script = "def after_request(response):\n"
+                script += f"    try:\n"
+                script += code + "\n"
+                script += f"    except:\n"
+                script += f"        pass\n"
+                script += f"    return None\n"
+                configpy.append(script)
+                configpy.append("config.after_request = after_request")
+                configpy.append("")
+        except:
+            pass
 
         # resource handler
-        code = package.framework["build_resource"]
-        code = addtabs(code, 2)
-        script  = f"def get_resource_handler():\n"
-        script += f"    try:\n"
-        script += code + "\n"
-        script += f"        return build_resource\n"
-        script += f"    except:\n"
-        script += f"        pass\n"
-        script += f"    return None\n"
-        
-        configpy.append(script)
-        configpy.append("config.build_resource = get_resource_handler()")
-        configpy.append("")
+        try:
+            code = package.framework["build_resource"]
+            if len(code) > 0:
+                code = addtabs(code, 2)
+                script  = f"def get_resource_handler(resource_dirpath, resource_filepath):\n"
+                script += f"    try:\n"
+                script += code + "\n"
+                script += f"    except:\n"
+                script += f"        pass\n"
+                script += f"    return None\n"
+                
+                configpy.append(script)
+                configpy.append("config.build_resource = get_resource_handler")
+                configpy.append("")
+        except:
+            pass
         
         configpy = "\n".join(configpy)
         return configpy
