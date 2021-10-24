@@ -11,14 +11,14 @@ var content_controller = function ($scope, $timeout, $sce) {
     $scope.status = {};
     $scope.data = {};
 
-    $.post('/wiz/admin/api/setting/general/framework/packageinfo', {}, function (res) {
+    $.post('/wiz/admin/api/setting/framework/setting/packageinfo', {}, function (res) {
         $scope.data = res.data;
         $timeout();
     });
 
     $scope.event.save = function () {
         var data = angular.copy($scope.data);
-        $.post('/wiz/admin/api/setting/general/framework/update', { data: JSON.stringify(data, null, 4) }, function (res) {
+        $.post('/wiz/admin/api/setting/framework/setting/update', { data: JSON.stringify(data, null, 4) }, function (res) {
             toastr.success("Saved");
         });
     }
@@ -38,8 +38,8 @@ var content_controller = function ($scope, $timeout, $sce) {
     
     $scope.event.apply = function () {
         var data = angular.copy($scope.data);
-        $.post('/wiz/admin/api/setting/general/framework/update', { data: JSON.stringify(data, null, 4) }, function (res) {
-            $.post('/wiz/admin/api/setting/general/framework/apply', {}, function (res) {
+        $.post('/wiz/admin/api/setting/framework/setting/update', { data: JSON.stringify(data, null, 4) }, function (res) {
+            $.post('/wiz/admin/api/setting/framework/setting/apply', {}, function (res) {
                 if (res.code == 200) {
                     return toastr.success("Applied");
                 }
