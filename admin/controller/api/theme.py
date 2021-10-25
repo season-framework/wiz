@@ -74,7 +74,7 @@ class Controller(season.interfaces.wiz.admin.api):
                 file = files[i]
                 if len(file.filename) == 0: continue
                 filename = filepath[i]
-                fs.write(filename, file)
+                fs.write_file(filename, file)
             except Exception as e:
                 pass
 
