@@ -48,6 +48,13 @@ mixin content()
                                 select.form-select.text-center(ng-model="data.wiz.theme.default")
                                     option(value='{{theme}}' ng-repeat="theme in themes") {{theme}}
 
+                        .info-form.row
+                            .col-md-4 
+                                h4.mb-0 Read File Support
+                                span.text-muted Support filetype for read file as code in theme/model/resources directory.
+                            .col-md-8.text-center
+                                textarea.form-control(rows=10 ng-model="data.wiz.supportfile" placeholder=".py: python")
+
                         //- .info-form.row
                         //-     .col-md-4 
                         //-         h4.mb-0 variable_start_string 
@@ -163,7 +170,6 @@ mixin content()
                         .info-form.row
                             .col-md-12.pt-3(style="height: 400px; overflow: hidden;")
                                 div(ng-model="data.wiz.uid" ui-monaco-opts="monaco_properties" ui-monaco)
-
 
     .bg-dark.text-center(ng-if="!loaded" style="width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 99999; padding-top: 40vh;")
         .spinner-grow.text-white(style="width: 60px; height: 60px;")

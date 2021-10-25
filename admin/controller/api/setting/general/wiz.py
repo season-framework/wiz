@@ -94,6 +94,37 @@ class Controller(season.interfaces.wiz.admin.api):
         configpy.append(f"config.topmenus = {topmenus}")
         configpy.append(f"")
 
+
+        extmap = {}
+        extmap[".py"] = "python"
+        extmap[".js"] = "javascript"
+        extmap[".ts"] = "typescript"
+        extmap[".css"] = "css"
+        extmap[".less"] = "less"
+        extmap[".sass"] = "scss"
+        extmap[".scss"] = "scss"
+        extmap[".html"] = "html"
+        extmap[".pug"] = "pug"
+        extmap[".json"] = "json"
+        extmap[".svg"] = "html"
+
+        try:
+            supportfiles = package.wiz.supportfile.split("\n")
+            for supportfile in supportfiles:
+                _supportfile = supportfile.split(":")
+                if len(_supportfile) != 2:
+                    continue
+                ext = _supportfile[0].strip()
+                lang = _supportfile[1].strip()
+                if lang[0] != ".":
+                    lang = "." + lang
+                extmap[ext] = lang
+        except:
+            pass
+        extmap = json.dumps(extmap)
+        configpy.append(f"config.supportfiles = {extmap}")
+        configpy.append(f"")
+
         code = package.wiz.uid
         configpy.append(code)
         configpy.append("config.uid = uid")

@@ -88,7 +88,6 @@ class Controller(season.interfaces.wiz.admin.api):
         info = self.db.get(id=_info['id'], version="master")
         _info['version'] = "master"
         stat, _ = self.db.upsert(_info)
-
         try:
             if info['socketio'] != _info['socketio']:
                 fs = framework.model("wizfs", module="wiz")

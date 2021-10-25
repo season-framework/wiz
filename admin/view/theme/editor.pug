@@ -98,7 +98,7 @@ mixin content()
                                 i.fas.fa-folder(ng-if="item.type == 'folder'")
                                 i.far.fa-file(ng-if="item.type == 'file'")
                                 i.fas.fa-columns(ng-if="item.type == 'layout'")
-                            td.pl-0.pr-0
+                            td.pl-0.pr-0(ng-dblclick="event.loader(item)")
                                 span.title(ng-if="!item.edit" ng-click="event.loader(item)") {{item.name}}
                                 input.form-control.form-control-sm.text-dark(ng-if="item.edit" ng-model="data.selected.rename" style="color: #000 !important; display: inline-block;" ng-enter="event.save_name()")
 

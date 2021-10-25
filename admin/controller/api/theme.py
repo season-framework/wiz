@@ -57,6 +57,7 @@ class Controller(season.interfaces.wiz.admin.api):
         self.fs = framework.model("wizfs", module="wiz")
         self.BASEPATH = framework.config().load("wiz").get("themepath", "themes")
         self.SEGMENT_BASE = len(self.BASEPATH.split("/"))
+        self.supportfiles = framework.config.load("wiz").get("supportfiles", {})
 
     def upload(self, framework):
         files = framework.request.files()
@@ -118,17 +119,7 @@ class Controller(season.interfaces.wiz.admin.api):
 
             if ftype == 'file':
                 ext = os.path.splitext(rename)[1]
-                extmap = {}
-                extmap[".py"] = "python"
-                extmap[".js"] = "javascript"
-                extmap[".ts"] = "typescript"
-                extmap[".css"] = "css"
-                extmap[".less"] = "less"
-                extmap[".sass"] = "scss"
-                extmap[".scss"] = "scss"
-                extmap[".html"] = "html"
-                extmap[".pug"] = "pug"
-                extmap[".svg"] = "html"
+                extmap = self.supportfiles
                 if ext in extmap:
                     fs.write(rename, "")
                 else:
@@ -193,18 +184,7 @@ class Controller(season.interfaces.wiz.admin.api):
             ext = os.path.splitext(name)[1].lower()
 
             # vscode
-            extmap = {}
-            extmap[".py"] = "python"
-            extmap[".js"] = "javascript"
-            extmap[".ts"] = "typescript"
-            extmap[".css"] = "css"
-            extmap[".less"] = "less"
-            extmap[".sass"] = "scss"
-            extmap[".scss"] = "scss"
-            extmap[".html"] = "html"
-            extmap[".pug"] = "pug"
-            extmap[".json"] = "json"
-            extmap[".svg"] = "html"
+            extmap = self.supportfiles
             if ext in extmap:
                 fs = self.fs.use(path)
                 self.status(201, {"text": fs.read(name), "path": path, "name": name, "language": extmap[ext]})
