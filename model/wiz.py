@@ -47,22 +47,7 @@ class Model(season.interfaces.wiz.model.sql.Model):
         self.framework = framework 
         self.cache = framework.cache
 
-        if 'wiz' not in self.cache:
-            _cache = None
-            try:
-                fs = self.framework.model("wizfs", module="wiz").use(".")
-                _cache = fs.read_pickle("wiz.cache") 
-            except:
-                pass
-
-            if _cache is None:
-                self.cache.wiz = dict()
-                self.cache.wiz['dev'] = dict()
-                self.cache.wiz['prod'] = dict()
-                self.cache.wiz['dev_theme'] = dict()
-                self.cache.wiz['prod_theme'] = dict()
-            else:
-                self.cache.wiz = _cache
+        self.load_cache()
         
         config = framework.config.load("wiz")
         try:
@@ -82,7 +67,24 @@ class Model(season.interfaces.wiz.model.sql.Model):
                 if versions[i]['version'] == 'master': continue
                 self.cache.wiz_deploy_version = versions[i]['version']
                 break
-            
+    
+    def load_cache(self):
+        _cache = None
+        try:
+            fs = self.framework.model("wizfs", module="wiz").use(".")
+            _cache = fs.read_pickle("wiz.cache") 
+        except:
+            pass
+
+        if _cache is None:
+            self.cache.wiz = dict()
+            self.cache.wiz['dev'] = dict()
+            self.cache.wiz['prod'] = dict()
+            self.cache.wiz['dev_theme'] = dict()
+            self.cache.wiz['prod_theme'] = dict()
+        else:
+            self.cache.wiz = _cache
+
     def deploy_version(self, version=None):
         if version is None:
             if 'wiz_deploy_version' not in self.cache:

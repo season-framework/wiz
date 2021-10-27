@@ -14,10 +14,10 @@ class Controller(season.interfaces.wiz.admin.api):
 
         if 'wiz' in framework.cache:
             if 'prod' in framework.cache.wiz:
-                for key in framework.cache.wiz.prod:
+                for key in framework.cache.wiz['prod']:
                     if key == "routes":
                         continue
-                    item = framework.cache.wiz.prod[key][0]
+                    item = framework.cache.wiz['prod'][key][0]
                     
                     obj = dict()
                     obj['version'] = item['version']
@@ -29,10 +29,10 @@ class Controller(season.interfaces.wiz.admin.api):
                     res['prod'].append(obj)
 
             if 'dev' in framework.cache.wiz:
-                for key in framework.cache.wiz.dev:
+                for key in framework.cache.wiz['dev']:
                     if key == "routes":
                         continue
-                    item = framework.cache.wiz.dev[key][0]
+                    item = framework.cache.wiz['dev'][key][0]
                     obj = dict()
                     obj['version'] = item['version']
                     obj['version_name'] = item['version_name']
