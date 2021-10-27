@@ -128,7 +128,6 @@ class Model(season.interfaces.wiz.model.sql.Model):
             try:
                 namespace = row['namespace']
                 self.render(namespace)
-                break
             except:
                 pass
 
