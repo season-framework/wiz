@@ -47,13 +47,23 @@ class Model(season.interfaces.wiz.model.sql.Model):
         self.framework = framework 
         self.cache = framework.cache
 
-        if 'wiz' not in self.cache: 
-            self.cache.wiz = season.stdClass()
-            self.cache.wiz.dev = season.stdClass()
-            self.cache.wiz.prod = season.stdClass()
-            self.cache.wiz.dev_theme = season.stdClass()
-            self.cache.wiz.prod_theme = season.stdClass()
-            
+        if 'wiz' not in self.cache:
+            _cache = None
+            try:
+                fs = self.framework.model("wizfs", module="wiz").use(".")
+                _cache = fs.read_pickle("wiz.cache") 
+            except:
+                pass
+
+            if _cache is None:
+                self.cache.wiz = dict()
+                self.cache.wiz['dev'] = dict()
+                self.cache.wiz['prod'] = dict()
+                self.cache.wiz['dev_theme'] = dict()
+                self.cache.wiz['prod_theme'] = dict()
+            else:
+                self.cache.wiz = _cache
+        
         config = framework.config.load("wiz")
         try:
             self.DEVMODE = framework.request.cookies("season-wiz-devmode", "false")
@@ -82,11 +92,11 @@ class Model(season.interfaces.wiz.model.sql.Model):
             self.cache.wiz_deploy_version = version
 
     def flush(self):
-        self.cache.wiz = season.stdClass()
-        self.cache.wiz.dev = season.stdClass()
-        self.cache.wiz.prod = season.stdClass()
-        self.cache.wiz.dev_theme = season.stdClass()
-        self.cache.wiz.prod_theme = season.stdClass()
+        self.cache.wiz = dict()
+        self.cache.wiz['dev'] = dict()
+        self.cache.wiz['prod'] = dict()
+        self.cache.wiz['dev_theme'] = dict()
+        self.cache.wiz['prod_theme'] = dict()
         
         versions = self.rows(groupby="version", orderby="`version` DESC", fields="version,count(*) AS cnt")
         if 'wiz_deploy_version' not in self.cache:
@@ -118,11 +128,15 @@ class Model(season.interfaces.wiz.model.sql.Model):
             try:
                 namespace = row['namespace']
                 self.render(namespace)
+                break
             except:
                 pass
 
         # restore mode
         self.set_dev(is_dev)
+
+        fs = self.framework.model("wizfs", module="wiz").use(".")
+        fs.write_pickle("wiz.cache", self.cache.wiz)
         return True
 
     def set_update_view(self, updateview):
@@ -193,7 +207,7 @@ class Model(season.interfaces.wiz.model.sql.Model):
         self.set_update_view(True)
 
         # clear development cache
-        self.cache.wiz.dev = season.stdClass()
+        self.cache.wiz['dev'] = season.stdClass()
 
         # build view and routes
         try:
@@ -272,11 +286,11 @@ class Model(season.interfaces.wiz.model.sql.Model):
         """load route from wiz database. This function used only in this instance.
         """
         if self.DEVMODE:
-            if 'routes' in self.cache.wiz.dev and self.updateview==False:
-                return self.cache.wiz.dev.routes
+            if 'routes' in self.cache.wiz['dev'] and self.updateview==False:
+                return self.cache.wiz['dev']['routes']
         else:
-            if 'routes' in self.cache.wiz.prod and self.updateview==False:
-                return self.cache.wiz.prod.routes
+            if 'routes' in self.cache.wiz['prod'] and self.updateview==False:
+                return self.cache.wiz['prod']['routes']
         
         if self.DEVMODE:
             routes = self.select(version="master", fields="id,route,theme", orderby="`updated` DESC")
@@ -314,11 +328,11 @@ class Model(season.interfaces.wiz.model.sql.Model):
                 return None, None, {}
 
         if self.DEVMODE:
-            self.cache.wiz.dev.routes = matcher
-            return self.cache.wiz.dev.routes
+            self.cache.wiz['dev']['routes'] = matcher
+            return self.cache.wiz['dev']['routes']
         else:
-            self.cache.wiz.prod.routes = matcher
-            return self.cache.wiz.prod.routes
+            self.cache.wiz['prod']['routes'] = matcher
+            return self.cache.wiz['prod']['routes']
     
     def themes(self):
         framework = self.framework
@@ -339,8 +353,8 @@ class Model(season.interfaces.wiz.model.sql.Model):
 
     def theme(self, themename, layoutname, viewpath, view=None):
         framework = self.framework
-        if self.is_dev(): cache = self.cache.wiz.dev_theme
-        else: cache = self.cache.wiz.prod_theme
+        if self.is_dev(): cache = self.cache.wiz['dev_theme']
+        else: cache = self.cache.wiz['prod_theme']
 
         namespace = f"{themename}/{layoutname}/{viewpath}"
 
@@ -421,9 +435,9 @@ class Model(season.interfaces.wiz.model.sql.Model):
 
         # check mode
         if self.is_dev(): 
-            cache = self.cache.wiz.dev
+            cache = self.cache.wiz['dev']
         else: 
-            cache = self.cache.wiz.prod
+            cache = self.cache.wiz['prod']
 
         # setup logger
         _prelogger = self.framework.log
@@ -433,8 +447,9 @@ class Model(season.interfaces.wiz.model.sql.Model):
 
         # check cached view
         if namespace in cache and self.updateview==False:
-            item, namespace, id, html, css, js, api, fn = cache[namespace]
-
+            item, namespace, id, html, css, js, api, kwargs_code = cache[namespace]
+            fn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner', 'print': _logger}
+            exec(compile(kwargs_code, 'season.Spawner', 'exec'), fn)
             _kwargs = fn['get'](self.framework, kwargs)
             kwargs = _kwargs
 
@@ -491,11 +506,12 @@ class Model(season.interfaces.wiz.model.sql.Model):
         if item['properties']['js'] == 'typescript':
             js = dukpy.typescript_compile(js)
             js = str(js)
+            js = '\n'.join(js.split('\n')[5:-4])
 
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         item['cachetime'] = timestamp
-        cache[namespace] = (item, namespace, id, html, css, js, item['api'], fn)
-        cache[id] = (item, namespace, id, html, css, js, item['api'], fn)
+        cache[namespace] = (item, namespace, id, html, css, js, item['api'], kwargs_code)
+        cache[id] = (item, namespace, id, html, css, js, item['api'], kwargs_code)
 
         self.framework.log = _prelogger
         return self.__view__(item, namespace, id, html, css, js, **kwargs), item['api']

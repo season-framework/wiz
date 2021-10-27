@@ -44,13 +44,7 @@ if ext == '.less':
     return cache.resources[filepath]
 """
 
-CODE_BUILD = """
-if app.framework.config.load().get("dev", False) == False:
-    app.framework.log("wiz build start")
-    wiz = app.framework.model("wiz", module="wiz")
-    wiz.build()
-    app.framework.log("wiz build finished")
-"""
+CODE_BUILD = ""
 
 class Controller(season.interfaces.wiz.admin.api):
 
