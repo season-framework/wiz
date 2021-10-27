@@ -44,6 +44,14 @@ if ext == '.less':
     return cache.resources[filepath]
 """
 
+CODE_BUILD = """
+if app.framework.config.load().get("dev", False) == False:
+    app.framework.log("wiz build start")
+    wiz = app.framework.model("wiz", module="wiz")
+    wiz.build()
+    app.framework.log("wiz build finished")
+"""
+
 class Controller(season.interfaces.wiz.admin.api):
 
     def __startup__(self, framework):
@@ -138,6 +146,7 @@ class Controller(season.interfaces.wiz.admin.api):
         secret_key = package.framework['secret_key']
         if secret_key is None or len(secret_key) == 0: secret_key = "season-wiz"
         code = package.framework["build"]
+        code = code + "\n" + CODE_BUILD
         code = addtabs(code, 2)
         script = "def build(app, socketio):\n"
         script = script + f"    try:\n{code}\n    except:\n        pass\n"
