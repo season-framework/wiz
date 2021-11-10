@@ -3,6 +3,8 @@ import season
 class base(season.interfaces.wiz.controller.base):
     def __startup__(self, framework):
         super().__startup__(framework)
+        if len(self.config) == 0: framework.response.redirect("/wiz/install")
+
         if self.config.acl is not None: self.config.acl(framework)
 
         self.wiz = framework.model("wiz", module="wiz")

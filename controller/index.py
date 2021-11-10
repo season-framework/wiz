@@ -25,6 +25,8 @@ class Controller(season.interfaces.wiz.controller.api):
         self.status(500, str(err))
 
     def __default__(self, framework):
+        if len(self.config) == 0:
+            framework.response.redirect("install")
         framework.response.redirect("admin")
 
     def api(self, framework):

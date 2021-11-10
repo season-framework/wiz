@@ -1,0 +1,141 @@
+doctype 5
+include wiz/theme/component
+
+html(ng-app="app")
+    head
+        +header
+        
+    body.border-top-wide.border-primary.d-flex.flex-column(ng-controller="content")
+        script(src='/resources/wiz/theme/libs/tabler/dist/libs/bootstrap/dist/js/bootstrap.bundle.min.js')
+        script(src='/resources/wiz/theme/libs/tabler/dist/js/tabler.min.js')
+        script(src='/resources/wiz/theme/libs/monaco/min/vs/loader.js')
+        script.
+            require.config({ paths: { vs: '/resources/wiz/theme/libs/monaco/min/vs' } });
+
+        .page.page-center.pt-5(style="background: transparent;")
+            .container-tight.p-4(style="{{step.wide ? 'max-width: 920px;' : ''}}")
+                .text-center.mb-4
+                    a(href=".")
+                        img(src="/resources/wiz/logo.png" height="36" alt="")
+
+                .card.card-md(ng-if="step.id == 'start'")
+                    .card-body.text-center.p-4.p-sm-5
+                        h2 WIZ Easy Install
+                        p.text-muted WIZ is not installed on the server. Click the Next button to proceed with the installation.
+
+                .card.card-md(ng-if="step.id == 'framework.default'")
+                    .card-body.text-center.p-3
+                        h2 Framework Setting
+                    .hr.my-0
+                    .card-body
+                        .mb-3
+                            label.form-label.bold Host
+                            .form-hint Development server host. Defaults to '0.0.0.0'.
+                            input.form-control.text-center(type="text" ng-model="data.framework.host" placeholder="0.0.0.0")
+                        
+                        .mb-3
+                            label.form-label.bold Port
+                            .form-hint Development server port. Default to '3000'.
+                            input.form-control.text-center(type="text" ng-model="data.framework.port" placeholder="3000")
+                        
+                        .mb-3
+                            label.form-label.bold Session secret
+                            .form-hint Session secret key for flask app. Default to 'season-wiz'.
+                            input.form-control.text-center(type="text" ng-model="data.framework.secret_key" placeholder="season-wiz")
+                        
+                        .mb-3
+                            label.form-label.bold Mode
+                            .form-hint If you set developer mode, UI always display develop code. Production mode display UI as latested deployed version.
+                            select.form-select.text-center(ng-model="data.framework.dev")
+                                option(value='True') Development
+                                option(value='False') Production
+
+                        .mb-3
+                            label.form-label.bold Log Level
+                            .form-hint If you don’t configure logging, default log level is usually ‘warning’.
+                            select.form-select.text-center(ng-model="data.framework.log_level")
+                                option(value=0) DEBUG
+                                option(value=1) INFO
+                                option(value=2) DEV
+                                option(value=3) WARNING
+                                option(value=4) ERROR
+                                option(value=5) CRITICAL
+
+                .card.card-md(ng-if="step.id == 'framework.watch'")
+                    .card-body.text-center.p-3
+                        h2 Framework Setting
+                    .hr.my-0
+                    .card-body
+                        .mb-3
+                            label.form-label.bold Watch Filter
+                            .form-hint Whitelist file name pattern for restart server. Defaults to '*'.
+                            textarea.form-control.text-left(rows=5 ng-model="data.framework.watch.pattern" placeholder="*")
+                        .mb-3
+                            label.form-label.bold Watch Ignore
+                            .form-hint Blacklist file name pattern for restart server. Defaults to 'None'.
+                            textarea.form-control.text-left(rows=5 ng-model="data.framework.watch.ignore" placeholder="websrc/app/config/*")
+
+                .card.card-md(ng-if="step.id == 'wiz.category'")
+                    .card-body.text-center.p-3
+                        h2 WIZ Configurations
+                    .hr.my-0
+                    .card-body
+                        .mb-3
+                            label.form-label.bold Category
+                            .form-hint
+                                div WIZ App categories. Seperated by line. 
+                                div Each lines defined as 'key: displayname'.
+                            textarea.form-control(rows=5 ng-model="data.wiz.category" placeholder="route: Route")
+
+                        .mb-3
+                            label.form-label.bold Menus
+                            .form-hint
+                                div WIZ Admin interface's top menu list.
+                                div Septerated by line.
+                            textarea.form-control(rows=5 ng-model="data.wiz.topmenus" placeholder="HOME: /")
+
+                        .mb-3
+                            label.form-label.bold Read File Support
+                            .form-hint Support filetype for read file as code in theme/model/resources directory.
+                            textarea.form-control(rows=10 ng-model="data.wiz.supportfile" placeholder=".py: python")
+
+                .card.card-md(ng-if="step.id == 'wiz.acl'")
+                    .card-body.text-center.p-3
+                        h2 WIZ Configurations
+                    .hr.my-0
+                    .card-body
+                        .mb-3
+                            label.form-label.mb-3.bold Access Control
+                            .form-hint.mb-3 
+                                div Define access control for access wiz admin interface.
+                                div you can use `framework` (flask app object) in code area.
+                            div(style="height: 400px; overflow: hidden;")
+                                div(ng-model="data.wiz.acl" ui-monaco-opts="monaco_properties" ui-monaco)
+
+                .card.card-md(ng-if="step.id == 'filter'")
+                    .card-body.text-center.p-3
+                        h2 Request Filter
+                    .hr.my-0
+                    .card-body
+                        .mb-3
+                            label.form-label.mb-3.bold Request Filter
+                            .form-hint.mb-3 
+                                div Custom defination for handling request.
+                                div you can use `framework` (season flask object) in code area.
+                            div(style="height: 400px; overflow: hidden;")
+                                div(ng-model="data.framework.filter" ui-monaco-opts="monaco_properties" ui-monaco)
+
+                .row.align-items-center.mt-3
+                    .col-4
+                        .progress
+                            .progress-bar(style="width: {{step_index * 100 / steps.length}}%" role="progressbar" aria-valuenow="{{step_index * 100 / steps.length}}" aria-valuemin="0" aria-valuemax="100")
+                    .col
+                        .btn-list.justify-content-end
+                            button.btn.btn-light(ng-click="event.prev()" ng-if="!isfirst")
+                                | Prev
+                            button.btn.btn-dark(ng-click="event.next()" ng-if="!islast")
+                                | Next
+                            button.btn.btn-dark(ng-click="event.build()" ng-if="islast")
+                                | Finish
+
+        +builder
