@@ -93,6 +93,14 @@ class Model:
 
     def isfile(self, filepath):
         return os.path.isfile(self.abspath(filepath))
+    
+    def isdir(self, filepath):
+        return os.path.isdir(self.abspath(filepath))
+
+    def copy(self, filepath1, filepath2):
+        filepath1 = self.abspath(filepath1)
+        filepath2 = self.abspath(filepath2)
+        shutil.copytree(filepath1, filepath2)
 
     def abspath(self, filepath):
         return os.path.join(self.basepath(), filepath)

@@ -3,34 +3,18 @@ import json
 import datetime
 import urllib
 
-class Controller(season.interfaces.wiz.controller.api):
+class Controller(season.interfaces.wiz.ctrl.base.api):
 
     def __startup__(self, framework):
         super().__startup__(framework)
-        self.framework = framework
-
-    def json_default(self, value):
-        if isinstance(value, datetime.date): 
-            return value.strftime('%Y-%m-%d %H:%M:%S')
-        return ""
-
-    def status(self, status_code=200, data=None):
-        res = season.stdClass()
-        res.code = status_code
-        res.data = data
-        res = json.dumps(res, default=self.json_default)
-        return self.__framework__.response.send(res, content_type='application/json')
-
-    def __error__(self, framework, err):
-        self.status(500, str(err))
 
     def __default__(self, framework):
-        if len(self.config) == 0:
+        if len(self.config.data) == 0:
             framework.response.redirect("install")
         framework.response.redirect("admin")
 
+    # TODO: change process code
     def api(self, framework):
-        framework.response.status = self.status
         app_id = framework.request.segment.get(0, True)
         fnname = framework.request.segment.get(1, True)
         wiz = self.db.get(id=app_id, fields="api,namespace")
@@ -48,6 +32,7 @@ class Controller(season.interfaces.wiz.controller.api):
         if '__startup__' in fn: fn['__startup__'](framework)
         fn[fnname](framework)
 
+    # TODO: change process code
     def export(self, framework):
         if self.config.acl is not None: self.config.acl(framework)
         app_id = framework.request.segment.get(0, True)

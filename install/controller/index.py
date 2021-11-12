@@ -281,10 +281,6 @@ class Controller(season.interfaces.wiz.controller.base):
         configpy.append(f"config.supportfiles = {extmap}")
         configpy.append(f"")
 
-        code = "def uid(framework): return 'admin'"
-        configpy.append(code)
-        configpy.append("config.uid = uid")
-
         code = package.wiz.acl
         configpy.append(code)
         configpy.append("config.acl = acl")

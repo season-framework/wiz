@@ -57,9 +57,8 @@ class Model:
         wizsrc = config.get("src", "wiz")
         self.path = season.stdClass()
         self.path.root = wizsrc
-        self.path.source = os.path.join(wizsrc, "src")
+        self.path.apps = os.path.join(wizsrc, "apps")
         self.path.cache = os.path.join(wizsrc, "cache")
-        self.path.compiler = os.path.join(wizsrc, "compiler")
 
         self.storage = wizfs.use("modules/wiz")
         
@@ -74,35 +73,79 @@ class Model:
         except:
             self.env.DEVMODE = False
 
-    """WIZ Configurations
+        try: self.env.BRANCH = framework.request.cookies("season-wiz-branch", "master")
+        except: self.env.BRANCH = "master"
+
+        self.cls = season.stdClass()
+
+        modulename = framework.modulename
+        framework.modulename = "wiz"
+        self.cls.Route = framework.lib.route.Route
+        self.cls.App = framework.lib.app.App
+        framework.modulename = modulename
+
+
+
+    """WIZ Configuration API
+    : configuration api used in wiz module.
+
+    - set_env(name, value)  :
+    - is_dev()              :
+    - set_dev(DEVMODE)      :
+    - theme()               :
     """
+
     def set_env(self, name, value=None):
         if value is None:
             if name in self.env:
                 del self.env[name]
         else:
             self.env[name] = value
+    
+    def is_dev(self):
+        return self.env.DEVMODE
 
+    def set_dev(self, DEVMODE):
+        """set development mode.
+        :param DEVMODE: string variable true/false
+        """
+        self.framework.response.cookies.set("season-wiz-devmode", DEVMODE)
+        if DEVMODE == "false": self.env.DEVMODE = False
+        else: self.env.DEVMODE = True
+
+    def themes(self):
+        framework = self.framework
+        config = framework.config().load('wiz')
+        BASEPATH = config.get("themepath", "themes")
+        fs = framework.model("wizfs", module="wiz").use(BASEPATH)
+        themes = fs.list()
+        res = []
+        for themename in themes:
+            layoutpath = os.path.join(BASEPATH, themename, 'layout')
+            fs = fs.use(layoutpath)
+            layouts = fs.list()
+            for layout in layouts:
+                fs = fs.use(os.path.join(layoutpath, layout))
+                if fs.isfile('layout.pug'):
+                    res.append(f"{themename}/{layout}")
+        return res
+
+    # TODO
     def target_version(self):
         if self.env.DEVMODE:
             return "master"
         return "master"
 
-    # version tag to git commit
     def commit_id(self, version_name):
         pass
 
-    def is_dev(self):
-        return True
-
-    def deploy_version(self):
-        return "master"
 
     """WIZ Process API
     : this function used in wiz interfaces code editors and frameworks.
 
     - render(target_id, namespace, **kwargs)
     - route()
+    - theme()
     - resources(path)
     """
     def render(self, *args, **kwargs):
@@ -126,51 +169,41 @@ class Model:
 
     def route(self):
         pass
-    
+
+
     """Data Management APIs
     - get(target_id)
     - rows()
-    - search()
     - update()
-    - upsert()
     """
 
-    def get(self, target_id):
-        target_version = self.target_version()
-        target_root = os.path.join(self.path.source, target_id)
-        fs = self.storage.use(target_root)
+    def get(self, app_id, route=False):
+        branch = self.env.BRANCH
+        if route: inst = self.cls.Route(self.framework)
+        else: inst = self.cls.App(self.framework)
+        inst.checkout(branch)
+        app = inst.get(app_id)
+        return app
 
-        if fs.isfile("package.wiz") == False:
-            return None
-        
-        def load_property(attr, default=None):
-            try:
-                return target['properties'][attr]
-            except:
-                return default
+    def rows(self, route=False):
+        branch = self.env.BRANCH
+        if route: inst = self.cls.Route(self.framework)
+        else: inst = self.cls.App(self.framework)
+        inst.checkout(branch)
+        apps = inst.rows()
+        return apps
 
-        if 'properties' not in target:
-            target['properties'] = dict()
+    def update(self, info, route=False):
+        branch = self.env.BRANCH
+        if route: inst = self.cls.Route(self.framework)
+        else: inst = self.cls.App(self.framework)
+        inst.checkout(branch)
+        apps = inst.update(info)
+        return apps
 
-        html = target['properties']["html"] = load_property("html", "pug")
-        js = target['properties']["js"] = load_property("js", "js")
-        css = target['properties']["css"] = load_property("css", "less")
-
-        target = fs.read_json("package.wiz")
-        if 'html' not in target: target["html"] = ""
-        if 'js' not in target: target["js"] = ""
-        if 'css' not in target: target["css"] = ""
-
-        def load_source(attr, filepath):
-            try: target[attr] = fs.read(filepath)
-            except: target[attr] = ""
-
-        target["html"] = load_source("html", f"view.{html}")
-        target["js"] = load_source("html", f"view.{js}")
-        target["css"] = load_source("html", f"view.{css}")
-
-        target["controller"] = load_source("html", f"controller.py")
-        target["api"] = load_source("html", f"api.py")
-        target["socketio"] = load_source("html", f"socketio.py")
-
-        return target
+    def delete(self, app_id, route=False):
+        branch = self.env.BRANCH
+        if route: inst = self.cls.Route(self.framework)
+        else: inst = self.cls.App(self.framework)
+        inst.checkout(branch)
+        inst.delete(app_id)
