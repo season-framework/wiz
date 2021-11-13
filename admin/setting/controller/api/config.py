@@ -40,6 +40,44 @@ if ext == '.less':
     return cache.resources[filepath]
 """
 
+CODE_HANDLE_RESOURCE = """def handle_resource(framework, resource_path):
+    try: branch = framework.request.cookies("season-wiz-branch", "master")
+    except: branch = "master"
+
+    resource_path_seg = resource_path.split("/")
+    if len(resource_path_seg) == 0:
+        return None
+
+    first_seg = resource_path_seg[0]
+    resource_path_seg = resource_path_seg[1:]
+    
+    if first_seg == "themes":
+        themename = resource_path_seg[0]
+        resource_path_seg = resource_path_seg[1:]
+        resource_path_seg = "/".join(resource_path_seg)
+        path = os.path.join(framework.core.PATH.WEBSRC, f"wiz/branch/{branch}/themes", themename, "resources", resource_path_seg)        
+        if os.path.isfile(path):
+            resource_filepath = os.path.basename(path)
+            resource_dirpath = os.path.dirname(path)
+            res = get_resource_handler(resource_dirpath, resource_filepath)
+            if res is not None: return res
+            res = flask.send_from_directory(resource_dirpath, resource_filepath)
+            return res
+        
+    path = os.path.join(framework.core.PATH.WEBSRC, f"wiz/branch/{branch}/resources", resource_path)
+    if os.path.isfile(path):
+        resource_filepath = os.path.basename(path)
+        resource_dirpath = os.path.dirname(path)
+        res = get_resource_handler(resource_dirpath, resource_filepath)
+        if res is not None: return res
+        res = flask.send_from_directory(resource_dirpath, resource_filepath)
+        return res
+
+    return None
+
+config.handle_resource = handle_resource
+"""
+
 CODE_BUILD = ""
 
 class Controller(season.interfaces.wiz.ctrl.admin.setting.api):
@@ -310,6 +348,8 @@ class Controller(season.interfaces.wiz.ctrl.admin.setting.api):
         except:
             pass
         
+        configpy.append(CODE_HANDLE_RESOURCE)
+
         configpy = "\n".join(configpy)
         return configpy
 

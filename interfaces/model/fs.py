@@ -65,7 +65,9 @@ class Model:
 
     def use(self, namespace):
         self.namespace = namespace
-        return self
+        fs = Model()
+        fs.namespace = namespace
+        return fs
 
     def list(self):
         return self.files()
@@ -107,6 +109,13 @@ class Model:
 
     def makedirs(self, path):
         try:
+            path = self.abspath(path)
+            os.makedirs(path)
+        except:
+            pass
+
+    def __makedirs__(self, path):
+        try:
             filedir = os.path.dirname(path)
             os.makedirs(filedir)
         except Exception as e:
@@ -118,7 +127,7 @@ class Model:
 
     def write_text(self, filepath, data):
         abspath = self.abspath(filepath)
-        self.makedirs(abspath)
+        self.__makedirs__(abspath)
         f = open(abspath, 'w')
         f.write(data)
         f.close()
@@ -131,19 +140,19 @@ class Model:
 
         obj = json.dumps(obj, default=json_default)
         abspath = self.abspath(filepath)
-        self.makedirs(abspath)
+        self.__makedirs__(abspath)
         f = open(abspath, 'w')
         f.write(obj)
         f.close() 
 
     def write_file(self, filepath, file):
         abspath = self.abspath(filepath)
-        self.makedirs(abspath)
+        self.__makedirs__(abspath)
         file.save(abspath)
 
     def write_pickle(self, filepath, data):
         abspath = self.abspath(filepath)
-        self.makedirs(abspath)
+        self.__makedirs__(abspath)
         f = open(abspath, 'wb')
         pickle.dump(data, f)
         f.close()
