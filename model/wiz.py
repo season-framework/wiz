@@ -42,6 +42,7 @@ class Wiz(season.stdClass):
         
         self.flask = framework.flask
         self.socketio = framework.socketio
+        self.lib = framework.lib
         self.flask_socketio = framework.flask_socketio
 
         self.PATH = framework.core.PATH
@@ -583,6 +584,26 @@ class Model:
     - api(app_id)
     - route()
     """
+
+    def socket(self, app_id):
+        app = self.data.get(app_id)
+        if app is None or 'socketio' not in app:
+            return None
+
+        app_id = app['package']['id']
+        namespace = app['package']['namespace']
+        socket_api = app['socketio']
+        if len(socket_api) == 0:
+            return None
+
+        wiz = self.instance()
+        wiz.app_id = app_id
+        
+        namespace = app['package']['namespace']
+        logger = wiz.logger(f"[app][{namespace}][socket]")
+        dic = wiz.__dic__('app', app_id)
+        socketfn = spawner(socket_api, 'season.wiz.app.socket', logger, dic=dic)
+        return socketfn, wiz
 
     def api(self, app_id):
         app = self.data.get(app_id)
