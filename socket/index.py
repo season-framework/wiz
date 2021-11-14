@@ -5,31 +5,13 @@ NAMESPACE = "/wiz"
 
 class Controller:
     def __init__(self, framework):
-        _stdout = sys.stdout
-        class stdout():
-            def __init__(self, socketio):
-                self.socketio = socketio
-                
-            def write(self, string):
-                _stdout.write(string)
-                self.socketio.emit("log", string, namespace=NAMESPACE, broadcast=True)
-
-            def flush(self):
-                _stdout.flush()
-
-        sys.stdout = stdout(framework.socketio)
-
         self.session = season.stdClass()
         self.room_connection = dict()
 
     def __startup__(self, framework, _):
         self.config = config = framework.config.load("wiz")
-        self.devtools = config.get("devtools", False)
-        try:
-            config.acl(framework)
-        except:
-            return
-
+        config.acl(framework)
+        
     def __status__(self, framework, room):
         msg = dict()
         msg['sid'] = framework.flask.request.sid
@@ -58,13 +40,10 @@ class Controller:
         msg = dict()
         msg["type"] = "connect"
         msg["sid"] = sid
-
-        if self.devtools:
-            framework.socket.emit("connect", msg, to=sid)
+        framework.socket.emit("connect", msg, to=sid)
 
     def join(self, framework, data):
         if framework.flask.request.sid not in self.session: return
-        if self.devtools: return
         sid = framework.flask.request.sid
         room = data["id"]
         self.session[sid]['room'] = room
@@ -80,18 +59,7 @@ class Controller:
         msg['join'] = room
         framework.socket.emit("message", msg, to=room, broadcast=True)
 
-    def edit(self, framework, data):
-        if self.devtools: return
-        sid = framework.flask.request.sid
-        if sid not in self.session:
-            return
-        room = self.session[sid]['room']
-        data['sid'] = sid
-        data['type'] = "edit"
-        framework.socket.emit("message", data, to=room, broadcast=True)
-
     def leave(self, framework, data):
-        if self.devtools: return
         if framework.flask.request.sid not in self.session:
             return
         
@@ -108,7 +76,6 @@ class Controller:
         framework.socket.emit("message", msg, to=room, broadcast=True)
 
     def disconnect(self, framework, _):
-        if self.devtools: return
         if framework.flask.request.sid not in self.session:
             return
         

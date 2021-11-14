@@ -8,7 +8,7 @@ class base:
         self.framework = framework
 
         self.config = framework.config.load('wiz')
-        self.wiz = framework.model("wiz", module="wiz")
+        self.wiz = framework.model("wiz", module="wiz")        
 
     def parse_json(self, jsonstr, default=None):
         try:
@@ -121,4 +121,6 @@ class api(base):
         super().__startup__(framework)
 
     def __error__(self, framework, e):
+        # TODO: socketio send by room
+
         framework.response.status(500, str(e))

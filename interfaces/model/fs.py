@@ -104,7 +104,7 @@ class Model:
         filepath2 = self.abspath(filepath2)
         shutil.copytree(filepath1, filepath2)
 
-    def abspath(self, filepath):
+    def abspath(self, filepath=""):
         return os.path.join(self.basepath(), filepath)
 
     def makedirs(self, path):
@@ -184,10 +184,10 @@ class Model:
         return data
 
     # remove file
-    def remove(self, filepath):
+    def remove(self, filepath=""):
         self.delete(filepath)
 
-    def delete(self, filepath):
+    def delete(self, filepath=""):
         abspath = self.abspath(filepath)
         try:
             shutil.rmtree(abspath)

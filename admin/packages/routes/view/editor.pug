@@ -114,6 +114,11 @@ mixin content()
 
                     .card.card-sm.mb-3
                         .card-body
+                            label.form-label(style="font-family: 'MAIN-EB'") Namespace
+                            input.form-control(type='text' placeholder='App Title' ng-model="app.data.package.namespace" autocomplete='off')
+
+                    .card.card-sm.mb-3
+                        .card-body
                             label.form-label(style="font-family: 'MAIN-EB'") Base Controller
                             select.form-select(ng-model="app.data.package.controller")
                                 option(value="{{c}}" ng-repeat="c in extdata.controller") {{c}}
@@ -187,7 +192,7 @@ mixin content()
                             i.fas.fa-upload
                             span.ml-2 Import
 
-                        a.btn.btn-white.btn-block.mb-3(href="/wiz/export/{{ app.id }}" target="_blank")
+                        a.btn.btn-white.btn-block.mb-3(href="/wiz/export/route/{{ app.id }}" target="_blank")
                             i.fas.fa-download
                             span.ml-2 Export
 
@@ -220,9 +225,9 @@ mixin content()
                     div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('tab4')" ng-if="app.editor.viewstate" ng-cloak)
                         .code-select.bg-dark.d-flex(style="margin-top: -2px;")
                             a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.app.tabchange('tab4', 'debug')" ng-class="configuration.tab.tab4_val == 'debug' ? 'btn-white' : 'btn-dark'") DEBUG
-                            a.btn.btn-square.btn-dark.btn-sm.p-2.ml-auto(href="" ng-if="configuration.tab.tab4_val == 'debug'" ng-click="session.clear()") CLEAR
+                            a.btn.btn-square.btn-dark.btn-sm.p-2.ml-auto(href="" ng-if="configuration.tab.tab4_val == 'debug'" ng-click="socket.clear()") CLEAR
                         div(style="height: calc(100% - 36px);")
-                            .debug-messages(ng-if="configuration.tab.tab4_val == 'debug'" style="overflow: auto; max-width: none; width: 100%; height: 100%; background: #000; color: #fff; padding: 8px; line-height: 1;" ng-bind-html="trustAsHtml(session.log)")
+                            .debug-messages(ng-if="configuration.tab.tab4_val == 'debug'" style="overflow: auto; max-width: none; width: 100%; height: 100%; background: #000; color: #fff; padding: 8px; line-height: 1;" ng-bind-html="trustAsHtml(socket.log)")
             
     #modal-add-language.modal.fade(tabindex="-1")
         .modal-dialog.modal-sm(role='document')

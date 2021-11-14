@@ -35,6 +35,7 @@ class Controller(season.interfaces.wiz.ctrl.admin.package.view):
 
     def editor(self, framework):
         self.js('editor.js')
+        self.js('/wiz/theme/js/editor.js')
         self.css('editor.css')
 
         app_id = framework.request.segment.get(0, True)
@@ -56,6 +57,7 @@ class Controller(season.interfaces.wiz.ctrl.admin.package.view):
             self.wiz.data.update(info, mode='route')
             framework.response.redirect("editor/" + pkg["id"])
 
-        controllers = framework.wiz.controllers()        
-        self.exportjs(APPID=app_id, CTRLS=controllers)
+        controllers = framework.wiz.controllers()
+        branch = framework.wiz.branch()
+        self.exportjs(APPID=app_id, CTRLS=controllers, BRANCH=branch)
         framework.response.render('editor.pug')

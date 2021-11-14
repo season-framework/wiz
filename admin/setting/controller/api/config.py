@@ -246,6 +246,8 @@ class Controller(season.interfaces.wiz.ctrl.admin.setting.api):
         configpy.append(f"import flask")
         configpy.append(f"import season")
         configpy.append(f"import os")
+        configpy.append(f"import traceback")
+        configpy.append(f"import time")
         configpy.append(f"")
         configpy.append(f"config = season.stdClass()")
         configpy.append(f"")
@@ -291,6 +293,13 @@ class Controller(season.interfaces.wiz.ctrl.admin.setting.api):
             code = package.framework["on_error"]
             code = addtabs(code, 1)
             script = "def on_error(framework, err):\n"
+            script += "    try:\n"
+            script += '        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())\n'
+            script += '        errorlog = f"\\033[91m[" + timestamp + "}][wiz][error]\\n" + traceback.format_exc() + "\\033[0m"\n'
+            script += '        branch = framework.wiz.branch()\n'
+            script += '        framework.socketio.emit("log", errorlog, namespace="/wiz", to=branch, broadcast=True)\n'
+            script += "    except:\n"
+            script += "        pass\n"
             script += code + "\n"
             script += "    pass"
             configpy.append(script)

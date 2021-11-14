@@ -10,30 +10,18 @@ import os
 import pypugjs
 import datetime
 from werkzeug.routing import Map, Rule
+import time
 
-RELOADJS = """<script>
-function wiz_devtools() {
-    try {
-        var socket = io("/wiz/devtools/reload/__ID__");
-        socket._reload = false;
-        socket.on("connect", function () {
-            if (socket._reload) {
-                location.reload();
-            }
-        });
-        socket.on("reload", function (data) {
-            if (data) {
-                socket._reload = true;
-                return;
-            }
-            location.reload()
-        })
-    } catch (e) {
-    }
-}
-wiz_devtools();
-</script>
-"""
+def addtabs(v, size=1):
+    for i in range(size):
+        v =  "    " + "\n    ".join(v.split("\n"))
+    return v
+
+def spawner(code, namespace, logger, **kwargs):
+    fn = {'__file__': namespace, '__name__': namespace, 'print': logger}
+    for key in kwargs: fn[key] = kwargs[key]
+    exec(compile(code, namespace, 'exec'), fn)
+    return fn
 
 
 """WIZ Process API
@@ -47,56 +35,110 @@ wiz_devtools();
 - resources(path)
 """
 
-class Wiz:
-    def __init__(self, wiz, **kwargs):
-        self.__wiz__ = wiz
-        self.__info__ = season.stdClass(kwargs)
-
+class Wiz(season.stdClass):
+    def __init__(self, wiz):
         framework = wiz.framework
+        self.__wiz__ = wiz
+        
+        self.flask = framework.flask
+        self.socketio = framework.socketio
+        self.flask_socketio = framework.flask_socketio
+
+        self.PATH = framework.core.PATH
         self.request = framework.request
         self.response = framework.response
+        self.response.render = self.__render__
         self.config = framework.config
+        self.__logger__ = self.logger("instance")
 
-        # self.model = framework.model
-        # self.lib = framework.lib
-        
-    def log(self, *args):
-        tag = self.__info__.tag
-        if tag is None: tag = "undefined"
-        tag = "[wiz]" + tag
-        log_color = self.__info__.log_color
-        if log_color is None: log_color = "94"
-        print(f"\033[93m{tag}\033[0m", *args)
+    def logger(self, tag=None, log_color=94):
+        class logger:
+            def __init__(self, tag, log_color, wiz):
+                self.tag = tag
+                self.log_color = log_color
+                self.wiz = wiz
 
-    def dic(self, key):
+            def log(self, *args):
+                tag = self.tag
+                log_color = self.log_color
+                wiz = self.wiz
+                
+                if tag is None: tag = "undefined"
+                tag = "[wiz]" + tag
+                
+                args = list(args)
+                for i in range(len(args)): 
+                    args[i] = str(args[i])
+                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+                logdata = f"\033[{log_color}m[{timestamp}]{tag}\033[0m " + " ".join(args)
+                print(logdata)
+
+                branch = wiz.__wiz__.branch()
+                wiz.socketio.emit("log", logdata + "\n", namespace="/wiz", to=branch, broadcast=True)
+                
+        return logger(tag, log_color, self).log
+
+    def __dic__(self, mode, app_id):
+        class dic:
+            def __init__(self, wizinst, mode, app_id):
+                self.__wizinst__ = wizinst
+                self.mode = mode
+                self.app_id = app_id
+            
+            def dic(self, key):
+                wiz = self.__wizinst__.__wiz__
+                cache = self.__wizinst__.cache
+
+                if mode is None or app_id is None:
+                    return ""
+
+                language = self.__wizinst__.request.language()
+                language = language.lower()
+                
+                # TODO: READ FROM CACHE
+
+                if mode == 'route': 
+                    inst = wiz.cls.Route(wiz.framework)
+                else: 
+                    inst = wiz.cls.App(wiz.framework)
+                dic = inst.dic(app_id)
+
+                if language in dic: dic = dic[language]
+                if "default" in dic: dic = dic["default"]
+
+                key = key.split(".")
+                tmp = dic
+                for k in key:
+                    if k not in tmp:
+                        return ""
+                    tmp = tmp[k]
+
+                return tmp
+
+        dicinst = dic(self, mode, app_id)
+        return dicinst.dic
+
+    def __render__(self, *args, **kwargs):
         wiz = self.__wiz__
-        mode = self.__info__.mode
-        app_id = self.__info__.app_id
+        framework = wiz.framework
+        view = self.render(*args, **kwargs)
+        framework.response.send(view, "text/html")
 
-        if mode is None or app_id is None:
-            return ""
-
-        language = self.request.language()
-        language = language.lower()
-        
-        # TODO: READ FROM CACHE
-        if mode == 'route': 
-            inst = wiz.cls.Route(wiz.framework)
-        else: 
-            inst = wiz.cls.App(wiz.framework)
-        dic = inst.dic(app_id)
-
-        if language in dic: dic = dic[language]
-        if "default" in dic: dic = dic["default"]
-
-        key = key.split(".")
-        tmp = dic
-        for k in key:
-            if k not in tmp:
-                return ""
-            tmp = tmp[k]
-
-        return tmp
+    def __compiler__(self, codelang, code, **kwargs):
+        logger = self.logger(f"[compiler][{codelang}]")
+        try:
+            if code is None: return ""
+            if len(code) == 0: return code
+            wiz = self.__wiz__
+            fs = wiz.framework.model("wizfs", module="wiz").use(f"wiz/compiler")
+            if fs.isfile(f"{codelang}.py") == False:
+                return code
+            compiler = fs.read(f"{codelang}.py")
+            compiler = spawner(compiler, "season.wiz.compiler", logger)
+            return compiler['compile'](self, code, kwargs)
+        except Exception as e:
+            logger(e)
+            raise e
 
     def controller(self, namespace):
         wiz = self.__wiz__
@@ -105,9 +147,8 @@ class Wiz:
         fsns = os.path.join(fsns, "interfaces/controller")
         fs = fs.use(fsns)
         code = fs.read(namespace + ".py")
-        wizinstance = wiz.instance(mode="interface.controller", app_id=self.__info__.app_id, tag=f"[interfaces][controller][{namespace}]", log_color="93")
-        obj = {'__file__': 'season.wiz.interfaces.controller', '__name__': 'season.wiz.interfaces.controller', 'wiz': wizinstance, 'print': wizinstance.log}
-        exec(compile(code, 'season.wiz.interfaces.controller', 'exec'), obj)
+        logger = self.logger(f"[controller][{namespace}]", 94)
+        obj = spawner(code, 'season.wiz.controller', logger, wiz=self)
         return obj['Controller']
 
     def model(self, namespace):
@@ -117,29 +158,160 @@ class Wiz:
         fsns = os.path.join(fsns, "interfaces/model")
         fs = fs.use(fsns)
         code = fs.read(namespace + ".py")
-        wizinstance = wiz.instance(mode="interface.model", app_id=self.__info__.app_id, tag=f"[interfaces][model][{namespace}]", log_color="93")
-        obj = {'__file__': 'season.wiz.interfaces.model', '__name__': 'season.wiz.interfaces.controller', 'wiz': wizinstance, 'print': wizinstance.log}
-        exec(compile(code, 'season.wiz.interfaces.model', 'exec'), obj)
+        logger = self.logger(f"[model][{namespace}]", 94)
+        obj = spawner(code, 'season.wiz.model', logger, wiz=self)
         return obj['Model']
+
+    def theme(self, themename, layoutname, viewpath, view=None):
+        layout = self.layout(themename, layoutname, viewpath, view=view)
+        return layout
+
+    def layout(self, themename, layoutname, viewpath, view=None):
+        wiz = self.__wiz__
+        framework = wiz.framework
+        cache = wiz.cache
+
+        THEME_BASEPATH = os.path.join(wiz.branchpath(), "themes")
+        namespace = f"{themename}/layout/{layoutname}/{viewpath}"
+
+        layout = cache.get(f"themes/{namespace}")
         
+        if layout is None:
+            _, ext = os.path.splitext(viewpath)
+            if ext[0] == ".": ext = ext[1:]
+            ext = ext.lower()
+
+            fs = wiz.storage().use(THEME_BASEPATH)
+            layout = fs.read(namespace)
+            layout = self.__compiler__(ext, layout)
+            cache.set(f"themes/{namespace}", layout)
+        
+        kwargs = framework.response.data.get()
+        kwargs['wiz'] = self
+        if view is not None:
+            kwargs['view'] = view
+        layout = framework.response.template_from_string(layout, **kwargs)
+        return layout
+
     def render(self, *args, **kwargs):
         if len(args) == 0: return ""
 
-        target_id = args[0]
+        wiz = self.__wiz__
+        cache = wiz.cache
+        framework = wiz.framework
 
-        # if args length is 1, namespace as target_id
-        namespace = str(target_id)
-        if len(args) > 1: namespace = str(args[1])
+        app_id = args[0] # app unique id or app namespace
 
-        # log trigger
-        _prelogger = self.framework.log
-        def _logger(*args):
-            _prelogger(f"\033[94m[{namespace}]\033[0m", *args)
-        self.framework.log = _logger
+        # find by namespace and id
+        app = cache.get(f"apps/bynamespace/{app_id}")
+        if app is None: app = cache.get(f"apps/byid/{app_id}")
 
-        # TODO: use cache
+        # if cache not exists, find app
+        if app is None:
+            inst = wiz.cls.App(framework)
+            app = inst.get(app_id)
 
-        # build source
+            app_id = app['package']['id']
+            app_namespace = app['package']['namespace']
+            namespace = str(app_namespace)  # namespace for ui
+            if len(args) > 1: namespace = args[1]
+            render_id = app['package']['render_id'] = app_id + "_" + framework.lib.util.randomstring(16)
+        
+            # compile controller
+            controller = app['controller']
+            controller = addtabs(controller)
+            controller = f"import season\ndef process(wiz, **kwargs):\n    framework = wiz\n{controller}\n    return kwargs"
+            app['controller'] = controller
+
+            # compile codes
+            def load_property(key, default=None):
+                try:
+                    return app['package']['properties'][key]
+                except:
+                    return default
+            
+            codelang_html = load_property("html", "pug")
+            codelang_css = load_property("css", "scss")
+            codelang_js = load_property("js", "javascript")
+
+            compile_args = dict()
+            compile_args['app_id'] = app_id
+            compile_args['app_namespace'] = app_namespace
+            compile_args['namespace'] = namespace
+            compile_args['render_id'] = render_id
+
+            # compile to default language
+            if codelang_html != 'html': app['html'] = self.__compiler__(codelang_html, app['html'], **compile_args)
+            if codelang_css != 'css': app['css'] = self.__compiler__(codelang_css, app['css'], **compile_args)
+            if codelang_js != 'javascript': app['js'] = self.__compiler__(codelang_js, app['js'], **compile_args)
+
+            # compile reformat default language 
+            app['html'] = self.__compiler__('html', app['html'], **compile_args)
+            app['css'] = self.__compiler__('css', app['css'], **compile_args)
+            app['js'] = self.__compiler__('javascript', app['js'], **compile_args)
+
+            # save cache
+            cache.set(f"apps/byid/{app_id}", app)
+            cache.set(f"apps/bynamespace/{app_namespace}", app)
+
+        app_id = app['package']['id']
+        app_namespace = app['package']['namespace']
+        namespace = str(app_namespace)  # namespace for ui
+        if len(args) > 1: namespace = args[1]
+        render_id = app['package']['render_id']
+
+        if self.app_id is None:
+            self.app_id = app_id
+
+        render_theme = None
+        if self.render_theme is None:
+            if 'theme' in app['package']:
+                render_theme = self.render_theme = app['package']['theme']
+        
+        ctrl = None
+        if 'controller' in app['package']:
+            ctrl = app['package']['controller']
+            ctrl = self.controller(ctrl)
+            if ctrl is not None:
+                ctrl = ctrl()
+                ctrl.__startup__(self)
+
+        logger = self.logger(f"[app][{app_namespace}]", 93)
+        dic = self.__dic__('app', app_id)
+        controllerfn = spawner(app['controller'], 'season.wiz.app', logger, controller=ctrl, dic=dic)
+        kwargs = controllerfn['process'](self, **kwargs)
+        kwargs['query'] = framework.request.query()
+        
+        kwargsstr = json.dumps(kwargs, default=self.json_default)
+        kwargsstr = kwargsstr.encode('ascii')
+        kwargsstr = base64.b64encode(kwargsstr)
+        kwargsstr = kwargsstr.decode('ascii')
+
+        kwargs['wiz'] = self
+
+        view = app['html']
+        js = app['js']
+        css = app['css']
+
+        view = f"""{view}
+<script src="/resources/wiz/libs/wiz.js"></script>
+<script type="text/javascript">
+    {js}
+</script>
+<style>{css}</style>
+        """
+
+        view = framework.response.template_from_string(view, kwargs=kwargsstr, **kwargs)
+
+        if render_theme is None:
+            return view
+
+        render_theme = render_theme.split("/")
+        themename = render_theme[0]
+        layoutname = render_theme[1]
+
+        view = self.theme(themename, layoutname, 'layout.pug', view=view)
+        return view
 
 
 
@@ -192,6 +364,7 @@ class DataManager:
         inst.delete(app_id)
 
 
+
 """WIZ Cache API
 : this class used in local only.
 
@@ -203,20 +376,25 @@ class CacheControl:
     def __init__(self, wiz):
         self.__wiz__ = wiz
         self.cache = wiz.framework.cache
+        self.enabled = False
         branch = wiz.branch()
         if 'wiz' not in self.cache:
             self.cache.wiz = season.stdClass()
         if branch not in self.cache.wiz:
             self.cache.wiz[branch] = season.stdClass()
 
+    def enable(self, enabled):
+        self.enabled = enabled
+        return self
+
     def fs(self):
         wiz = self.__wiz__
         branch = wiz.branch()
-        return wiz.framework.model("wizfs", module="wiz").use(f"wiz/cache/{branch}")
+        return wiz.framework.model("wizfs", module="wiz").use(f"wiz/cache/render/{branch}")
 
     def get(self, key, default=None):
         wiz = self.__wiz__
-        if wiz.is_dev():
+        if wiz.is_dev() and self.enabled == False:
             return None
         branch = wiz.branch()
         if branch in self.cache.wiz:
@@ -231,8 +409,6 @@ class CacheControl:
         
     def set(self, key, value):
         wiz = self.__wiz__
-        if wiz.is_dev():
-            return False
         branch = wiz.branch()
         try:
             fs = self.fs()
@@ -298,12 +474,13 @@ class Model:
 
         modulename = framework.modulename
         framework.modulename = "wiz"
-        self.cls.Route = framework.lib.route.Route
+        self.cls.Route = framework.lib.app.Route
         self.cls.App = framework.lib.app.App
         framework.modulename = modulename
 
         self.cache = CacheControl(self)
         self.data = DataManager(self)
+        self.instances = []
 
 
     """WIZ Configuration API
@@ -344,15 +521,14 @@ class Model:
         self.framework.response.cookies.set("season-wiz-branch", branch)
         self.env.BRANCH = branch
 
-        route_inst = self.cls.Route(self.framework)
-        route_inst.checkout(branch)
+        # route_inst = self.cls.Route(self.framework)
+        # route_inst.checkout(branch)
 
         # route_inst = self.cls.App(self.framework)
         # route_inst.checkout(branch)
 
     def themes(self):
         framework = self.framework
-        config = framework.config().load('wiz')
         BASEPATH = os.path.join(self.branchpath(), "themes")
         fs = framework.model("wizfs", module="wiz").use(BASEPATH)
         themes = fs.list()
@@ -404,8 +580,37 @@ class Model:
     """Process API
     : this function used in framework.
     
+    - api(app_id)
     - route()
     """
+
+    def api(self, app_id):
+        app = self.data.get(app_id)
+        if app is None or 'api' not in app:
+            return None
+
+        app_id = app['package']['id']
+        
+        view_api = app['api']
+        if len(view_api) == 0:
+            return None
+
+        wiz = self.instance()
+        wiz.app_id = app_id
+
+        ctrl = None
+        if 'controller' in app['package']:
+            ctrl = app['package']['controller']
+            ctrl = wiz.controller(ctrl)
+            if ctrl is not None:
+                ctrl = ctrl()
+                ctrl.__startup__(wiz)
+        
+        namespace = app['package']['namespace']
+        logger = wiz.logger(f"[app][{namespace}][api]")
+        dic = wiz.__dic__('app', app_id)
+        apifn = spawner(view_api, 'season.wiz.app.api', logger, controller=ctrl, dic=dic)
+        return apifn, wiz
 
     def route(self):
         """select route wiz component and render view.
@@ -413,7 +618,6 @@ class Model:
         """
 
         cache = self.cache
-        branch = self.branch()
         framework = self.framework
 
         # get request uri
@@ -437,25 +641,19 @@ class Model:
         route = cache.get(f"routes/{app_id}")
 
         if route is None:
-            def addtabs(v, size=1):
-                for i in range(size):
-                    v =  "    " + "\n    ".join(v.split("\n"))
-                return v
-
             inst = self.cls.Route(self.framework)
             route = inst.get(app_id)
             controller = route['controller']
             controller = addtabs(controller)
-            controller = f"import season\ndef process(wiz):\n    kwargs = season.stdClass()\n    framework = wiz\n{controller}"
+            controller = f"import season\ndef process(wiz):\n    framework = wiz\n{controller}"
             route['controller'] = controller
             cache.set(f"routes/{app_id}", route)
             
         # setup logger
-        wiz = self.instance(mode="route", app_id=app_id, tag=f"[route][{request_uri}]", log_color="93")
-        
-        controllerfn = {'__file__': 'season.Spawner', '__name__': 'season.Spawner', 'print': wiz.log}
-        exec(compile(route["controller"], 'season.Spawner', 'exec'), controllerfn)
+        wiz = self.instance()
+        wiz.route_id = app_id
 
+        ctrl = None
         if 'controller' in route['package']:
             ctrl = route['package']['controller']
             ctrl = wiz.controller(ctrl)
@@ -463,6 +661,9 @@ class Model:
                 ctrl = ctrl()
                 ctrl.__startup__(wiz)
         
+        logger = wiz.logger(f"[route][{request_uri}]", 93)
+        dic = wiz.__dic__('route', app_id)
+        controllerfn = spawner(route['controller'], 'season.wiz.route', logger, controller=ctrl, dic=dic)
         controllerfn['process'](wiz)
 
 
@@ -529,5 +730,7 @@ class Model:
         
         return matcher
 
-    def instance(self, **kwargs):
-        return Wiz(self, **kwargs)
+    def instance(self):
+        inst = Wiz(self)
+        self.instances.append(inst)
+        return inst

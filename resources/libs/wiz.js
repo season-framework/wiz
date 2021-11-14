@@ -3,7 +3,7 @@ if (!window.season_wiz) {
         var obj = {};
         obj.__cache__ = {};
 
-        obj.load = function (app_id, wiz_id, namespace) {
+        obj.load = function (app_id, namespace) {
             var wiz = {};
             wiz.id = app_id;
             wiz.namespace = namespace;
@@ -85,7 +85,7 @@ if (!window.season_wiz) {
             }
 
             obj.__cache__[namespace] = wiz;
-            obj.__cache__[wiz_id] = wiz;
+            obj.__cache__[app_id] = wiz;
 
             return wiz;
         }
