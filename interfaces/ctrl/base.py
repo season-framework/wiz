@@ -8,7 +8,7 @@ class base:
         self.framework = framework
 
         self.config = framework.config.load('wiz')
-        self.wiz = framework.model("wiz", module="wiz")        
+        self.wiz = framework.model("wiz", module="wiz").use()
 
     def parse_json(self, jsonstr, default=None):
         try:
@@ -38,6 +38,13 @@ class view(base):
         if isdevmode is not None:
             if isdevmode == "false" : self.wiz.set_dev("false")
             else: self.wiz.set_dev("true")
+            framework.response.redirect(framework.request.uri())
+
+        # change branch after check exist working branch
+        branch = framework.request.query("branch", None)
+        if branch is not None and len(branch) > 0:
+            if branch in framework.wiz.workspace.branches():
+                framework.response.cookies.set("season-wiz-branch", branch)
             framework.response.redirect(framework.request.uri())
     
     def exportjs(self, **args):

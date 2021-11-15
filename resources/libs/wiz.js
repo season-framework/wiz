@@ -16,7 +16,11 @@ if (!window.season_wiz) {
                 wiz.socket.get = function (socketnamespace) {
                     var socketns = "/wiz/api/" + wiz.namespace;
                     if (socketnamespace) socketns = "/wiz/api/" + socketnamespace;
-                    return window.io(socketns);
+                    if(wiz.branch != 'master') {
+                        socketns = socketns + "/" + wiz.branch;
+                    }
+                    wiz.socket_instance = window.io(socketns);
+                    return wiz.socket_instance;
                 }
             }
 

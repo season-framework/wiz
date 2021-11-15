@@ -401,7 +401,7 @@ class Controller(season.interfaces.wiz.ctrl.admin.setting.api):
                 raise e
 
             filterpy.append("")
-            filterpy.append(f'    framework.wiz = framework.model("wiz", module="wiz")')
+            filterpy.append(f'    framework.wiz = framework.model("wiz", module="wiz").use()')
             filterpy.append(f'    framework.response.data.set(wiz=framework.wiz)')
             filterpy.append(f'    framework.wiz.route()')
             filterpy.append("")

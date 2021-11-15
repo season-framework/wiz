@@ -45,6 +45,11 @@ class Wiz(season.stdClass):
         self.lib = framework.lib
         self.flask_socketio = framework.flask_socketio
 
+        if 'wiz_instance' not in framework.cache:
+            framework.cache.wiz_instance = season.stdClass()
+        
+        self.cache = CacheControl(wiz, namespace="instance")
+
         self.PATH = framework.core.PATH
         self.request = framework.request
         self.response = framework.response
@@ -85,10 +90,10 @@ class Wiz(season.stdClass):
                 self.__wizinst__ = wizinst
                 self.mode = mode
                 self.app_id = app_id
+                self.cache = dict()
             
             def dic(self, key):
                 wiz = self.__wizinst__.__wiz__
-                cache = self.__wizinst__.cache
 
                 if mode is None or app_id is None:
                     return ""
@@ -97,15 +102,18 @@ class Wiz(season.stdClass):
                 language = language.lower()
                 
                 # TODO: READ FROM CACHE
+                if language in self.cache:
+                    dic = self.cache[language]
+                else:
+                    if mode == 'route': 
+                        inst = wiz.cls.Route(wiz)
+                    else: 
+                        inst = wiz.cls.App(wiz)
+                    dic = inst.dic(app_id)
 
-                if mode == 'route': 
-                    inst = wiz.cls.Route(wiz.framework)
-                else: 
-                    inst = wiz.cls.App(wiz.framework)
-                dic = inst.dic(app_id)
-
-                if language in dic: dic = dic[language]
-                if "default" in dic: dic = dic["default"]
+                    if language in dic: dic = dic[language]
+                    if "default" in dic: dic = dic["default"]
+                    self.cache[language] = dic
 
                 key = key.split(".")
                 tmp = dic
@@ -126,12 +134,13 @@ class Wiz(season.stdClass):
         framework.response.send(view, "text/html")
 
     def __compiler__(self, codelang, code, **kwargs):
+        branch = self.branch()
         logger = self.logger(f"[compiler][{codelang}]")
         try:
             if code is None: return ""
             if len(code) == 0: return code
             wiz = self.__wiz__
-            fs = wiz.framework.model("wizfs", module="wiz").use(f"wiz/compiler")
+            fs = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{branch}/compiler")
             if fs.isfile(f"{codelang}.py") == False:
                 return code
             compiler = fs.read(f"{codelang}.py")
@@ -140,6 +149,12 @@ class Wiz(season.stdClass):
         except Exception as e:
             logger(e)
             raise e
+
+    def is_dev(self):
+        return self.__wiz__.is_dev()
+    
+    def branch(self):
+        return self.__wiz__.branch()
 
     def controller(self, namespace):
         wiz = self.__wiz__
@@ -209,7 +224,7 @@ class Wiz(season.stdClass):
 
         # if cache not exists, find app
         if app is None:
-            inst = wiz.cls.App(framework)
+            inst = wiz.cls.App(self.__wiz__)
             app = inst.get(app_id)
 
             app_id = app['package']['id']
@@ -329,39 +344,31 @@ class DataManager:
     
     def inst(self, mode):
         wiz = self.__wiz__
-        if mode == 'route': inst = wiz.cls.Route(wiz.framework)
-        else: inst = wiz.cls.App(wiz.framework)
+        if mode == 'route': inst = wiz.cls.Route(wiz)
+        else: inst = wiz.cls.App(wiz)
         return inst
 
     def get(self, app_id, mode='app'):
         wiz = self.__wiz__
-        branch = wiz.branch()
         inst = self.inst(mode)
-        inst.checkout(branch)
         app = inst.get(app_id)
         return app
 
     def rows(self, mode='app'):
         wiz = self.__wiz__
-        branch = wiz.branch()
         inst = self.inst(mode)
-        inst.checkout(branch)
         apps = inst.rows()
         return apps
 
     def update(self, info, mode='app'):
         wiz = self.__wiz__
-        branch = wiz.branch()
         inst = self.inst(mode)
-        inst.checkout(branch)
         apps = inst.update(info)
         return apps
 
     def delete(self, app_id, mode='app'):
         wiz = self.__wiz__
-        branch = wiz.branch()
         inst = self.inst(mode)
-        inst.checkout(branch)
         inst.delete(app_id)
 
 
@@ -374,33 +381,73 @@ class DataManager:
 - flush()
 """
 class CacheControl:
-    def __init__(self, wiz):
+    def __init__(self, wiz, namespace="render"):
         self.__wiz__ = wiz
+        self.namespace = namespace
         self.cache = wiz.framework.cache
         self.enabled = False
         branch = wiz.branch()
-        if 'wiz' not in self.cache:
-            self.cache.wiz = season.stdClass()
-        if branch not in self.cache.wiz:
-            self.cache.wiz[branch] = season.stdClass()
 
-    def enable(self, enabled):
+        if namespace not in self.cache:
+            self.cache[namespace] = season.stdClass()
+        if branch not in self.cache[namespace]:
+            self.cache[namespace][branch] = season.stdClass()
+
+    def use(self, namespace):
+        if namespace[0] == "/":
+            namespace = namespace[1:]
+        namespace = os.path.join(self.namespace, namespace)
+        return CacheControl(self.__wiz__, namespace=namespace)
+
+    def open(self, key, default=None):
+        class Cache:
+            def __init__(self, ctrl, key, default):
+                self.ctrl = ctrl
+                self.key = key
+                self.default = default
+                self.cache = season.stdClass()
+            
+            def __enter__(self):
+                ctrl = self.ctrl
+                key = self.key
+                default = self.default
+                self.cache[key] = ctrl.get(key, default=default)
+                return self.cache
+
+            def __exit__(self, type, value, traceback):
+                ctrl = self.ctrl
+                key = self.key
+                val = self.cache[key]
+                ctrl.set(key, val)
+
+        return Cache(self, key, default)
+
+    def enable(self, enabled=True):
         self.enabled = enabled
         return self
 
+    def disable(self, disabled=True):
+        if disabled:
+            self.enabled = False
+        else:
+            self.enabled = True
+        return self
+
     def fs(self):
+        namespace = self.namespace
         wiz = self.__wiz__
         branch = wiz.branch()
-        return wiz.framework.model("wizfs", module="wiz").use(f"wiz/cache/render/{branch}")
+        return wiz.framework.model("wizfs", module="wiz").use(f"wiz/cache/{branch}/{namespace}")
 
     def get(self, key, default=None):
+        namespace = self.namespace
         wiz = self.__wiz__
         if wiz.is_dev() and self.enabled == False:
             return None
         branch = wiz.branch()
-        if branch in self.cache.wiz:
-            if key in self.cache.wiz[branch]:
-                return self.cache.wiz[branch][key]
+        if branch in self.cache[namespace]:
+            if key in self.cache[namespace][branch]:
+                return self.cache[namespace][branch][key]
         try:
             fs = self.fs()
             return fs.read_pickle(f"{key}.pkl")
@@ -409,18 +456,20 @@ class CacheControl:
         return default
         
     def set(self, key, value):
+        namespace = self.namespace
         wiz = self.__wiz__
         branch = wiz.branch()
         try:
             fs = self.fs()
             fs.write_pickle(f"{key}.pkl", value)
-            self.cache.wiz[branch][key] = value
+            self.cache[namespace][branch][key] = value
             return True
         except:
             pass
         return False
         
     def flush(self):
+        namespace = self.namespace
         wiz = self.__wiz__
         branch = wiz.branch()
         try:
@@ -428,7 +477,45 @@ class CacheControl:
             fs.remove(".")
         except:
             pass
-        self.cache.wiz[branch] = season.stdClass()
+        self.cache[namespace][branch] = season.stdClass()
+
+
+
+"""WIZ Workspace API
+: this class used in wiz framework level.
+: this class control branches using git
+"""
+
+class Workspace:
+    def __init__(self, wiz):
+        self.wiz = wiz
+        self.fs = wiz.framework.model("wizfs", module="wiz").use("wiz/branch")
+
+    def branch(self):
+        return self.wiz.env.BRANCH
+
+    def checkout(self, branch, base="master"):
+        """checkout branch
+        :branch: string variable of branch name
+        :base='master': string variable of branch for copy if not exist
+        """
+
+        branches = self.branches()
+        if branch in branches:
+            self.wiz.env.BRANCH = branch
+            return True
+
+        
+        
+        return False
+
+
+    
+    def branches(self, working=True):
+        if working:
+            branches = self.fs.list()
+            return branches
+        return []
 
 
 """ WIZ Model used in framework level
@@ -479,10 +566,13 @@ class Model:
         self.cls.App = framework.lib.app.App
         framework.modulename = modulename
 
+        self.workspace = Workspace(self)
         self.cache = CacheControl(self)
         self.data = DataManager(self)
         self.instances = []
 
+    def use(self):
+        return Model(self.framework)
 
     """WIZ Configuration API
     : configuration api used in wiz module.
@@ -511,22 +601,6 @@ class Model:
         self.framework.response.cookies.set("season-wiz-devmode", DEVMODE)
         if DEVMODE == "false": self.env.DEVMODE = False
         else: self.env.DEVMODE = True
-
-    def branch(self):
-        return self.env.BRANCH
-
-    def checkout(self, branch):
-        """checkout branch
-        :param branch: string variable of branch name
-        """
-        self.framework.response.cookies.set("season-wiz-branch", branch)
-        self.env.BRANCH = branch
-
-        # route_inst = self.cls.Route(self.framework)
-        # route_inst.checkout(branch)
-
-        # route_inst = self.cls.App(self.framework)
-        # route_inst.checkout(branch)
 
     def themes(self):
         framework = self.framework
@@ -571,11 +645,15 @@ class Model:
         branchpath = self.branchpath()
         return framework.model("wizfs", module="wiz").use(branchpath)
 
-    # TODO
-    def target_version(self):
-        if self.env.DEVMODE:
-            return "master"
-        return "master"    
+
+    """Git API
+    : this function used in framework.
+    
+    - branch(): return current branch
+    """
+
+    def branch(self):
+        return self.env.BRANCH
 
 
     """Process API
