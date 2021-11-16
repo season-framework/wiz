@@ -3,7 +3,7 @@ if (!window.season_wiz) {
         var obj = {};
         obj.__cache__ = {};
 
-        obj.load = function (app_id, namespace) {
+        obj.load = function (app_id, namespace, app_namespace) {
             var wiz = {};
             wiz.id = app_id;
             wiz.namespace = namespace;
@@ -14,7 +14,7 @@ if (!window.season_wiz) {
             if (window.io) {
                 wiz.socket.active = true;
                 wiz.socket.get = function (socketnamespace) {
-                    var socketns = "/wiz/api/" + wiz.namespace;
+                    var socketns = "/wiz/api/" + app_namespace;
                     if (socketnamespace) socketns = "/wiz/api/" + socketnamespace;
                     if(wiz.branch != 'master') {
                         socketns = socketns + "/" + wiz.branch;
@@ -71,7 +71,7 @@ if (!window.season_wiz) {
 
             wiz.connect = function (id) {
                 if (!obj.__cache__[id]) return null;
-                var connected_wiz = obj.__cache__[id]
+                var connected_wiz = obj.__cache__[id];
                 var _obj = {};
                 _obj.event = function (name, cb) {
                     if (!connected_wiz._event[name]) {
@@ -97,4 +97,3 @@ if (!window.season_wiz) {
         return obj;
     })();
 }
-

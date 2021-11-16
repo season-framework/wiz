@@ -154,3 +154,12 @@ try {
 } catch (e) {
     app.controller('content', function () { });
 }
+
+app.controller('navctrl', function ($scope, $timeout) {
+    $scope.branch = {};
+    $scope.branch.id = BRANCH;
+    $scope.branch.list = BRANCHES;
+    $scope.branch.change = async (branchname) => {
+        location.href = location.pathname + "?branch=" + branchname;
+    }
+});

@@ -3,6 +3,7 @@ import season
 import traceback
 
 class SocketRegister(season.stdClass):
+    
     # just regist
     def __init__(self, framework, app_id, branch="master"):
         try:
@@ -58,7 +59,6 @@ class SocketRegister(season.stdClass):
                 
                 wiz_instance.cache.namespace = ""
                 wiz_instance.cache = wiz_instance.cache.use("socket").use(cache_namespace)
-                wiz_instance.dic = wiz_instance.__dic__('app', app_id)
 
                 ctrl = ctrl['Controller']
                 try: ctrl = ctrl(wiz_instance)

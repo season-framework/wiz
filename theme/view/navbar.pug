@@ -1,5 +1,5 @@
 mixin navbar()
-    header.navbar.navbar-expand-md.navbar-dark
+    header.navbar.navbar-expand-md.navbar-dark(ng-controller="navctrl")
         .container-xl
             button.navbar-toggler.text-white(type='button' data-toggle='collapse' data-target='#navbar-menu')
                 span.navbar-toggler-icon
@@ -13,7 +13,11 @@ mixin navbar()
                         - each menu in topmenus
                             a.text-white.ml-4(href=menu['url'])
                                 span.nav-link-title= menu['title']
-
+                        
+                        select.form-control.form-control-sm.text-white.ml-2(ng-model="branch.id" ng-change="branch.change(branch.id)" style="width: 90px; display: inline-block;")
+                            option(value="" ng-if="!branch.id") select branch
+                            option(ng-repeat="b in branch.list" value="{{b}}") {{b}}
+                    
                 #navbar-menu.navbar.collapse.navbar-collapse.mb-3
                     .container-xl
                         ul.navbar-nav

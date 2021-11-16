@@ -11,6 +11,7 @@ import pypugjs
 import datetime
 from werkzeug.routing import Map, Rule
 import time
+import markupsafe
 
 def addtabs(v, size=1):
     for i in range(size):
@@ -92,7 +93,7 @@ class Wiz(season.stdClass):
                 self.app_id = app_id
                 self.cache = dict()
             
-            def dic(self, key):
+            def dic(self, key=None):
                 wiz = self.__wizinst__.__wiz__
 
                 if mode is None or app_id is None:
@@ -101,7 +102,6 @@ class Wiz(season.stdClass):
                 language = self.__wizinst__.request.language()
                 language = language.lower()
                 
-                # TODO: READ FROM CACHE
                 if language in self.cache:
                     dic = self.cache[language]
                 else:
@@ -114,6 +114,9 @@ class Wiz(season.stdClass):
                     if language in dic: dic = dic[language]
                     if "default" in dic: dic = dic["default"]
                     self.cache[language] = dic
+
+                if key is None:
+                    return dic
 
                 key = key.split(".")
                 tmp = dic
@@ -283,7 +286,9 @@ class Wiz(season.stdClass):
         if self.render_theme is None:
             if 'theme' in app['package']:
                 render_theme = self.render_theme = app['package']['theme']
-        
+            else:
+                render_theme = self.config.load("wiz").get("theme_default", None)
+
         ctrl = None
         if 'controller' in app['package']:
             ctrl = app['package']['controller']
@@ -298,6 +303,12 @@ class Wiz(season.stdClass):
         kwargs = controllerfn['process'](self, **kwargs)
         kwargs['query'] = framework.request.query()
         
+        dicstr = dic()
+        dicstr = json.dumps(dicstr, default=self.json_default)
+        dicstr = dicstr.encode('ascii')
+        dicstr = base64.b64encode(dicstr)
+        dicstr = dicstr.decode('ascii')
+
         kwargsstr = json.dumps(kwargs, default=self.json_default)
         kwargsstr = kwargsstr.encode('ascii')
         kwargsstr = base64.b64encode(kwargsstr)
@@ -310,24 +321,23 @@ class Wiz(season.stdClass):
         css = app['css']
 
         view = f"""{view}
-<script src="/resources/wiz/libs/wiz.js"></script>
 <script type="text/javascript">
     {js}
 </script>
 <style>{css}</style>
         """
 
-        view = framework.response.template_from_string(view, kwargs=kwargsstr, **kwargs)
-
+        view = framework.response.template_from_string(view, dicstr=dicstr, kwargs=kwargsstr, **kwargs)
         if render_theme is None:
-            return view
+            return markupsafe.Markup(view)
 
         render_theme = render_theme.split("/")
         themename = render_theme[0]
         layoutname = render_theme[1]
 
+        view = f'<script src="/resources/wiz/libs/wiz.js"></script>\n{view}'
         view = self.theme(themename, layoutname, 'layout.pug', view=view)
-        return view
+        return markupsafe.Markup(view)
 
 
 
@@ -494,6 +504,14 @@ class Workspace:
     def branch(self):
         return self.wiz.env.BRANCH
 
+    def branches(self, working=True):
+        branches = self.fs.list()
+        if working:
+            return branches
+
+        # TODO: from git repo branch list
+        return []
+
     def checkout(self, branch, base="master"):
         """checkout branch
         :branch: string variable of branch name
@@ -505,17 +523,15 @@ class Workspace:
             self.wiz.env.BRANCH = branch
             return True
 
-        
+        # TODO: checkout from git
+
+        # TODO: if git not exist copy working branch and init git branch
         
         return False
 
-
-    
-    def branches(self, working=True):
-        if working:
-            branches = self.fs.list()
-            return branches
-        return []
+    def commit(self):
+        # TODO: git commit flow
+        pass
 
 
 """ WIZ Model used in framework level
@@ -740,7 +756,7 @@ class Model:
         route = cache.get(f"routes/{app_id}")
 
         if route is None:
-            inst = self.cls.Route(self.framework)
+            inst = self.cls.Route(self)
             route = inst.get(app_id)
             controller = route['controller']
             controller = addtabs(controller)
@@ -786,7 +802,7 @@ class Model:
 
         # if routes not in cache or `devmode` true, load routes            
         if routes is None:
-            inst = self.cls.Route(self.framework)
+            inst = self.cls.Route(self)
             rows = inst.rows()
             routes = []
             for row in rows:
