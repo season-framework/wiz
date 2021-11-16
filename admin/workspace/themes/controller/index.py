@@ -8,18 +8,14 @@ class Controller(season.interfaces.wiz.ctrl.admin.workspace.view):
         super().__startup__(framework)
 
     def __default__(self, framework):
-        self.css('editor.less')
-        self.js('editor.js')
-        BASEPATH = self.wiz.branchpath()
-        BASEPATH = os.path.join(BASEPATH, "themes")
-        fs = framework.model("wizfs", module="wiz").use(BASEPATH)
-        try:
-            os.makedirs(fs.abspath("."))
-        except:
-            pass
-        themes = fs.list()
-        target = []
-        for theme in themes:
-            target.append({"path": BASEPATH, "name": theme})
-        self.exportjs(target=target, BASEPATH=BASEPATH)
-        return framework.response.render('editor.pug')
+        self.css('/wiz/theme/less/browser.less')
+        self.js('browser.js')
+        self.js('/wiz/theme/editor/browser.js')
+        
+        fs = self.wiz.storage()
+        if fs.isdir("themes") == False:
+            fs.makedirs("themes")
+        themes = fs.files("themes")
+        branchpath = self.wiz.branchpath()
+        self.exportjs(BRANCHPATH=branchpath, THEMES=themes)
+        framework.response.render('browser.pug')

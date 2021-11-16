@@ -14,18 +14,22 @@ class Controller(season.interfaces.wiz.ctrl.admin.base.api):
         files = framework.request.files()
         path = framework.request.query("path", True)
         name = framework.request.query("name", True)
-        filepath = framework.request.query("filepath", True)
-        filepath = json.loads(filepath)
+        filepath = framework.request.query("filepath", None)
 
-        if len(filepath) != len(files):
-            return framework.response.status(400, True)
+        if filepath is not None:
+            filepath = json.loads(filepath)
+            if len(filepath) != len(files):
+                return framework.response.status(400, True)
 
         fs = self.fs.use(path + "/" + name)
         for i in range(len(files)):
             try:
                 file = files[i]
                 if len(file.filename) == 0: continue
-                filename = filepath[i]
+                if filepath is not None:
+                    filename = filepath[i]
+                else:
+                    filename = file.filename
                 fs.write_file(filename, file)
             except Exception as e:
                 pass

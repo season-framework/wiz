@@ -16,4 +16,4 @@ class Controller(season.interfaces.wiz.ctrl.admin.workspace.view):
 
         branchpath = self.wiz.branchpath()
         self.exportjs(BRANCHPATH=branchpath)
-        framework.response.render('editor.pug')
+        framework.response.render('browser.pug')
