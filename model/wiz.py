@@ -502,8 +502,10 @@ class Git:
         self.repo = git.Repo.init(self.path)
         self.remote_repo = git.Repo.init(self.remote_path)
 
+        commits = len(self.commits())
+
         # if not initialized repo, create first commit
-        if self.fs.isfile(".gitignore") == False:
+        if commits == 0:
             # if branch is not master, create remote 
             if branch != 'master':
                 remote_branches = [h.name for h in self.remote_repo.heads]
@@ -559,7 +561,8 @@ class Git:
     def commit(self, message="init"):
         self.repo.git.add('--all')
         self.repo.index.commit(message)
-        self.push()
+        if self.branch != 'master':
+            self.push()
 
     def commits(self, max_count=30, skip=0):
         branch = self.branch
@@ -650,6 +653,23 @@ class Workspace:
     def changed(self, branch=None):
         if branch is None: branch = self.branch()
         return self.git(branch).changed()
+
+    def delete(self, branch, remote=False):
+        if branch == 'master': raise Exception("master branch not allowed removing")
+        if branch == self.branch(): raise Exception("working branch not allowed removing")
+                
+        # remove from remote
+        if remote:
+            remote_path = self.wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/master").abspath()
+            remote_repo = git.Repo.init(remote_path)
+            git.Head.delete(remote_repo, remote_repo.heads[branch])
+
+        # remove working branch
+        try:
+            fs = self.wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{branch}")
+            fs.delete()
+        except:
+            pass
 
         
 """ WIZ Model used in framework level

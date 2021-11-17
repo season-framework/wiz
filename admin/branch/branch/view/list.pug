@@ -3,8 +3,8 @@ mixin content()
         .page-header
             .row.align-items-center
                 .col-auto
-                    .page-pretitle SEASON WIZ
-                    h2.page-title Branch
+                    .page-pretitle Branch
+                    h2.page-title Active Branch
 
                 .col-auto.ml-auto.d-print-none
                     .d-flex
@@ -16,22 +16,70 @@ mixin content()
             table.table.board-table.table-hover.mb-0
                 thead 
                     tr
+                        th.text-center.width-1
                         th.text-center.width-1.pr-2.pl-2 Working
                         th.text-left.pr-2.pl-2 Branch
                         th.text-center.width-1.pr-2.pl-2
 
                 tbody
                     tr(ng-repeat="item in branch.list" class="{{branch.id == item.name ? 'bg-dark-lt' : ''}}")
+                        td.text-center.width-1
+                            button.btn.btn-sm(ng-click="event.checkout(item.name)" class="{{ branch.id != item.name ? 'btn-light' : 'btn-dark' }}")
+                                i.fas.fa-check-circle
                         td.text-center.width-1.pr-2.pl-2
                             span.badge.bg-green(ng-if="item.working")
-                        td.text-left.pr-2.pl-2 {{item.name}}
-                        td.text-right.width-1.pr-2.pl-2
-                            button.btn.btn-sm.btn-light.ml-2(ng-if="item.changed")
+                        td.text-left.pr-2.pl-2 
+                            span {{item.name}}
+                            span.badge.badge-sm.bg-dark-lt.ml-2(ng-if="item.changed")
                                 i.fas.fa-exchange-alt
                                 span.ml-1 {{item.changed}}
-                            button.btn.btn-sm.btn-light.ml-2(ng-click="branch.checkout(item.name)")
-                                i.fas.fa-code-branch
-                                span.ml-1 Checkout
+                        td.text-right.width-1.pr-2.pl-2
+                            button.btn.btn-sm.btn-light.ml-1(ng-click="modal.delete(item)" ng-if="item.name != branch.id && item.name != 'master'")
+                                i.fas.fa-trash
+                                span.ml-1 Delete
+
+        .page-header.mt-5
+            .row.align-items-center
+                .col-auto
+                    .page-pretitle Branch
+                    h2.page-title Stale Branch
+
+        .overflow-x
+            table.table.board-table.table-hover.mb-0
+                thead 
+                    tr
+                        th.text-center.width-1
+                        th.text-center.width-1.pr-2.pl-2 Working
+                        th.text-left.pr-2.pl-2 Branch
+                        th.text-center.width-1.pr-2.pl-2
+
+                tbody
+                    tr(ng-repeat="item in branch.stale" class="{{branch.id == item.name ? 'bg-dark-lt' : ''}}")
+                        td.text-center.width-1
+                            button.btn.btn-sm(ng-click="event.checkout(item.name)" class="{{ branch.id != item.name ? 'btn-light' : 'btn-dark' }}")
+                                i.fas.fa-check-circle
+                        td.text-center.width-1.pr-2.pl-2
+                            span.badge.bg-green(ng-if="item.working")
+                        td.text-left.pr-2.pl-2 
+                            span {{item.name}}
+                            span.badge.badge-sm.bg-dark-lt.ml-2(ng-if="item.changed")
+                                i.fas.fa-exchange-alt
+                                span.ml-1 {{item.changed}}
+                        td.text-right.width-1.pr-2.pl-2
+                            button.btn.btn-sm.btn-light.ml-1(ng-click="modal.delete(item)" ng-if="item.name != branch.id && item.name != 'master'")
+                                i.fas.fa-trash
+                                span.ml-1 Delete
+
+    #modal-delete.modal.fade(tabindex="-1")
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title(ng-if="modal.data.delete.working") Delete active branch
+                    .modal-title(ng-if="!modal.data.delete.working") Delete
+                    div Once deleted, it cannot be restored. Are you sure you want to delete?
+                .modal-footer
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-danger(type='button' ng-click="event.delete()") Delete  
 
     #modal-new-branch.modal.fade(tabindex="-1")
         .modal-dialog.modal-sm(role='document')

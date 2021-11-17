@@ -14,3 +14,11 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
         framework.wiz.workspace.checkout(branch, base)
         framework.response.cookies.set("season-wiz-branch", branch)
         framework.response.status(200, True)
+
+    def delete(self, framework):
+        branch = framework.request.query("branch", True)
+        remote = framework.request.query("remote", True)
+        if remote == 'true': remote = True
+        else: remote = False
+        framework.wiz.workspace.delete(branch, remote)
+        framework.response.status(200, True)
