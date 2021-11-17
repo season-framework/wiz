@@ -44,6 +44,7 @@ class view(base):
         branch = framework.request.query("branch", None)
         if branch is not None and len(branch) > 0:
             if branch in framework.wiz.workspace.branches():
+                framework.wiz.workspace.checkout(branch)
                 framework.response.cookies.set("season-wiz-branch", branch)
             framework.response.redirect(framework.request.uri())
     

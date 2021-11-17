@@ -10,26 +10,7 @@ class view(season.interfaces.wiz.ctrl.admin.base.view):
 
         menus.append({"url": "/wiz/admin/setting/status", "icon": "fas fa-heartbeat", "title": "System Status", 'pattern': r'^/wiz/admin/setting/status'})
         menus.append({"url": "/wiz/admin/setting/configuration", "icon": "fas fa-cog", "title": "Configuration", 'pattern': r'^/wiz/admin/setting/configuration'})
-        menus.append({"url": "/wiz/admin/setting/deploy", "icon": "fas fa-cloud-download-alt", "title": "Deploy & Backup"})
-        menus.append({"url": "/wiz/admin/setting/restore", "icon": "fas fa-history", "title": "Restore"})
-        menus.append({"url": "/wiz/admin/setting/cache_status", "icon": "fas fa-file-medical-alt", "title": "Cache Status"})
-        
-        # menus.append({"url": "/wiz/admin/setting/framework_general", "icon": "fas fa-rocket", "title": "Framework", 'pattern': r'^/wiz/admin/setting/framework', "sub": [
-        #     {"url": "/wiz/admin/setting/framework_general", "icon": "fas fa-caret-right", "title": "Settings"},
-        #     {"url": "/wiz/admin/setting/framework_handler/build", "icon": "fas fa-caret-right", "title": "Handler", 'pattern': r'^/wiz/admin/setting/framework_handler', 
-        #         "sub": [
-        #             {"url": "/wiz/admin/setting/framework_handler/build", "icon": "fas fa-caret-right", "title": "Build Handler"},
-        #             {"url": "/wiz/admin/setting/framework_handler/filter", "icon": "fas fa-caret-right", "title": "Request Filter"},
-        #             {"url": "/wiz/admin/setting/framework_handler/before_request", "icon": "fas fa-caret-right", "title": "Before Request Handler"},
-        #             {"url": "/wiz/admin/setting/framework_handler/after_request", "icon": "fas fa-caret-right", "title": "After Request Handler"},
-        #             {"url": "/wiz/admin/setting/framework_handler/error", "icon": "fas fa-caret-right", "title": "Error Handler"},
-        #             {"url": "/wiz/admin/setting/framework_handler/resource", "icon": "fas fa-caret-right", "title": "Resource Handler"}
-        #         ]
-        #     },
-        #     {"url": "/wiz/admin/setting/framework_config", "icon": "fas fa-caret-right", "title": "Config Files"},
-        #     {"url": "/wiz/admin/setting/framework_lib", "icon": "fas fa-caret-right", "title": "Library"},
-        #     {"url": "/wiz/admin/setting/framework_dic", "icon": "fas fa-caret-right", "title": "Dictionary"}
-        # ]})
+        menus.append({"url": "/wiz/admin/setting/compiler", "icon": "fas fa-rocket", "title": "Compiler", 'pattern': r'^/wiz/admin/setting/compiler'})
 
         self.setting_nav(menus)
 

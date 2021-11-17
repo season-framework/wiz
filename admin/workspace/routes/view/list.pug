@@ -19,7 +19,7 @@ mixin content()
                     tr
                         th.text-left.width-1.pr-2.pl-2 Route
                         th.text-left.pr-2.pl-2 Title
-                        th.text-center.width-2.pr-2.pl-2 Created
+                        th.text-center.width-2.pr-2.pl-2 Updated
 
                 tbody
                     tr(ng-if="list.length == 0")
@@ -30,7 +30,7 @@ mixin content()
                             a(ng-href="/wiz/admin/workspace/routes/editor/{{item.package.id}}") {{item.package.route}}
                         td.pr-2.pl-2
                             a(ng-href="/wiz/admin/workspace/routes/editor/{{item.package.id}}") {{item.package.title}}
-                        td.text-center.width-2.pr-2.pl-2 {{item.package.created.substring(0,10)}}                
+                        td.text-center.width-2.pr-2.pl-2 {{item.package.updated.substring(0,10)}}                
                        
 include wiz/theme/layout
 +layout

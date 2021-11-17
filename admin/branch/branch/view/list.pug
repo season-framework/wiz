@@ -1,0 +1,58 @@
+mixin content()
+    .container.pt-4.pb-4(style="max-width: 920px;")
+        .page-header
+            .row.align-items-center
+                .col-auto
+                    .page-pretitle SEASON WIZ
+                    h2.page-title Branch
+
+                .col-auto.ml-auto.d-print-none
+                    .d-flex
+                        a.btn.btn-light.pr-4.pl-4.ml-2(style="width: 140px;" ng-click="modal.create()") 
+                            i.mr-2.fas.fa-code-branch
+                            | Create
+
+        .overflow-x
+            table.table.board-table.table-hover.mb-0
+                thead 
+                    tr
+                        th.text-center.width-1.pr-2.pl-2 Working
+                        th.text-left.pr-2.pl-2 Branch
+                        th.text-center.width-1.pr-2.pl-2
+
+                tbody
+                    tr(ng-repeat="item in branch.list" class="{{branch.id == item.name ? 'bg-dark-lt' : ''}}")
+                        td.text-center.width-1.pr-2.pl-2
+                            span.badge.bg-green(ng-if="item.working")
+                        td.text-left.pr-2.pl-2 {{item.name}}
+                        td.text-right.width-1.pr-2.pl-2
+                            button.btn.btn-sm.btn-light.ml-2(ng-if="item.changed")
+                                i.fas.fa-exchange-alt
+                                span.ml-1 {{item.changed}}
+                            button.btn.btn-sm.btn-light.ml-2(ng-click="branch.checkout(item.name)")
+                                i.fas.fa-code-branch
+                                span.ml-1 Checkout
+
+    #modal-new-branch.modal.fade(tabindex="-1")
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title Branch Name
+                    div.mb-4
+                        input.form-control(type="text" ng-model="modal.data.create.branchname" placeholder="Branch Name")
+                    
+                    .modal-title Base Branch
+                    div 
+                        select.form-select(ng-model="modal.data.create.basebranch")
+                            option(value="" ng-if="!modal.data.create.basebranch") select branch
+                            option(ng-repeat="b in branch.list" value="{{b.name}}") {{b.name}}
+                    
+                .modal-footer
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-dark(type='button' ng-click="event.create(modal.data.create.branchname, modal.data.create.basebranch)") Create
+
+    .bg-dark.text-center(ng-if="loading" style="width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 99999; opacity: .6; padding-top: 40vh;")
+        .spinner-grow.text-white(style="width: 60px; height: 60px;")
+
+include wiz/theme/layout
++layout

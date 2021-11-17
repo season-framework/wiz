@@ -12,6 +12,7 @@ import datetime
 from werkzeug.routing import Map, Rule
 import time
 import markupsafe
+import git
 
 def addtabs(v, size=1):
     for i in range(size):
@@ -490,6 +491,88 @@ class CacheControl:
         self.cache[namespace][branch] = season.stdClass()
 
 
+class Git:
+
+    def __init__(self, wiz, branch="master", base_branch="master"):
+        self.branch = branch
+        self.wiz = wiz
+        self.remote_path = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/master").abspath()
+        self.fs = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{branch}")
+        self.path = self.fs.abspath()
+        self.repo = git.Repo.init(self.path)
+        self.remote_repo = git.Repo.init(self.remote_path)
+
+        # if not initialized repo, create first commit
+        if self.fs.isfile(".gitignore") == False:
+            # if branch is not master, create remote 
+            if branch != 'master':
+                remote_branches = [h.name for h in self.remote_repo.heads]
+
+                # create origin and fetch master
+                origin = self.repo.create_remote('origin', self.remote_path)
+                origin.fetch()
+
+                # if branch in remote, checkout directly
+                if branch in remote_branches:
+                    branch_head = self.repo.create_head(branch, origin.refs[branch])
+                    self.repo.head.set_reference(branch_head)
+                    branch_head.checkout()
+                
+                # if branch not in remote, clone from base branch
+                else:
+                    # if base branch not in remote, base branch to master
+                    if base_branch not in remote_branches:
+                        base_branch = "master"
+
+                    # checkout base head
+                    base_head = self.repo.create_head(branch, origin.refs[base_branch])
+                    self.repo.head.set_reference(base_head)
+                    base_head.checkout()
+
+                    # new branch
+                    branch_head = self.repo.create_head(branch)
+                    self.repo.head.set_reference(branch_head)
+                    branch_head.checkout()
+
+                    # push to remote
+                    self.push()
+
+            # if branch is master, create .gitignore
+            else:
+                gitignore = wiz.framework.model("wizfs", module="wiz").read("modules/wiz/.gitignore")
+                self.fs.write(".gitignore", gitignore)
+                self.commit()
+
+    def branches(self):
+        return [h.name for h in self.remote_repo.heads]
+
+    def push(self, remote='origin'):
+        origin = self.repo.remote(name=remote)
+        origin.push(self.branch)
+
+    def pull(self, remote='origin'):
+        origin = self.repo.remote(name=remote)
+        origin.pull(self.branch)
+        if self.branch != 'master':
+            origin.pull('master')
+
+    def commit(self, message="init"):
+        self.repo.git.add('--all')
+        self.repo.index.commit(message)
+        self.push()
+
+    def commits(self, max_count=30, skip=0):
+        branch = self.branch
+        try:
+            commits = list(self.repo.iter_commits(branch, max_count=max_count, skip=skip))
+        except:
+            commits = []
+        return commits
+
+    def changed(self):
+        changed = [item.a_path for item in self.repo.index.diff(None)]
+        return changed
+
 
 """WIZ Workspace API
 : this class used in wiz framework level.
@@ -500,40 +583,75 @@ class Workspace:
     def __init__(self, wiz):
         self.wiz = wiz
         self.fs = wiz.framework.model("wizfs", module="wiz").use("wiz/branch")
+        self.git_origin = self.git("master")
+
+    def git(self, branch=None, base_branch="master"):
+        if branch is None:
+            branch = self.branch()
+        return Git(self.wiz, branch, base_branch)
 
     def branch(self):
         return self.wiz.env.BRANCH
 
-    def branches(self, working=True):
-        branches = self.fs.list()
-        if working:
-            return branches
+    def branches(self, working=True, status=False, git=False):
+        wheads = self.fs.list()
+        gheads = self.git_origin.branches()
 
-        # TODO: from git repo branch list
-        return []
-
-    def checkout(self, branch, base="master"):
-        """checkout branch
-        :branch: string variable of branch name
-        :base='master': string variable of branch for copy if not exist
-        """
-
-        branches = self.branches()
-        if branch in branches:
-            self.wiz.env.BRANCH = branch
-            return True
-
-        # TODO: checkout from git
-
-        # TODO: if git not exist copy working branch and init git branch
+        wheads.sort()
+        gheads.sort()
         
-        return False
+        res = ['master']
+        if status:
+            wb = ['master']
+            gb = ['master']
 
-    def commit(self):
-        # TODO: git commit flow
-        pass
+        if working:
+            for b in wheads:
+                if b not in res:
+                    res.append(b)
+                if status:
+                    if b not in wb:
+                        wb.append(b)
 
+        # add git branches
+        if git:
+            for b in gheads:
+                if b not in res:
+                    res.append(b)
+                if status:
+                    if b not in gb:
+                        gb.append(b)
 
+        # branch name only
+        if status == False:
+            return res
+
+        # with status
+        stat = []
+        for b in res:
+            obj = dict()
+            obj['name'] = b
+            obj['working'] = b in wb
+            obj['git'] = b in gb
+            stat.append(obj)
+
+        return stat
+
+    def checkout(self, branch, base_branch="master"):
+        self.wiz.env.BRANCH = branch
+        self.git(branch, base_branch)
+
+    def commit(self, message=""):
+        self.git().commit(message=message)
+
+    def commits(self, max_count=30, skip=0):
+        return self.git().commits(max_count=30, skip=0)
+        
+    def changed(self, branch=None):
+        if branch is None: branch = self.branch()
+        return self.git(branch).changed()
+
+        
 """ WIZ Model used in framework level
 """
 class Model:

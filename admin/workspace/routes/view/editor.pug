@@ -9,11 +9,6 @@ mixin editor_tab_app()
 
     .card.card-sm.mb-3
         .card-body
-            label.form-label(style="font-family: 'MAIN-EB'") Namespace
-            input.form-control(type='text' placeholder='App Title' ng-model="app.data.package.namespace" autocomplete='off')
-
-    .card.card-sm.mb-3
-        .card-body
             label.form-label(style="font-family: 'MAIN-EB'") Base Controller
             select.form-select(ng-model="app.data.package.controller")
                 option(value="{{c}}" ng-repeat="c in extdata.controller") {{c}}
