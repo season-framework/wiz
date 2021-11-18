@@ -17,8 +17,8 @@ mixin content()
                 thead 
                     tr
                         th.text-center.width-1
-                        th.text-center.width-1.pr-2.pl-2 Working
                         th.text-left.pr-2.pl-2 Branch
+                        th.text-center.width-1.pr-2.pl-2 Author
                         th.text-center.width-1.pr-2.pl-2
 
                 tbody
@@ -26,17 +26,24 @@ mixin content()
                         td.text-center.width-1
                             button.btn.btn-sm(ng-click="event.checkout(item.name)" class="{{ branch.id != item.name ? 'btn-light' : 'btn-dark' }}")
                                 i.fas.fa-check-circle
-                        td.text-center.width-1.pr-2.pl-2
-                            span.badge.bg-green(ng-if="item.working")
+
                         td.text-left.pr-2.pl-2 
                             span {{item.name}}
                             span.badge.badge-sm.bg-dark-lt.ml-2(ng-if="item.changed")
                                 i.fas.fa-exchange-alt
                                 span.ml-1 {{item.changed}}
+                        
+                        td.text-center.width-1.pr-2.pl-2
+                            span {{item.author.name}}
+
                         td.text-right.width-1.pr-2.pl-2
                             button.btn.btn-sm.btn-light.ml-1(ng-click="modal.delete(item)" ng-if="item.name != branch.id && item.name != 'master'")
                                 i.fas.fa-trash
                                 span.ml-1 Delete
+
+                            a.btn.btn-sm.btn-light.ml-1(ng-href="/wiz/admin/branch/commit/diff/{{item.name}}")
+                                i.fas.fa-code-branch
+                                span.ml-1 Commit
 
         .page-header.mt-5
             .row.align-items-center
@@ -49,7 +56,6 @@ mixin content()
                 thead 
                     tr
                         th.text-center.width-1
-                        th.text-center.width-1.pr-2.pl-2 Working
                         th.text-left.pr-2.pl-2 Branch
                         th.text-center.width-1.pr-2.pl-2
 
@@ -58,13 +64,8 @@ mixin content()
                         td.text-center.width-1
                             button.btn.btn-sm(ng-click="event.checkout(item.name)" class="{{ branch.id != item.name ? 'btn-light' : 'btn-dark' }}")
                                 i.fas.fa-check-circle
-                        td.text-center.width-1.pr-2.pl-2
-                            span.badge.bg-green(ng-if="item.working")
                         td.text-left.pr-2.pl-2 
                             span {{item.name}}
-                            span.badge.badge-sm.bg-dark-lt.ml-2(ng-if="item.changed")
-                                i.fas.fa-exchange-alt
-                                span.ml-1 {{item.changed}}
                         td.text-right.width-1.pr-2.pl-2
                             button.btn.btn-sm.btn-light.ml-1(ng-click="modal.delete(item)" ng-if="item.name != branch.id && item.name != 'master'")
                                 i.fas.fa-trash
@@ -90,14 +91,22 @@ mixin content()
                         input.form-control(type="text" ng-model="modal.data.create.branchname" placeholder="Branch Name")
                     
                     .modal-title Base Branch
-                    div 
-                        select.form-select(ng-model="modal.data.create.basebranch")
-                            option(value="" ng-if="!modal.data.create.basebranch") select branch
+                    div.mb-4
+                        select.form-select(ng-model="modal.data.create.base_branch")
+                            option(value="" ng-if="!modal.data.create.base_branch") select branch
                             option(ng-repeat="b in branch.list" value="{{b.name}}") {{b.name}}
+
+                    .modal-title Author Name
+                    div.mb-4
+                        input.form-control(type="text" ng-model="modal.data.create.name" placeholder="Author Name")
+                    
+                    .modal-title Author Email
+                    div 
+                        input.form-control(type="email" ng-model="modal.data.create.email" placeholder="Author Email")
                     
                 .modal-footer
                     button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
-                    button.btn.btn-dark(type='button' ng-click="event.create(modal.data.create.branchname, modal.data.create.basebranch)") Create
+                    button.btn.btn-dark(type='button' ng-click="event.create(modal.data.create.branchname, modal.data.create.base_branch)") Create
 
     .bg-dark.text-center(ng-if="loading" style="width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 99999; opacity: .6; padding-top: 40vh;")
         .spinner-grow.text-white(style="width: 60px; height: 60px;")

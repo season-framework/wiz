@@ -4,6 +4,7 @@ import json
 import datetime
 import shutil
 import season
+import mimetypes
 
 class stdClass(dict):
     def __init__(self, *args, **kwargs):
@@ -120,6 +121,10 @@ class Model:
             os.makedirs(filedir)
         except Exception as e:
             pass
+
+    def mimetype(self, path):
+        path = self.abspath(path)
+        return mimetypes.guess_type(path)[0]
 
     # file write
     def write(self, filepath, data):

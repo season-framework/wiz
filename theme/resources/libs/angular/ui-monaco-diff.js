@@ -51,7 +51,7 @@ function uiMonacoDirective($timeout, uiMonacoConfig) {
             $(iElement).css("height", "100%");
             $(iElement).html("<div style='height: 100%; width: 100%;'></div>")
             var div = $(iElement).find("div")[0];
-            var editor = monaco.editor.createDiffEditor(div, { enableSplitViewResizing: true, fontSize: 14, readOnly: true });
+            var editor = monaco.editor.createDiffEditor(div, monacoOptions);
 
             window.onresize = function () {
                 editor.layout();
@@ -72,6 +72,14 @@ function uiMonacoDirective($timeout, uiMonacoConfig) {
             editor.setModel({
                 original: originalModel,
                 modified: modifiedModel
+            });
+
+            modifiedModel.onDidChangeContent(function (event) {
+                var newValue = modifiedModel.getValue();
+                if (newValue !== ngModel.$viewValue.main.code) {
+                    ngModel.$viewValue.main.code = newValue;
+                    ngModel.$modelValue.main.code = newValue;
+                }
             });
         };
     }

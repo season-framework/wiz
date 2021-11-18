@@ -1,5 +1,4 @@
 import season
-
 import base64
 import lesscpy
 import sass
@@ -13,6 +12,7 @@ from werkzeug.routing import Map, Rule
 import time
 import markupsafe
 import git
+import io
 
 def addtabs(v, size=1):
     for i in range(size):
@@ -493,7 +493,7 @@ class CacheControl:
 
 class Git:
 
-    def __init__(self, wiz, branch="master", base_branch="master"):
+    def __init__(self, wiz, branch="master", base_branch="master", author=None):
         self.branch = branch
         self.wiz = wiz
         self.remote_path = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/master").abspath()
@@ -503,6 +503,18 @@ class Git:
         self.remote_repo = git.Repo.init(self.remote_path)
 
         commits = len(self.commits())
+
+        if author is not None:
+            try:
+                _author = self.author()
+                _author = season.stdClass(_author)
+                author = season.stdClass(author)
+                if author.name is not None and _author['name'] != author.name:
+                    self.repo.config_writer().set_value("user", "name", author.name).release()
+                if author.email is not None and _author['email'] != author.email:
+                    self.repo.config_writer().set_value("user", "email", author.email).release()
+            except:
+                pass
 
         # if not initialized repo, create first commit
         if commits == 0:
@@ -560,6 +572,11 @@ class Git:
 
     def commit(self, message="init"):
         self.repo.git.add('--all')
+
+        # if not changed any, return
+        if self.changed() == 0:
+            return
+        
         self.repo.index.commit(message)
         if self.branch != 'master':
             self.push()
@@ -568,14 +585,66 @@ class Git:
         branch = self.branch
         try:
             commits = list(self.repo.iter_commits(branch, max_count=max_count, skip=skip))
+            for i in range(len(commits)):
+                commits[i] = {
+                    "author": commits[i].author.name, 
+                    "author_email": commits[i].author.email, 
+                    "committer": commits[i].committer.name, 
+                    "committer_email": commits[i].committer.email, 
+                    "datetime": commits[i].committed_datetime, 
+                    "message": commits[i].message,
+                    "id": str(commits[i])
+                }
         except:
             commits = []
         return commits
 
     def changed(self):
-        changed = [item.a_path for item in self.repo.index.diff(None)]
-        return changed
+        return len(self.diff())
 
+    def diff(self, commit=None):
+        repo = self.repo
+        
+        if commit is None:
+            repo.git.add('--all')
+            src = "index"
+            parent = repo.commit()
+            diffs = parent.diff(None)
+        else:
+            commit = repo.commit(commit)
+            src = str(commit)
+            if len(commit.parents) == 0:
+                parent = None
+                diffs = []
+            else:
+                parent = str(commit.parents[0])
+                parent = repo.commit(parent)
+                diffs = parent.diff(str(commit))
+        
+        res = []
+        for diff in diffs:
+            res.append({"change_type": diff.change_type, "parent_path": diff.a_path, "commit_path": diff.b_path, "commit": src, "parent": str(parent)})
+
+        return res
+
+    def file(self, filepath, commit=None):
+        # if commit is None, return from file (index)
+        if commit is None:
+            return self.fs.read(filepath)
+            
+        # return file from git
+        repo = self.repo
+        commit = repo.commit(commit)
+        targetfile = commit.tree / filepath
+        data = dict()
+        f = io.BytesIO(targetfile.data_stream.read())
+        return f.read().decode('utf-8')
+
+    def author(self):
+        author = dict()
+        author['name'] = self.repo.config_reader().get_value("user", "name")
+        author['email'] = self.repo.config_reader().get_value("user", "email")
+        return author
 
 """WIZ Workspace API
 : this class used in wiz framework level.
@@ -588,10 +657,9 @@ class Workspace:
         self.fs = wiz.framework.model("wizfs", module="wiz").use("wiz/branch")
         self.git_origin = self.git("master")
 
-    def git(self, branch=None, base_branch="master"):
-        if branch is None:
-            branch = self.branch()
-        return Git(self.wiz, branch, base_branch)
+    def git(self, branch=None, base_branch="master", author=None):
+        if branch is None: branch = self.branch()
+        return Git(self.wiz, branch=branch, base_branch=base_branch, author=author)
 
     def branch(self):
         return self.wiz.env.BRANCH
@@ -640,15 +708,31 @@ class Workspace:
 
         return stat
 
-    def checkout(self, branch, base_branch="master"):
+    def checkout(self, branch, base_branch="master", name=None, email=None):
+        author = None
+        if name is not None and email is not None:
+            author = dict()
+            author['name'] = name
+            author['email'] = email
+
         self.wiz.env.BRANCH = branch
-        self.git(branch, base_branch)
+        self.git(branch=branch, base_branch=base_branch, author=author)
 
-    def commit(self, message=""):
-        self.git().commit(message=message)
+    def diff(self, branch=None, commit=None):
+        if branch is None: branch = self.branch()
+        return self.git(branch).diff(commit=commit)
 
-    def commits(self, max_count=30, skip=0):
-        return self.git().commits(max_count=30, skip=0)
+    def file(self, filepath, branch=None, commit=None):
+        if branch is None: branch = self.branch()
+        return self.git(branch).file(filepath, commit=commit)
+
+    def commit(self, branch=None, message=""):
+        if branch is None: branch = self.branch()
+        self.git(branch).commit(message=message)
+
+    def commits(self, branch=None, max_count=30, skip=0):
+        if branch is None: branch = self.branch()
+        return self.git(branch).commits(max_count=30, skip=0)
         
     def changed(self, branch=None):
         if branch is None: branch = self.branch()
@@ -671,7 +755,10 @@ class Workspace:
         except:
             pass
 
-        
+    def author(self, branch=None):
+        if branch is None: branch = self.branch()
+        return self.git(branch).author()
+
 """ WIZ Model used in framework level
 """
 class Model:
@@ -790,13 +877,14 @@ class Model:
             pass
         return []
 
-    def branchpath(self):
-        branch = self.branch()
+    def branchpath(self, branch=None):
+        if branch is None:
+            branch = self.branch()
         return f"wiz/branch/{branch}"
 
-    def storage(self):
+    def storage(self, branch=None):
         framework = self.framework
-        branchpath = self.branchpath()
+        branchpath = self.branchpath(branch=branch)
         return framework.model("wizfs", module="wiz").use(branchpath)
 
 

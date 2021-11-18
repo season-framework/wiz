@@ -1,8 +1,16 @@
-var content_controller = function ($sce, $scope, $timeout) {
+var content_controller = async ($sce, $scope, $timeout) => {
     let API = {
-        checkout: (branch, base) => new Promise((resolve) => {
+        list: () => new Promise((resolve, reject) => {
+            let url = '/wiz/admin/branch/branch/api/list';
+            $.get(url, function (res) {
+                if (res.code == 200) resolve(res.data);
+                else reject(res);
+            });
+        }),
+        checkout: (data) => new Promise((resolve) => {
             let url = '/wiz/admin/branch/branch/api/create';
-            $.post(url, { branch: branch, base: base }, function (res) {
+            data = angular.copy(data);
+            $.post(url, data, function (res) {
                 resolve(res);
             });
         }),
@@ -17,16 +25,22 @@ var content_controller = function ($sce, $scope, $timeout) {
         })
     };
 
+    $scope.loading = true;
+
     $scope.branch = {};
     $scope.branch.id = BRANCH;
-    $scope.branch.list = active_branch;
-    $scope.branch.stale = stale_branch;
+    
+    let branches = await API.list();
+    $scope.branch.list = branches.active;
+    $scope.branch.stale = branches.stale;
 
     $scope.modal = {};
     $scope.modal.data = {};
     $scope.modal.create = async () => {
         $scope.modal.data.create = {};
-        $scope.modal.data.create.basebranch = BRANCH;
+        $scope.modal.data.create.base_branch = BRANCH;
+        $scope.modal.data.create.name = author.name;
+        $scope.modal.data.create.email = author.email;
         $('#modal-new-branch').modal('show');
     }
 
@@ -41,15 +55,21 @@ var content_controller = function ($sce, $scope, $timeout) {
         if (!branch || !base) return toastr.error("Branch name at least 2 char");
         if (branch.length < 2) return toastr.error("Branch name at least 2 char");
         $scope.loading = true;
+
+        $scope.modal.data.create.branch = branch;
+        $scope.modal.data.create.base_branch = base;
+        let create = angular.copy($scope.modal.data.create);
         await API.timeout();
-        await API.checkout(branch, base);
+        await API.checkout(create);
         location.reload();
     }
 
     $scope.event.checkout = async (branch) => {
         $scope.loading = true;
+        let checkout_object = {};
+        checkout_object.branch = branch;
         await API.timeout();
-        await API.checkout(branch);
+        await API.checkout(checkout_object);
         location.reload();
     }
 
@@ -61,4 +81,7 @@ var content_controller = function ($sce, $scope, $timeout) {
         await API.delete(branch, working);
         location.reload();
     }
+
+    $scope.loading = false;
+    await API.timeout();
 };
