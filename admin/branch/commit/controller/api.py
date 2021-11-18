@@ -151,7 +151,6 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
             except:
                 return ""
 
-
         if category in ['apps', 'routes']:
             appinfo = dict()
             try:

@@ -77,8 +77,11 @@ function uiMonacoDirective($timeout, uiMonacoConfig) {
             modifiedModel.onDidChangeContent(function (event) {
                 var newValue = modifiedModel.getValue();
                 if (newValue !== ngModel.$viewValue.main.code) {
-                    ngModel.$viewValue.main.code = newValue;
-                    ngModel.$modelValue.main.code = newValue;
+                    let updateValue = angular.copy(ngModel.$viewValue);
+                    updateValue.main.code = newValue;
+                    scope.$evalAsync(function () {
+                        ngModel.$setViewValue(updateValue);
+                    });
                 }
             });
         };

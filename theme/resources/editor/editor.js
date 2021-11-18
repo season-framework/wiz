@@ -1,4 +1,4 @@
-let content_controller = function ($scope, $timeout, $sce) {
+let content_controller = async ($scope, $timeout, $sce) => {
     _builder($scope, $timeout);
 
     let hash = location.hash.split("#")[1];
@@ -16,6 +16,10 @@ let content_controller = function ($scope, $timeout, $sce) {
     let BUILDER = {};
 
     let API = {
+        handler: (resolve, reject) => async (res) => {
+            if (res.code == 200) resolve(res.data);
+            else reject(res);
+        },
         search: () => new Promise((resolve) => {
             let url = API_URL + '/search';
             $.get(url, function (res) {
@@ -34,6 +38,16 @@ let content_controller = function ($scope, $timeout, $sce) {
             $.post(url, { info: JSON.stringify(data) }, function (res) {
                 resolve(res);
             });
+        }),
+        diff: (app_id, commit) => new Promise((resolve, reject) => {
+            let url = API_URL + '/diff/' + app_id + '/' + commit;
+            $.get(url, function (res) {
+                $.get(url, API.handler(resolve, reject));
+            });
+        }),
+        history: () => new Promise((resolve, reject) => {
+            let url = API_URL + '/history';
+            $.get(url, API.handler(resolve, reject));
         }),
         delete: (app_id) => new Promise((resolve) => {
             let url = API_URL + '/delete/' + app_id;
@@ -61,6 +75,8 @@ let content_controller = function ($scope, $timeout, $sce) {
     $scope.browse = {};              // controller for code editor
     $scope.shortcut = {};
     $scope.socket = {};
+    $scope.history = {};
+    $scope.viewer = {};
 
     /* 
      * load wiz editor options from localstorage
@@ -207,7 +223,7 @@ let content_controller = function ($scope, $timeout, $sce) {
         $scope.workspace.list = [
             { id: 'app', name: 'App' },
             { id: 'browse', name: 'Browse' },
-            { id: 'git', name: 'Git' }
+            { id: 'history', name: 'History' }
         ];
 
         $scope.workspace.list[0].active = async () => {
@@ -223,6 +239,10 @@ let content_controller = function ($scope, $timeout, $sce) {
 
         $scope.workspace.list[2].active = async () => {
             $scope.workspace.active_workspace = $scope.workspace.list[2].id;
+
+            if ($scope.viewer.selected) {
+                await $scope.viewer.load($scope.viewer.selected);
+            }
 
             await API.timeout();
         };
@@ -261,11 +281,11 @@ let content_controller = function ($scope, $timeout, $sce) {
     BUILDER.app.base = async () => {
         $scope.app.save = async (returnres) => {
             if ($scope.app.data.controller) $scope.app.data.controller = $scope.app.data.controller.replace(/\t/gim, '    ');
-            var data = angular.copy($scope.app.data);
+            let appdata = angular.copy($scope.app.data);
             try {
-                for (var key in data.dic) {
-                    if (data.dic[key] && data.dic[key].length > 0) {
-                        data.dic[key] = JSON.parse(data.dic[key]);
+                for (let key in appdata.dic) {
+                    if (appdata.dic[key] && appdata.dic[key].length > 0) {
+                        appdata.dic[key] = JSON.parse(appdata.dic[key]);
                     } else {
                         delete data.dic[key];
                     }
@@ -276,10 +296,13 @@ let content_controller = function ($scope, $timeout, $sce) {
                 return { code: 500, data: e };
             }
 
-            $scope.browse.item.package.title = data.package.title;
-            $scope.browse.item.package.namespace = data.package.namespace;
+            try {
+                $scope.browse.item.package.title = appdata.package.title;
+                $scope.browse.item.package.namespace = appdata.package.namespace;
+            } catch (e) {
+            }
 
-            let res = await API.update(data);
+            let res = await API.update(appdata);
 
             if (returnres) return res;
 
@@ -556,6 +579,103 @@ let content_controller = function ($scope, $timeout, $sce) {
         }
     }
 
+
+    BUILDER.history = async () => {
+        $scope.history.load = async () => {
+            $scope.history.data = await API.history();
+            await API.timeout();
+        }
+
+        $scope.history.change = async (item) => {
+            await $scope.viewer.load(item.id);
+        }
+    };
+
+    BUILDER.viewer = async () => {
+        $scope.viewer.editor = {};
+        $scope.viewer.editor.data = {};
+
+        $scope.viewer.editor.configuration = { enableSplitViewResizing: false, fontSize: 14, readOnly: false, originalEditable: false };
+        $scope.viewer.editor.configuration.onLoad = async (editor) => {
+            await $scope.plugin.editor.build(null, editor);
+        }
+
+        $scope.viewer.load = async (commit) => {
+            await $scope.loading.show();
+            let app_id = $scope.app.id;
+            let compare = await API.diff(app_id, commit);
+
+            $scope.viewer.codes = TABS;
+            $scope.viewer.selected = commit;
+            $scope.viewer.compared = compare;
+
+            await $scope.viewer.change('controller');
+        }
+
+        $scope.viewer.change = async (code) => {
+            $scope.viewer.code = code;
+
+            let next = angular.copy($scope.app.data);
+            let prev = angular.copy($scope.viewer.compared);
+
+            for (let key in next.dic)
+                next.dic[key] = JSON.parse(next.dic[key]);
+            next.dic = JSON.stringify(next.dic, null, 4);
+
+            try {
+                next.language = "json";
+                if (['controller', 'api', 'socketio'].includes(code)) next.language = "python";
+                if (next.package.properties[code]) next.language = next.package.properties[code];
+            } catch (e) {
+                next.language = "text";
+                next[code] = "";
+            }
+
+            try {
+                prev.language = "json";
+                if (['controller', 'api', 'socketio'].includes(code)) prev.language = "python";
+                if ($scope.viewer.mode == 'app') if (prev.properties[code]) prev.language = prev.properties[code];
+                if (prev.language == 'json') prev.code[code] = JSON.stringify(JSON.parse(prev.code[code]), null, 4);
+            } catch (e) {
+                prev.language = "text";
+                prev.code[code] = "";
+            }
+
+            $scope.viewer.editor.data = {
+                compare: {
+                    code: prev.code[code],
+                    language: prev.language
+                },
+                main: {
+                    code: next[code],
+                    language: next.language
+                }
+            }
+
+            await $scope.loading.hide();
+            await API.timeout();
+        }
+
+        $scope.$watch('viewer.editor.data', function () {
+            let code = $scope.viewer.code;
+            if (!code) return;
+            let codedata = $scope.viewer.editor.data.main.code;
+            if (code == 'dic') {
+                try {
+                    codedata = JSON.parse(codedata);
+                    for (let key in codedata) {
+                        codedata[key] = JSON.stringify(codedata[key], null, 4);
+                    }
+                } catch (e) {
+                    return;
+                }
+            }
+
+            if (codedata != $scope.app.data[code])
+                $scope.app.data[code] = codedata;
+        }, true);
+    };
+
     BUILDER.shortcuts = async () => {
         $scope.shortcut.configuration = (monaco) => {
             return {
@@ -687,20 +807,23 @@ let content_controller = function ($scope, $timeout, $sce) {
         window.addEventListener("focus", $scope.shortcut.bind, false);
     }
 
-    BUILDER.layout();
-    BUILDER.plugin();
-    BUILDER.loading();
-    BUILDER.modal();
-    BUILDER.workspace();
-    BUILDER.app.base();
-    BUILDER.app.editor();
-    BUILDER.browse();
-    BUILDER.shortcuts();
+    await BUILDER.loading();
+    await BUILDER.layout();
+    await BUILDER.plugin();
+    await BUILDER.modal();
+    await BUILDER.workspace();
+    await BUILDER.app.base();
+    await BUILDER.app.editor();
+    await BUILDER.browse();
+    await BUILDER.history();
+    await BUILDER.viewer();
+    await BUILDER.shortcuts();
 
     let init = async () => {
         await ADDON($scope);
-        await $scope.app.load(APPID);
         await $scope.browse.load();
+        await $scope.history.load();
+        await $scope.app.load(APPID);
 
         /*
          * socket.io event binding for trace log

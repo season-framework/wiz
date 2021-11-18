@@ -27,7 +27,7 @@ mixin content()
     .display-none(style="display: none;")
         input#import-file(type="file" accept=".json,application/json")
 
-    .bg-dark.text-center(ng-if="loading.status" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 99999; padding-top: 40vh;")
+    .bg-dark.text-center(ng-if="loading.status" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 99999; padding-top: 40vh; opacity: .6;")
         .spinner-grow.text-white(style="width: 60px; height: 60px;")
 
     .fixed-top
@@ -65,23 +65,19 @@ mixin content()
                 .btn-group.w-100.mb-3
                     button.btn(type="button" ng-repeat="item in workspace.list" style="width: 50%;" class="{{workspace.active_workspace == item.id ? 'btn-white' : 'btn-dark'}}" ng-click="item.active()") {{item.name}}
 
-                .tree-container(ng-show="workspace.active_workspace == workspace.list[2].id")
-                    .card.card-sm.mb-4
-                        .card-body.text-dark
-                            label.form-label New Commit
-                            input.form-control.mb-1(type='text' placeholder='Version Name' ng-model="commit.data.version_name" ng-enter="commit.event.save(commit.data)" autocomplete='off')
-                            textarea.mb-2.form-control(placeholder='Commit Message' ng-model="commit.data.version_message" rows=3)
-                            button.btn.btn-dark.btn-block(ng-click="commit.event.save(commit.data)") Commit
+                .tree-container(ng-show="workspace.active_workspace == workspace.list[2].id")                    
+                    .root-tree.mb-1(ng-repeat="item in history.data" class="{{item.id == viewer.selected ? 'active' : ''}}" ng-click="history.change(item)")
+                        .root-title
+                            table
+                                tr 
+                                    td.w-1.pr-2.pt-2.pb-2(style="vertical-align: top; font-size: 18px;")
+                                        i.fas.fa-code-branch
 
-                    .card.card-sm.mb-3
-                        table.table.board-table.table-hover.mb-0
-                            tbody
-                                tr.cursor-pointer(ng-repeat="item in commit.logs" class="{{item.version == commit.target.selected.version ? 'bg-green-lt' : (item.version == commit.target.diff.version ? 'bg-red-lt' : '')}}")
-                                    td.w-1.p-1.pl-3.text-dark(style="font-size: 14px;")
-                                        input(type="checkbox" ng-checked="commit.target.diff.version == item.version" ng-click="commit.event.diff(item)" autocomplete='off')
-                                    td.w-1.p-1.pr-3.text-dark(style="font-size: 14px;" ng-click="commit.event.item(item)") {{item.version_name ? item.version_name : item.version}}
-                                    td.p-1.pr-3.pl-3.text-dark(style="font-size: 14px; white-space: nowrap; overflow: hidden;" ng-click="commit.event.item(item)")
-                                        span.text-muted {{item.version_message}}
+                                    td.pt-2.pb-2(style="line-height: 1;")
+                                        span {{ item.id.substring(0, 8) }} · {{ item.message }}
+                                        br
+                                        span.namespace {{item.committer ? item.committer : item.author}} ·
+                                        span.namespace.text-muted.ml-1 {{item.datetime}} 
 
 
                 .tree-container(ng-show="workspace.active_workspace == workspace.list[1].id")
@@ -155,11 +151,12 @@ mixin content()
         div(data-split-pane-divider data-width="0px")
         
         #editor-area(data-split-pane-component)
-            //- div(ng-if="options.panel == 'commit'" style="width: 100%; height: 100%;")
-            //-     div(style="width: 100%; height: 100%;")
-            //-         .code-select.bg-dark.d-flex(style="margin-top: -2px;")
-            //-             a.btn.btn-square.btn-sm.p-2(href="" ng-click="commit.change('controller')" ng-class="commit.view == 'controller' ? 'btn-white' : 'btn-dark'") Controller
-            //-         div(ng-model="commit.diff" ui-monaco-opts="commit.monaco" ui-monaco-diff)
+            div(style="width: 100%; height: 100%;" ng-if="workspace.active_workspace == 'history'")
+                .code-select.bg-dark.d-flex(style="margin-top: -2px;" ng-if="viewer.codes.length > 0")
+                    .btn.btn-square.btn-sm.p-2(ng-repeat="code in viewer.codes" ng-click="viewer.change(code)" ng-class="viewer.code == code ? 'btn-white' : 'btn-dark'" ng-if="code != 'preview'") {{code}}
+                    
+                div(style="height: {{ viewer.codes.length > 0 ? 'calc(100% - 36px);' : '100%' }}")
+                    div(ng-model="viewer.editor.data" ui-monaco-opts="viewer.editor.configuration" ui-monaco-diff)
 
             div(data-split-pane data-split-pane-properties="layout.viewstate.horizonal" ng-show="workspace.active_workspace != 'history'")
                 div(data-split-pane-component data-height="100%")
