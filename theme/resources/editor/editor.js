@@ -625,7 +625,9 @@ let content_controller = async ($scope, $timeout, $sce) => {
             try {
                 next.language = "json";
                 if (['controller', 'api', 'socketio'].includes(code)) next.language = "python";
-                if (next.package.properties[code]) next.language = next.package.properties[code];
+                if (next.package.properties)
+                    if (next.package.properties[code])
+                        next.language = next.package.properties[code];
             } catch (e) {
                 next.language = "text";
                 next[code] = "";
