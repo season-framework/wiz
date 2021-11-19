@@ -1,0 +1,10 @@
+mixin content()
+    h2 Hello, World!
+
+    ul 
+        - each item in data
+            li
+                a(href="/intro/item/{{item.id}}")= item.title
+    
+include theme/layout
++layout
