@@ -3,6 +3,10 @@ var setting_builder = function ($scope, $timeout, $sce) {
     $scope.trustAsHtml = $sce.trustAsHtml;
     $scope.loaded = true;
 
+    $scope.env = {}
+    $scope.env.branches = BRANCHES;
+    $scope.env.branch = BRANCH;
+
     try {
         var properties = JSON.parse(localStorage["season.wiz.resources.properties"]);
         delete properties.root.lastComponentSize;

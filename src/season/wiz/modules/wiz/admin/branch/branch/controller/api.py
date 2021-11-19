@@ -13,7 +13,7 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
         base = framework.request.query("base", "master")
         name = framework.request.query("name", None)
         email = framework.request.query("email", None)
-        framework.wiz.workspace.checkout(branch=branch, base_branch=base, name=name, email=email)
+        framework.wiz.workspace.checkout(branch=branch, base_branch=base, name=name, email=email, reload=True)
         framework.response.cookies.set("season-wiz-branch", branch)
         framework.response.status(200, True)
 

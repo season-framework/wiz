@@ -37,10 +37,39 @@ def spawner(code, namespace, logger, **kwargs):
 - resources(path)
 """
 
+class Config(season.stdClass):
+    def __init__(self, name='config'):
+        self.name = name
+
+    @classmethod
+    def load(self, branch, namespace='config'):
+        c = Config(namespace)
+        config_path = os.path.join(season.core.PATH.PROJECT, 'branch', branch, 'config', namespace + '.py')
+        if os.path.isfile(config_path) == False:
+            c.data = dict()
+        try:
+            with open(config_path, mode="rb") as file:
+                _tmp = {'config': None}
+                _code = file.read().decode('utf-8')
+                exec(_code, _tmp)
+                c.data = _tmp['config']
+        except Exception as e:
+            pass
+        return c
+
+    def get(self, key=None, _default=None):
+        if key is None:
+            return self.data
+        if key in self.data:
+            return self.data[key]
+        return _default
+
 class Wiz(season.stdClass):
     def __init__(self, wiz):
         framework = wiz.framework
         self.__wiz__ = wiz
+        
+        self.__config__ = dict()
         
         self.flask = framework.flask
         self.socketio = framework.socketio
@@ -56,7 +85,6 @@ class Wiz(season.stdClass):
         self.request = framework.request
         self.response = framework.response
         self.response.render = self.__render__
-        self.config = framework.config
         self.__logger__ = self.logger("instance")
 
     def logger(self, tag=None, log_color=94):
@@ -170,6 +198,16 @@ class Wiz(season.stdClass):
         logger = self.logger(f"[controller][{namespace}]", 94)
         obj = spawner(code, 'season.wiz.controller', logger, wiz=self)
         return obj['Controller']
+
+    def config(self, namespace="config"):
+        branch = self.branch()
+        if branch not in self.__config__: 
+            self.__config__[branch] = dict()
+        if namespace in self.__config__[branch]: 
+            config = self.__config__[branch][namespace]
+        else:
+            self.__config__[branch][namespace] = config = Config.load(branch, namespace)
+        return config
 
     def model(self, namespace):
         wiz = self.__wiz__
@@ -493,20 +531,21 @@ class CacheControl:
 
 class Git:
 
-    def __init__(self, wiz, branch="master", base_branch="master", author=None):
+    def __init__(self, wiz, branch="master", base_branch="master", author=None, reload=False):
         self.branch = branch
         self.wiz = wiz
         self.remote_path = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/master").abspath()
         self.fs = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{branch}")
         self.path = self.fs.abspath()
-    
-        gitbranchcache = f'git_{branch}'
-        if gitbranchcache in wiz.framework.cache: self.repo = wiz.framework.cache[gitbranchcache]
-        else: wiz.framework.cache[gitbranchcache] = self.repo = git.Repo.init(self.path)
 
+        gitbranchcache = f'git_{branch}'
         gitremotecache = f'git_{base_branch}'
-        if gitremotecache in wiz.framework.cache: self.remote_repo = wiz.framework.cache[gitremotecache]
+
+        if gitbranchcache in wiz.framework.cache and reload == False: self.repo = wiz.framework.cache[gitbranchcache]
+        else: wiz.framework.cache[gitbranchcache] = self.repo = git.Repo.init(self.path)
+        if gitremotecache in wiz.framework.cache and reload == False: self.remote_repo = wiz.framework.cache[gitremotecache]
         else: wiz.framework.cache[gitremotecache] = self.remote_repo = git.Repo.init(self.remote_path)
+    
         
         if author is not None:
             try:
@@ -664,9 +703,9 @@ class Workspace:
         self.fs = wiz.framework.model("wizfs", module="wiz").use("wiz/branch")
         self.git_origin = self.git("master")
 
-    def git(self, branch=None, base_branch="master", author=None):
+    def git(self, branch=None, base_branch="master", author=None, reload=False):
         if branch is None: branch = self.branch()
-        return Git(self.wiz, branch=branch, base_branch=base_branch, author=author)
+        return Git(self.wiz, branch=branch, base_branch=base_branch, author=author, reload=reload)
 
     def branch(self):
         return self.wiz.env.BRANCH
@@ -715,7 +754,7 @@ class Workspace:
 
         return stat
 
-    def checkout(self, branch, base_branch="master", name=None, email=None):
+    def checkout(self, branch, base_branch="master", name=None, email=None, reload=False):
         author = None
         if name is not None and email is not None:
             author = dict()
@@ -723,7 +762,7 @@ class Workspace:
             author['email'] = email
 
         self.wiz.env.BRANCH = branch
-        self.git(branch=branch, base_branch=base_branch, author=author)
+        self.git(branch=branch, base_branch=base_branch, author=author, reload=reload)
 
     def diff(self, branch=None, commit=None):
         if branch is None: branch = self.branch()

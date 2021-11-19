@@ -1,5 +1,5 @@
 mixin codearea(tab)
-    div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('{$tab$}')" ng-if="app.editor.viewstate" ng-cloak)
+    div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('{$tab$}')" ng-if="app.editor.viewstate && layout.accessable_tab.includes('{$tab$}')" ng-cloak)
         .code-select.bg-dark.d-flex(style="margin-top: -2px;")
             .btn.btn-square.btn-sm.p-2(ng-repeat="code in app.editor.code.list" ng-click="app.editor.code.change('{$tab$}', code.id)" ng-class="configuration.tab.{$tab$}_val == code.id ? 'btn-white' : 'btn-dark'") {{code.name}}
 

@@ -11,6 +11,7 @@ class view(season.interfaces.wiz.ctrl.admin.base.view):
         menus.append({"title":"Model", "url": '/wiz/admin/workspace/models', 'pattern': r'^/wiz/admin/workspace/models' })
         menus.append({"title":"Theme", "url": '/wiz/admin/workspace/themes', 'pattern': r'^/wiz/admin/workspace/themes' })
         menus.append({"title":"Resource", "url": '/wiz/admin/workspace/res', 'pattern': r'^/wiz/admin/workspace/res' })
+        menus.append({"title":"Config", "url": '/wiz/admin/workspace/config', 'pattern': r'^/wiz/admin/workspace/config' })
         self.subnav(menus)
 
 class api(season.interfaces.wiz.ctrl.admin.base.api):

@@ -1,11 +1,12 @@
+import time
 import logging
 import os
-import time
 import traceback
 import inspect
 import flask
 import flask_socketio
 from werkzeug.exceptions import HTTPException
+
 
 class stdClass(dict):
     def __init__(self, *args, **kwargs):
@@ -86,13 +87,14 @@ class bootstrap_wiz:
         self.response = None
         self.season = season
 
-    def bootstrap(self, app, isMain):
-        boottime = round(time.time() * 1000)
-
-        socketio = flask_socketio.SocketIO(app)
-
-        HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
+    def bootstrap(self):
         season = self.season
+        boottime = season.boottime
+        app = flask.Flask('__main__', static_url_path='')
+        socketio = flask_socketio.SocketIO(app)
+        
+        HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
+        
         season.core.build.template()
 
         log = logging.getLogger('werkzeug')
@@ -220,7 +222,7 @@ class bootstrap_wiz:
         @app.before_request
         def before_request():
             if handler.before_request is not None:
-                handler.before_request(season)
+                handler.before_request(app.framework)
 
         @app.after_request
         def after_request(response):
@@ -593,9 +595,8 @@ class bootstrap_wiz:
             if _app is not None:
                 app = app
         
-        if isMain:
-            boottime = round(time.time() * 1000) - boottime
-            _logger(LOG_DEV, message=f"{boottime}ms to boot. server running on http://{host}:{port}/ (Press CTRL+C to quit)")
-            socketio.run(app, host=host, port=port)
+        boottime = round(time.time() * 1000) - boottime
+        _logger(LOG_DEV, message=f"{boottime}ms to boot. server running on http://{host}:{port}/ (Press CTRL+C to quit)")
+        socketio.run(app, host=host, port=port)
 
-        return app
+        return socketio

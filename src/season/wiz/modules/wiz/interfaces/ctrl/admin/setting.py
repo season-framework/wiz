@@ -10,7 +10,12 @@ class view(season.interfaces.wiz.ctrl.admin.base.view):
 
         menus.append({"url": "/wiz/admin/setting/status", "icon": "fas fa-heartbeat", "title": "System Status", 'pattern': r'^/wiz/admin/setting/status'})
         menus.append({"url": "/wiz/admin/setting/configuration", "icon": "fas fa-cog", "title": "Configuration", 'pattern': r'^/wiz/admin/setting/configuration'})
-        menus.append({"url": "/wiz/admin/setting/compiler", "icon": "fas fa-rocket", "title": "Compiler", 'pattern': r'^/wiz/admin/setting/compiler'})
+        menus.append({"url": "/wiz/admin/setting/acl", "icon": "fas fa-shield-alt", "title": "Access control", 'pattern': r'^/wiz/admin/setting/acl'})
+        menus.append({"url": "/wiz/admin/setting/onerror", "icon": "fas fa-shield-alt", "title": "On error", 'pattern': r'^/wiz/admin/setting/onerror'})
+        menus.append({"url": "/wiz/admin/setting/onboot", "icon": "fas fa-shield-alt", "title": "On boot", 'pattern': r'^/wiz/admin/setting/onboot'})
+        menus.append({"url": "/wiz/admin/setting/build_resource", "icon": "fas fa-shield-alt", "title": "Build resource", 'pattern': r'^/wiz/admin/setting/build_resource'})
+        menus.append({"url": "/wiz/admin/setting/before_request", "icon": "fas fa-shield-alt", "title": "Before Request", 'pattern': r'^/wiz/admin/setting/before_request'})
+        menus.append({"url": "/wiz/admin/setting/after_request", "icon": "fas fa-shield-alt", "title": "After Request", 'pattern': r'^/wiz/admin/setting/after_request'})
 
         self.setting_nav(menus)
 

@@ -1,19 +1,18 @@
+import time
+boottime = round(time.time() * 1000)
+
 import os
 import datetime
 import shutil
 import json
-import time
 
-from .util.bootstrap import bootstrap
-from .util.bootstrap_wiz import bootstrap_wiz
+from .version import VERSION_STRING as VERSION
 from .util.stdclass import stdClass
-
 from .framework.request import request
 from .framework.segment import segment
 from .framework.response import response
 from .framework.lib import lib
 from .framework.status import status
-from .version import VERSION_STRING as VERSION
 
 LOG_DEBUG = 0
 LOG_INFO = 1
@@ -53,7 +52,6 @@ if FRAMEWORK_MODE == 'wiz':
     core.PATH.WEBSRC = core.PATH.WIZ.CORE
     core.PATH.APP = os.path.join(core.PATH.WEBSRC, 'app')
     core.PATH.MODULES = os.path.join(core.PATH.WEBSRC, 'modules')
-
 
 # Framework Methods
 core.CLASS = stdClass()
@@ -188,6 +186,9 @@ class config(stdClass):
         return _default
 
 def build_template():
+    if os.path.isdir(core.PATH.TEMPLATE):
+        return
+
     try:
         shutil.rmtree(core.PATH.TEMPLATE)
     except:
@@ -477,23 +478,32 @@ class dicClass(dict):
             return "{}"
         return str(obj)
 
-if FRAMEWORK_MODE == 'web':
-    season = stdClass()
-    season.core = core
-    season.interfaces = interfaces
-    season.config = config
-    __DIC__ = __finddic__()
-    season.dic = dicClass(__DIC__, __DIC__)
-    season.cache = cache
-    bootstrap = bootstrap(season).bootstrap
 
-elif FRAMEWORK_MODE == 'wiz':
-    season = stdClass()
-    season.core = core
-    season.interfaces = interfaces
-    season.config = config
-    __DIC__ = __finddic__()
-    season.dic = dicClass(__DIC__, __DIC__)
-    season.cache = cache
+def bootstrap(*args, **kwargs):
+    if FRAMEWORK_MODE == 'web':
+        from .util.bootstrap import bootstrap
 
-    bootstrap = bootstrap_wiz(season).bootstrap
+        season = stdClass()
+        season.FRAMEWORK_MODE = FRAMEWORK_MODE
+        season.boottime = boottime
+        season.core = core
+        season.interfaces = interfaces
+        season.config = config
+        __DIC__ = __finddic__()
+        season.dic = dicClass(__DIC__, __DIC__)
+        season.cache = cache
+        return bootstrap(season).bootstrap()
+
+    elif FRAMEWORK_MODE == 'wiz':
+        from .util.bootstrap_wiz import bootstrap_wiz
+
+        season = stdClass()
+        season.FRAMEWORK_MODE = FRAMEWORK_MODE
+        season.boottime = boottime
+        season.core = core
+        season.interfaces = interfaces
+        season.config = config
+        __DIC__ = __finddic__()
+        season.dic = dicClass(__DIC__, __DIC__)
+        season.cache = cache
+        return bootstrap_wiz(season).bootstrap()

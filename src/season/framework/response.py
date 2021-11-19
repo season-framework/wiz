@@ -1,4 +1,3 @@
-import flask
 import json
 import os
 
@@ -28,7 +27,7 @@ class response:
         self.mimetype = mimetype
 
     def abort(self, code=500):
-        flask.abort(code)
+        self._flask.abort(code)
 
     def error(self, code=404, response="ERROR"):
         event = self.framework.core.CLASS.RESPONSE.STATUS(code=code, response=response)
@@ -46,7 +45,7 @@ class response:
         if os.path.isfile(filepath):
             resp = self._flask.send_file(filepath, as_attachment=as_attachment, attachment_filename=filename)
             return self._build(resp)
-        flask.abort(404)
+        self._flask.abort(404)
     
     def send(self, message, content_type=None):
         resp = self._flask.Response(str(message))
@@ -104,7 +103,7 @@ class response:
         resp = self.template(template_uri, module=module, **args)
         if resp is not None:
             return self.send(resp, "text/html")
-        flask.abort(404)
+        self._flask.abort(404)
 
     # template varialbes
     class _data:
