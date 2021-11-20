@@ -1,189 +1,140 @@
-# SEASON WIZ (Widget Interface Zone)
+# SEASON WIZ Framework
 
-- SEASON WIZ depends on `season-flask`
+- SEASON WIZ is framework & IDE for web development.
+- SEASON WIZ Support git flow
 
 ## Installation
 
 ```bash
-sf module import wiz --uri https://github.com/season-framework/season-flask-wiz
-pip install libsass dukpy
-```
-
-## Configuration
-
-### MySQL Table Scheme
-
-```sql
-CREATE TABLE `widget` (
-  `id` varchar(32) NOT NULL,
-  `version` varchar(20) NOT NULL,
-  `version_name` varchar(20) DEFAULT NULL,
-  `version_message` varchar(192) DEFAULT NULL,
-  `user_id` varchar(20) NOT NULL,
-  `title` varchar(128) NOT NULL DEFAULT '',
-  `namespace` varchar(32) DEFAULT NULL,
-  `category` varchar(20) DEFAULT NULL,
-  `content` text DEFAULT NULL,
-  `kwargs` longtext DEFAULT NULL,
-  `api` longtext DEFAULT NULL,
-  `socketio` longtext DEFAULT NULL,
-  `html` longtext DEFAULT NULL,
-  `js` longtext DEFAULT NULL,
-  `css` longtext DEFAULT NULL,
-  `created` datetime NOT NULL,
-  `updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `theme` varchar(32) DEFAULT '',
-  `viewuri` text DEFAULT NULL,
-  `route` varchar(192) DEFAULT NULL,
-  `properties` longtext DEFAULT NULL,
-  PRIMARY KEY (`id`,`version`),
-  UNIQUE KEY `namespace` (`namespace`,`version`),
-  KEY `title` (`title`),
-  KEY `category` (`category`),
-  KEY `route` (`route`),
-  KEY `id` (`id`),
-  KEY `version` (`version`),
-  KEY `version_name` (`version_name`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
-```
-
-### websrc/app/config/config.py
-
-- add variable start/end string config: `{$` / `$}`
-
-```python
-import season
-config = season.stdClass()
-
-# set jinja variable
-config.jinja_variable_start_string = "{$"
-config.jinja_variable_end_string = "$}"
-```
-
-### websrc/app/config/database.py
-
-- Add Database Connection Info for WIZ
-
-```python
-from season import stdClass
-config = stdClass()
-
-# ...
-
-config.wiz = stdClass()
-config.wiz.host = '127.0.0.1'
-config.wiz.user = 'db_user'
-config.wiz.password = 'db_password'
-config.wiz.database = 'db_name'
-config.wiz.charset = 'utf8'
-```
-
-### websrc/app/config/wiz.py
-
-```python
-from season import stdClass
-config = stdClass()
-
-def acl(framework):
-    if 'role' not in framework.session:
-        framework.response.abort(401)
-    if framework.session['role'] not in ['admin']:
-        framework.response.abort(401)
-
-def uid(framework):
-    return framework.session['id']
-
-config.acl = acl
-config.uid = uid
-config.home = "/"
-config.table = 'widget'
-config.category = ["widget", "page"]
-config.wizsrc = '/<wiz-src-path>/wiz-src'
-config.topmenus = [{ 'title': 'HOME', 'url': '/' }, { 'title': 'sample', 'url': 'sample' }]
-
-def themeobj(module, view):
-    obj = stdClass()
-    obj.module = module
-    obj.view = view
-    return obj
-
-config.theme = stdClass()
-config.theme.default = themeobj("<modulename>", "<viewname>.pug")
-config.theme.default = themeobj("theme", "layout-wiz.pug")
-
-config.pug = stdClass()
-config.pug.variable_start_string = "{$"
-config.pug.variable_end_string = "$}"
-```
-
-### custom theme
-
-- setup base theme layout for wiz (eg. websrc/modules/theme/view/layout-wiz.pug)
-
-```pug
-doctype 5
-include wiz/theme/component
-
-html(ng-app="app")
-    head
-        +header
-        
-    body.antialiased
-        script(src='/resources/wiz/theme/libs/tabler/dist/libs/bootstrap/dist/js/bootstrap.bundle.min.js')
-        script(src='/resources/wiz/theme/libs/tabler/dist/libs/peity/jquery.peity.min.js')
-        script(src='/resources/wiz/theme/libs/tabler/dist/js/tabler.min.js')
-
-        .page(ng-controller="content" ng-cloak)
-            .preview
-                {$ view $}
-
-            style.
-                html,
-                body {
-                    overflow: auto;
-                }
-
-                body {
-                    padding: 32px;
-                }
-
-                .page {
-                    background: transparent;
-                }
-
-        +builder
+pip install season
 ```
 
 ## Usage
 
-### websrc/app/filter/indexfilter.py
+- create project
 
-- add code to indexfilter
-
-```python
-framework.wiz = framework.model("wiz", module="wiz")
-framework.response.data.set(wiz=framework.wiz)
-framework.wiz.route(framework)
+```
+cd <workspace>
+wiz create myapp
+cd myapp
 ```
 
-### in Templates
+- `127.0.0.1:3000` on your web browser
 
-- load view using `namespace`
-    - wiz.view("namespace")
 
-```pug
-mixin content()
-    .container.mt-4
-        .row.row-deck.row-cards
-            .col-md-4
-                {$ wiz.render("widget-commute") $}
+## Release Note
 
-            .col-md-4
-                {$ wiz.render("widget-monthly-worktime") $}
+### 0.4.0
 
-            .col-md-4
-                {$ wiz.render("widget-vacation") $}
-    
-include theme/layout
-+layout
-```
+- Integrate WIZ & Season Flask
+- support git flow
+- workspace structure changed
+- UI upgrade
+- support installer
+
+### 0.3.12
+
+- framework on build
+
+### 0.3.11
+
+- socketio error display
+
+### 0.3.10
+
+- socket bug fixed
+
+### 0.3.9
+
+- command run modified (add pattern, ignores)
+
+### 0.3.7
+
+- change Framework Object
+
+### 0.3.6
+
+- Socket.io disconnect bug fixed
+
+### 0.3.3
+
+- Socket.io Namespace Injection
+
+### 0.3.2
+
+- Socket.io bug fixed
+
+### 0.3.1
+
+- Socket.io bug fixed
+
+
+### 0.3.0
+
+- add Socket.io 
+
+
+### 0.2.14
+
+- add response.template_from_string function
+
+### 0.2.13
+
+- add response.template function
+
+### 0.2.12
+
+- add variable expression change option
+
+### 0.2.11
+
+- interface loader update
+
+
+### 0.2.10
+
+- config onerror changed 
+
+### 0.2.9
+
+- add response.abort
+
+### 0.2.8
+
+- error handler in controller `__error__`
+
+### 0.2.7
+
+- response redirect update (relative module path)
+
+### 0.2.6
+
+- logger upgrade (file trace bug fixed)
+
+### 0.2.5
+
+- logger upgrade (log executed file trace)
+
+### 0.2.4
+
+- logger upgrade (code trace)
+
+### 0.2.3
+
+- error handler bug fixed
+
+### 0.2.2
+
+- apache wsgi bug fixed (public/app.py)
+
+### 0.2.1
+
+- apache wsgi bug fixed
+
+### 0.2.0
+
+- framework structure upgraded
+- command line tool function changed
+- submodule structure added
+- logging 
+- simplify public directory structure

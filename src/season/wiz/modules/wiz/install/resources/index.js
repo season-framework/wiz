@@ -6,33 +6,15 @@ var content_controller = function ($scope, $timeout, $sce) {
         enabled: false
     };
 
-    $scope.data = {
-        framework: {
-            host: "0.0.0.0",
-            port: "3000",
-            log_level: "2",
-            secret_key: "",
-            dev: "True",
-            watch: {
-                pattern: "*",
-                ignore: "websrc/wiz.json"
-            },
-            filter: "request_uri = framework.request.uri()\nif request_uri == '/':\n    return framework.response.redirect('/wiz')"
-        },
-        wiz: {
-            category: "component: Component\nwidget: Widget\nmodal: Modal",
-            topmenus: "HOME: /\nWIZ: /wiz",
-            acl: "def acl(framework):\n    req_ip = framework.request.client_ip()\n    if req_ip not in ['127.0.0.1', '" + request_ip + "']:\n        framework.response.abort(401)"
-        }
-    };
+    $scope.data = wizpackage;
+
+    console.log(wizpackage);
 
     var steps = [];
     steps.push({ id: "start" });
     steps.push({ id: "framework.default", });
-    steps.push({ id: "framework.watch" });
     steps.push({ id: "wiz.category" });
     steps.push({ id: "wiz.acl", wide: true });
-    steps.push({ id: "filter", wide: true });
 
     $scope.steps = steps;
     $scope.step = $scope.steps[0];
@@ -69,7 +51,7 @@ var content_controller = function ($scope, $timeout, $sce) {
         pd = JSON.stringify(pd);
         $.post("/wiz/install/build", { data: pd }, function (res) {
             $timeout(function () {
-                location.href = window.location.protocol + "//" + window.location.hostname + ":" + $scope.data.framework.port;
+                location.href = window.location.protocol + "//" + window.location.hostname + ":" + $scope.data.framework.port + "/wiz";
             }, 3000);
         });
     }

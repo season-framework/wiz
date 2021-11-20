@@ -130,7 +130,7 @@ class bootstrap_wiz:
         LOG_WARNING = 3
         LOG_ERROR = 4
         LOG_CRITICAL = 5
-        LOG_LEVEL = config.get('log_level', LOG_ERROR)
+        LOG_LEVEL = config.get('log_level', LOG_DEV)
 
         def _logger(level, ERROR_INFO=None, message=None, code=200, starttime=None):
             if starttime is not None: starttime = round(time.time() * 1000) - starttime
@@ -541,7 +541,10 @@ class bootstrap_wiz:
                             try:
                                 if startup is not None: startup(framework, namespace)
                             except:
-                                if startup is not None: startup(framework)
+                                try:
+                                    if startup is not None: startup(framework)
+                                except:
+                                    pass
 
                             try:
                                 getattr(controller, fnname)(framework, namespace, data)

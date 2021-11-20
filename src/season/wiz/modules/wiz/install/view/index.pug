@@ -42,13 +42,6 @@ html(ng-app="app")
                             label.form-label.bold Session secret
                             .form-hint Session secret key for flask app. Default to 'season-wiz'.
                             input.form-control.text-center(type="text" ng-model="data.framework.secret_key" placeholder="season-wiz")
-                        
-                        .mb-3
-                            label.form-label.bold Mode
-                            .form-hint If you set developer mode, UI always display develop code. Production mode display UI as latested deployed version.
-                            select.form-select.text-center(ng-model="data.framework.dev")
-                                option(value='True') Development
-                                option(value='False') Production
 
                         .mb-3
                             label.form-label.bold Log Level
@@ -60,20 +53,6 @@ html(ng-app="app")
                                 option(value=3) WARNING
                                 option(value=4) ERROR
                                 option(value=5) CRITICAL
-
-                .card.card-md(ng-if="step.id == 'framework.watch'")
-                    .card-body.text-center.p-3
-                        h2 Framework Setting
-                    .hr.my-0
-                    .card-body
-                        .mb-3
-                            label.form-label.bold Watch Filter
-                            .form-hint Whitelist file name pattern for restart server. Defaults to '*'.
-                            textarea.form-control.text-left(rows=5 ng-model="data.framework.watch.pattern" placeholder="*")
-                        .mb-3
-                            label.form-label.bold Watch Ignore
-                            .form-hint Blacklist file name pattern for restart server. Defaults to 'None'.
-                            textarea.form-control.text-left(rows=5 ng-model="data.framework.watch.ignore" placeholder="websrc/app/config/*")
 
                 .card.card-md(ng-if="step.id == 'wiz.category'")
                     .card-body.text-center.p-3
@@ -111,19 +90,6 @@ html(ng-app="app")
                                 div you can use `framework` (flask app object) in code area.
                             div(style="height: 400px; overflow: hidden;")
                                 div(ng-model="data.wiz.acl" ui-monaco-opts="monaco_properties" ui-monaco)
-
-                .card.card-md(ng-if="step.id == 'filter'")
-                    .card-body.text-center.p-3
-                        h2 Request Filter
-                    .hr.my-0
-                    .card-body
-                        .mb-3
-                            label.form-label.mb-3.bold Request Filter
-                            .form-hint.mb-3 
-                                div Custom defination for handling request.
-                                div you can use `framework` (season flask object) in code area.
-                            div(style="height: 400px; overflow: hidden;")
-                                div(ng-model="data.framework.filter" ui-monaco-opts="monaco_properties" ui-monaco)
 
                 .row.align-items-center.mt-3
                     .col-4

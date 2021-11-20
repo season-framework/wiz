@@ -6,4 +6,4 @@ class Controller(season.interfaces.wiz.ctrl.admin.base.view):
         super().__startup__(framework)
 
     def __default__(self, framework):
-        framework.response.redirect('setting')
+        framework.response.redirect('workspace')
