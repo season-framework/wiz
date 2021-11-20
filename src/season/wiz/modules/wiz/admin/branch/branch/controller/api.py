@@ -47,7 +47,11 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
             else:
                 stale_branch.append(branches[i])
 
-        pull_request = framework.wiz.workspace.merge().branches()
+        merge = framework.wiz.workspace.merge()
+        pull_request = merge.branches()
+        for i in range(len(pull_request)):
+            merge.checkout(pull_request[i]['from'], pull_request[i]['to'])
+            pull_request[i]['author'] = merge.author()
         
         framework.response.status(200, active=active_branch, stale=stale_branch, pull_request=pull_request)
 

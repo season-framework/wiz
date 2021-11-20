@@ -60,6 +60,7 @@ mixin content()
                 thead 
                     tr
                         th.text-left.pr-2.pl-2 Pull Request
+                        th.text-center.width-1.pr-2.pl-2 Author
                         th.text-center.width-1.pr-2.pl-2
 
                 tbody
@@ -68,6 +69,8 @@ mixin content()
                             span {{item.from}}
                             i.fas.fa-arrow-alt-circle-right.mr-2.ml-2
                             span {{item.to}}
+                        td.text-center.width-1.pr-2.pl-2
+                            span {{item.author.name}}
                         td.text-right.width-1.pr-2.pl-2
                             button.btn.btn-sm.btn-light.ml-1(ng-click="modal.delete(item)" ng-if="item.name != branch.id && item.name != 'master'")
                                 i.fas.fa-trash

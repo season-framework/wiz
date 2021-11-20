@@ -666,8 +666,11 @@ class Git:
         self.repo.git.add('--all')
 
         # if not changed any, return
-        if self.changed() == 0:
-            return
+        try:
+            if self.changed() == 0:
+                return
+        except:
+            pass
         
         self.repo.index.commit(message)
         if self.branch != 'master':
@@ -740,6 +743,9 @@ class Git:
         author['email'] = self.repo.config_reader().get_value("user", "email")
         return author
 
+    def current(self):
+        return self.repo.commit()
+
 class Merge(Git):
 
     def __init__(self, wiz, branch="master", base_branch="master", author=None, **kwargs):
@@ -765,6 +771,13 @@ class Merge(Git):
         _git.add()
         if _git.changed() > 0:
             raise Exception("Uncommited file exist.")
+        origin_commit = _git.current().tree
+
+        _git = Git(wiz, branch=branch, reload=True)
+        branch_commit = _git.current()
+
+        if len(branch_commit.diff(origin_commit)) == 0:
+            raise Exception("No changes")
         
         self.repo = repo = git.Repo.init(path)
         self.remote_repo = remote_repo = git.Repo.init(remote_origin)
@@ -821,13 +834,17 @@ class Merge(Git):
         self.push()
 
     def push(self, remote='origin'):
-        # push to origin master
-        origin = self.repo.remote(name=remote)
-        origin.push(self.base_branch)
-
         # push to target
-        _git = Git(self.wiz, branch=self.base_branch, reload=True)
-        _git.pull()
+        if self.base_branch != "master":
+            origin = self.repo.remote(name=remote)
+            origin.push(self.base_branch)
+            _git = Git(self.wiz, branch=self.base_branch, reload=True)
+            _git.pull()
+        else:
+            self.remote_repo.heads[self.branch].checkout("-f")
+            origin = self.repo.remote(name=remote)
+            origin.push(self.base_branch)
+            self.remote_repo.heads[self.base_branch].checkout("-f")
 
 
 """WIZ MergeWorkspace API
@@ -1007,7 +1024,7 @@ class Workspace:
         if remote:
             remote_path = self.wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/master").abspath()
             remote_repo = git.Repo.init(remote_path)
-            git.Head.delete(remote_repo, remote_repo.heads[branch])
+            remote_repo.git.branch("-D", branch)
 
         # remove working branch
         try:

@@ -233,7 +233,7 @@ let content_controller = async ($scope, $timeout, $sce) => {
         }
 
         $scope.commit.commit = async (message) => {
-            if (!message) message = 'commit';
+            if (!message) message = null;
             await API.commit(message);
             location.reload();
         }
@@ -375,7 +375,7 @@ let content_controller = async ($scope, $timeout, $sce) => {
             let data = angular.copy($scope.viewer.selected);
             let path = data.commit_path;
             await API.delete({ path: path });
-            location.reload();
+            location.href = "/wiz/admin/branch";
         }
 
         $scope.viewer.change = async (code) => {

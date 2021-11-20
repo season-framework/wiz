@@ -120,8 +120,11 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
         base_branch = branch[1]
         branch = branch[0]
         merge = framework.wiz.workspace.merge().checkout(branch, base_branch)
-        message = framework.request.query('message', 'Merge from `{branch}` to `{base_branch}`')
+        message = framework.request.query('message', f'Merge branch `{branch}` into `{base_branch}`')
+        if len(message) == 0:
+            message = f'Merge branch `{branch}` into `{base_branch}`'
         merge.commit(message=message)
+        merge.delete()
         framework.response.status(200)
 
     def update(self, framework):
