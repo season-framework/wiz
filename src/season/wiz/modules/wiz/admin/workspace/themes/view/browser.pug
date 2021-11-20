@@ -1,0 +1,75 @@
+mixin topbutton()
+    .d-flex(ng-if="viewer.mode == 'folder' && viewer.data.type == 'folder' && !viewer.has_parent()")
+        span.ml-2.if-desktop.text-muted {{ viewer.data.path.substring(10) }}/{{viewer.data.name}}
+        span.mr-auto &nbsp;
+        button.btn.btn-sm.btn-light.pt-1.pb-1.cursor-pointer.mr-1(ng-click="modal.delete(viewer.data)" style="height: 20px;")
+            i.fas.fa-trash
+            span.ml-1.if-desktop Delete Theme
+
+    .d-flex(ng-if="viewer.mode == 'folder' && viewer.data.type == 'folder' && viewer.has_parent()")
+        input.mt-1(type="checkbox" ng-click="viewer.check_all(viewer.data)" ng-model="viewer.data.checked")
+        span.ml-2.if-desktop.text-muted {{ viewer.data.path.substring(10) }}/{{viewer.data.name}}
+        span.mr-auto &nbsp;
+
+        button.btn.btn-sm.btn-light.pt-1.pb-1.cursor-pointer.mr-1(ng-click="modal.delete_bulk(viewer.data)" style="height: 20px;")
+            i.fas.fa-trash
+            span.ml-1.if-desktop Delete
+
+        button.btn.btn-sm.btn-light.pt-1.pb-1.cursor-pointer.mr-1(ng-click="viewer.create(viewer.data, 'folder')" style="height: 20px;")
+            i.fas.fa-folder-plus
+            span.ml-1.if-desktop New Folder
+
+        button.btn.btn-sm.btn-light.pt-1.pb-1.cursor-pointer.mr-1(ng-click="viewer.create(viewer.data, 'file')" style="height: 20px;")
+            i.fas.fa-file
+            span.ml-1.if-desktop New File
+
+        button.btn.btn-sm.btn-light.pt-1.pb-1.cursor-pointer.mr-1(ng-click="viewer.upload()" style="height: 20px;")
+            i.fas.fa-cloud-upload-alt
+            span.ml-1.if-desktop Upload
+
+    .d-flex(ng-if="viewer.mode == 'folder' && viewer.data.type == 'layout'")
+        input.mt-1(type="checkbox" ng-click="viewer.check_all(viewer.data)" ng-model="viewer.data.checked")
+        span.ml-2.if-desktop.text-muted {{ viewer.data.path.substring(10) }}/{{viewer.data.name}}
+        span.mr-auto &nbsp;
+
+        button.btn.btn-sm.btn-light.pt-1.pb-1.cursor-pointer.mr-1(ng-click="viewer.create(viewer.data, 'folder')" style="height: 20px;")
+            i.fas.fa-folder-plus
+            span.ml-1.if-desktop Create Layout
+
+        button.btn.btn-sm.btn-light.pt-1.pb-1.cursor-pointer.mr-1(ng-click="modal.delete_bulk(viewer.data)" style="height: 20px;")
+            i.fas.fa-trash
+            span.ml-1.if-desktop Delete
+
+    .d-flex(ng-if="viewer.mode == 'editor'")
+        span.ml-2.if-desktop.text-muted {{ viewer.data.path.substring(10) }}/{{viewer.data.name}}
+        span.mr-auto &nbsp;
+
+        button.btn.btn-sm.btn-light.pt-1.pb-1.cursor-pointer.mr-1(ng-click="viewer.save()" style="height: 20px;")
+            i.fas.fa-save
+            span.ml-1.if-desktop Save
+
+        button.btn.btn-sm.btn-light.pt-1.pb-1.cursor-pointer(ng-click="viewer.parent()" style="height: 20px;" ng-if="status.view != 'folder'")
+            i.fas.fa-times
+
+    .d-flex(ng-if="viewer.mode == 'image'")
+        span.ml-2.if-desktop.text-muted {{ viewer.data.path.substring(10) }}/{{viewer.data.name}}
+        span.mr-auto &nbsp;
+
+        button.btn.btn-sm.btn-light.pt-1.pb-1.cursor-pointer(ng-click="viewer.parent()" style="height: 20px;" ng-if="status.view != 'folder'")
+            i.fas.fa-times
+
+mixin footer()
+    #modal-new-theme.modal.fade(tabindex="-1")
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title New Theme
+                    div 
+                        input.form-control(type="text" ng-model="modal.data.newtheme.title" placeholder="Theme Name" ng-enter="modal.data.newtheme.create(modal.data.newtheme.title)")
+                .modal-footer
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-dark(type='button' ng-click="modal.data.newtheme.create(modal.data.newtheme.title)") Create
+
+include wiz/theme/browser
+include wiz/theme/layout
++layout

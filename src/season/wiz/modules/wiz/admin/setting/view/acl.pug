@@ -1,0 +1,35 @@
+include wiz/admin/setting/navi
+
+mixin content()
+    .main-panel.container.p-0(style="height: calc(100% - 112px);")
+        div(data-split-pane data-split-pane-properties="properties.root")
+            div(data-split-pane-component data-width="250px")
+                +setting_nav
+
+            div(data-split-pane-divider data-width="1px")
+            
+            div(data-split-pane-component style="height: 100%; overflow: hidden;")
+                .panel-editor(style="height: 100%; overflow: auto;")
+                    .p-4.pr-6.pl-6
+                        .page-header.mb-0
+                            .row.align-items-center
+                                .col-auto
+                                    h2.page-title Access Control
+                                .col-auto.ml-auto.d-print-none
+                                    button.btn.btn-light.ml-2(ng-click="event.update()") Save
+                                    button.btn.btn-light.ml-2(ng-click="event.apply()") Apply
+
+                        .info-form.row
+                            .col-md-12
+                                .text-muted Define access control for access wiz admin interface.
+                                .text-muted you can use `framework` (flask app object) in code area.
+                        
+                        .info-form.row.first-child
+                            .col-md-12.pt-3(style="height: 70vh; overflow: hidden;")
+                                div(ng-model="data.wiz.acl" ui-monaco-opts="monaco_properties" ui-monaco)
+
+    .bg-dark.text-center(ng-if="!loaded" style="width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 99999; padding-top: 40vh; opacity: .6;")
+        .spinner-grow.text-white(style="width: 60px; height: 60px;")
+                               
+include wiz/theme/layout
++layout
