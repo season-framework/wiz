@@ -1,5 +1,5 @@
 const LOCALSTORAGEID = "season.wiz.branch.configuration";
-const API_URL = "/wiz/admin/branch/commit/api";
+const API_URL = "/wiz/admin/branch/merge/api";
 const COMMIT_ID = location.hash.split("#")[1] ? location.hash.split("#")[1] : '';
 
 let content_controller = async ($scope, $timeout, $sce) => {
@@ -19,10 +19,6 @@ let content_controller = async ($scope, $timeout, $sce) => {
             let url = API_URL + '/diff/' + TARGET_BRANCH + "/" + COMMIT_ID;
             $.get(url, API.handler(resolve, reject));
         }),
-        history: () => new Promise((resolve, reject) => {
-            let url = API_URL + '/history/' + TARGET_BRANCH;
-            $.get(url, API.handler(resolve, reject));
-        }),
         file: (filepath, commit) => new Promise((resolve, reject) => {
             if (!commit) commit = "";
             let url = API_URL + '/file/' + TARGET_BRANCH + "/" + commit;
@@ -35,6 +31,11 @@ let content_controller = async ($scope, $timeout, $sce) => {
         update: (data) => new Promise((resolve, reject) => {
             data = angular.copy(data);
             let url = API_URL + '/update/' + TARGET_BRANCH;
+            $.post(url, data, API.handler(resolve, reject));
+        }),
+        delete: (data) => new Promise((resolve, reject) => {
+            data = angular.copy(data);
+            let url = API_URL + '/delete/' + TARGET_BRANCH;
             $.post(url, data, API.handler(resolve, reject));
         }),
         timeout: (ts) => new Promise((resolve, reject) => {
@@ -54,7 +55,6 @@ let content_controller = async ($scope, $timeout, $sce) => {
     $scope.modal = {};               // controller for modal
     $scope.plugin = {};              // manage plugins for ui components
     $scope.commit = {};                 // controller for code editor
-    $scope.history = {};              // controller for code editor
     $scope.viewer = {};              // controller for code editor
     $scope.shortcut = {};
     $scope.socket = {};
@@ -189,18 +189,11 @@ let content_controller = async ($scope, $timeout, $sce) => {
 
     BUILDER.workspace = async () => {
         $scope.workspace.list = [
-            { id: 'commit', name: 'Commit' },
-            { id: 'history', name: 'History' }
+            { id: 'commit', name: 'Commit' }
         ];
 
         $scope.workspace.list[0].active = async () => {
             $scope.workspace.active_workspace = $scope.workspace.list[0].id;
-            await API.timeout();
-        };
-
-        $scope.workspace.list[1].active = async () => {
-            $scope.workspace.active_workspace = $scope.workspace.list[1].id;
-
             await API.timeout();
         };
 
@@ -248,23 +241,6 @@ let content_controller = async ($scope, $timeout, $sce) => {
         $scope.commit.id = COMMIT_ID;
     };
 
-    BUILDER.history = async () => {
-        $scope.history.load = async () => {
-            $scope.history.data = await API.history();
-            await API.timeout();
-        }
-
-        $scope.history.change = async (item) => {
-            if (item.id == $scope.commit.id) {
-                return;
-            }
-
-            let path = location.pathname + "#" + item.id;
-            location.href = path;
-            location.reload();
-        }
-    };
-
     BUILDER.viewer = async () => {
         $scope.viewer.editor = {};
         $scope.viewer.editor.configuration = { enableSplitViewResizing: false, fontSize: 14, readOnly: COMMIT_ID != '', originalEditable: false };
@@ -287,8 +263,18 @@ let content_controller = async ($scope, $timeout, $sce) => {
                     await $scope.plugin.editor.build(editor);
                 }
 
-                let next = await API.file(obj.commit_path, obj.commit == 'index' ? null : obj.commit);
-                let prev = await API.file(obj.parent_path, obj.parent == 'index' ? null : obj.parent);
+                let next = {};
+                let prev = {};
+
+                try {
+                    next = await API.file(obj.commit_path, obj.commit == 'index' ? null : obj.commit);
+                } catch (e) {
+                }
+
+                try {
+                    prev = await API.file(obj.parent_path, obj.parent == 'index' ? null : obj.parent);
+                } catch (e) {
+                }
 
                 if (next.mode == 'apps') {
                     next = next.app;
@@ -382,6 +368,14 @@ let content_controller = async ($scope, $timeout, $sce) => {
             path = path + "/" + codemap[$scope.viewer.code];
             await API.update({ data: code, path: path });
             toastr.success("Saved");
+        }
+
+        $scope.viewer.delete = async () => {
+            if ($scope.viewer.mode == 'etc') return;
+            let data = angular.copy($scope.viewer.selected);
+            let path = data.commit_path;
+            await API.delete({ path: path });
+            location.reload();
         }
 
         $scope.viewer.change = async (code) => {
@@ -502,7 +496,6 @@ let content_controller = async ($scope, $timeout, $sce) => {
     BUILDER.modal();
     BUILDER.workspace();
     BUILDER.commit();
-    BUILDER.history();
     BUILDER.viewer();
     BUILDER.shortcuts();
 
@@ -514,7 +507,6 @@ let content_controller = async ($scope, $timeout, $sce) => {
     }
 
     await $scope.commit.load();
-    await $scope.history.load();
     await $scope.loading.hide();
 
     await API.timeout();

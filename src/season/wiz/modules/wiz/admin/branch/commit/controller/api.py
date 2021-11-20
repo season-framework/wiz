@@ -45,28 +45,26 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
 
                 commit_route = None
                 commit_namespace = None
-                commit_properties = None
                 try:
                     commit_appinfo = json.loads(framework.wiz.workspace.file(f"{display}/app.json", branch=branch, commit=commit))
                     commit_namespace = commit_appinfo['namespace']
                     if 'route' in commit_appinfo: commit_route = commit_appinfo['route']
-                    commit_properties = commit_appinfo['properties']
                 except:
                     commit_appinfo = None
                 
                 parent_route = None
                 parent_namespace = None
-                parent_properties = None
                 try:
                     parent_appinfo = json.loads(framework.wiz.workspace.file(f"{display}/app.json", branch=branch, commit=parent))
                     parent_namespace = parent_appinfo['namespace']
                     if 'route' in parent_appinfo: parent_route = parent_appinfo['route']
-                    parent_properties = parent_appinfo['properties']
                 except:
                     parent_appinfo = None
 
-                if commit_appinfo is None: change_type = 'D'
-                if parent_appinfo is None: change_type = 'A'
+                if commit_appinfo is None and parent_appinfo is not None: 
+                    change_type = 'D'
+                if commit_appinfo is not None and parent_appinfo is None: 
+                    change_type = 'A'
                 
                 if display not in apps:
                     apps[display] = dict()
@@ -124,6 +122,13 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
         path = framework.request.query('path', True)
         fs = framework.wiz.storage(branch=branch)
         fs.write(path, data)
+        framework.response.status(200)
+
+    def delete(self, framework):
+        branch = framework.request.segment.get(0, True)
+        path = framework.request.query('path', True)
+        fs = framework.wiz.storage(branch=branch)
+        fs.delete(path)
         framework.response.status(200)
 
     def history(self, framework):

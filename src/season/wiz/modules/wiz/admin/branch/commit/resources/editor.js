@@ -37,6 +37,11 @@ let content_controller = async ($scope, $timeout, $sce) => {
             let url = API_URL + '/update/' + TARGET_BRANCH;
             $.post(url, data, API.handler(resolve, reject));
         }),
+        delete: (data) => new Promise((resolve, reject) => {
+            data = angular.copy(data);
+            let url = API_URL + '/delete/' + TARGET_BRANCH;
+            $.post(url, data, API.handler(resolve, reject));
+        }),
         timeout: (ts) => new Promise((resolve, reject) => {
             $timeout(resolve, ts);
         })
@@ -392,6 +397,14 @@ let content_controller = async ($scope, $timeout, $sce) => {
             path = path + "/" + codemap[$scope.viewer.code];
             await API.update({ data: code, path: path });
             toastr.success("Saved");
+        }
+
+        $scope.viewer.delete = async () => {
+            if ($scope.viewer.mode == 'etc') return;
+            let data = angular.copy($scope.viewer.selected);
+            let path = data.commit_path;
+            await API.delete({ path: path });
+            toastr.success("Deleted");
         }
 
         $scope.viewer.change = async (code) => {

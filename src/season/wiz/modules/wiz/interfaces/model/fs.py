@@ -110,7 +110,11 @@ class Model:
         shutil.copytree(filepath1, filepath2)
 
     def abspath(self, filepath=""):
-        return os.path.join(self.basepath(), filepath)
+        target_path = os.path.join(self.basepath(), filepath)
+        notallowed = ["", "/"]
+        if target_path in notallowed: 
+            raise Exception("not allowed path")
+        return target_path
 
     def makedirs(self, path):
         try:

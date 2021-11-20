@@ -13,15 +13,22 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.view):
         framework.response.redirect("/wiz/admin/branch")
         
     def diff(self, framework):
-        active_branches = framework.wiz.workspace.branches()
+        merge = framework.wiz.workspace.merge()
+        
+        active_branches = merge.branches()
         branch = framework.request.segment.get(0, True)
-        if branch not in active_branches:
+        base_branch = framework.request.segment.get(1, True)
+        active_branches = [h['from'] + "_" + h['to'] for h in active_branches]
+        merge_path = branch + "_" + base_branch
+        if merge_path not in active_branches:
             framework.response.redirect("/wiz/admin/branch")
         
-        author = framework.wiz.workspace.author(branch)
-        self.exportjs(author=author)
+        merge.checkout(branch, base_branch)
+        author = merge.author()
 
-        self.exportjs(TARGET_BRANCH=branch)
+        self.exportjs(author=author)
+        self.exportjs(TARGET_BRANCH=merge_path)
+
         self.js('editor.js')
         self.css('editor.css')
         framework.response.render('editor.pug')

@@ -3,7 +3,7 @@ mixin content()
         .page-header
             .row.align-items-center
                 .col-auto
-                    .page-pretitle Branch
+                    .page-pretitle Git Flow
                     h2.page-title Active Branch
 
                 .col-auto.ml-auto.d-print-none
@@ -34,12 +34,16 @@ mixin content()
                                 span.ml-1 {{item.changed}}
                         
                         td.text-center.width-1.pr-2.pl-2
-                            span {{item.author.name}}
+                            a(href="" ng-click="modal.commiter(item)") {{item.author.name}}
 
                         td.text-right.width-1.pr-2.pl-2
                             button.btn.btn-sm.btn-light.ml-1(ng-click="modal.delete(item)" ng-if="item.name != branch.id && item.name != 'master'")
                                 i.fas.fa-trash
                                 span.ml-1 Delete
+
+                            button.btn.btn-sm.btn-light.ml-1(ng-click="modal.merge(item)")
+                                i.fas.fa-code-branch
+                                span.ml-1 Pull Request
 
                             a.btn.btn-sm.btn-light.ml-1(ng-href="/wiz/admin/branch/commit/diff/{{item.name}}")
                                 i.fas.fa-code-branch
@@ -48,7 +52,34 @@ mixin content()
         .page-header.mt-5
             .row.align-items-center
                 .col-auto
-                    .page-pretitle Branch
+                    .page-pretitle Git Flow
+                    h2.page-title Pull Request
+
+        .overflow-x
+            table.table.board-table.table-hover.mb-0
+                thead 
+                    tr
+                        th.text-left.pr-2.pl-2 Pull Request
+                        th.text-center.width-1.pr-2.pl-2
+
+                tbody
+                    tr(ng-repeat="item in branch.pull_request")
+                        td.text-left.pr-2.pl-2 
+                            span {{item.from}}
+                            i.fas.fa-arrow-alt-circle-right.mr-2.ml-2
+                            span {{item.to}}
+                        td.text-right.width-1.pr-2.pl-2
+                            button.btn.btn-sm.btn-light.ml-1(ng-click="modal.delete(item)" ng-if="item.name != branch.id && item.name != 'master'")
+                                i.fas.fa-trash
+                                span.ml-1 Delete
+                            a.btn.btn-sm.btn-light.ml-1(ng-href="/wiz/admin/branch/merge/diff/{{item.from}}/{{item.to}}")
+                                i.fas.fa-code-branch
+                                span.ml-1 Merge
+
+        .page-header.mt-5
+            .row.align-items-center
+                .col-auto
+                    .page-pretitle Git Flow
                     h2.page-title Stale Branch
 
         .overflow-x
@@ -60,7 +91,7 @@ mixin content()
                         th.text-center.width-1.pr-2.pl-2
 
                 tbody
-                    tr(ng-repeat="item in branch.stale" class="{{branch.id == item.name ? 'bg-dark-lt' : ''}}")
+                    tr(ng-repeat="item in branch.stale")
                         td.text-center.width-1
                             button.btn.btn-sm(ng-click="event.checkout(item.name)" class="{{ branch.id != item.name ? 'btn-light' : 'btn-dark' }}")
                                 i.fas.fa-check-circle
@@ -81,6 +112,35 @@ mixin content()
                 .modal-footer
                     button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
                     button.btn.btn-danger(type='button' ng-click="event.delete()") Delete  
+
+    #modal-merge-branch.modal.fade(tabindex="-1")
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title Merge Branch
+                    .row.mb-4 
+                        .col-md-5
+                            select.form-select(ng-model="modal.data.merge.branch")
+                                option(value="" ng-if="!modal.data.merge.branch") select branch
+                                option(ng-repeat="b in branch.list" value="{{b.name}}") {{b.name}}
+                        .col-md-2.text-center 
+                            i.fas.fa-arrow-alt-circle-right
+                        .col-md-5
+                            select.form-select(ng-model="modal.data.merge.base_branch")
+                                option(value="" ng-if="!modal.data.merge.base_branch") select branch
+                                option(ng-repeat="b in branch.list" value="{{b.name}}") {{b.name}}
+                        
+                    .modal-title Author Name
+                    div.mb-4
+                        input.form-control(type="text" ng-model="modal.data.merge.name" placeholder="Author Name")
+                    
+                    .modal-title Author Email
+                    div 
+                        input.form-control(type="email" ng-model="modal.data.merge.email" placeholder="Author Email")
+                    
+                .modal-footer
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-dark(type='button' ng-click="event.pull_request(modal.data.merge.branch, modal.data.merge.base_branch)") Pull Request
 
     #modal-new-branch.modal.fade(tabindex="-1")
         .modal-dialog.modal-sm(role='document')
@@ -107,6 +167,28 @@ mixin content()
                 .modal-footer
                     button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
                     button.btn.btn-dark(type='button' ng-click="event.create(modal.data.create.branchname, modal.data.create.base_branch)") Create
+
+    #modal-change-commiter.modal.fade(tabindex="-1")
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title Branch
+                    div.mb-4
+                        select.form-select(ng-model="modal.data.commiter.branch")
+                            option(value="" ng-if="!modal.data.commiter.branch") select branch
+                            option(ng-repeat="b in branch.list" value="{{b.name}}") {{b.name}}
+
+                    .modal-title Author Name
+                    div.mb-4
+                        input.form-control(type="text" ng-model="modal.data.commiter.name" placeholder="Author Name")
+                    
+                    .modal-title Author Email
+                    div 
+                        input.form-control(type="email" ng-model="modal.data.commiter.email" placeholder="Author Email")
+                    
+                .modal-footer
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-dark(type='button' ng-click="event.change_commiter(modal.data.commiter.branch)") Change
 
     .bg-dark.text-center(ng-if="loading" style="width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 99999; opacity: .6; padding-top: 40vh;")
         .spinner-grow.text-white(style="width: 60px; height: 60px;")

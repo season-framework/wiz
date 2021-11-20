@@ -38,6 +38,7 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
         branches = framework.wiz.workspace.branches(working=True, git=True, status=True)
         active_branch = []
         stale_branch = []
+        
         for i in range(len(branches)):
             if branches[i]['working']:
                 branches[i]['changed'] = framework.wiz.workspace.changed(branches[i]['name'])
@@ -45,15 +46,29 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
                 active_branch.append(branches[i])
             else:
                 stale_branch.append(branches[i])
-        framework.response.status(200, active=active_branch, stale=stale_branch)
 
-    def merge(self, framework):
+        pull_request = framework.wiz.workspace.merge().branches()
+        
+        framework.response.status(200, active=active_branch, stale=stale_branch, pull_request=pull_request)
+
+    def pull_request(self, framework):
         branch = framework.request.query("branch", True)
-        base = framework.request.query("base", "master")
+        base = framework.request.query("base_branch", True)
         name = framework.request.query("name", None)
         email = framework.request.query("email", None)
-        
-        # branch: apply changed, base_branch: source branch
-        framework.wiz.workspace.checkout(branch=branch, base_branch=base, name=name, email=email, reload=True)
-        framework.response.cookies.set("season-wiz-branch", branch)
+
+        fs = framework.model("wizfs", module="wiz").use(f"wiz/merge")
+        if fs.isdir(f"{branch}_{base}"):
+            framework.response.status(500, "merge request on working. please delete previous work.")    
+    
+        # branch: source branch, base_branch: apply changed
+        framework.wiz.workspace.merge().checkout(branch, base, name=name, email=email)
+
+        framework.response.status(200, True)
+    
+    def delete_request(self, framework):
+        branch = framework.request.query("branch", True)
+        base = framework.request.query("base_branch", True)
+        merge = framework.wiz.workspace.merge().checkout(branch, base)
+        merge.delete()
         framework.response.status(200, True)

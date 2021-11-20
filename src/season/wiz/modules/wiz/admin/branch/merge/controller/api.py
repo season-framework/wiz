@@ -9,9 +9,12 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
 
     def diff(self, framework):
         branch = framework.request.segment.get(0, True)
-        commit_id = framework.request.segment.get(1, "")
-        if len(commit_id) == 0: commit_id = None
-        diff = framework.wiz.workspace.diff(branch=branch, commit=commit_id)
+        branch = branch.split("_")
+        base_branch = branch[1]
+        branch = branch[0]
+
+        merge = framework.wiz.workspace.merge().checkout(branch, base_branch)
+        diff = merge.diff()
 
         res = dict()
         res['apps'] = []
@@ -45,29 +48,28 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
 
                 commit_route = None
                 commit_namespace = None
-                commit_properties = None
                 try:
-                    commit_appinfo = json.loads(framework.wiz.workspace.file(f"{display}/app.json", branch=branch, commit=commit))
+                    commit_appinfo = json.loads(merge.file(f"{display}/app.json"))
                     commit_namespace = commit_appinfo['namespace']
                     if 'route' in commit_appinfo: commit_route = commit_appinfo['route']
-                    commit_properties = commit_appinfo['properties']
                 except:
                     commit_appinfo = None
                 
                 parent_route = None
                 parent_namespace = None
-                parent_properties = None
                 try:
-                    parent_appinfo = json.loads(framework.wiz.workspace.file(f"{display}/app.json", branch=branch, commit=parent))
+                    parent_appinfo = merge.file(f"{display}/app.json", commit=parent)
+                    parent_appinfo = json.loads(parent_appinfo)
                     parent_namespace = parent_appinfo['namespace']
                     if 'route' in parent_appinfo: parent_route = parent_appinfo['route']
-                    parent_properties = parent_appinfo['properties']
-                except:
+                except Exception as e:
                     parent_appinfo = None
 
-                if commit_appinfo is None: change_type = 'D'
-                if parent_appinfo is None: change_type = 'A'
-                
+                if commit_appinfo is None and parent_appinfo is not None: 
+                    change_type = 'D'
+                if commit_appinfo is not None and parent_appinfo is None: 
+                    change_type = 'A'
+
                 if display not in apps:
                     apps[display] = dict()
                     apps[display]['change_type'] = change_type
@@ -84,7 +86,7 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
                     apps[display]['commit_namespace'] = commit_namespace
                     apps[display]['parent_namespace'] = parent_namespace
                 return True
-            except:
+            except Exception as e:
                 return False
                         
         for i in range(len(diff)):
@@ -114,27 +116,39 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
 
     def commit(self, framework):
         branch = framework.request.segment.get(0, True)
-        message = framework.request.query('message', 'commit')
-        framework.wiz.workspace.commit(branch=branch, message=message)
+        branch = branch.split("_")
+        base_branch = branch[1]
+        branch = branch[0]
+        merge = framework.wiz.workspace.merge().checkout(branch, base_branch)
+        message = framework.request.query('message', 'Merge from `{branch}` to `{base_branch}`')
+        merge.commit(message=message)
         framework.response.status(200)
 
     def update(self, framework):
         branch = framework.request.segment.get(0, True)
-        data = framework.request.query('data', '')
         path = framework.request.query('path', True)
-        fs = framework.wiz.storage(branch=branch)
+        fs = framework.model("wizfs", module="wiz").use(f"wiz/merge/{branch}")
         fs.write(path, data)
         framework.response.status(200)
 
-    def history(self, framework):
+    def delete(self, framework):
         branch = framework.request.segment.get(0, True)
-        commits = framework.wiz.workspace.commits(branch=branch, max_count=100)
-        framework.response.status(200, commits)
+        data = framework.request.query('data', '')
+        path = framework.request.query('path', True)
+        fs = framework.model("wizfs", module="wiz").use(f"wiz/merge/{branch}")
+        fs.delete(path)
+        framework.response.status(200)
 
     def file(self, framework):
         branch = framework.request.segment.get(0, True)
         commit = framework.request.segment.get(1, "")
         filepath = framework.request.query("filepath", True)
+
+        branch = branch.split("_")
+        base_branch = branch[1]
+        branch = branch[0]
+
+        merge = framework.wiz.workspace.merge().checkout(branch, base_branch)
 
         if commit is not None and len(commit) == 0:
             commit = None
@@ -146,7 +160,7 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
         def load_app_files(key):
             try:
                 appfile = os.path.join(filepath, key)
-                text = framework.wiz.workspace.file(appfile, branch=branch, commit=commit)
+                text = merge.file(appfile, commit=commit)
                 return text
             except:
                 return ""
@@ -155,7 +169,7 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
             appinfo = dict()
             try:
                 appinfo = os.path.join(filepath, 'app.json')
-                appinfo = framework.wiz.workspace.file(appinfo, branch=branch, commit=commit)
+                appinfo = merge.file(appinfo, commit=commit)
                 appinfo_txt = appinfo
                 appinfo = json.loads(appinfo)
                 appinfo['info'] = appinfo_txt
@@ -177,5 +191,5 @@ class Controller(season.interfaces.wiz.ctrl.admin.branch.api):
             framework.response.status(400)
 
         language = extmap[ext]
-        text = framework.wiz.workspace.file(filepath, branch=branch, commit=commit)
+        text = merge.file(filepath, commit=commit)
         framework.response.status(200, mode="text", text=text, language=language)

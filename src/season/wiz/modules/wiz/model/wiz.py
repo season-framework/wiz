@@ -659,6 +659,9 @@ class Git:
         if self.branch != 'master':
             origin.pull('master')
 
+    def add(self):
+        self.repo.git.add('--all')
+
     def commit(self, message="init"):
         self.repo.git.add('--all')
 
@@ -725,9 +728,11 @@ class Git:
         repo = self.repo
         commit = repo.commit(commit)
         targetfile = commit.tree / filepath
-        data = dict()
+
         f = io.BytesIO(targetfile.data_stream.read())
-        return f.read().decode('utf-8')
+        data = f.read().decode('utf-8')
+        
+        return data
 
     def author(self):
         author = dict()
@@ -738,21 +743,29 @@ class Git:
 class Merge(Git):
 
     def __init__(self, wiz, branch="master", base_branch="master", author=None, **kwargs):
+        if branch == base_branch:
+            raise Exception("select different branch")
+
         self.branch = branch
+        self.base_branch = base_branch
         self.wiz = wiz
         
-        fs = self.fs = wiz.framework.model("wizfs", module="wiz").use(f"wiz/merge/{branch}_{base_branch}")
-        path = self.fs.abspath()
+        self.fs = fs = wiz.framework.model("wizfs", module="wiz").use(f"wiz/merge/{branch}_{base_branch}")
+        path = fs.abspath()
 
         remote_origin = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/master").abspath()
-        remote_base = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{remote_base}").abspath()
+        remote_base = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{base_branch}").abspath()
         remote_target = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{branch}").abspath()
 
         if fs.isdir(remote_origin) == False: raise Exception("master branch not exists")
-        if fs.isdir(remote_base) == False: raise Exception("master branch not exists")
-        if fs.isdir(remote_target) == False: raise Exception("master branch not exists")
-        
+        if fs.isdir(remote_base) == False: raise Exception(f"{base_branch} branch not exists")
+        if fs.isdir(remote_target) == False: raise Exception(f"{branch} branch not exists")
 
+        _git = Git(wiz, branch=base_branch, reload=True)
+        _git.add()
+        if _git.changed() > 0:
+            raise Exception("Uncommited file exist.")
+        
         self.repo = repo = git.Repo.init(path)
         self.remote_repo = remote_repo = git.Repo.init(remote_origin)
         
@@ -770,7 +783,6 @@ class Merge(Git):
 
         # if not initialized repo, create first commit
         isinit = len(repo.heads)
-        
         if isinit == 0:
             origin = repo.create_remote('origin', remote_origin)
             origin.fetch()
@@ -785,17 +797,111 @@ class Merge(Git):
             dirs = os.listdir(path)
             for name in dirs:
                 if name == '.git': continue
-                fs.delete(name)
+                if fs.isdir(name):
+                    fs.delete(name)
 
             # copy update files
             newdirs = os.listdir(remote_target)
             for name in dirs:
                 if name == '.git': continue
                 copy_path = os.path.join(remote_target, name)
-                fs.copy(copy_path, name)
+                if fs.isdir(copy_path):
+                    fs.copy(copy_path, name)
 
             repo.git.add('--all')
-            
+    
+    def commit(self, message="init"):
+        self.repo.git.add('--all')
+
+        # if not changed any, return
+        if self.changed() == 0:
+            return
+        
+        self.repo.index.commit(message)
+        self.push()
+
+    def push(self, remote='origin'):
+        # push to origin master
+        origin = self.repo.remote(name=remote)
+        origin.push(self.base_branch)
+
+        # push to target
+        _git = Git(self.wiz, branch=self.base_branch, reload=True)
+        _git.pull()
+
+
+"""WIZ MergeWorkspace API
+: this class used in wiz framework level.
+: this class control branches using git
+"""
+
+class MergeWorkspace:
+    def __init__(self, wiz):
+        self.wiz = wiz
+        self.fs = wiz.framework.model("wizfs", module="wiz").use("wiz/merge")
+        self.branch = None
+        self.base_branch = None
+        self._author = None
+
+    def git(self):
+        branch = self.branch
+        base_branch = self.base_branch
+        if branch is None or base_branch is None:
+            raise Exception("Merge Error: not defined branches")
+        author = self._author
+        return Merge(self.wiz, branch=branch, base_branch=base_branch, author=author)
+
+    def branches(self):
+        wheads = self.fs.list()
+        wheads.sort()
+        res = []
+
+        for b in wheads:
+            if b not in res:
+                b = b.split("_")
+                res.append({"from": b[0], "to": b[1]})
+
+        return res
+        
+    def checkout(self, branch, base_branch, name=None, email=None):
+        author = None
+        if name is not None and email is not None:
+            author = dict()
+            author['name'] = name
+            author['email'] = email
+
+        self.branch = branch
+        self.base_branch = base_branch
+        self._author = author
+        self.git()
+        return self
+
+    def diff(self, commit=None):
+        return self.git().diff(commit=commit)
+
+    def file(self, filepath, commit=None):
+        return self.git().file(filepath, commit=commit)
+
+    def commit(self, message=""):
+        self.git().commit(message=message)
+
+    def commits(self, max_count=30, skip=0):
+        return self.git().commits(max_count=30, skip=0)
+        
+    def changed(self):
+        return self.git().changed()
+
+    def delete(self):
+        branch = self.branch
+        base_branch = self.base_branch
+        try:
+            fs = self.wiz.framework.model("wizfs", module="wiz").use(f"wiz/merge")
+            fs.delete(f"{branch}_{base_branch}")
+        except:
+            pass
+
+    def author(self):
+        return self.git().author()
 
 """WIZ Workspace API
 : this class used in wiz framework level.
@@ -811,6 +917,9 @@ class Workspace:
     def git(self, branch=None, base_branch="master", author=None, reload=False):
         if branch is None: branch = self.branch()
         return Git(self.wiz, branch=branch, base_branch=base_branch, author=author, reload=reload)
+
+    def merge(self):
+        return MergeWorkspace(self.wiz)
 
     def branch(self):
         return self.wiz.env.BRANCH
@@ -858,7 +967,7 @@ class Workspace:
             stat.append(obj)
 
         return stat
-
+        
     def checkout(self, branch, base_branch="master", name=None, email=None, reload=False):
         author = None
         if name is not None and email is not None:
@@ -868,6 +977,7 @@ class Workspace:
 
         self.wiz.env.BRANCH = branch
         self.git(branch=branch, base_branch=base_branch, author=author, reload=reload)
+        return self
 
     def diff(self, branch=None, commit=None):
         if branch is None: branch = self.branch()

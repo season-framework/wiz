@@ -39,12 +39,13 @@ mixin content()
                 .navbar-brand.navbar-brand-autodark.d-none-navbar-horizontal.pr-0.pr-md-3
                     h2.m-0 WIZ Git Flow
 
-                select.form-control.text-white.mr-2(ng-model="extdata.branch" ng-change="extdata.change_branch(extdata.branch)" style="width: 120px;")
-                    option(ng-repeat="branch in extdata.branches" value="{{branch}}") {{branch}}
-
                 #navbar-menu.navbar.navbar-collapse.collapse
                     ul.navbar-nav
                     .navbar-nav.flex-row.order-md-last.mr-2(style="align-items: center;")
+                        li.nav-item.p-0.pr-2(ng-if="viewer.mode != 'etc' && viewer.mode && !commit.id && viewer.selected.change_type != 'D'")
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="modal.delete()")
+                                span.nav-link-title(style="font-size: 14px;") Delete
+
                         li.nav-item.p-0.pr-2(ng-if="viewer.mode != 'etc' && viewer.mode && !commit.id")
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="viewer.update()")
                                 span.nav-link-title(style="font-size: 14px;") Save
@@ -55,12 +56,9 @@ mixin content()
                                     i.fas.fa-times
     
     div(data-split-pane data-split-pane-properties="layout.viewstate.root")
-        .bg-dark(data-split-pane-component data-width="360px")
+        .bg-dark(data-split-pane-component data-width="360px" style="height: calc(100vh - 236px);")
             .menu-layout.p-3
-                .btn-group.w-100.mb-3
-                    button.btn(type="button" ng-repeat="item in workspace.list" style="width: 50%;" class="{{workspace.active_workspace == item.id ? 'btn-white' : 'btn-dark'}}" ng-click="item.active()") {{item.name}}
-
-                .tree-container(ng-show="workspace.active_workspace == workspace.list[0].id" style="padding-bottom: 300px;")
+                .tree-container(ng-show="workspace.active_workspace == workspace.list[0].id" style="padding-bottom: 60px;")
                     h3.text-white.mt-4.text-center(ng-if="commit.files.count == 0") 0 Changed files
 
                     h3.text-white.mt-2.mb-2(ng-if="commit.files.routes.length > 0") Routes
@@ -123,33 +121,9 @@ mixin content()
                         
                     .card.card-sm.mb-0(style="position: fixed; left: 0; bottom: 0; width: {{configuration.layout_menu_width}}px; border-radius: 0;" ng-if="commit.files.count > 0 && !commit.id")
                         .card-body.text-dark
-                            label.form-label Commit Code
+                            label.form-label Merge Request
                             textarea.mb-2.form-control(placeholder='Commit Message' ng-model="commit.data.message" rows=3)
-                            button.btn.btn-dark.btn-block(ng-click="commit.commit(commit.data.message)") Commit
-
-                .tree-container(ng-show="workspace.active_workspace == workspace.list[1].id")
-                    .root-tree.mb-1(ng-click="history.change({id: ''})" class="{{'' == commit.id ? 'active' : ''}}")
-                        .root-title
-                            table
-                                tr 
-                                    td.w-1.pr-2.pt-2.pb-2(style="vertical-align: top; font-size: 18px;")
-                                        i.fas.fa-code-branch
-
-                                    td.pt-2.pb-2(style="line-height: 1;")
-                                        span HEAD
-
-                    .root-tree.mb-1(ng-repeat="item in history.data" class="{{item.id == commit.id ? 'active' : ''}}" ng-click="history.change(item)")
-                        .root-title
-                            table
-                                tr 
-                                    td.w-1.pr-2.pt-2.pb-2(style="vertical-align: top; font-size: 18px;")
-                                        i.fas.fa-code-branch
-
-                                    td.pt-2.pb-2(style="line-height: 1;")
-                                        span {{ item.id.substring(0, 8) }} · {{ item.message }}
-                                        br
-                                        span.namespace {{item.committer ? item.committer : item.author}} ·
-                                        span.namespace.text-muted.ml-1 {{item.datetime}} 
+                            button.btn.btn-dark.btn-block(ng-click="commit.commit(commit.data.message)") Merge
                                         
         div(data-split-pane-divider data-width="0px")
         
@@ -169,7 +143,7 @@ mixin content()
                     div Once deleted, it cannot be restored. Are you sure you want to delete?
                 .modal-footer
                     button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
-                    button.btn.btn-danger(type='button' ng-click="app.delete()") Delete
+                    button.btn.btn-danger(type='button' ng-click="viewer.delete()") Delete
 
 include wiz/theme/layout-empty
 +layout
