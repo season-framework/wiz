@@ -121,7 +121,7 @@ class Model:
 
         try:
             code = package.framework["on_error"]
-            code = self.__addtabs__(code, 1)
+            code = self.__addtabs__(code, 2)
             script = "def on_error(framework, err):\n"
             script += "    try:\n"
             script += '        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())\n'
@@ -130,8 +130,11 @@ class Model:
             script += '        framework.socketio.emit("log", errorlog, namespace="/wiz", to=branch, broadcast=True)\n'
             script += "    except:\n"
             script += "        pass\n"
+            script += "    wiz = framework.wiz.instance()\n"
+            script += "    def handle_error(wiz, err):\n"
             script += code + "\n"
-            script += "    pass"
+            script += "        pass\n"
+            script += "    handle_error(wiz, err)\n"
             configpy.append(script)
             configpy.append("config.on_error = on_error")
             configpy.append("")
@@ -162,7 +165,7 @@ class Model:
                 script += code + "\n"
                 script += f"    except:\n"
                 script += f"        pass\n"
-                script += f"    return None\n"
+                script += f"    return response\n"
                 configpy.append(script)
                 configpy.append("config.after_request = after_request")
                 configpy.append("")

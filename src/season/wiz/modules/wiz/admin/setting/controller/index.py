@@ -15,14 +15,9 @@ class Controller(season.interfaces.wiz.ctrl.admin.setting.view):
         self.exportjs(**kwargs)
         self.js('js/configuration.js')
         
-    def __default__(self, framework):
+    def __error__(self, framework, err):
         framework.response.redirect('status')
 
-    def status(self, framework):
-        framework.response.render('status.pug')
-
-    def configuration(self, framework):
-        framework.response.render('configuration.pug')
-
-    def acl(self, framework):
-        framework.response.render('acl.pug')
+    def __default__(self, framework):
+        page = framework.request.segment.get(0, True)
+        framework.response.render(f'{page}.pug')

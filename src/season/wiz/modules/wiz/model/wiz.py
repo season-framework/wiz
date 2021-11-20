@@ -84,7 +84,10 @@ class Wiz(season.stdClass):
         self.PATH = framework.core.PATH
         self.request = framework.request
         self.response = framework.response
+        
         self.response.render = self.__render__
+        self.render = self.__view__
+
         self.__logger__ = self.logger("instance")
 
     def logger(self, tag=None, log_color=94):
@@ -162,7 +165,49 @@ class Wiz(season.stdClass):
     def __render__(self, *args, **kwargs):
         wiz = self.__wiz__
         framework = wiz.framework
-        view = self.render(*args, **kwargs)
+
+        if len(args) == 0:
+            return self
+
+        if len(args) == 1:
+            view = self.render(*args, **kwargs)
+            framework.response.send(view, "text/html")
+        
+        route = args[0]
+        endpoint = args[1]
+
+        if route is None: return self
+        if len(route) == 0: return self
+        url_map = []
+        if route[-1] == "/":
+            url_map.append(Rule(route[:-1], endpoint=endpoint))
+        elif route[-1] == ">":
+            rpath = route
+            while rpath[-1] == ">":
+                rpath = rpath.split("/")[:-1]
+                rpath = "/".join(rpath)
+                url_map.append(Rule(rpath, endpoint=endpoint))
+                if rpath[-1] != ">":
+                    url_map.append(Rule(rpath + "/", endpoint=endpoint))
+        url_map.append(Rule(route, endpoint=endpoint))
+        url_map = Map(url_map)
+        url_map = url_map.bind("", "/")
+
+        def matcher(url):
+            try:
+                endpoint, kwargs = url_map.match(url, "GET")
+                return endpoint, kwargs
+            except:
+                return None, {}
+                
+        request_uri = self.request.uri()
+        app_id, segment = matcher(request_uri)
+
+        if app_id is None:
+            return self
+
+        self.request.segment = season.stdClass(segment)
+        view = self.render(app_id, **kwargs)
         framework.response.send(view, "text/html")
 
     def __compiler__(self, codelang, code, **kwargs):
@@ -251,7 +296,7 @@ class Wiz(season.stdClass):
         layout = framework.response.template_from_string(layout, **kwargs)
         return layout
 
-    def render(self, *args, **kwargs):
+    def __view__(self, *args, **kwargs):
         if len(args) == 0: return ""
 
         wiz = self.__wiz__
@@ -546,7 +591,6 @@ class Git:
         if gitremotecache in wiz.framework.cache and reload == False: self.remote_repo = wiz.framework.cache[gitremotecache]
         else: wiz.framework.cache[gitremotecache] = self.remote_repo = git.Repo.init(self.remote_path)
     
-        
         if author is not None:
             try:
                 _author = self.author()
@@ -602,7 +646,6 @@ class Git:
                 self.fs.write(".gitignore", gitignore)
                 self.commit()
 
-        
     def branches(self):
         return [h.name for h in self.remote_repo.heads]
 
@@ -691,6 +734,68 @@ class Git:
         author['name'] = self.repo.config_reader().get_value("user", "name")
         author['email'] = self.repo.config_reader().get_value("user", "email")
         return author
+
+class Merge(Git):
+
+    def __init__(self, wiz, branch="master", base_branch="master", author=None, **kwargs):
+        self.branch = branch
+        self.wiz = wiz
+        
+        fs = self.fs = wiz.framework.model("wizfs", module="wiz").use(f"wiz/merge/{branch}_{base_branch}")
+        path = self.fs.abspath()
+
+        remote_origin = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/master").abspath()
+        remote_base = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{remote_base}").abspath()
+        remote_target = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{branch}").abspath()
+
+        if fs.isdir(remote_origin) == False: raise Exception("master branch not exists")
+        if fs.isdir(remote_base) == False: raise Exception("master branch not exists")
+        if fs.isdir(remote_target) == False: raise Exception("master branch not exists")
+        
+
+        self.repo = repo = git.Repo.init(path)
+        self.remote_repo = remote_repo = git.Repo.init(remote_origin)
+        
+        if author is not None:
+            try:
+                _author = self.author()
+                _author = season.stdClass(_author)
+                author = season.stdClass(author)
+                if author.name is not None and _author['name'] != author.name:
+                    repo.config_writer().set_value("user", "name", author.name).release()
+                if author.email is not None and _author['email'] != author.email:
+                    repo.config_writer().set_value("user", "email", author.email).release()
+            except:
+                pass
+
+        # if not initialized repo, create first commit
+        isinit = len(repo.heads)
+        
+        if isinit == 0:
+            origin = repo.create_remote('origin', remote_origin)
+            origin.fetch()
+
+            # copy source branch
+            branch_head = repo.create_head(branch, origin.refs[branch])
+            base_head = repo.create_head(base_branch, origin.refs[base_branch])
+            
+            base_head.checkout() # init as base branch
+
+            # delete wiz component files
+            dirs = os.listdir(path)
+            for name in dirs:
+                if name == '.git': continue
+                fs.delete(name)
+
+            # copy update files
+            newdirs = os.listdir(remote_target)
+            for name in dirs:
+                if name == '.git': continue
+                copy_path = os.path.join(remote_target, name)
+                fs.copy(copy_path, name)
+
+            repo.git.add('--all')
+            
 
 """WIZ Workspace API
 : this class used in wiz framework level.

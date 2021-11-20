@@ -29,7 +29,7 @@ var content_controller = async ($sce, $scope, $timeout) => {
 
     $scope.branch = {};
     $scope.branch.id = BRANCH;
-    
+
     let branches = await API.list();
     $scope.branch.list = branches.active;
     $scope.branch.stale = branches.stale;
@@ -55,12 +55,16 @@ var content_controller = async ($sce, $scope, $timeout) => {
         if (!branch || !base) return toastr.error("Branch name at least 2 char");
         if (branch.length < 2) return toastr.error("Branch name at least 2 char");
         $scope.loading = true;
-
         $scope.modal.data.create.branch = branch;
         $scope.modal.data.create.base_branch = base;
         let create = angular.copy($scope.modal.data.create);
         await API.timeout();
-        await API.checkout(create);
+        let res = await API.checkout(create);
+        if (res.code != 200) {
+            $scope.loading = false;
+            await API.timeout();
+            return toastr.error(res.data);
+        }
         location.reload();
     }
 
@@ -69,7 +73,12 @@ var content_controller = async ($sce, $scope, $timeout) => {
         let checkout_object = {};
         checkout_object.branch = branch;
         await API.timeout();
-        await API.checkout(checkout_object);
+        let res = await API.checkout(checkout_object);
+        if (res.code != 200) {
+            $scope.loading = false;
+            await API.timeout();
+            return toastr.error(res.data);
+        }
         location.reload();
     }
 

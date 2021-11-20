@@ -1,0 +1,175 @@
+mixin codearea(tab)
+    div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('{$tab$}')" ng-if="app.editor.viewstate" ng-cloak)
+        .code-select.bg-dark.d-flex(style="margin-top: -2px;")
+            .btn.btn-square.btn-sm.p-2(ng-repeat="code in app.editor.code.list" ng-click="app.editor.code.change('{$tab$}', code.id)" ng-class="configuration.tab.{$tab$}_val == code.id ? 'btn-white' : 'btn-dark'") {{code.name}}
+
+            select.form-select.form-select-sm.m-1.ml-auto(style="width: 120px;" ng-model="app.data.package.properties[configuration.tab.{$tab$}_val]" ng-if="app.editor.codetypes[configuration.tab.{$tab$}_val].length > 0")
+                option(ng-repeat="code in app.editor.codetypes[configuration.tab.{$tab$}_val]" value="{{code}}") {{code}}
+            select.form-select.form-select-sm.m-1.mr-0.ml-auto(ng-if="configuration.tab.{$tab$}_val == 'dic'" style="width: 60px;" ng-model="configuration.tab.{$tab$}_language")
+                option(ng-repeat="(key, value) in app.data.dic" value="{{key}}") {{key}}
+            .btn.btn-square.btn-dark.btn-sm.p-2(ng-if="configuration.tab.{$tab$}_val == 'dic'" ng-click="modal.add_language()")
+                i.fas.fa-plus
+
+        div(style="height: calc(100% - 36px);")
+            div(ng-if="['preview', 'dic'].includes(configuration.tab.{$tab$}_val) == false" ng-model="app.data[configuration.tab.{$tab$}_val]" ui-monaco-opts="app.editor.properties['{$tab$}']" ui-monaco)
+            div(ng-if="configuration.tab.{$tab$}_val == 'dic'" ng-model="app.data[configuration.tab.{$tab$}_val][configuration.tab.{$tab$}_language]" ui-monaco-opts="app.editor.properties['{$tab$}']" ui-monaco)
+
+            .code-preview(ng-if="configuration.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: 100%;")
+                iframe.preview(style="height: 100%;" ng-show="app.preview.status")
+                table(ng-if="!app.preview.status" style="width: 100%; height: 100%;")
+                    tr 
+                        td(style="text-align: center; vertical-align: middle;")
+                            .spinner-grow.text-dark(style="width: 120px; height: 120px;")
+
+            div(ng-if="app.tab.activetab != '{$tab$}' && ['preview'].includes(configuration.tab.{$tab$}_val) == false" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: rgba(0,0,0,.05); z-index: 9999;")
+
+mixin content()
+    .display-none(style="display: none;")
+        input#import-file(type="file" accept=".json,application/json")
+
+    .bg-dark.text-center(ng-if="loading.status" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 99999; padding-top: 40vh; opacity: .6;")
+        .spinner-grow.text-white(style="width: 60px; height: 60px;")
+
+    .fixed-top
+        header.navbar.navbar-expand-md.navbar-dark
+            .container(style="max-width: none;")
+                button.navbar-toggler(type='button' data-toggle='collapse' data-target='#navbar-menu')
+                    span.navbar-toggler-icon
+
+                .navbar-brand.navbar-brand-autodark.d-none-navbar-horizontal.pr-0.pr-md-3
+                    h2.m-0 WIZ Git Flow
+
+                select.form-control.text-white.mr-2(ng-model="extdata.branch" ng-change="extdata.change_branch(extdata.branch)" style="width: 120px;")
+                    option(ng-repeat="branch in extdata.branches" value="{{branch}}") {{branch}}
+
+                #navbar-menu.navbar.navbar-collapse.collapse
+                    ul.navbar-nav
+                    .navbar-nav.flex-row.order-md-last.mr-2(style="align-items: center;")
+                        li.nav-item.p-0.pr-2(ng-if="viewer.mode != 'etc' && viewer.mode && !commit.id")
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="viewer.update()")
+                                span.nav-link-title(style="font-size: 14px;") Save
+
+                        li.nav-item.p-0
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-href='/wiz/admin/branch')
+                                span.nav-link-title.bold(style="font-size: 14px;")
+                                    i.fas.fa-times
+    
+    div(data-split-pane data-split-pane-properties="layout.viewstate.root")
+        .bg-dark(data-split-pane-component data-width="360px")
+            .menu-layout.p-3
+                .btn-group.w-100.mb-3
+                    button.btn(type="button" ng-repeat="item in workspace.list" style="width: 50%;" class="{{workspace.active_workspace == item.id ? 'btn-white' : 'btn-dark'}}" ng-click="item.active()") {{item.name}}
+
+                .tree-container(ng-show="workspace.active_workspace == workspace.list[0].id" style="padding-bottom: 300px;")
+                    h3.text-white.mt-4.text-center(ng-if="commit.files.count == 0") 0 Changed files
+
+                    h3.text-white.mt-2.mb-2(ng-if="commit.files.routes.length > 0") Routes
+
+                    .root-tree.mb-2(ng-repeat="item in commit.files.routes" class="{{item == viewer.selected ? 'active' : ''}}" ng-click="viewer.load(item)")
+                        .root-title
+                            table
+                                tr 
+                                    td.w-1.pr-1(style="vertical-align: top; font-size: 12px;")
+                                        i.fas.fa-plus-circle(ng-if="item.change_type == 'A'")
+                                        i.fas.fa-exchange-alt(ng-if="item.change_type == 'M'")
+                                        i.fas.fa-minus-circle(ng-if="item.change_type == 'D'")
+                                        i.fas.fa-arrows-alt(ng-if="item.change_type == 'R'")
+                                        i.fas.fa-minus-circle(ng-if="!['A','M','D','R'].includes(item.change_type)")
+
+                                    td(style="line-height: 1;")
+                                        span {{item.display}}
+                                        br
+                                        span.namespace {{item.commit_path ? item.commit_path : item.parent_path}}
+
+                    .mb-4(ng-if="commit.files.routes.length > 0")
+
+                    h3.text-white.mt-2.mb-2(ng-if="commit.files.apps.length > 0") Apps
+
+                    .root-tree.mb-2(ng-repeat="item in commit.files.apps" class="{{item == viewer.selected ? 'active' : ''}}" ng-click="viewer.load(item)")
+                        .root-title
+                            table
+                                tr 
+                                    td.w-1.pr-1(style="vertical-align: top; font-size: 12px;")
+                                        i.fas.fa-plus-circle(ng-if="item.change_type == 'A'")
+                                        i.fas.fa-exchange-alt(ng-if="item.change_type == 'M'")
+                                        i.fas.fa-minus-circle(ng-if="item.change_type == 'D'")
+                                        i.fas.fa-arrows-alt(ng-if="item.change_type == 'R'")
+                                        i.fas.fa-minus-circle(ng-if="!['A','M','D','R'].includes(item.change_type)")
+
+                                    td(style="line-height: 1;")
+                                        span {{item.display}}
+                                        br
+                                        span.namespace {{item.commit_path ? item.commit_path : item.parent_path}}
+
+                    .mb-4(ng-if="commit.files.apps.length > 0")
+
+                    h3.text-white.mt-2.mb-2(ng-if="commit.files.files.length > 0") Files
+
+                    .root-tree.mb-2(ng-repeat="item in commit.files.files" class="{{item == viewer.selected ? 'active' : ''}}" ng-click="viewer.load(item)")
+                        .root-title
+                            table
+                                tr 
+                                    td.w-1.pr-1(style="vertical-align: top; font-size: 12px;")
+                                        i.fas.fa-plus-circle(ng-if="item.change_type == 'A'")
+                                        i.fas.fa-exchange-alt(ng-if="item.change_type == 'M'")
+                                        i.fas.fa-minus-circle(ng-if="item.change_type == 'D'")
+                                        i.fas.fa-arrows-alt(ng-if="item.change_type == 'R'")
+                                        i.fas.fa-minus-circle(ng-if="!['A','M','D','R'].includes(item.change_type)")
+
+                                    td(style="line-height: 1;")
+                                        span {{item.display}}
+                                        br
+                                        span.namespace {{item.commit_path ? item.commit_path : item.parent_path}}
+                        
+                    .card.card-sm.mb-0(style="position: fixed; left: 0; bottom: 0; width: {{configuration.layout_menu_width}}px; border-radius: 0;" ng-if="commit.files.count > 0 && !commit.id")
+                        .card-body.text-dark
+                            label.form-label Commit Code
+                            textarea.mb-2.form-control(placeholder='Commit Message' ng-model="commit.data.message" rows=3)
+                            button.btn.btn-dark.btn-block(ng-click="commit.commit(commit.data.message)") Commit
+
+                .tree-container(ng-show="workspace.active_workspace == workspace.list[1].id")
+                    .root-tree.mb-1(ng-click="history.change({id: ''})" class="{{'' == commit.id ? 'active' : ''}}")
+                        .root-title
+                            table
+                                tr 
+                                    td.w-1.pr-2.pt-2.pb-2(style="vertical-align: top; font-size: 18px;")
+                                        i.fas.fa-code-branch
+
+                                    td.pt-2.pb-2(style="line-height: 1;")
+                                        span HEAD
+
+                    .root-tree.mb-1(ng-repeat="item in history.data" class="{{item.id == commit.id ? 'active' : ''}}" ng-click="history.change(item)")
+                        .root-title
+                            table
+                                tr 
+                                    td.w-1.pr-2.pt-2.pb-2(style="vertical-align: top; font-size: 18px;")
+                                        i.fas.fa-code-branch
+
+                                    td.pt-2.pb-2(style="line-height: 1;")
+                                        span {{ item.id.substring(0, 8) }} · {{ item.message }}
+                                        br
+                                        span.namespace {{item.committer ? item.committer : item.author}} ·
+                                        span.namespace.text-muted.ml-1 {{item.datetime}} 
+                                        
+        div(data-split-pane-divider data-width="0px")
+        
+        #editor-area(data-split-pane-component)
+            div(style="width: 100%; height: 100%;" ng-if="!loading.status")
+                .code-select.bg-dark.d-flex(style="margin-top: -2px;" ng-if="viewer.codes.length > 0")
+                    .btn.btn-square.btn-sm.p-2(ng-repeat="code in viewer.codes" ng-click="viewer.change(code)" ng-class="viewer.code == code ? 'btn-white' : 'btn-dark'") {{code}}
+                    
+                div(style="height: {{ viewer.codes.length > 0 ? 'calc(100% - 36px);' : '100%' }}")
+                    div(ng-model="viewer.editor.data" ui-monaco-opts="viewer.editor.configuration" ui-monaco-diff)
+
+    #modal-delete.modal.fade(tabindex="-1")
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title Delete
+                    div Once deleted, it cannot be restored. Are you sure you want to delete?
+                .modal-footer
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-danger(type='button' ng-click="app.delete()") Delete
+
+include wiz/theme/layout-empty
++layout

@@ -287,18 +287,8 @@ let content_controller = async ($scope, $timeout, $sce) => {
                     await $scope.plugin.editor.build(editor);
                 }
 
-                let next = {};
-                let prev = {};
-
-                try {
-                    next = await API.file(obj.commit_path, obj.commit == 'index' ? null : obj.commit);
-                } catch (e) {
-                }
-
-                try {
-                    prev = await API.file(obj.parent_path, obj.parent == 'index' ? null : obj.parent);
-                } catch (e) {
-                }
+                let next = await API.file(obj.commit_path, obj.commit == 'index' ? null : obj.commit);
+                let prev = await API.file(obj.parent_path, obj.parent == 'index' ? null : obj.parent);
 
                 if (next.mode == 'apps') {
                     next = next.app;

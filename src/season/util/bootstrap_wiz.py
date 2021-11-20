@@ -221,15 +221,11 @@ class bootstrap_wiz:
         # Before Request
         @app.before_request
         def before_request():
-            if handler.before_request is not None:
-                handler.before_request(app.framework)
+            if handler.before_request is not None:                
+                handler.before_request(app, socketio)
 
         @app.after_request
         def after_request(response):
-            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
-            response.headers['Cache-Control'] = 'public, max-age=0'
             if handler.after_request is not None:
                 res = handler.after_request(response)
                 if res is not None: return res
@@ -563,7 +559,7 @@ class bootstrap_wiz:
                     if regist(controller, fnname, framework, namespace):
                         reglist.append(fnname)
                 reglist = ", ".join(reglist)
-                _logger(LOG_DEV, message=f"socketio event binding on '{reglist}' with namespace '{namespace}'")
+                # _logger(LOG_INFO, message=f"socketio event binding on '{reglist}' with namespace '{namespace}'")
                     
                 if hasattr(controller, 'namespaces'):
                     namespaces = controller.namespaces
@@ -581,19 +577,24 @@ class bootstrap_wiz:
                             if regist(controller, fnname, framework, _namespace):
                                 reglist.append(fnname)
                         reglist = ", ".join(reglist)
-                        _logger(LOG_DEV, message=f"socketio event binding on '{reglist}' with namespace '{_namespace}'")
+                        # _logger(LOG_INFO, message=f"socketio event binding on '{reglist}' with namespace '{_namespace}'")
 
         socket_binder()
 
         app.framework = season.core.CLASS.FRAMEWORK(season=season, module="build", module_path="build", controller_path="", segment_path="", ERROR_INFO=init_error_info("build"), logger=_logger, flask=flask, socketio=socketio, flask_socketio=flask_socketio)
 
         if handler.build is not None:
+            _app = None
             try:
                 _app = handler.build(app, socketio)
             except:
-                _app = handler.build(app)
+                try:
+                    _app = handler.build(app)
+                except:
+                    pass
+                    
             if _app is not None:
-                app = app
+                app = _app
         
         boottime = round(time.time() * 1000) - boottime
         _logger(LOG_DEV, message=f"{boottime}ms to boot. server running on http://{host}:{port}/ (Press CTRL+C to quit)")
