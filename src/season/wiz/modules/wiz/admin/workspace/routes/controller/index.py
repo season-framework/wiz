@@ -1,22 +1,29 @@
 import season
 import time
 
-WIZ_CONTROLLER = """# use framework controller
-# controller = season.interfaces.controller.admin.view()
-# controller.__startup__(framework)
+WIZ_CONTROLLER = """### wiz.request.query(<KEY>, <DEFAULT_VALUE>)
+# data = wiz.request.query() # get all queries as dict type
+# value = wiz.request.query("key", "test") # get `key` value, if not exist in query, return default value
+# value = wiz.request.query("key", True) # if default value is True, this key required
 
-# TODO: Setup Access Level
-if 'id' not in framework.session:
-    framework.response.abort(401)
+### load text from dictionary
+# hello = dic("hello")
+# title = dic("title.text")
 
-# use segments
-# Route: /board/<category>/list
-# View URI: /board/notice/list
-segment = framework.request.segment
-framework.log(segment)
+### use selected controller
+# controller.custom_function()
 
-# TODO: Build view variables
-kwargs['message'] = "Hello, World!"
+### use segments
+### Route: /board/<category>/list
+### View URI: /board/notice/list
+# segment = framework.request.segment
+
+### render app
+# wiz.response.render("main")
+# wiz.response.render("app_namespace")
+# wiz.response.render("<url_pattern_1>", "<app_namespace>", key="value", key2="value2")
+# wiz.response.render("<url_pattern_2>", "<app_namespace>", key="value", key2="value3")
+# wiz.response.status(200)
 """
 
 class Controller(season.interfaces.wiz.ctrl.admin.workspace.view):
@@ -53,6 +60,10 @@ class Controller(season.interfaces.wiz.ctrl.admin.workspace.view):
             info["package"] = pkg
             info["controller"] = WIZ_CONTROLLER
             info["dic"] = dict()
+            info["dic"]["default"] = dict()
+            info["dic"]["default"]["hello"] = "hello"
+            info["dic"]["ko"] = dict()
+            info["dic"]["ko"]["hello"] = "안녕하세요"
 
             self.wiz.data.update(info, mode='route')
             framework.response.redirect("editor/" + pkg["id"])

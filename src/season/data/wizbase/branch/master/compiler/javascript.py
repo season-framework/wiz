@@ -12,15 +12,10 @@ def compile(wiz, js, data):
     kwargsstr = "{$ kwargs $}"
     dicstr = "{$ dicstr $}"
     branch = wiz.branch()
-    isdev = wiz.is_dev()
-    if isdev: isdev = 'true'
-    else: isdev = 'false'
 
     js = f"""
     function __init_{render_id}() {o}
-        var wiz = season_wiz.load('{app_id}', '{namespace}', '{app_namespace}');
-        wiz.render_id = '{render_id}';
-        wiz.is_dev = {isdev};
+        let wiz = season_wiz.load('{app_id}', '{namespace}', '{app_namespace}', '{render_id}');
         wiz.branch = '{branch}';
         wiz.data = wiz.kwargs = wiz.options = JSON.parse(atob('{kwargsstr}'));
         wiz.dic = wiz.DIC = JSON.parse(atob('{dicstr}'));
@@ -30,7 +25,7 @@ def compile(wiz, js, data):
         try {o}
             app.controller('{render_id}', wiz_controller); 
         {e} catch (e) {o} 
-            app.controller('{render_id}', function() {o} {e} ); 
+            app.controller('{render_id}', ()=> {o} {e} ); 
         {e} 
     {e}; 
     __init_{render_id}();
