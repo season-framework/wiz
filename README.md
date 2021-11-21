@@ -17,18 +17,32 @@ pip install season
 cd <workspace>
 wiz create myapp
 cd myapp
+wiz run
 ```
 
-- `127.0.0.1:3000` on your web browser
+- `127.0.0.1:3000/wiz` on your web browser
 
+
+## Roadmap
+
+- plugin support
+    - wiz based online plugin development env
+    - support programmable api for plugins
+- git flow
+    - support management for remote branches
 
 ## Release Note
+
+### 0.4.1
+
+- WIZ API (js) changed (async mode)
 
 ### 0.4.0
 
 - Integrate WIZ & Season Flask
 - support git flow
 - workspace structure changed
+- base code workspace changed (mysql to filesystem)
 - UI upgrade
 - support installer
 
@@ -138,3 +152,4 @@ cd myapp
 - submodule structure added
 - logging 
 - simplify public directory structure
+

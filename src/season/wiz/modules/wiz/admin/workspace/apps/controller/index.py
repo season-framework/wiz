@@ -23,39 +23,63 @@ WIZ_CONTROLLER = """### get request query
 # kwargs['message'] = "Hello, World!"
 """
 
-WIZ_JS = """var wiz_controller = function ($sce, $scope, $timeout) {
-    // call api
-    wiz.API.function('status', {}, function(res) {
-        console.log(res);
-    });
+WIZ_JS = """let wiz_controller = async ($sce, $scope, $timeout) => {
+    // call wiz api
+    let status = await wiz.API.async('status', {});
+    console.log(status);
 
-    // bind event. allow access form another wiz
     /*
-    // response to caller, when event end.
-    $scope.myevent = function() {
-        var data = "hello";
-        $scope.wiz_callback(data);
-    };
+    // WIZ JS API Variables
+    wiz.id // random generated wiz workspace app id
+    wiz.namespace // defined namespace at view
+    wiz.app_namespace // defined namespace at wiz workspace 
+    wiz.render_id // random generated view instance id
+    */
 
-    wiz.bind("event-name", function (data, callback) {
-        $scope.wiz_callback = callback;
+    /*
+    // bind event. allow access form another wiz
+    wiz.bind("modal-show", (data) => {
+        $scope.data = data;
+        $('#' + wiz.render_id).modal("show");
+        $timeout();
     });
+
+    // response to caller, when event end.
+    $scope.event = {};
+    $scope.event.submit = async () => {
+        $('#' + wiz.render_id).modal("hide");
+        let resp = true;
+        wiz.response("modal-show", resp);
+    }
+
+    $scope.event.close = async () => {
+        $('#' + wiz.render_id).modal("hide");
+        let resp = false;
+        wiz.response("modal-show", resp);
+    }
     */
 
     // call another wiz's event.
     /*
-    wiz.connect("wiz-namespace")
-        // set data to send
-        .data({ title: "My Title" }) 
-        // call event and get response
-        .event("event-name", function (data) {
-            $scope.data = data;
-            $timeout();
-        });
+    $scope.call_view = async () => {
+        let resp = await wiz.connect("view namespace")
+            .data({
+                title: "Confirm",
+                message: "Are you sure?",
+                btn_close: "Cancel",
+                btn_action: "Confirm",
+                btn_class: "btn-success"
+            })
+            .event("modal-show");
+
+        console.log("[response]", resp);
+    }
     */
 
     /*
-    var socket = wiz.socket.get();    
+    let socket = wiz.socket.get();
+    // let socket = wiz.socket.get('app_namespace');
+    
     socket.on("connect", function (data) {
         socket.emit("response", "hello");
     });
@@ -77,10 +101,56 @@ WIZ_API = """def __startup__(framework):
 def status(framework):
     # build response
     framework.response.status(200, 'hello')
+    # framework.response.status(200, hello='hello', world='world')
 """
 
 WIZ_PUG = """.container
     h3= message
+    // {$ wiz.render("app-namespace-1", "view-instance-namespace") $}
+    // {$ wiz.render("app-namespace-2", data='hello') $}
+"""
+
+WIZ_SOCKET = """# import datetime
+
+# class Controller:
+#     def __init__(self, wiz):
+#         print("master")
+#         self.cache = wiz.cache
+#         self.room = "public"
+        
+#     def join(self, wiz, data):
+#         wiz.flask_socketio.join_room(self.room, namespace=wiz.socket.namespace)
+#         msg = dict()
+#         msg["type"] = "init"
+#         msg["data"] = self.cache.get("message", [])
+#         wiz.socket.emit("message", msg, to=self.room, broadcast=True)
+
+#     def message(self, wiz, data):
+#         message = data["message"]
+#         user_id = wiz.lib.util.randomstring(6)
+#         msg = dict()
+#         msg["type"] = "message"
+#         msg["user"] = user_id
+#         msg["message"] = message
+#         msg["time"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#         with self.cache.open("message", []) as cache:
+#             try:
+#                 cache['message'].append(msg)
+#                 cache['message'] = cache['message'][-100:]
+#             except:
+#                 cache['message'] = []
+#                 cache['message'].append(msg)
+#                 cache['message'] = cache['message'][-100:]
+
+#         wiz.socket.emit("message", msg, to=self.room)
+    
+#     def connect(self, wiz, data):
+#         pass
+
+#     def disconnect(self, wiz, data):            
+#         msg = dict()
+#         msg["type"] = "users"
+#         wiz.socket.emit("message", msg, to=self.room, broadcast=True)
 """
 
 class Controller(season.interfaces.wiz.ctrl.admin.workspace.view):
@@ -117,7 +187,7 @@ class Controller(season.interfaces.wiz.ctrl.admin.workspace.view):
             info["package"] = pkg
             info["controller"] = WIZ_CONTROLLER
             info["api"] = WIZ_API
-            info["socketio"] = ""
+            info["socketio"] = WIZ_SOCKET
             info["html"] = WIZ_PUG
             info["js"] = WIZ_JS
             info["css"] = ""

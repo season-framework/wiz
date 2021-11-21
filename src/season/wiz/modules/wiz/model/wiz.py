@@ -314,6 +314,13 @@ class Wiz(season.stdClass):
             inst = wiz.cls.App(self.__wiz__)
             app = inst.get(app_id)
 
+            if app is None:
+                # TODO: logger
+                _logger = self.logger(f"[app][{app_id}]", 91)
+                _logger(f"not found")
+
+                return ""
+
             app_id = app['package']['id']
             app_namespace = app['package']['namespace']
             namespace = str(app_namespace)  # namespace for ui
@@ -371,7 +378,7 @@ class Wiz(season.stdClass):
             if 'theme' in app['package']:
                 render_theme = self.render_theme = app['package']['theme']
             else:
-                render_theme = self.config.load("wiz").get("theme_default", None)
+                render_theme = self.__wiz__.framework.config.load("wiz").get("theme_default", None)
 
         ctrl = None
         if 'controller' in app['package']:
