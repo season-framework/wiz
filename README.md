@@ -33,6 +33,16 @@ wiz run
 
 ## Release Note
 
+### 0.4.7
+
+- scroll bug fixed in logger
+
+### 0.4.6
+
+- dictionary bug fixed in App HTML
+- history display ui changed (workspace)
+- app browse in route workspace
+
 ### 0.4.5
 
 - cache bug fixed

@@ -63,6 +63,8 @@ let content_controller = async ($scope, $timeout, $sce) => {
         })
     };
 
+    $scope.API = API;
+
     /*
      * define variables of scope
      */

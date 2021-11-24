@@ -33,7 +33,7 @@ let content_controller = async ($scope, $timeout, $sce) => {
         $timeout(function () {
             var element = $('.debug-messages')[0];
             if (!element) return;
-            element.scrollTop = element.scrollHeight - element.clientHeight;
+            element.scrollTo(0, element.scrollHeight);
         });
     });
 

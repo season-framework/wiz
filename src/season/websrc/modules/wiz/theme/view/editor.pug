@@ -86,10 +86,10 @@ mixin content()
                                         i.fas.fa-code-branch
 
                                     td.pt-2.pb-2(style="line-height: 1;")
-                                        span {{ item.id.substring(0, 8) }} · {{ item.message }}
+                                        span {{ item.message ? item.message : 'no message' }}
                                         br
                                         span.namespace {{item.committer ? item.committer : item.author}} ·
-                                        span.namespace.text-muted.ml-1 {{item.datetime}} 
+                                        span.namespace.text-muted.ml-1 {{item.datetime}} · {{ item.id.substring(0, 8) }} 
 
 
                 .tree-container(ng-show="workspace.active_workspace == workspace.list[1].id")
@@ -152,9 +152,9 @@ mixin content()
                             i.fas.fa-keyboard
                             span.ml-2 Shortcuts
 
-                        button.btn.btn-white.btn-block.mb-3(ng-click="event.select_file()") 
-                            i.fas.fa-upload
-                            span.ml-2 Import
+                        //- button.btn.btn-white.btn-block.mb-3(ng-click="event.select_file()") 
+                        //-     i.fas.fa-upload
+                        //-     span.ml-2 Import
 
                         a.btn.btn-white.btn-block.mb-3(ng-href="/wiz/export/{{mode}}/{{ app.id }}" target="_blank")
                             i.fas.fa-download
