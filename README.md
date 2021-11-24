@@ -33,6 +33,10 @@ wiz run
 
 ## Release Note
 
+### 0.4.4
+
+- git bug changed (if author is not set, default user to `wiz`)
+
 ### 0.4.3
 
 - full size log viewer

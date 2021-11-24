@@ -1136,8 +1136,10 @@ class Git:
 
     def author(self):
         author = dict()
-        author['name'] = self.repo.config_reader().get_value("user", "name")
-        author['email'] = self.repo.config_reader().get_value("user", "email")
+        try: author['name'] = self.repo.config_reader().get_value("user", "name")
+        except: author['name'] = 'wiz'
+        try: author['email'] = self.repo.config_reader().get_value("user", "email")
+        except: author['email'] = 'wiz@localhost'
         return author
 
     def current(self):
