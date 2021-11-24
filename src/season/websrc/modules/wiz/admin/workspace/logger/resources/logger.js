@@ -31,9 +31,11 @@ let content_controller = async ($scope, $timeout, $sce) => {
         data = ansi_up.ansi_to_html(data).replace(/\n/gim, '<br>').replace(/__SEASONWIZPADDING__/gim, '<div style="width: 6px; display: inline-block;"></div>');
         $scope.socket.log = $scope.socket.log + data;
         $timeout(function () {
-            var element = $('.debug-messages')[0];
-            if (!element) return;
-            element.scrollTo(0, element.scrollHeight);
+            $timeout(function () {
+                var element = $('.debug-messages')[0];
+                if (!element) return;
+                element.scrollTo(0, element.scrollHeight);
+            }, 200);
         });
     });
 
