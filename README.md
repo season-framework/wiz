@@ -33,6 +33,11 @@ wiz run
 
 ## Release Note
 
+### 0.4.5
+
+- cache bug fixed
+- add cache clean in workspace
+
 ### 0.4.4
 
 - git bug changed (if author is not set, default user to `wiz`)
