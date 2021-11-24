@@ -19,6 +19,7 @@ extra_files = package_files(os.path.join(SEASON_PKG_DIR, 'command'))
 extra_files = extra_files + package_files(os.path.join(SEASON_PKG_DIR, 'data'))
 extra_files = extra_files + package_files(os.path.join(SEASON_PKG_DIR, 'framework')) 
 extra_files = extra_files + package_files(os.path.join(SEASON_PKG_DIR, 'util')) 
+extra_files = extra_files + package_files(os.path.join(SEASON_PKG_DIR, 'websrc'))
 extra_files = extra_files + package_files(os.path.join(SEASON_PKG_DIR, 'wiz'))
 
 setup(

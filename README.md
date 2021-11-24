@@ -33,6 +33,29 @@ wiz run
 
 ## Release Note
 
+### 0.4.5
+
+- cache bug fixed
+- add cache clean in workspace
+
+### 0.4.4
+
+- git bug changed (if author is not set, default user to `wiz`)
+
+### 0.4.3
+
+- full size log viewer
+- keyword changed
+- cache bug fixed
+- socketio performance upgrade 
+
+### 0.4.2
+
+- wiz.js embeded
+- developer/production mode
+    - developer: enabled socketio logger on every pages
+    - production: disabled socketio logger
+
 ### 0.4.1
 
 - WIZ API (js) changed (async mode)

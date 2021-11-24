@@ -1,0 +1,280 @@
+mixin codearea(tab)
+    div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('{$tab$}')" ng-if="app.editor.viewstate && layout.accessable_tab.includes('{$tab$}')" ng-cloak)
+        .code-select.bg-dark.d-flex(style="margin-top: -2px;")
+            .btn.btn-square.btn-sm.p-2(ng-repeat="code in app.editor.code.list" ng-click="app.editor.code.change('{$tab$}', code.id)" ng-class="configuration.tab.{$tab$}_val == code.id ? 'btn-white' : 'btn-dark'") {{code.name}}
+
+            select.form-select.form-select-sm.m-1.ml-auto(style="width: 120px;" ng-model="app.data.package.properties[configuration.tab.{$tab$}_val]" ng-if="app.editor.codetypes[configuration.tab.{$tab$}_val].length > 0")
+                option(ng-repeat="code in app.editor.codetypes[configuration.tab.{$tab$}_val]" value="{{code}}") {{code}}
+            select.form-select.form-select-sm.m-1.mr-0.ml-auto(ng-if="configuration.tab.{$tab$}_val == 'dic'" style="width: 60px;" ng-model="configuration.tab.{$tab$}_language")
+                option(ng-repeat="(key, value) in app.data.dic" value="{{key}}") {{key}}
+            .btn.btn-square.btn-dark.btn-sm.p-2(ng-if="configuration.tab.{$tab$}_val == 'dic'" ng-click="modal.add_language()")
+                i.fas.fa-plus
+
+        div(style="height: calc(100% - 36px);")
+            div(ng-if="['preview', 'dic'].includes(configuration.tab.{$tab$}_val) == false" ng-model="app.data[configuration.tab.{$tab$}_val]" ui-monaco-opts="app.editor.properties['{$tab$}']" ui-monaco)
+            div(ng-if="configuration.tab.{$tab$}_val == 'dic'" ng-model="app.data[configuration.tab.{$tab$}_val][configuration.tab.{$tab$}_language]" ui-monaco-opts="app.editor.properties['{$tab$}']" ui-monaco)
+
+            .code-preview(ng-if="configuration.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: 100%;")
+                iframe.preview(style="height: 100%;" ng-show="app.preview.status")
+                table(ng-if="!app.preview.status" style="width: 100%; height: 100%;")
+                    tr 
+                        td(style="text-align: center; vertical-align: middle;")
+                            .spinner-grow.text-dark(style="width: 120px; height: 120px;")
+
+            div(ng-if="app.tab.activetab != '{$tab$}' && ['preview'].includes(configuration.tab.{$tab$}_val) == false" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: rgba(0,0,0,.05); z-index: 9999;")
+
+mixin content()
+    .display-none(style="display: none;")
+        input#import-file(type="file" accept=".json,application/json")
+
+    .bg-dark.text-center(ng-if="loading.status" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 99999; padding-top: 40vh; opacity: .6;")
+        .spinner-grow.text-white(style="width: 60px; height: 60px;")
+
+    .fixed-top
+        header.navbar.navbar-expand-md.navbar-dark
+            .container(style="max-width: none;")
+                button.navbar-toggler(type='button' data-toggle='collapse' data-target='#navbar-menu')
+                    span.navbar-toggler-icon
+
+                .navbar-brand.navbar-brand-autodark.d-none-navbar-horizontal.pr-0.pr-md-3
+                    h2.m-0 WIZ Editor
+
+                select.form-control.text-white.mr-2(ng-model="extdata.branch" ng-change="app.branch.change(extdata.branch)" style="width: 120px;")
+                    option(ng-repeat="branch in extdata.branches" value="{{branch}}") {{branch}}
+                +editor_fastmenu
+
+                #navbar-menu.navbar.navbar-collapse.collapse
+                    ul.navbar-nav
+                    .navbar-nav.flex-row.order-md-last.mr-2(style="align-items: center;")
+                        li.nav-item.p-0.pr-2
+                            - if IS_DEV
+                                a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(href="?dev=false")
+                                    span.nav-link-title(style="font-size: 14px;") development
+                            - else
+                                a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(href="?dev=true")
+                                    span.nav-link-title(style="font-size: 14px;") production
+
+                        li.nav-item.p-0.pr-2
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="app.clean()")
+                                span.nav-link-title(style="font-size: 14px;") Clean
+                        
+                        li.nav-item.p-0.pr-2
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="modal.delete()")
+                                span.nav-link-title(style="font-size: 14px;") Delete
+
+                        li.nav-item.p-0.pr-2
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="app.save()")
+                                span.nav-link-title(style="font-size: 14px;") Save
+
+                        li.nav-item.p-0
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-href='/wiz/admin/workspace/{{mode}}s/list')
+                                span.nav-link-title.bold(style="font-size: 14px;")
+                                    i.fas.fa-times
+    
+    div(data-split-pane data-split-pane-properties="layout.viewstate.root")
+        .bg-dark(data-split-pane-component data-width="360px")
+            .menu-layout.p-3
+                .btn-group.w-100.mb-3
+                    button.btn(type="button" ng-repeat="item in workspace.list" style="width: 50%;" class="{{workspace.active_workspace == item.id ? 'btn-white' : 'btn-dark'}}" ng-click="item.active()") {{item.name}}
+
+                .tree-container(ng-show="workspace.active_workspace == workspace.list[2].id")                    
+                    .root-tree.mb-1(ng-repeat="item in history.data" class="{{item.id == viewer.selected ? 'active' : ''}}" ng-click="history.change(item)")
+                        .root-title
+                            table
+                                tr 
+                                    td.w-1.pr-2.pt-2.pb-2(style="vertical-align: top; font-size: 18px;")
+                                        i.fas.fa-code-branch
+
+                                    td.pt-2.pb-2(style="line-height: 1;")
+                                        span {{ item.id.substring(0, 8) }} · {{ item.message }}
+                                        br
+                                        span.namespace {{item.committer ? item.committer : item.author}} ·
+                                        span.namespace.text-muted.ml-1 {{item.datetime}} 
+
+
+                .tree-container(ng-show="workspace.active_workspace == workspace.list[1].id")
+                    +editor_tab_browse
+
+                div(ng-show="workspace.active_workspace == workspace.list[0].id")
+                    +editor_tab_app
+
+                    .hr.bg-white
+    
+                    h3.text-white Code Layout
+
+                    .text-center.mb-4
+                        .layout-selector.p-2(ng-class="layout.active_layout == 1 ? 'active' : ''" ng-click="layout.change(1)")
+                            .layout-icon
+                                .layout-row
+                                    .layout-column
+
+                        .layout-selector.p-2(ng-class="layout.active_layout == 2 ? 'active' : ''" ng-click="layout.change(2)")
+                            .layout-icon
+                                .layout-row
+                                    .layout-column
+                                    .layout-column
+
+                        .layout-selector.p-2(ng-class="layout.active_layout == 3 ? 'active' : ''" ng-click="layout.change(3)")
+                            .layout-icon
+                                .layout-row
+                                    .layout-column
+                                    .layout-column
+                                    .layout-column
+                        br
+                        .layout-selector.p-2(ng-class="layout.active_layout == 4 ? 'active' : ''" ng-click="layout.change(4)")
+                            .layout-icon.rows-2
+                                .layout-row
+                                    .layout-column
+                                .layout-row
+                                    .layout-column
+
+                        .layout-selector.p-2(ng-class="layout.active_layout == 5 ? 'active' : ''" ng-click="layout.change(5)")
+                            .layout-icon.rows-2
+                                .layout-row
+                                    .layout-column
+                                    .layout-column
+                                .layout-row
+                                    .layout-column
+
+                        .layout-selector.p-2(ng-class="layout.active_layout == 6 ? 'active' : ''" ng-click="layout.change(6)")
+                            .layout-icon.rows-2
+                                .layout-row
+                                    .layout-column
+                                    .layout-column
+                                    .layout-column
+                                .layout-row
+                                    .layout-column
+
+                    .hr.bg-white
+
+                    .button-container
+                        button.btn.btn-white.btn-block.mb-3(ng-click="modal.keymaps()") 
+                            i.fas.fa-keyboard
+                            span.ml-2 Shortcuts
+
+                        button.btn.btn-white.btn-block.mb-3(ng-click="event.select_file()") 
+                            i.fas.fa-upload
+                            span.ml-2 Import
+
+                        a.btn.btn-white.btn-block.mb-3(ng-href="/wiz/export/{{mode}}/{{ app.id }}" target="_blank")
+                            i.fas.fa-download
+                            span.ml-2 Export
+
+        div(data-split-pane-divider data-width="0px")
+        
+        #editor-area(data-split-pane-component)
+            div(style="width: 100%; height: 100%;" ng-if="workspace.active_workspace == 'history'")
+                .code-select.bg-dark.d-flex(style="margin-top: -2px;" ng-if="viewer.codes.length > 0")
+                    .btn.btn-square.btn-sm.p-2(ng-repeat="code in viewer.codes" ng-click="viewer.change(code)" ng-class="viewer.code == code ? 'btn-white' : 'btn-dark'" ng-if="code != 'preview'") {{code}}
+                    
+                div(style="height: {{ viewer.codes.length > 0 ? 'calc(100% - 36px);' : '100%' }}")
+                    div(ng-model="viewer.editor.data" ui-monaco-opts="viewer.editor.configuration" ui-monaco-diff)
+
+            div(data-split-pane data-split-pane-properties="layout.viewstate.horizonal" ng-show="workspace.active_workspace != 'history'")
+                div(data-split-pane-component data-height="100%")
+                    div(data-split-pane data-split-pane-properties="layout.viewstate.vertical_1_1")
+                        div(data-split-pane-component data-width="34%")
+                            +codearea('tab1')
+                        div(data-split-pane-divider data-width="3px")
+                        div(data-split-pane-component data-width="66%")
+                            div(data-split-pane data-split-pane-properties="layout.viewstate.vertical_1_2")
+                                div(data-split-pane-component data-width="50%")
+                                    +codearea('tab2')
+                                div(data-split-pane-divider data-width="3px")
+                                div(data-split-pane-component data-width="50%")
+                                    +codearea('tab3')
+
+                div(data-split-pane-divider data-height="3px")
+
+                div(data-split-pane-component data-height="0")
+                    div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('tab4')" ng-if="app.editor.viewstate" ng-cloak)
+                        .code-select.bg-dark.d-flex(style="margin-top: -2px;")
+                            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.app.tabchange('tab4', 'debug')" ng-class="configuration.tab.tab4_val == 'debug' ? 'btn-white' : 'btn-dark'") DEBUG
+                            a.btn.btn-square.btn-dark.btn-sm.p-2.ml-auto(href="" ng-if="configuration.tab.tab4_val == 'debug'" ng-click="socket.clear()") CLEAR
+                            button.btn.btn-square.btn-dark.btn-sm.p-2(ng-click="socket.link()" ng-if="configuration.tab.tab4_val == 'debug'")
+                                i.fas.fa-external-link-square-alt
+                        div(style="height: calc(100% - 36px);")
+                            .debug-messages(ng-if="configuration.tab.tab4_val == 'debug'" style="overflow: auto; max-width: none; width: 100%; height: 100%; background: #000; color: #fff; padding: 8px; line-height: 1;" ng-bind-html="trustAsHtml(socket.log)")
+            
+    #modal-add-language.modal.fade(tabindex="-1")
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title Add Language
+                    .p-4 
+                        input.form-control(type="text" placeholder="ko" ng-model="modal.add_language.lang" autocomplete='off')
+                .modal-footer
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-dark(type='button' ng-click="app.editor.code.dic.add(modal.add_language.lang)") Add
+
+    #modal-delete.modal.fade(tabindex="-1")
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title Delete
+                    div Once deleted, it cannot be restored. Are you sure you want to delete?
+                .modal-footer
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-danger(type='button' ng-click="app.delete()") Delete
+
+    #modal-delete-file.modal.fade(tabindex="-1")
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title Delete
+                    div Once deleted, it cannot be restored. Are you sure you want to delete?
+                .modal-footer
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-danger(type='button' ng-click="framework.delete()") Delete
+
+    #modal-keymaps.modal.fade(tabindex="-1")
+        .modal-dialog(role='document' style="max-width: 720px;")
+            .modal-content
+                .modal-header
+                    .modal-title Shortcuts
+                .modal-body.m-0
+                    table.table.table-bordered.table-hover 
+                        thead 
+                            th.text-center Shortcut
+                            th.text-center Description
+                        tbody
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Ctrl(CMD)
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark S
+                                td.text-center Save
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Alt
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark Z, X
+                                td.text-center move previous/next tab
+                             tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Alt
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark A, S
+                                td.text-center move previous/next code view
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Alt
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark 1, 2, 3
+                                td.text-center Panel change (config/widget/framework)
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Alt
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark J, K
+                                td.text-center Previous/Next wiz component
+                            tr 
+                                th.text-center
+                                    button.btn.btn-sm.btn-dark Alt
+                                    i.fas.fa-plus.ml-1.mr-1
+                                    button.btn.btn-sm.btn-dark F
+                                td.text-center Find Widgets (in widgets tab)
+                            
+                .modal-footer
+                    button.btn.btn-link.link-secondary.ml-auto(type='button' data-dismiss='modal') Cancel
+
