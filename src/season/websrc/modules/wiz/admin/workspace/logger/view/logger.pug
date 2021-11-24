@@ -1,0 +1,11 @@
+mixin content()
+    div(style="overflow: hidden; height: 100%; width: 100%;")
+        .code-select.bg-dark.d-flex
+            select.form-select.form-select-sm.ml-auto.mt-1(ng-model="branch" ng-change="change(branch)" style="width: 80px;")
+                option(ng-repeat="branch in branches" value="{{branch}}") {{branch}}
+            a.btn.btn-square.btn-dark.btn-sm.p-2.ml-1(href="" ng-click="socket.clear()") CLEAR
+        div(style="height: calc(100% - 36px);")
+            .debug-messages(style="overflow: auto; max-width: none; width: 100%; height: 100%; background: #000; color: #fff; padding: 8px; line-height: 1;" ng-bind-html="trustAsHtml(socket.log)")
+
+include wiz/theme/layout-empty
++layout

@@ -33,6 +33,20 @@ wiz run
 
 ## Release Note
 
+### 0.4.3
+
+- full size log viewer
+- keyword changed
+- cache bug fixed
+- socketio performance upgrade 
+
+### 0.4.2
+
+- wiz.js embeded
+- developer/production mode
+    - developer: enabled socketio logger on every pages
+    - production: disabled socketio logger
+
 ### 0.4.1
 
 - WIZ API (js) changed (async mode)

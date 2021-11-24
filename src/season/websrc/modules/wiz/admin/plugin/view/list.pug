@@ -1,0 +1,49 @@
+mixin content()
+    .container.pt-4.pb-4
+        .page-header
+            .row.align-items-center
+                .col-auto
+                    .page-pretitle SEASON WIZ
+                    h2.page-title Plugin
+
+                .col-auto.ml-auto.d-print-none
+                    .d-flex
+                        input.form-control(type="text" placeholder="Search..." ng-model="search.text" ng-change="event.search(search.text)" style="width: 240px;")
+                        a.btn.btn-light.pr-4.pl-4.ml-2(style="width: 140px;" ng-click="modal.create()")
+                            i.mr-2.fas.fa-plus
+                            | Create
+
+        .overflow-x
+            table.table.board-table.table-hover.mb-0
+                thead 
+                    tr
+                        th.text-left.pr-2.pl-2 Plugin Name
+                        th.text-center.width-2.pr-2.pl-2 Updated
+
+                tbody
+                    tr(ng-if="list.length == 0")
+                        td.text-center(colspan=2) Plugin is not founded. create or import plugin.
+
+                    tr(ng-repeat="item in list" ng-if="!item.hide")
+                        td
+                            a(ng-href="/wiz/admin/plugin/editor/{{item.name}}") {{item.name}}
+                        td.text-center.width-2.pr-2.pl-2 
+
+    #modal-create.modal.fade(tabindex="-1")
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .modal-body
+                    .modal-title Plugin ID
+                    div.mb-4
+                        input.form-control(type="text" ng-model="modal.data.create.id" placeholder="Plugin ID" ng-change="event.change_id(modal.data.create.id)")
+
+                    .modal-title Plugin Name
+                    div
+                        input.form-control(type="text" ng-model="modal.data.create.name" placeholder="Plugin Name")
+
+                .modal-footer
+                    button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
+                    button.btn.btn-dark(type='button' ng-click="event.create()") Create
+
+include wiz/theme/layout
++layout

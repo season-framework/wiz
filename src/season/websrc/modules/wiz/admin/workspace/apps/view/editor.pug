@@ -1,0 +1,66 @@
+mixin editor_fastmenu()
+    input.form-control.mr-2.text-white.if-desktop(type="text" ng-model="app.data.package.title" style="width: 160px; display: inline-block;" autocomplete='off')
+    input.form-control.mr-2.text-white.if-desktop(type="text" ng-model="app.data.package.namespace" style="width: 240px; display: inline-block;" autocomplete='off')
+
+mixin editor_tab_app()
+    .card.card-sm.mb-3
+        .card-body
+            label.form-label(style="font-family: 'MAIN-EB'") Title
+            input.form-control(type='text' placeholder='App Title' ng-model="app.data.package.title" autocomplete='off')
+
+    .card.card-sm.mb-3
+        .card-body
+            label.form-label(style="font-family: 'MAIN-EB'") Namespace
+            input.form-control(type='text' placeholder='App Title' ng-model="app.data.package.namespace" autocomplete='off')
+
+    .card.card-sm.mb-3
+        .card-body
+            label.form-label(style="font-family: 'MAIN-EB'") Category
+            select.form-select(ng-model="app.data.package.category")
+                option(value="{{c.id}}" ng-repeat="c in extdata.categories") {{c.title}}
+
+    .card.card-sm.mb-3
+        .card-body
+            label.form-label(style="font-family: 'MAIN-EB'") Base Controller
+            select.form-select(ng-model="app.data.package.controller")
+                option(value="{{c}}" ng-repeat="c in extdata.controller") {{c}}
+        
+    .card.card-sm.mb-3
+        .card-body
+            label.form-label(style="font-family: 'MAIN-EB'") Base Theme
+            select.form-select(ng-model="app.data.package.theme")
+                option(value="{{c}}" ng-repeat="c in extdata.themes") {{c}}
+    
+    .card.card-sm.mb-3
+        .card-body
+            label.form-label(style="font-family: 'MAIN-EB'") View URI
+            input.form-control(type='text' placeholder='/board/notice/list' ng-model="app.data.package.viewuri" autocomplete='off')
+
+mixin editor_tab_browse()
+    .input-icon.mb-3
+        input.form-control#search(type="text" placeholder="Search" style="color: #545d6d !important;" ng-model="browse.searchvalue" ng-change="browse.search(browse.searchvalue)" autocomplete='off')
+        span.input-icon-addon
+            svg.icon(xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round")
+                path(stroke="none" d="M0 0h24v24H0z")
+                circle(cx="10" cy="10" r="7")
+                line(x1="21" y1="21" x2="15" y2="15")
+            
+    .root-tree.mb-1(ng-repeat="item in browse.data" class="{{item.package.id == app.id ? 'active' : ''}}" ng-click="browse.select(item)" ng-if="!item.hide")
+        .root-title
+            table
+                tr 
+                    td.w-1(style="vertical-align: top;")
+                        i.fas.fa-code.mr-2
+                    td(style="line-height: 1;")
+                        span {{item.package.title}}
+                        br
+                        span.namespace {{item.package.namespace}}
+                    
+    a.root-tree.mb-1(href="/wiz/admin/workspace/apps/editor/new")
+        .root-title.text-center.p-1.text-white
+            i.fas.fa-plus.mr-2 
+            span Create New App
+            
+include wiz/theme/editor
+include wiz/theme/layout-empty
++layout

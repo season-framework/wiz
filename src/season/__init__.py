@@ -30,7 +30,7 @@ core.PATH.PROJECT = os.path.join(os.getcwd())
 
 # WIZ PATH
 core.PATH.WIZ = stdClass()
-core.PATH.WIZ.CORE = os.path.join(core.PATH.FRAMEWORK, 'wiz')
+core.PATH.WIZ.CORE = os.path.join(core.PATH.FRAMEWORK, 'websrc')
 core.PATH.WIZ.CONFIG = os.path.join(core.PATH.PROJECT, 'wiz.json')
 
 core.PATH.PUBLIC = os.path.join(core.PATH.PROJECT, 'public')
