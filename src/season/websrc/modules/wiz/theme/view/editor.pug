@@ -53,6 +53,11 @@ mixin content()
                             - else
                                 a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(href="?dev=true")
                                     span.nav-link-title(style="font-size: 14px;") production
+
+                        li.nav-item.p-0.pr-2
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="app.clean()")
+                                span.nav-link-title(style="font-size: 14px;") Clean
+                        
                         li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="modal.delete()")
                                 span.nav-link-title(style="font-size: 14px;") Delete

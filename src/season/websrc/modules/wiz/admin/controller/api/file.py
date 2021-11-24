@@ -137,6 +137,8 @@ class Controller(season.interfaces.wiz.ctrl.admin.base.api):
 
         rows = []
         for file in files:
+            if file == '__pycache__':
+                continue
             obj = dict()
             obj["path"] = namespace
             obj["name"] = file

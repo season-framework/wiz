@@ -36,6 +36,6 @@ class Controller(season.interfaces.wiz.ctrl.admin.setting.api):
     def clean(self, framework):
         fs = framework.model("wizfs", module="wiz").use("wiz")
         fs.delete("public/templates")
-        fs.delete("public/cache")
+        fs.delete("cache")
         fs.write("config/.cache", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         framework.response.status(200, True)

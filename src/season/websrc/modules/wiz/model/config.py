@@ -1,5 +1,4 @@
 import season
-import pymysql
 import json
 from werkzeug.exceptions import HTTPException
 

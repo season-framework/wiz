@@ -211,5 +211,6 @@ class Controller(season.interfaces.wiz.ctrl.admin.workspace.view):
         app_id = framework.request.segment.get(0, True)
         framework.request.segment = season.stdClass()
         wiz = framework.wiz.instance()
+        wiz.cache.disable()
         wiz.response.render(app_id)
         framework.response.status(200, app_id)

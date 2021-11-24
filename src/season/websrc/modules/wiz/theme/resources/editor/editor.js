@@ -55,6 +55,9 @@ let content_controller = async ($scope, $timeout, $sce) => {
                 resolve(res);
             });
         }),
+        clean: () => new Promise((resolve, reject) => {
+            $.get('/wiz/admin/setting/api/config/clean', API.handler(resolve, reject));
+        }),
         timeout: (ts) => new Promise((resolve) => {
             $timeout(resolve, ts);
         })
@@ -332,7 +335,12 @@ let content_controller = async ($scope, $timeout, $sce) => {
             } else {
                 location.href = APP_URL;
             }
+        }
 
+        $scope.app.clean = async () => {
+            let app_id = $scope.app.id;
+            await API.clean(app_id);
+            $scope.app.preview();
         }
 
         $scope.app.load = async (app_id) => {
