@@ -24,29 +24,54 @@ mixin editor_tab_app()
             input.form-control(type='text' placeholder='/board/notice/list' ng-model="app.data.package.viewuri" autocomplete='off')
 
 mixin editor_tab_browse()
-    .input-icon.mb-3
-        input.form-control#search(type="text" placeholder="Search…" style="color: #545d6d !important;" ng-model="browse.searchvalue" ng-change="browse.search(browse.searchvalue)" autocomplete='off')
-        span.input-icon-addon
-            svg.icon(xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round")
-                path(stroke="none" d="M0 0h24v24H0z")
-                circle(cx="10" cy="10" r="7")
-                line(x1="21" y1="21" x2="15" y2="15")
+    .btn-group.w-100.mb-3
+        button.btn.btn-sm(type="button" style="width: 50%;" class="{{extdata.browse_active == 'route' ? 'btn-white' : 'btn-dark'}}" ng-click="extdata.change_browse('route')") Routes
+        button.btn.btn-sm(type="button" style="width: 50%;" class="{{extdata.browse_active == 'app' ? 'btn-white' : 'btn-dark'}}" ng-click="extdata.change_browse('app')") Apps
 
-    .root-tree.mb-1(ng-repeat="item in browse.data" class="{{item.package.id == app.id ? 'active' : ''}}" ng-click="browse.select(item)" ng-if="!item.hide")
-        .root-title
-            table
-                tr 
-                    td.w-1(style="vertical-align: top;")
-                        i.fas.fa-code.mr-2
-                    td(style="line-height: 1;")
-                        span {{item.package.title}}
-                        br
-                        span.namespace {{item.package.route}}
+    div(ng-if="extdata.browse_active=='route'")
+        .input-icon.mb-3
+            input.form-control#search(type="text" placeholder="Search…" style="color: #545d6d !important;" ng-model="browse.searchvalue" ng-change="browse.search(browse.searchvalue)" autocomplete='off')
+            span.input-icon-addon
+                svg.icon(xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round")
+                    path(stroke="none" d="M0 0h24v24H0z")
+                    circle(cx="10" cy="10" r="7")
+                    line(x1="21" y1="21" x2="15" y2="15")
 
-    a.root-tree.mb-1(href="/wiz/admin/workspace/routes/editor/new")
-        .root-title.text-center.p-1.text-white
-            i.fas.fa-plus.mr-2 
-            span Create New Route
+        .root-tree.mb-1(ng-repeat="item in browse.data" class="{{item.package.id == app.id ? 'active' : ''}}" ng-click="browse.select(item)" ng-if="!item.hide")
+            .root-title
+                table
+                    tr 
+                        td.w-1(style="vertical-align: top;")
+                            i.fas.fa-code.mr-2
+                        td(style="line-height: 1;")
+                            span {{item.package.title}}
+                            br
+                            span.namespace {{item.package.route}}
+
+        a.root-tree.mb-1(href="/wiz/admin/workspace/routes/editor/new")
+            .root-title.text-center.p-1.text-white
+                i.fas.fa-plus.mr-2 
+                span Create New Route
+
+    div(ng-if="extdata.browse_active=='app'")
+        .input-icon.mb-3
+            input.form-control#search(type="text" placeholder="Search" style="color: #545d6d !important;" ng-model="extdata.searchvalue" ng-change="extdata.browse_search(extdata.searchvalue)" autocomplete='off')
+            span.input-icon-addon
+                svg.icon(xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round")
+                    path(stroke="none" d="M0 0h24v24H0z")
+                    circle(cx="10" cy="10" r="7")
+                    line(x1="21" y1="21" x2="15" y2="15")
+                
+        .root-tree.mb-1(ng-repeat="item in extdata.apps" ng-if="!item.hide" ng-click="extdata.browse_select(item)")
+            .root-title
+                table
+                    tr 
+                        td.w-1(style="vertical-align: top;")
+                            i.fas.fa-code.mr-2
+                        td(style="line-height: 1;")
+                            span {{item.package.title}}
+                            br
+                            span.namespace {{item.package.namespace}}
 
 include wiz/theme/editor
 include wiz/theme/layout-empty

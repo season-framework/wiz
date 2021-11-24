@@ -558,7 +558,7 @@ class Wiz(season.stdClass):
 
         view = f'{view}<script type="text/javascript">{js}</script><style>{css}</style>'
 
-        view = framework.response.template_from_string(view, dicstr=dicstr, kwargs=kwargsstr, **kwargs)
+        view = framework.response.template_from_string(view, dicstr=dicstr, kwargs=kwargsstr, dic=dic, **kwargs)
         if render_theme is None:
             return markupsafe.Markup(view)
 
