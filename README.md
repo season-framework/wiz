@@ -33,6 +33,10 @@ wiz run
 
 ## Release Note
 
+### 0.4.7
+
+- scroll bug fixed in logger
+
 ### 0.4.6
 
 - dictionary bug fixed in App HTML
