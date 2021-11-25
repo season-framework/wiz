@@ -8,7 +8,7 @@ class Controller(season.interfaces.wiz.ctrl.admin.plugin.api):
         super().__startup__(framework)
 
     def list(self, framework):
-        rows = self.wiz.data.plugin_list()
+        rows = self.plugin.list()
         framework.response.status(200, rows)
 
     def create(self, framework):
@@ -17,8 +17,8 @@ class Controller(season.interfaces.wiz.ctrl.admin.plugin.api):
         framework.response.status(200)
 
     def info(self, framework):
-        app_id = framework.request.segment.get(0, True)
-        info = self.wiz.data.get(app_id, mode='plugin')
+        plugin_id = framework.request.segment.get(0, True)
+        info = self.plugin.get(plugin_id)
         if info is None:
             framework.response.status(404)
         framework.response.status(200, info)

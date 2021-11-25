@@ -30,10 +30,10 @@ var content_controller = async ($sce, $scope, $timeout) => {
         $scope.list.sort((a, b) => {
             let comp = 0;
             try {
-                comp = a.localeCompare(b);
+                comp = a.name.localeCompare(b.name);
                 if (comp != 0) return comp;
             } catch (e) { }
-            comp = a.localeCompare(b);
+            comp = a.id.localeCompare(b.id);
             return comp;
         });
 
@@ -43,12 +43,17 @@ var content_controller = async ($sce, $scope, $timeout) => {
     $scope.event.search = async (val) => {
         val = val.toLowerCase();
         for (var i = 0; i < $scope.list.length; i++) {
-            let searchindex = ['title', 'namespace', 'route', 'category'];
+            if (val.length == 0) {
+                $scope.list[i].hide = false;
+                continue;
+            }
+                
+            let searchindex = ['name', 'id', 'author_name'];
             $scope.list[i].hide = true;
             for (let j = 0; j < searchindex.length; j++) {
                 try {
                     let key = searchindex[j];
-                    let keyv = $scope.list[i].package[key].toLowerCase();
+                    let keyv = $scope.list[i][key].toLowerCase();
                     if (keyv.includes(val)) {
                         $scope.list[i].hide = false;
                         break;
@@ -56,8 +61,6 @@ var content_controller = async ($sce, $scope, $timeout) => {
                 } catch (e) {
                 }
             }
-            if (val.length == 0)
-                $scope.list[i].hide = false;
         }
 
         $timeout();

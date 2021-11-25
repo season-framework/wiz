@@ -62,18 +62,18 @@
 
 .layout-icon {
     display: inline-table;
-    width: 60px;
-    height: 60px;
+    width: 24px;
+    height: 24px;
     border: 2px solid #ffffff;
     border-radius: 10%;
 }
 
 .layout-icon .layout-row, .layout-icon .layout-column {
-    height: 60px;
+    height: 24px;
 }
 
 .layout-icon.rows-2 .layout-row, .layout-icon.rows-2 .layout-column {
-    height: 30px;
+    height: 12px;
 }
 
 .layout-icon .layout-row {

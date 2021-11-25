@@ -571,235 +571,6 @@ class Wiz(season.stdClass):
 
         return markupsafe.Markup(view)
 
-class Plugin(season.stdClass):
-    def __init__(self, wiz):
-        framework = wiz.framework
-        self.__wiz__ = wiz
-        
-        self.__config__ = dict()
-        
-        self.flask = framework.flask
-        self.socketio = framework.socketio
-        self.lib = framework.lib
-        self.flask_socketio = framework.flask_socketio
-
-        if 'wiz_plugin' not in framework.cache:
-            framework.cache.wiz_plugin = season.stdClass()
-        
-        self.cache = CacheControl(wiz, namespace="plugin")
-
-        self.PATH = framework.core.PATH
-        self.request = framework.request
-        self.response = framework.response
-
-        self.render = self.__view__
-
-        self.__logger__ = self.logger("plugin")
-
-    def logger(self, tag=None, log_color=94):
-        class logger:
-            def __init__(self, tag, log_color, wiz):
-                self.tag = tag
-                self.log_color = log_color
-                self.wiz = wiz
-
-            def log(self, *args):
-                tag = self.tag
-                log_color = self.log_color
-                wiz = self.wiz
-                
-                if tag is None: tag = "undefined"
-                tag = "[wiz]" + tag
-                
-                args = list(args)
-                for i in range(len(args)): 
-                    args[i] = str(args[i])
-                timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
-                logdata = f"\033[{log_color}m[{timestamp}]{tag}\033[0m " + " ".join(args)
-                print(logdata)
-
-                if self.wiz.is_dev():
-                    wiz.socketio.emit("log", logdata + "\n", namespace="/wiz", broadcast=True)
-                
-        return logger(tag, log_color, self).log
-
-    def __dic__(self, app_id):
-        class dic:
-            def __init__(self, wizinst, app_id):
-                self.__wizinst__ = wizinst
-                self.mode = mode
-                self.app_id = app_id
-                self.cache = dict()
-            
-            def dic(self, key=None):
-                wiz = self.__wizinst__.__wiz__
-
-                if mode is None or app_id is None:
-                    return ""
-
-                language = self.__wizinst__.request.language()
-                language = language.lower()
-                
-                if language in self.cache:
-                    dic = self.cache[language]
-                else:
-                    inst = wiz.cls.plugin(wiz)
-                    dic = inst.dic(app_id)
-
-                    if language in dic: dic = dic[language]
-                    if "default" in dic: dic = dic["default"]
-                    self.cache[language] = dic
-
-                if key is None:
-                    return dic
-
-                key = key.split(".")
-                tmp = dic
-                for k in key:
-                    if k not in tmp:
-                        return ""
-                    tmp = tmp[k]
-
-                return tmp
-
-        dicinst = dic(self, app_id)
-        return dicinst.dic
-
-    def __compiler__(self, codelang, code, **kwargs):
-        logger = self.logger(f"[compiler][{codelang}]")
-        try:
-            if code is None: return ""
-            if len(code) == 0: return code
-            wiz = self.__wiz__
-            fs = wiz.framework.model("wizfs", module="wiz").use(f"modules/wiz/compiler")
-            if fs.isfile(f"{codelang}.py") == False:
-                return code
-            compiler = fs.read(f"{codelang}.py")
-            compiler = spawner(compiler, "season.wiz.plugin.compiler", logger)
-            return compiler['compile'](self, code, kwargs)
-        except Exception as e:
-            logger(e)
-            raise e
-    
-    def model(self, namespace):
-        wiz = self.__wiz__
-        plugin_name = namespace.split(".")[0]
-        fs = wiz.storage()
-        fsns = os.path.join("wiz/plugin", plugin_name, "model")
-        fs = fs.use(fsns)
-        code = fs.read(namespace + ".py")
-        logger = self.logger(f"[model][{namespace}]", 94)
-        obj = spawner(code, 'season.wiz.plugin.model', logger, wiz=self)
-        return obj['Model']
-
-    def is_dev(self):
-        return self.__wiz__.is_dev()
-
-    def __view__(self, *args, **kwargs):
-        if len(args) == 0: return ""
-
-        wiz = self.__wiz__
-        cache = wiz.cache
-        framework = wiz.framework
-
-        app_id = args[0] # app unique id or app namespace
-
-        # find by namespace and id
-        app = cache.get(f"apps/bynamespace/{app_id}")
-        if app is None: app = cache.get(f"apps/byid/{app_id}")
-
-        # if cache not exists, find app
-        if app is None:
-            inst = wiz.cls.plugin(self.__wiz__)
-            app = inst.get(app_id)
-
-            if app is None:
-                _logger = self.logger(f"[app][{app_id}]", 91)
-                _logger(f"not found")
-
-                return ""
-
-            app_id = app['package']['id']
-            app_namespace = app['package']['namespace']
-            namespace = str(app_namespace)  # namespace for ui
-            if len(args) > 1: namespace = args[1]
-            render_id = app['package']['render_id'] = app_id + "_" + framework.lib.util.randomstring(16)
-
-            # compile controller
-            controller = app['controller']
-            controller = addtabs(controller)
-            controller = f"import season\ndef process(wiz, **kwargs):\n    framework = wiz\n{controller}\n    return kwargs"
-            app['controller'] = controller
-        
-            # compile codes
-            def load_property(key, default=None):
-                try:
-                    return app['package']['properties'][key]
-                except:
-                    return default
-            
-            codelang_html = load_property("html", "pug")
-            codelang_css = load_property("css", "scss")
-            codelang_js = load_property("js", "javascript")
-
-            compile_args = dict()
-            compile_args['app_id'] = app_id
-            compile_args['app_namespace'] = app_namespace
-            compile_args['namespace'] = namespace
-            compile_args['render_id'] = render_id
-
-            # compile to default language
-            if codelang_html != 'html': app['html'] = self.__compiler__(codelang_html, app['html'], **compile_args)
-            if codelang_css != 'css': app['css'] = self.__compiler__(codelang_css, app['css'], **compile_args)
-            if codelang_js != 'javascript': app['js'] = self.__compiler__(codelang_js, app['js'], **compile_args)
-
-            # compile reformat default language 
-            app['html'] = self.__compiler__('html', app['html'], **compile_args)
-            app['css'] = self.__compiler__('css', app['css'], **compile_args)
-            app['js'] = self.__compiler__('javascript', app['js'], **compile_args)
-
-            # save cache
-            cache.set(f"apps/byid/{app_id}", app)
-            cache.set(f"apps/bynamespace/{app_namespace}", app)
-
-        app_id = app['package']['id']
-        app_namespace = app['package']['namespace']
-        namespace = str(app_namespace)  # namespace for ui
-        if len(args) > 1: namespace = args[1]
-        render_id = app['package']['render_id']
-
-        if self.app_id is None:
-            self.app_id = app_id
-
-        logger = self.logger(f"[app][{app_namespace}]", 93)
-        dic = self.__dic__(app_id)
-        controllerfn = spawner(app['controller'], 'season.wiz.plugin.app', logger, controller=ctrl, dic=dic)
-        kwargs = controllerfn['process'](self, **kwargs)
-        kwargs['query'] = framework.request.query()
-        
-        dicstr = dic()
-        dicstr = json.dumps(dicstr, default=self.json_default)
-        dicstr = dicstr.encode('ascii')
-        dicstr = base64.b64encode(dicstr)
-        dicstr = dicstr.decode('ascii')
-
-        kwargsstr = json.dumps(kwargs, default=self.json_default)
-        kwargsstr = kwargsstr.encode('ascii')
-        kwargsstr = base64.b64encode(kwargsstr)
-        kwargsstr = kwargsstr.decode('ascii')
-
-        kwargs['wiz'] = self
-
-        view = app['html']
-        js = app['js']
-        css = app['css']
-
-        view = f'{view}<script type="text/javascript">{js}</script><style>{css}</style>'
-
-        view = framework.response.template_from_string(view, dicstr=dicstr, kwargs=kwargsstr, **kwargs)
-        return markupsafe.Markup(view)
-
-
 
 """Data Management APIs
 
@@ -815,7 +586,6 @@ class DataManager:
     def inst(self, mode):
         wiz = self.__wiz__
         if mode == 'route': inst = wiz.cls.Route(wiz)
-        elif mode == 'plugin': inst = wiz.cls.plugin(wiz)
         else: inst = wiz.cls.App(wiz)
         return inst
 
@@ -841,22 +611,6 @@ class DataManager:
         wiz = self.__wiz__
         inst = self.inst(mode)
         inst.delete(app_id)
-
-    def create_plugin(self, plugin_name):
-        wiz = self.__wiz__
-        inst = self.inst("plugin")
-        inst.create_plugin(plugin_name)
-
-    def delete_plugin(self, plugin_name):
-        wiz = self.__wiz__
-        inst = self.inst("plugin")
-        inst.delete_plugin(plugin_name)
-
-    def plugin_list(self):
-        wiz = self.__wiz__
-        inst = self.inst("plugin")
-        return inst.plugin_list()
-
 
 
 """WIZ Cache API
@@ -1483,8 +1237,6 @@ class Model:
         framework.modulename = "wiz"
         self.cls.Route = framework.lib.app.Route
         self.cls.App = framework.lib.app.App
-
-        self.cls.plugin = framework.lib.plugin.App
 
         framework.modulename = modulename
 

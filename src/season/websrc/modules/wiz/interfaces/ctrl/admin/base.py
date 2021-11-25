@@ -13,7 +13,7 @@ class view(season.interfaces.wiz.ctrl.base.view):
         menus = []
         menus.append({"title": "Workspace", "url": '/wiz/admin/workspace', 'pattern': r'^/wiz/admin/workspace' })
         menus.append({"title": "Branch", "url": '/wiz/admin/branch', 'pattern': r'^/wiz/admin/branch' })
-        # menus.append({"title": "Plugin", "url": '/wiz/admin/plugin', 'pattern': r'^/wiz/admin/plugin' })
+        menus.append({"title": "Plugin", "url": '/wiz/admin/plugin', 'pattern': r'^/wiz/admin/plugin' })
         menus.append({"title": "Setting", "url": '/wiz/admin/setting', 'pattern': r'^/wiz/admin/setting' })
         self.nav(menus)
 
