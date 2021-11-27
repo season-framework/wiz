@@ -3,13 +3,14 @@ import season
 class view(season.interfaces.wiz.ctrl.admin.base.view):
     def __startup__(self, framework):
         super().__startup__(framework)
-        self.css('main.less')
-        self.js('global.js')
+        self.css('/wiz/admin/setting/main.less')
+        self.js('/wiz/admin/setting/global.js')
 
         menus = []
 
         menus.append({"url": "/wiz/admin/setting/status", "icon": "fas fa-heartbeat", "title": "System Status", 'pattern': r'^/wiz/admin/setting/status'})
         menus.append({"url": "/wiz/admin/setting/configuration", "icon": "fas fa-cog", "title": "Configuration", 'pattern': r'^/wiz/admin/setting/configuration'})
+        menus.append({"url": "/wiz/admin/plugin", "icon": "fas fa-plug", "title": "Plugin", 'pattern': r'^/wiz/admin/plugin'})
         menus.append({"url": "/wiz/admin/setting/acl", "icon": "fas fa-shield-alt", "title": "Access control", 'pattern': r'^/wiz/admin/setting/acl'})
         menus.append({"url": "/wiz/admin/setting/onerror", "icon": "fas fa-exclamation-triangle", "title": "On error", 'pattern': r'^/wiz/admin/setting/onerror'})
         menus.append({"url": "/wiz/admin/setting/onboot", "icon": "fas fa-power-off", "title": "On boot", 'pattern': r'^/wiz/admin/setting/onboot'})

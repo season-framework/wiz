@@ -5,55 +5,49 @@ class Controller(season.interfaces.wiz.ctrl.admin.plugin.view):
 
     def __startup__(self, framework):
         super().__startup__(framework)
-        self.css('main.less')
         
     def __default__(self, framework):
         framework.response.redirect("list")
 
     def list(self, framework):
+        self.css('main.less')
         cate = framework.request.segment.get(0, None)
         self.js('list.js')
         framework.response.render('list.pug')
 
     def editor(self, framework):
+        self.css('main.less')
         self.js('editor.js')
         self.css('editor.css')
-
         plugin_id = framework.request.segment.get(0, True)
-        
-        # info = self.wiz.data.get(app_id, mode='app')
 
-        # if info is None:
-        #     pkg = dict()
-        #     pkg["id"] = framework.lib.util.randomstring(12) + str(int(time.time()))
-        #     pkg["title"] = "New App"
-        #     pkg["namespace"] = pkg["id"]
-        #     pkg["properties"] = {"html": "pug", "js": "javascript", "css": "scss"}
-        #     pkg["viewuri"] = ""
+        if self.plugin.get(plugin_id) is None:
+            framework.response.redirect("list")
 
-        #     info = dict()
-        #     info["package"] = pkg
-        #     info["controller"] = WIZ_CONTROLLER
-        #     info["api"] = WIZ_API
-        #     info["socketio"] = WIZ_SOCKET
-        #     info["html"] = WIZ_PUG
-        #     info["js"] = WIZ_JS
-        #     info["css"] = ""
-        #     info["dic"] = dict()
-        #     info["dic"]["default"] = dict()
-        #     info["dic"]["default"]["hello"] = "hello"
-        #     info["dic"]["ko"] = dict()
-        #     info["dic"]["ko"]["hello"] = "안녕하세요"
-
-        #     self.wiz.data.update(info, mode='plugin')
-        #     framework.response.redirect("editor/" + pkg["id"])
- 
         self.exportjs(PLUGIN_ID=plugin_id)
         framework.response.render('editor.pug')
 
     def preview(self, framework):
-        app_id = framework.request.segment.get(0, True)
+        plugin_id = framework.request.segment.get(0, True)
+        bundle_id = framework.request.segment.get(1, True)
+
         framework.request.segment = season.stdClass()
-        wiz = framework.wiz.instance()
-        wiz.response.render(app_id)
-        framework.response.status(200, app_id)
+        plugin = self.plugin.instance(plugin_id)
+        plugin.layout('core.theme.layout', navbar=False, monaco=True)
+        plugin.render(bundle_id)
+
+    def filebrowser(self, framework):
+        self.css('browser.less')
+        self.css('/wiz/theme/less/browser.less')
+        self.js('browser.js')
+        self.js('/wiz/theme/editor/browser.js')
+        plugin_id = framework.request.segment.get(0, True)
+        target = framework.request.segment.get(1, True)
+
+        fs = framework.model("wizfs", module="wiz").use(f"wiz/plugin/{plugin_id}")
+        if fs.isdir(target) == False:
+            fs.makedirs(target)
+        
+        TARGET_PATH = fs.abspath()
+        self.exportjs(TARGET_PATH=f"wiz/plugin/{plugin_id}", TARGET=target)
+        framework.response.render('browser.pug')

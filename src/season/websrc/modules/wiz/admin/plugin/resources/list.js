@@ -1,4 +1,7 @@
 var content_controller = async ($sce, $scope, $timeout) => {
+    _builder($scope, $timeout);
+    setting_builder($scope, $timeout, $sce);
+
     let API = {
         handler: (resolve, reject) => async (res) => {
             if (res.code == 200) resolve(res.data);
@@ -11,7 +14,7 @@ var content_controller = async ($sce, $scope, $timeout) => {
         create: (data) => new Promise((resolve, reject) => {
             let url = '/wiz/admin/plugin/api/create';
             data = angular.copy(data);
-            $.post(url, data, API.handler(resolve, reject));
+            $.post(url, data, resolve);
         }),
         timeout: (ts) => new Promise((resolve) => {
             $timeout(resolve, ts);
@@ -76,7 +79,12 @@ var content_controller = async ($sce, $scope, $timeout) => {
     $scope.event.create = async () => {
         let pd = angular.copy($scope.modal.data.create);
         let res = await API.create(pd);
-        console.log(res);
+
+        if(res.code == 200 ) {
+            location.reload();
+        } else {
+            toastr.error(res.data);
+        }
     };
 
 

@@ -462,7 +462,6 @@ class Wiz(season.stdClass):
             if app is None:
                 _logger = self.logger(f"[app][{app_id}]", 91)
                 _logger(f"not found")
-
                 return ""
 
             app_id = app['package']['id']

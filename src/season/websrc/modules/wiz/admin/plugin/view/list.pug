@@ -1,38 +1,49 @@
+include wiz/admin/setting/navi
+
 mixin content()
-    .container.pt-4.pb-4
-        .page-header
-            .row.align-items-center
-                .col-auto
-                    .page-pretitle SEASON WIZ
-                    h2.page-title Plugin
+    .main-panel.container.p-0(style="height: calc(100% - 112px);")
+        div(data-split-pane data-split-pane-properties="properties.root")
+            div(data-split-pane-component data-width="250px")
+                +setting_nav
 
-                .col-auto.ml-auto.d-print-none
-                    .d-flex
-                        input.form-control(type="text" placeholder="Search..." ng-model="search.text" ng-change="event.search(search.text)" style="width: 240px;")
-                        a.btn.btn-light.pr-4.pl-4.ml-2(style="width: 140px;" ng-click="modal.create()")
-                            i.mr-2.fas.fa-plus
-                            | Create
+            div(data-split-pane-divider data-width="1px")
+            
+            div(data-split-pane-component style="height: 100%; overflow: hidden;")
+                .panel-editor(style="height: 100%; overflow: auto;")
+                    .p-4.pr-6.pl-6
+                        .page-header
+                            .row.align-items-center
+                                .col-auto
+                                    .page-pretitle SEASON WIZ
+                                    h2.page-title Plugin
 
-        .hr.mt-2
+                                .col-auto.ml-auto.d-print-none
+                                    .d-flex
+                                        input.form-control(type="text" placeholder="Search..." ng-model="search.text" ng-change="event.search(search.text)" style="width: 240px;")
+                                        a.btn.btn-light.pr-4.pl-4.ml-2(style="width: 140px;" ng-click="modal.create()")
+                                            i.mr-2.fas.fa-plus
+                                            | Create
 
-        .row.row-deck.mt-4
-            .col-md-4(ng-repeat="item in list" ng-if="!item.hide")
-                .card.d-flex.flex-column
-                    .card-body.d-flex.flex-column
-                        h3.card-title.mb-2
-                            a(ng-href="/wiz/admin/plugin/editor/{{item.id}}") {{item.name}}
-                        .text-muted {{item.description}}
-                        .d-flex.align-items-center.pt-5.mt-auto
-                            span.avatar.avatar-md(style="background-image: url({{item.author_icon}});" ng-if="item.author_icon")
-                            span.avatar.avatar-md(ng-if="!item.author_icon") {{item.author_name ? item.author_name.toUpperCase().substring(0, 2) : 'UN'}}
-                            .ml-3(style="line-height: 1.3;")
-                                a.text-body(href="./profile.html") {{item.author_name ? item.author_name : 'Unknown'}}
-                                small.d-block.text-muted {{item.version ? item.version : 'unknown version'}}
-                            .ml-auto
-                                a.icon.d-none.d-md-inline-block.ml-3.text-muted(href="#")
-                                    i.fas.fa-cog
-                                a.icon.d-none.d-md-inline-block.ml-3.text-muted(ng-href="/wiz/admin/plugin/editor/{{item.id}}")
-                                    i.fas.fa-code
+                        .hr.mt-2
+
+                        .row.row-deck.mt-4
+                            .col-md-4(ng-repeat="item in list" ng-if="!item.hide")
+                                .card.d-flex.flex-column
+                                    .card-body.d-flex.flex-column
+                                        h3.card-title.mb-2
+                                            a(ng-href="/wiz/admin/plugin/editor/{{item.id}}") {{item.name}}
+                                        .text-muted {{item.description}}
+                                        .d-flex.align-items-center.pt-5.mt-auto
+                                            span.avatar.avatar-md(style="background-image: url({{item.author_icon}});" ng-if="item.author_icon")
+                                            span.avatar.avatar-md(ng-if="!item.author_icon") {{item.author_name ? item.author_name.toUpperCase().substring(0, 2) : 'UN'}}
+                                            .ml-3(style="line-height: 1.3;")
+                                                a.text-body {{item.author_name ? item.author_name : 'Unknown'}}
+                                                small.d-block.text-muted {{item.version ? item.version : 'unknown version'}}
+                                            .ml-auto
+                                                a.icon.d-none.d-md-inline-block.ml-3.text-muted(href="#")
+                                                    i.fas.fa-cog
+                                                a.icon.d-none.d-md-inline-block.ml-3.text-muted(ng-href="/wiz/admin/plugin/editor/{{item.id}}")
+                                                    i.fas.fa-code
 
     #modal-create.modal.fade(tabindex="-1")
         .modal-dialog.modal-sm(role='document')

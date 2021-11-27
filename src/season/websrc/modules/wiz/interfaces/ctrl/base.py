@@ -6,6 +6,7 @@ import os
 class base:
     def __startup__(self, framework):
         self.framework = framework
+        self.__framework__ = framework
 
         self.config = framework.config.load('wiz')
         self.wiz = framework.model("wiz", module="wiz").use()

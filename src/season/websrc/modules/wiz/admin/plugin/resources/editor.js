@@ -1,22 +1,27 @@
 /*
  * define editor config
  */
+const FILEMENUS = [
+    { 'name': 'Resources', 'id': 'resources' }
+];
+
+const WORKSPACES = [
+    { id: 'config', name: 'Config' },
+    { id: 'component', name: 'Component' },
+    { id: 'files', name: 'Files' }
+]
 const APPMODE = BRANCH + ".app";
 const LOCALSTORAGEID = "season.wiz.plugin.configuration";
 const APP_URL = "/wiz/admin/plugin/";
 const API_URL = "/wiz/admin/plugin/api";
 const TABS = {
-    ROUTE: ['route', 'socketio', 'api', 'html', 'js', 'css'],
+    ROUTE: ['builder', 'route'],
     APP: ['controller', 'api', 'html', 'js', 'css', 'dic']
 };
 const CODELIST = {
     ROUTE: [
+        { id: 'builder', name: 'Builder' },
         { id: 'route', name: 'Route' },
-        { id: 'socketio', name: 'Socket API' },
-        { id: 'api', name: 'Config API' },
-        { id: 'html', name: 'Config View' },
-        { id: 'js', name: 'Config JS' },
-        { id: 'css', name: 'Config CSS' },
         { id: 'preview', name: 'Preview' }
     ],
     APP: [
@@ -31,7 +36,7 @@ const CODELIST = {
 }
 
 let PREVIEW_URL = async (app_id) => {
-    return APP_URL + "preview/" + app_id;
+    return APP_URL + "preview/" + PLUGIN_ID + "/" + app_id;
 }
 
 let content_controller = async ($scope, $timeout, $sce) => {
@@ -49,9 +54,11 @@ let content_controller = async ($scope, $timeout, $sce) => {
             $.get(url, API.handler(resolve, reject));
         }),
         update: (data) => new Promise((resolve, reject) => {
-            let plugin_id = data.id;
+            let plugin_id = data.info.id;
             let url = API_URL + '/update/' + plugin_id;
-            $.post(url, { info: JSON.stringify(data) }, API.handler(resolve, reject));
+            $.post(url, { info: JSON.stringify(data.info), apps: JSON.stringify(data.apps), route: JSON.stringify(data.route) }, (res) => {
+                resolve(res);
+            });
         }),
         delete: (plugin_id) => new Promise((resolve, reject) => {
             let url = API_URL + '/delete/' + plugin_id;
@@ -75,6 +82,7 @@ let content_controller = async ($scope, $timeout, $sce) => {
     $scope.plugin = {};              // manage plugins for ui components
     $scope.app = {};                 // controller for code editor
     $scope.browse = {};              // controller for code editor
+    $scope.files = {};
     $scope.shortcut = {};
     $scope.socket = {};
 
@@ -92,9 +100,9 @@ let content_controller = async ($scope, $timeout, $sce) => {
     }
 
     $scope.configuration.tab = {};
-    $scope.configuration.tab['tab1_val'] = TABS.ROUTE[0];
-    $scope.configuration.tab['tab2_val'] = TABS.ROUTE[1];
-    $scope.configuration.tab['tab3_val'] = TABS.ROUTE[2];
+    $scope.configuration.tab['tab1_val'] = CODELIST.ROUTE[0].id;
+    $scope.configuration.tab['tab2_val'] = CODELIST.ROUTE[1].id;
+    $scope.configuration.tab['tab3_val'] = CODELIST.ROUTE[2].id;
     $scope.configuration.tab['tab4_val'] = 'debug';
 
     $scope.$watch("configuration", function () {
@@ -221,16 +229,13 @@ let content_controller = async ($scope, $timeout, $sce) => {
      */
 
     BUILDER.workspace = async () => {
-        $scope.workspace.list = [
-            { id: 'config', name: 'Config' },
-            { id: 'component', name: 'Component' }
-        ];
+        $scope.workspace.list = WORKSPACES;
 
         $scope.workspace.list[0].active = async () => {
             $scope.workspace.active_workspace = $scope.workspace.list[0].id;
-            $scope.configuration.tab['tab1_val'] = TABS.ROUTE[0];
-            $scope.configuration.tab['tab2_val'] = TABS.ROUTE[1];
-            $scope.configuration.tab['tab3_val'] = TABS.ROUTE[2];
+            $scope.configuration.tab['tab1_val'] = CODELIST.ROUTE[0].id;
+            $scope.configuration.tab['tab2_val'] = CODELIST.ROUTE[1].id;
+            $scope.configuration.tab['tab3_val'] = CODELIST.ROUTE[2].id;
             $scope.configuration.tab['tab4_val'] = 'debug';
             $scope.app.config.build();
             await API.timeout();
@@ -238,13 +243,18 @@ let content_controller = async ($scope, $timeout, $sce) => {
 
         $scope.workspace.list[1].active = async () => {
             $scope.workspace.active_workspace = $scope.workspace.list[1].id;
-            $scope.configuration.tab['tab1_val'] = TABS.APP[0];
-            $scope.configuration.tab['tab2_val'] = TABS.APP[1];
-            $scope.configuration.tab['tab3_val'] = TABS.APP[2];
+            $scope.configuration.tab['tab1_val'] = CODELIST.APP[0].id;
+            $scope.configuration.tab['tab2_val'] = CODELIST.APP[1].id;
+            $scope.configuration.tab['tab3_val'] = CODELIST.APP[2].id;
             $scope.configuration.tab['tab4_val'] = 'debug';
 
             if ($scope.app.data)
                 $scope.app.editor.build();
+            await API.timeout();
+        };
+
+        $scope.workspace.list[2].active = async () => {
+            $scope.workspace.active_workspace = $scope.workspace.list[2].id;
             await API.timeout();
         };
 
@@ -297,29 +307,27 @@ let content_controller = async ($scope, $timeout, $sce) => {
 
     BUILDER.app.base = async () => {
         $scope.app.save = async (returnres) => {
-            if ($scope.app.data.controller) $scope.app.data.controller = $scope.app.data.controller.replace(/\t/gim, '    ');
-            let appdata = angular.copy($scope.app.data);
-            try {
-                for (let key in appdata.dic) {
-                    if (appdata.dic[key] && appdata.dic[key].length > 0) {
-                        appdata.dic[key] = JSON.parse(appdata.dic[key]);
-                    } else {
-                        delete data.dic[key];
+            let data = angular.copy($scope.data);
+
+            // check app status
+            let cache = {};
+            for (let i = 0; i < data.apps.length; i++) {
+                if (!data.apps[i].id || data.apps[i].id.length == 0) return toastr.error("app id not defined");
+                if (cache[data.apps[i].id]) return toastr.error("app id conflicts");
+                cache[data.apps[i].id] = true;
+            }
+
+            for (let i = 0; i < data.apps.length; i++) {
+                for (let key in data.apps[i].dic) {
+                    try {
+                        data.apps[i].dic[key] = JSON.parse(data.apps[i].dic[key], null, 4);
+                    } catch (e) {
+                        delete data.apps[i].dic[key];
                     }
                 }
-            } catch (e) {
-                if (!returnres)
-                    toastr.error("Dictionary syntax error");
-                return { code: 500, data: e };
             }
 
-            try {
-                $scope.browse.item.package.title = appdata.package.title;
-                $scope.browse.item.package.namespace = appdata.package.namespace;
-            } catch (e) {
-            }
-
-            let res = await API.update(appdata);
+            let res = await API.update(data);
 
             if (returnres) return res;
 
@@ -339,21 +347,24 @@ let content_controller = async ($scope, $timeout, $sce) => {
             await API.timeout();
         }
 
-        $scope.app.delete = async () => {
-            let app_id = $scope.app.id;
-            await API.delete(app_id);
-            await $scope.browse.load();
-            if ($scope.browse.data[0]) {
-                app_id = $scope.browse.data[0].package.id;
-                location.href = APP_URL + "editor/" + app_id;
-            } else {
-                location.href = APP_URL;
-            }
+        $scope.app.uninstall = async () => {
+            await API.delete(PLUGIN_ID);
+            location.href = "/wiz/admin/plugin";
+        }
+
+        $scope.app.delete = async (item) => {
+            $scope.data.apps.remove(item);
+            delete $scope.app.data;
+            await API.timeout();
         }
 
         $scope.app.load = async (item) => {
             // set data
             $scope.app.data = item;
+
+            if (!$scope.app.data.dic) {
+                $scope.app.data.dic = {"default": "{}"};
+            }
 
             await $scope.app.editor.build();
             await $scope.layout.change($scope.layout.active_layout);
@@ -365,14 +376,22 @@ let content_controller = async ($scope, $timeout, $sce) => {
                 $scope.app.editor.cache[$scope.app.tab.activetab].focus();
         }
 
+
+        $scope.app.create = async () => {
+            $scope.data.apps.push({});
+            $scope.app.load($scope.data.apps[$scope.data.apps.length - 1]);
+        };
+
         $scope.app.preview = async () => {
-            let url = $scope.app.data.package.viewuri;
-            if (!$scope.app.data.package.viewuri) {
-                url = await PREVIEW_URL($scope.app.id);
+            let url = $scope.app.config.url;
+
+            if (url && url.length > 0) {
+                if (url[0] == "/") url = url.substring(1);
+                url = "/wiz/admin/" + url
             }
 
-            if (!url) {
-                return;
+            if ($scope.workspace.active_workspace == $scope.workspace.list[1].id) {
+                url = await PREVIEW_URL($scope.app.data.id);
             }
 
             $scope.app.preview.status = false;
@@ -508,7 +527,6 @@ let content_controller = async ($scope, $timeout, $sce) => {
         $scope.app.editor.code = {};
 
         $scope.app.editor.code.list = CODELIST.APP;
-
         $scope.app.editor.code.dic = {};
         $scope.app.editor.code.dic.add = async (lang) => {
             if (!lang || lang.length < 2) {
@@ -671,6 +689,31 @@ let content_controller = async ($scope, $timeout, $sce) => {
         }
     }
 
+    BUILDER.files = async () => {
+        $scope.files.data = null;
+        $scope.files.menus = FILEMENUS;
+
+        $scope.files.select = async (item) => {
+            $scope.files.data = item;
+            // TODO load
+            await $scope.files.preview(item);
+            await API.timeout();
+        }
+
+
+        $scope.files.preview = (item) => new Promise((resolve) => {
+            $scope.files.preview_status = false;
+            $timeout(function () {
+                let url = "/wiz/admin/plugin/filebrowser/" + PLUGIN_ID + "/" + item.id;
+                $('iframe#file-browser').attr('src', url);
+                $('iframe#file-browser').on('load', function () {
+                    $scope.files.preview_status = true;
+                    $timeout(resolve);
+                });
+            });
+        });
+    }
+
     BUILDER.shortcuts = async () => {
         $scope.shortcut.configuration = (monaco) => {
             return {
@@ -712,7 +755,8 @@ let content_controller = async ($scope, $timeout, $sce) => {
                             else prev = tabs[prev];
                         }
 
-                        await $scope.app.editor.code.change(targettab, prev);
+                        if ($scope.workspace.active_workspace == $scope.workspace.list[1].id) await $scope.app.editor.code.change(targettab, prev);
+                        else await $scope.app.config.code.change(targettab, prev);
                         await $scope.shortcut.bind();
                     }
                 },
@@ -726,7 +770,8 @@ let content_controller = async ($scope, $timeout, $sce) => {
                         if (next == 'preview') {
                             next = tabs[(tabs.indexOf(next) + 1) % tabs.length];
                         }
-                        await $scope.app.editor.code.change(targettab, next);
+                        if ($scope.workspace.active_workspace == $scope.workspace.list[1].id) await $scope.app.editor.code.change(targettab, next);
+                        else await $scope.app.config.code.change(targettab, next);
                         await $scope.shortcut.bind();
                     }
                 },
@@ -750,14 +795,17 @@ let content_controller = async ($scope, $timeout, $sce) => {
                     key: 'Alt KeyZ',
                     monaco: monaco.KeyMod.Alt | monaco.KeyCode.KEY_Z,
                     fn: async () => {
-                        await $scope.app.editor.code.prev();
+                        if ($scope.workspace.active_workspace == $scope.workspace.list[1].id) await $scope.app.editor.code.prev();
+                        else await $scope.app.config.code.prev();
+
                     }
                 },
                 'workspace_next': {
                     key: 'Alt KeyX',
                     monaco: monaco.KeyMod.Alt | monaco.KeyCode.KEY_X,
                     fn: async () => {
-                        await $scope.app.editor.code.next();
+                        if ($scope.workspace.active_workspace == $scope.workspace.list[1].id) await $scope.app.editor.code.next();
+                        else await $scope.app.config.code.next();
                     }
                 },
                 'search': {
@@ -817,8 +865,11 @@ let content_controller = async ($scope, $timeout, $sce) => {
     await BUILDER.app.editor();
     await BUILDER.browse();
     await BUILDER.shortcuts();
+    await BUILDER.files();
 
     $scope.data = await API.info(PLUGIN_ID);
+
+    $scope.app.config.url = "/" + $scope.data.info.route;
 
     for (let i = 0; i < $scope.data.apps.length; i++) {
         try {
@@ -850,7 +901,7 @@ let content_controller = async ($scope, $timeout, $sce) => {
         $scope.socket.id = data.sid;
     });
 
-    socket.on("plugin", function (data) {
+    socket.on("debug", function (data) {
         data = data.replace(/ /gim, "__SEASONWIZPADDING__");
         data = ansi_up.ansi_to_html(data).replace(/\n/gim, '<br>').replace(/__SEASONWIZPADDING__/gim, '<div style="width: 6px; display: inline-block;"></div>');
         $scope.socket.log = $scope.socket.log + data;

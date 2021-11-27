@@ -8,6 +8,11 @@ mixin editor_tab_1()
         .card-body
             label.form-label(style="font-family: 'MAIN-EB'") Plugin Name
             input.form-control(type='text' placeholder='Plugin Name' ng-model="data.info.name" autocomplete='off')
+
+    .card.card-sm.mb-3
+        .card-body
+            label.form-label(style="font-family: 'MAIN-EB'") Plugin Version
+            input.form-control(type='text' placeholder='0.1.0' ng-model="data.info.version" autocomplete='off')
     
     .card.card-sm.mb-3
         .card-body
@@ -15,6 +20,22 @@ mixin editor_tab_1()
             .input-group
                 span.input-group-text /wiz/admin/
                 input.form-control(type='text' placeholder='workspace' ng-model="data.info.route" autocomplete='off')
+
+    .card.card-sm.mb-3
+        .card-body
+            label.form-label(style="font-family: 'MAIN-EB'") Plugin Config
+            select.form-select(ng-model="data.info.config")
+                option(value="") Not Support
+                option(value="{{app.id}}" ng-repeat="app in data.apps") {{app.id}}
+        
+    .card.card-sm.mb-3
+        .card-body
+            label.form-label(style="font-family: 'MAIN-EB'") Description
+            textarea.form-control(rows=5 type='text' ng-model="data.info.description" autocomplete='off')
+
+    .hr.bg-white
+
+    h3.text-white Author Info.
         
     .card.card-sm.mb-3
         .card-body
@@ -33,24 +54,44 @@ mixin editor_tab_1()
 
 
 mixin editor_tab_2()
-    .card.card-sm.mb-3
-        .card-body
-            label.form-label(style="font-family: 'MAIN-EB'") Title
-            input.form-control(type='text' placeholder='App Title' ng-model="app.data.name" autocomplete='off')
+    div(ng-if="app.data")
+        .card.card-sm.mb-3
+            .card-body
+                label.form-label(style="font-family: 'MAIN-EB'") Plugin ID
+                input.form-control(type='text' placeholder='wiz.workspace' ng-model="data.info.id" autocomplete='off' disabled)
 
-    .card.card-sm.mb-3
-        .card-body
-            label.form-label(style="font-family: 'MAIN-EB'") Namespace
-            input.form-control(type='text' placeholder='package.namespace' ng-model="app.data.id" autocomplete='off')
+        .card.card-sm.mb-3
+            .card-body
+                label.form-label(style="font-family: 'MAIN-EB'") App ID
+                input.form-control(type='text' placeholder='package.namespace' ng-model="app.data.id" autocomplete='off')
+        
+        .card.card-sm.mb-3
+            .card-body
+                label.form-label(style="font-family: 'MAIN-EB'") Title
+                input.form-control(type='text' placeholder='App Title' ng-model="app.data.name" autocomplete='off')
 
-    .card.card-sm.mb-3
-        .card-body
-            label.form-label(style="font-family: 'MAIN-EB'") Layout
-            select.form-select(ng-model="app.data.layout")
-                option(value="default") default
-                option(value="empty") empty
+        .card.card-sm.mb-3
+            .card-body
+                label.form-label(style="font-family: 'MAIN-EB'") Compile
 
-    .hr.bg-white
+                .row 
+                    .col-md-4
+                        label.form-label(style="font-family: 'MAIN-EB'") HTML
+                        select.form-select(ng-model="app.data.compile_html")
+                            option(value="off") OFF
+                            option(value="on") ON
+                    .col-md-4
+                        label.form-label(style="font-family: 'MAIN-EB'") CSS
+                        select.form-select(ng-model="app.data.compile_css")
+                            option(value="off") OFF
+                            option(value="on") ON
+                    .col-md-4
+                        label.form-label(style="font-family: 'MAIN-EB'") JS
+                        select.form-select(ng-model="app.data.compile_js")
+                            option(value="off") OFF
+                            option(value="on") ON
+
+        .hr.bg-white
     
     h3.text-white Components
     
@@ -66,11 +107,22 @@ mixin editor_tab_2()
                             br
                             span.namespace {{item.id}}
                         
-        a.root-tree.mb-1(ng-click="browse.create()")
+        a.root-tree.mb-1(ng-click="app.create()")
             .root-title.text-center.p-1.text-white
                 i.fas.fa-plus.mr-2 
                 span Add New App
-                
+
+
+mixin editor_tab_3()
+    .tree-container
+        .root-tree.mb-1(ng-repeat="item in files.menus" class="{{item.id == files.data.id ? 'active' : ''}}" ng-click="files.select(item)")
+            .root-title
+                table
+                    tr 
+                        td.w-1(style="vertical-align: top;")
+                            i.fas.fa-code.mr-2
+                        td(style="line-height: 1;")
+                            span {{item.name}}
 
 mixin codearea_tab_1(tab)
     div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('{$tab$}')" ng-if="app.config.viewstate && layout.accessable_tab.includes('{$tab$}') && workspace.active_workspace == workspace.list[0].id" ng-cloak)
@@ -85,17 +137,24 @@ mixin codearea_tab_1(tab)
         div(style="height: calc(100% - 36px);")
             div(ng-if="['preview', 'dic'].includes(configuration.tab.{$tab$}_val) == false && workspace.active_workspace == workspace.list[0].id" ng-model="data.route[configuration.tab.{$tab$}_val]" ui-monaco-opts="app.config.properties['{$tab$}']" ui-monaco)
 
-            .code-preview(ng-if="configuration.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: 100%;")
+            div(ng-if="configuration.tab.{$tab$}_val == 'preview'")
+                .input-group.input-group-sm(style="border-radius: 0;")
+                    span.input-group-text(style="border-radius: 0;")
+                        i.fas.fa-compass
+                    input.form-control.form-control-sm(type="text" style="border-radius: 0;" placeholder="/route/test" ng-model="app.config.url" ng-enter="app.preview()")
+                    button.btn.btn-dark(style="border-radius: 0; min-width: 60px;" ng-click="app.preview()")
+                        i.fas.fa-location-arrow
+
+            .code-preview(ng-if="configuration.tab.{$tab$}_val == 'preview'" style="max-width: none; width: 100%; height: calc(100% - 28px);")
                 iframe.preview(style="height: 100%;" ng-show="app.preview.status")
                 table(ng-if="!app.preview.status" style="width: 100%; height: 100%;")
                     tr 
                         td(style="text-align: center; vertical-align: middle;")
                             .spinner-grow.text-dark(style="width: 120px; height: 120px;")
-
             div(ng-if="app.tab.activetab != '{$tab$}' && ['preview'].includes(configuration.tab.{$tab$}_val) == false" style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: rgba(0,0,0,.05); z-index: 9999;")
 
 mixin codearea_tab_2(tab)
-    div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('{$tab$}')" ng-if="app.editor.viewstate && layout.accessable_tab.includes('{$tab$}') && workspace.active_workspace == workspace.list[1].id" ng-cloak)
+    div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('{$tab$}')" ng-if="app.editor.viewstate && layout.accessable_tab.includes('{$tab$}') && workspace.active_workspace == workspace.list[1].id && app.data" ng-cloak)
         .code-select.bg-dark.d-flex(style="margin-top: -2px;")
             .btn.btn-square.btn-sm.p-2(ng-repeat="code in app.editor.code.list" ng-click="app.editor.code.change('{$tab$}', code.id)" ng-class="configuration.tab.{$tab$}_val == code.id ? 'btn-white' : 'btn-dark'") {{code.name}}
 
@@ -135,7 +194,7 @@ mixin content()
 
                 #navbar-menu.navbar.navbar-collapse.collapse
                     ul.navbar-nav
-                    ul.navbar-nav.flex-row.order-md-last.mr-2(style="align-items: center;")                        
+                    ul.navbar-nav.flex-row.order-md-last.mr-2(style="align-items: center;")
 
                         li.nav-item.p-0.pr-2
                             .layout-selector.p-2(ng-class="layout.active_layout == 1 ? 'active' : ''" ng-click="layout.change(1)")
@@ -171,7 +230,7 @@ mixin content()
                                         .layout-column
                                     .layout-row
                                         .layout-column
-                        li.nav-item.p-0.pr-2
+                        li.nav-item.p-0
                             .layout-selector.p-2(ng-class="layout.active_layout == 6 ? 'active' : ''" ng-click="layout.change(6)")
                                 .layout-icon.rows-2
                                     .layout-row
@@ -181,14 +240,19 @@ mixin content()
                                     .layout-row
                                         .layout-column
 
+                    ul.navbar-nav.flex-row.order-md-last.mr-2(style="align-items: center;")
                         li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="modal.keymaps()") 
                                 i.fas.fa-keyboard.mr-2
                                 span.nav-link-title(style="font-size: 14px;") Shortcuts
 
+                        li.nav-item.p-0.pr-2(ng-if="app.data && workspace.active_workspace == workspace.list[1].id")
+                            a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="app.delete(app.data)")
+                                span.nav-link-title(style="font-size: 14px;") Delete App
+
                         li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="modal.delete()")
-                                span.nav-link-title(style="font-size: 14px;") Delete
+                                span.nav-link-title(style="font-size: 14px;") Uninstall
 
                         li.nav-item.p-0.pr-2
                             a.nav-link.btn.btn-sm.text-dark.btn-white.btn-pill(ng-click="app.save()")
@@ -210,39 +274,46 @@ mixin content()
 
                 div(ng-show="workspace.active_workspace == workspace.list[1].id")
                     +editor_tab_2
+                
+                div(ng-show="workspace.active_workspace == workspace.list[2].id")
+                    +editor_tab_3
 
 
         div(data-split-pane-divider data-width="0px")
         
         #editor-area(data-split-pane-component)
-            div(data-split-pane data-split-pane-properties="layout.viewstate.horizonal")
-                div(data-split-pane-component data-height="100%")
-                    div(data-split-pane data-split-pane-properties="layout.viewstate.vertical_1_1")
-                        div(data-split-pane-component data-width="34%")
-                            +codearea_tab_1('tab1')
-                            +codearea_tab_2('tab1')
-                        div(data-split-pane-divider data-width="3px")
-                        div(data-split-pane-component data-width="66%")
-                            div(data-split-pane data-split-pane-properties="layout.viewstate.vertical_1_2")
-                                div(data-split-pane-component data-width="50%")
-                                    +codearea_tab_1('tab2')
-                                    +codearea_tab_2('tab2')
-                                div(data-split-pane-divider data-width="3px")
-                                div(data-split-pane-component data-width="50%")
-                                    +codearea_tab_1('tab3')
-                                    +codearea_tab_2('tab3')
+            div(ng-show="workspace.active_workspace == workspace.list[2].id" style="height: 100%;")
+                iframe#file-browser(style="width: 100%; height: 100%;")
 
-                div(data-split-pane-divider data-height="3px")
+            div(ng-show="workspace.active_workspace == workspace.list[0].id || workspace.active_workspace == workspace.list[1].id" style="height: 100%;")
+                div(data-split-pane data-split-pane-properties="layout.viewstate.horizonal")
+                    div(data-split-pane-component data-height="100%")
+                        div(data-split-pane data-split-pane-properties="layout.viewstate.vertical_1_1")
+                            div(data-split-pane-component data-width="34%")
+                                +codearea_tab_1('tab1')
+                                +codearea_tab_2('tab1')
+                            div(data-split-pane-divider data-width="3px")
+                            div(data-split-pane-component data-width="66%")
+                                div(data-split-pane data-split-pane-properties="layout.viewstate.vertical_1_2")
+                                    div(data-split-pane-component data-width="50%")
+                                        +codearea_tab_1('tab2')
+                                        +codearea_tab_2('tab2')
+                                    div(data-split-pane-divider data-width="3px")
+                                    div(data-split-pane-component data-width="50%")
+                                        +codearea_tab_1('tab3')
+                                        +codearea_tab_2('tab3')
 
-                div(data-split-pane-component data-height="0")
-                    div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('tab4')" ng-cloak)
-                        .code-select.bg-dark.d-flex(style="margin-top: -2px;")
-                            a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.app.tabchange('tab4', 'debug')" ng-class="configuration.tab.tab4_val == 'debug' ? 'btn-white' : 'btn-dark'") DEBUG
-                            a.btn.btn-square.btn-dark.btn-sm.p-2.ml-auto(href="" ng-if="configuration.tab.tab4_val == 'debug'" ng-click="socket.clear()") CLEAR
-                            button.btn.btn-square.btn-dark.btn-sm.p-2(ng-click="socket.link()" ng-if="configuration.tab.tab4_val == 'debug'")
-                                i.fas.fa-external-link-square-alt
-                        div(style="height: calc(100% - 36px);")
-                            .debug-messages(ng-if="configuration.tab.tab4_val == 'debug'" style="overflow: auto; max-width: none; width: 100%; height: 100%; background: #000; color: #fff; padding: 8px; line-height: 1;" ng-bind-html="trustAsHtml(socket.log)")
+                    div(data-split-pane-divider data-height="3px")
+
+                    div(data-split-pane-component data-height="0")
+                        div(style="overflow: hidden; height: 100%; width: 100%;" ng-click="app.tab.active('tab4')" ng-cloak)
+                            .code-select.bg-dark.d-flex(style="margin-top: -2px;")
+                                a.btn.btn-square.btn-sm.p-2(href="" ng-click="event.app.tabchange('tab4', 'debug')" ng-class="configuration.tab.tab4_val == 'debug' ? 'btn-white' : 'btn-dark'") DEBUG
+                                a.btn.btn-square.btn-dark.btn-sm.p-2.ml-auto(href="" ng-if="configuration.tab.tab4_val == 'debug'" ng-click="socket.clear()") CLEAR
+                                button.btn.btn-square.btn-dark.btn-sm.p-2(ng-click="socket.link()" ng-if="configuration.tab.tab4_val == 'debug'")
+                                    i.fas.fa-external-link-square-alt
+                            div(style="height: calc(100% - 36px);")
+                                .debug-messages(ng-if="configuration.tab.tab4_val == 'debug'" style="overflow: auto; max-width: none; width: 100%; height: 100%; background: #000; color: #fff; padding: 8px; line-height: 1;" ng-bind-html="trustAsHtml(socket.log)")
 
     #modal-add-language.modal.fade(tabindex="-1")
         .modal-dialog.modal-sm(role='document')
@@ -259,11 +330,11 @@ mixin content()
         .modal-dialog.modal-sm(role='document')
             .modal-content
                 .modal-body
-                    .modal-title Delete
-                    div Once deleted, it cannot be restored. Are you sure you want to delete?
+                    .modal-title Uninstall
+                    div Are you sure you want to uninstall this plugin?
                 .modal-footer
                     button.btn.btn-link.link-secondary.mr-auto(type='button' data-dismiss='modal') Cancel
-                    button.btn.btn-danger(type='button' ng-click="app.delete()") Delete
+                    button.btn.btn-danger(type='button' ng-click="app.uninstall()") Uninstall
 
     #modal-delete-file.modal.fade(tabindex="-1")
         .modal-dialog.modal-sm(role='document')

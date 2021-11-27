@@ -5,6 +5,9 @@ TREE_DATA = [
 ];
 
 VIEWER_IMAGE_URL = (item) => { 
-    let url = item.url.substring("wiz/branch/dev".length);
-    return url;
+    let url = item.url;
+    url = url.split("/");
+    url = url.splice(3);
+    url = url.join("/");
+    return "/" + url;
 };

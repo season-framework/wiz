@@ -35,7 +35,7 @@ TREE_DATA.push({
 });
 
 VIEWER_IMAGE_URL = (item) => {
-    let url = item.url.substring("wiz/branch/dev".length);
+    let url = item.url;
     url = url.split("/");
     let themename = url[2];
     url = url.splice(4);

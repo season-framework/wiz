@@ -91,12 +91,14 @@ let content_controller = function ($scope, $timeout, $sce) {
         let configuration = JSON.parse(localStorage[LOCALSTORAGEID]);
         delete configuration.root.lastComponentSize;
         $scope.configuration = configuration;
+        if ($scope.configuration.root.firstComponentSize == 0) $scope.configuration.root.firstComponentSize = 240;
     } catch (e) {
         $scope.configuration = {};
         $scope.configuration.root = {};
     }
 
     $scope.$watch("configuration", function () {
+        if ($scope.configuration.root.firstComponentSize == 0) $scope.configuration.root.firstComponentSize = 240;
         let configuration = angular.copy($scope.configuration);
         localStorage[LOCALSTORAGEID] = JSON.stringify(configuration);
     }, true);
