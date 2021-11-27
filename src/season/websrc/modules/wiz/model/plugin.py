@@ -255,12 +255,16 @@ class Plugin(season.stdClass):
             compile_args['render_id'] = render_id
             
             bundle['html'] = self.__compiler__("pug", app['html'], **compile_args)
-            bundle['css'] = app['css']
             bundle['js'] = app['js']
 
             if compile_opt_css == 'on':
                 bundle['css'] = self.__compiler__("scss", app['css'], **compile_args)
-                bundle['css'] = self.__compiler__('css', bundle['css'], **compile_args)
+            else:
+                try:
+                    bundle['css'] = self.__compiler__("scss", app['css'])
+                except:
+                    bundle['css'] = app['css']
+
             if compile_opt_html == 'on':
                 bundle['html'] = self.__compiler__('html', bundle['html'], **compile_args)
             if compile_opt_js == 'on':
@@ -402,13 +406,11 @@ class Plugin(season.stdClass):
         else:
             route = args[0]
             app_id = args[1]
-        
-        view = self.view(app_id, **kwargs)
-        
-        if self.__LAYOUTID__ is not None:
-            view = self.view(self.__LAYOUTID__, view=view, **self.__LAYOUTOPT__)
-            
+                    
         if route is None:
+            view = self.view(app_id, **kwargs)
+            if self.__LAYOUTID__ is not None:
+                view = self.view(self.__LAYOUTID__, view=view, **self.__LAYOUTOPT__)
             framework.response.send(view, "text/html")
 
         if route[0] == "/": route = route[1:]
@@ -445,6 +447,11 @@ class Plugin(season.stdClass):
             return self
 
         self.request.segment = season.stdClass(segment)
+
+        view = self.view(app_id, **kwargs)
+        if self.__LAYOUTID__ is not None:
+            view = self.view(self.__LAYOUTID__, view=view, **self.__LAYOUTOPT__)
+
         framework.response.send(view, "text/html")
 
     def view(self, app_id, **kwargs):
@@ -492,7 +499,7 @@ class Plugin(season.stdClass):
         route_script = addtabs(route_script)
         route_script = f"import season\ndef process(framework):\n{route_script}"
 
-        controller = season.interfaces.wiz.ctrl.admin.base.view()
+        controller = season.interfaces.wiz.ctrl.admin.view()
         controller.__startup__(self.framework)
 
         logger = self.logger(f"[plugin][route][{plugin_id}]", 93)
@@ -511,7 +518,7 @@ class Plugin(season.stdClass):
         dic = self.__dic__(bundle_id)
         logger = self.logger(f"[plugin][api][{bundle_id}]", 93)
         
-        apifn = spawner(api, 'season.wiz.plugin.api', logger, dic=dic)
+        apifn = spawner(api, 'season.wiz.plugin.api', logger, dic=dic, framework=self)
         
         if fnname not in apifn:
             framework.response.status(404)
@@ -617,13 +624,20 @@ class Model:
     def build(self):
         fs = self.fs
         plugins = self.list()
+
         fs.delete(".cache")
         fs.makedirs(".cache")
         
-        for plugin_id in plugins:
+        for plugin in plugins:
+            plugin_id = plugin['id']
             plugin = self.instance(plugin_id)
+            plugin.build()
 
     def route(self):
+        fs = self.fs
+        if fs.isdir(".cache") == False:
+            self.build()
+
         framework = self.framework
         request_uri = framework.request.uri()        
         routes = self.routes()

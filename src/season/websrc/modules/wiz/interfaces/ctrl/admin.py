@@ -22,8 +22,12 @@ class view(season.interfaces.wiz.ctrl.base.view):
         branches = framework.wiz.workspace.branches()
         self.exportjs(CATEGORIES=category, BRANCH=branch, BRANCHES=branches, IS_DEV=IS_DEV)
         framework.response.data.set(branches=branches, IS_DEV=IS_DEV)
+
+        self.plugin = framework.model("plugin", module="wiz")
     
 class api(season.interfaces.wiz.ctrl.base.api):
     def __startup__(self, framework):
         super().__startup__(framework)
         if self.config.data.acl is not None: self.config.data.acl(framework)
+
+        self.plugin = framework.model("plugin", module="wiz")
