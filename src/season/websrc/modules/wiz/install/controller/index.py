@@ -9,19 +9,19 @@ class Controller(season.interfaces.wiz.ctrl.base.view):
         self.framework = framework
 
     def __default__(self, framework):
-        if len(self.config.data) > 0: framework.response.redirect("/")
-        self.js('index.js')
-        wizpackage = framework.model("config", module="wiz").get()
-        self.exportjs(request_ip=framework.request.client_ip(), wizpackage=wizpackage)
-        framework.response.render('index.pug')
-
+        if len(self.config.data) > 0: framework.response.redirect("/wiz")
+        model = framework.model("plugin", module="wiz")
+        model.build()
+        plugin = model.instance("core.setting")
+        plugin.layout('core.theme.layout', navbar=False, monaco=True)
+        plugin.render("core.setting.installer")
+        
     def build(self, framework):
         if len(self.config.data) > 0: framework.response.status(403)
         
         data = framework.request.query("data", True)
         fs = framework.model("wizfs", module="wiz").use("wiz")
         fs.write("wiz.json", data)
-
         
         config = framework.model("config", module="wiz")
 

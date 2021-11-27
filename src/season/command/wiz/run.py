@@ -1,5 +1,6 @@
 import time
 import os
+import signal
 import subprocess
 import psutil
 import multiprocessing as mp
@@ -60,11 +61,22 @@ def run():
             diff = now - CACHE['lasttime']
 
             if CACHE['refresh'] and diff > 500:
-                try:
-                    for child in psutil.Process(proc.pid).children(recursive=True):
+                pids = []
+                for child in psutil.Process(proc.pid).children(recursive=True):
+                    pids.append(child.pid)
+
+                for child in psutil.Process(proc.pid).children(recursive=True):
+                    try:
                         child.kill()
-                except:
-                    pass
+                    except:
+                        pass
+
+                for pid in pids:
+                    try:
+                        os.kill(int(pid), signal.SIGKILL)
+                    except Exception as e:
+                        pass
+
                 try:
                     proc = mp.Process(target=run_ctrl)
                     proc.start()

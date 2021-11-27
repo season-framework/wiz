@@ -3,7 +3,7 @@ import os
 import shutil
 import json
 
-class Controller(season.interfaces.wiz.ctrl.admin.base.api):
+class Controller(season.interfaces.wiz.ctrl.admin.api):
 
     def __startup__(self, framework):
         super().__startup__(framework)

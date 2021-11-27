@@ -22,16 +22,32 @@ wiz run
 
 - `127.0.0.1:3000/wiz` on your web browser
 
+- cleaning cache and init plugins
+
+```
+cd <workspace>
+wiz clean
+```
+
 
 ## Roadmap
 
-- plugin support
-    - wiz based online plugin development env
-    - support programmable api for plugins
 - git flow
     - support management for remote branches
 
+
 ## Release Note
+
+### 0.5.0
+
+- wiz based online plugin development env
+- support programmable api for plugins
+- remove useless resources
+
+### 0.4.8
+
+- scroll bug fixed in logger
+
 
 ### 0.4.7
 

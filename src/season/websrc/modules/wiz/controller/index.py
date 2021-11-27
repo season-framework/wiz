@@ -16,6 +16,11 @@ class Controller(season.interfaces.wiz.ctrl.base.api):
     def api(self, framework):
         app_id = framework.request.segment.get(0, True)
         fnname = framework.request.segment.get(1, True)
+
+        org = framework.request.segment.get
+        def get(idx, default=None):
+            return org(idx+2, default)
+        framework.request.segment.get = get
         
         api, wiz = self.wiz.api(app_id)
         if api is None: 

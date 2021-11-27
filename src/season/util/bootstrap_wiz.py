@@ -69,6 +69,21 @@ def handle_resource(framework, get_resource_handler, resource_path):
                 if res is not None: return res
             res = flask.send_from_directory(resource_dirpath, resource_filepath)
             return res
+    elif first_seg == "wiz":
+        target = resource_path_seg[0]
+        if target == "plugin":
+            plugin_id = resource_path_seg[1]
+            resource_path_seg = resource_path_seg[2:]
+            resource_path_seg = "/".join(resource_path_seg)
+            path = os.path.join(BASE_FILE_PATH, "plugin", plugin_id, "resources", resource_path_seg)        
+            if os.path.isfile(path):
+                resource_filepath = os.path.basename(path)
+                resource_dirpath = os.path.dirname(path)
+                if get_resource_handler is not None:
+                    res = get_resource_handler(resource_dirpath, resource_filepath)
+                    if res is not None: return res
+                res = flask.send_from_directory(resource_dirpath, resource_filepath)
+                return res
         
     path = os.path.join(BASE_FILE_PATH, f"branch/{branch}/resources", resource_path)
     if os.path.isfile(path):
