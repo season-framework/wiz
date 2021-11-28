@@ -8,7 +8,7 @@ config = season.stdClass()
 
 config.dev = True
 config.host = '0.0.0.0'
-config.port = 3000
+config.port = __PORT__
 config.log_level = 2
 
 config.jinja_variable_start_string = '{$'
@@ -18,12 +18,6 @@ config.jinja_variable_end_string = '$}'
 config.filter = ['indexfilter']
 
 def build(app, socketio):
-    try:
-        
-        
-        pass
-    except:
-        pass
     app.secret_key = 'season-wiz'
 config.build = build
 

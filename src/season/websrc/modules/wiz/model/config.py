@@ -2,10 +2,7 @@ import season
 import json
 from werkzeug.exceptions import HTTPException
 
-CODE_BUILD_RESOURCE = """import lesscpy
-from six import StringIO
-
-cache = season.cache
+CODE_BUILD_RESOURCE = """cache = season.cache
 if 'resources' not in cache:
     cache.resources = season.stdClass()
 
@@ -14,12 +11,33 @@ filepath = os.path.join(resource_dirpath, resource_filepath)
 if filepath in cache.resources:
     return cache.resources[filepath]
 
+ext = ext.lower()
+
+allowed = ['.less', '.scss']
+if ext not in allowed:
+    return None
+
 if ext == '.less':
+    import lesscpy
+    from six import StringIO
+
     f = open(filepath, 'r')
     lessfile = f.read()
     f.close()
     cssfile = lesscpy.compile(StringIO(lessfile), minify=True)
     response = flask.Response(str(cssfile))
+    response.headers['Content-Type'] = 'text/css'
+    cache.resources[filepath] = response
+    return cache.resources[filepath]
+
+if ext == '.scss':
+    import sass
+    f = open(filepath, 'r')
+    css = f.read()
+    f.close()
+    css = sass.compile(string=css)
+    css = str(css)
+    response = flask.Response(css)
     response.headers['Content-Type'] = 'text/css'
     cache.resources[filepath] = response
     return cache.resources[filepath]

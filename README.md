@@ -38,6 +38,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.1
+
+- port scan when wiz project created
+
 ### 0.5.0
 
 - wiz based online plugin development env

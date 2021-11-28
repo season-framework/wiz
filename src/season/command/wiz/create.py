@@ -2,6 +2,17 @@ import os
 import shutil
 from argh import arg, expects_obj
 from git import Repo
+import socket
+
+def portchecker(port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        port = int(port)
+        s.connect(("127.0.0.1", port))
+        return True
+    except:
+        pass
+    return False
 
 def copytree(src, dst, symlinks=False, ignore=None):
     for item in os.listdir(src):
@@ -24,6 +35,20 @@ def create(projectname):
     print("create project...")
     PATH_PUBLIC_SRC = os.path.join(PATH_FRAMEWORK, 'data', 'wizbase')
     shutil.copytree(PATH_PUBLIC_SRC, PATH_PROJECT)
+
+    # port finder
+    startport = 3000
+    while portchecker(startport):
+        startport = startport + 1
+    
+    CONFIG_PATH = os.path.join(PATH_PROJECT, 'config', 'config.py')
+    f = open(CONFIG_PATH, 'r')
+    data = f.read()
+    f.close()
+    data = data.replace("__PORT__", str(startport))
+    f = open(CONFIG_PATH, 'w')
+    f.write(data)
+    f.close()
 
     # install plugins
     print("install plugin... (setting)")
