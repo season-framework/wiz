@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.6
+
+- bug fixed in theme function
+
 ### 0.5.5
 
 - add `match` api at wiz instance

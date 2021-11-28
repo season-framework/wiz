@@ -435,7 +435,7 @@ class Wiz(season.stdClass):
         if view is not None:
             kwargs['view'] = view
         layout = framework.response.template_from_string(layout, **kwargs)
-        return layout
+        return markupsafe.Markup(layout)
 
     def match(self, route):
         endpoint = "exist"
