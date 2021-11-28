@@ -38,6 +38,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.2
+
+- route bug fixed
+
 ### 0.5.1
 
 - port scan when wiz project created

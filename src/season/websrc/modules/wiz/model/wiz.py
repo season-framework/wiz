@@ -1482,6 +1482,11 @@ class Model:
             if len(route) == 0: continue
 
             endpoint = info["id"]
+
+            if route == "/":
+                url_map.append(Rule(route, endpoint=endpoint))
+                continue
+
             if route[-1] == "/":
                 url_map.append(Rule(route[:-1], endpoint=endpoint))
             elif route[-1] == ">":
