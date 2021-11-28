@@ -35,8 +35,11 @@ wiz clean
 - git flow
     - support management for remote branches
 
-
 ## Release Note
+
+### 0.5.3
+
+- support plugin storage
 
 ### 0.5.2
 

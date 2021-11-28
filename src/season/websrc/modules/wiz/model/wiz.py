@@ -160,7 +160,7 @@ def addtabs(v, size=1):
     return v
 
 def spawner(code, namespace, logger, **kwargs):
-    fn = {'__file__': namespace, '__name__': namespace, 'print': logger}
+    fn = {'__file__': namespace, '__name__': namespace, 'print': logger, 'season': season}
     for key in kwargs: fn[key] = kwargs[key]
     exec(compile(code, namespace, 'exec'), fn)
     return fn
@@ -473,7 +473,7 @@ class Wiz(season.stdClass):
             # compile controller
             controller = app['controller']
             controller = addtabs(controller)
-            controller = f"import season\ndef process(wiz, **kwargs):\n    framework = wiz\n{controller}\n    return kwargs"
+            controller = f"def process(wiz, **kwargs):\n    framework = wiz\n{controller}\n    return kwargs"
             app['controller'] = controller
 
             # compile codes
@@ -1421,7 +1421,7 @@ class Model:
             route = inst.get(app_id)
             controller = route['controller']
             controller = addtabs(controller)
-            controller = f"import season\ndef process(wiz):\n    framework = wiz\n{controller}"
+            controller = f"def process(wiz):\n    framework = wiz\n{controller}"
             route['controller'] = controller
             cache.set(f"routes/{app_id}", route)
             
