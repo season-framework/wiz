@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.4
+
+- api error logger bug fixed
+
 ### 0.5.3
 
 - support plugin storage

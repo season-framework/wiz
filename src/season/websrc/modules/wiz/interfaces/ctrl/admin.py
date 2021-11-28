@@ -29,5 +29,4 @@ class api(season.interfaces.wiz.ctrl.base.api):
     def __startup__(self, framework):
         super().__startup__(framework)
         if self.config.data.acl is not None: self.config.data.acl(framework)
-
         self.plugin = framework.model("plugin", module="wiz")
