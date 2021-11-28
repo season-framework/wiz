@@ -15,79 +15,28 @@ def addtabs(v, size=1):
     return v
 
 def spawner(code, namespace, logger, **kwargs):
-    fn = {'__file__': namespace, '__name__': namespace, 'print': logger}
+    fn = {'__file__': namespace, '__name__': namespace, 'print': logger, 'season': season}
     for key in kwargs: fn[key] = kwargs[key]
     exec(compile(code, namespace, 'exec'), fn)
     return fn
 
-class CacheControl:
-    def __init__(self, framework, namespace="app"):
-        self.framework = framework
-        self.namespace = namespace
-        self.enabled = True
+class Storage(season.interfaces.wiz.model.fs.Model):
+    def __init__(self, framework, plugin):
+        super().__init__(framework)
+        self.config.path = os.path.join(season.core.PATH.PROJECT, 'plugin', plugin)
+        self.config.plugin = plugin
+
+        if self.isdir(self.config.path) == False:
+            raise Exception(f"plugin `{plugin}` not exists")
+
+        self.config.path = os.path.join(self.config.path, "storage")
+        self.namespace = ''
 
     def use(self, namespace):
-        if namespace[0] == "/":
-            namespace = namespace[1:]
-        namespace = os.path.join(self.namespace, namespace)
-        return CacheControl(self.__wiz__, namespace=namespace)
-
-    def open(self, key, default=None):
-        class Cache:
-            def __init__(self, ctrl, key, default):
-                self.ctrl = ctrl
-                self.key = key
-                self.default = default
-                self.cache = season.stdClass()
-            
-            def __enter__(self):
-                ctrl = self.ctrl
-                key = self.key
-                default = self.default
-                self.cache[key] = ctrl.get(key, default=default)
-                return self.cache
-
-            def __exit__(self, type, value, traceback):
-                ctrl = self.ctrl
-                key = self.key
-                val = self.cache[key]
-                ctrl.set(key, val)
-
-        return Cache(self, key, default)
-
-    def enable(self, enabled=True):
-        self.enabled = enabled
-        return self
-
-    def disable(self, disabled=True):
-        if disabled:
-            self.enabled = False
-        else:
-            self.enabled = True
-        return self
-
-    def fs(self):
-        namespace = self.namespace
-        return self.framework.model("wizfs", module="wiz").use(f"wiz/plugin/.cache/{namespace}")
-
-    def get(self, key, default=None):
-        namespace = self.namespace
-        try:
-            fs = self.fs()
-            if fs.isfile(f"{key}.pkl"):
-                return fs.read_pickle(f"{key}.pkl")
-        except:
-            pass
-        return default
-        
-    def set(self, key, value):
-        try:
-            fs = self.fs()
-            fs.write_pickle(f"{key}.pkl", value)
-            return True
-        except:
-            pass
-        return False
+        while namespace[0] == "/": namespace = namespace[1:]
+        model = Storage(self.framework, self.config.plugin)
+        model.namespace = namespace
+        return model
 
 class Plugin(season.stdClass):
     def __init__(self, framework, plugin_id):
@@ -133,6 +82,7 @@ class Plugin(season.stdClass):
         self.PATH = framework.core.PATH
         self.response.redirect = redirect
         self.__logger__ = self.logger("plugin")
+        self.storage = Storage(framework, plugin_id)
 
 
     def logger(self, tag=None, log_color=94):
