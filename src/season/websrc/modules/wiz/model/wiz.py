@@ -433,7 +433,7 @@ class Wiz(season.stdClass):
         kwargs = framework.response.data.get()
         kwargs['wiz'] = self
         if view is not None:
-            kwargs['view'] = view
+            kwargs['view'] = markupsafe.Markup(view)
         layout = framework.response.template_from_string(layout, **kwargs)
         return markupsafe.Markup(layout)
 
