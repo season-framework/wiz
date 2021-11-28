@@ -362,7 +362,7 @@ class Wiz(season.stdClass):
             if fs.isfile(f"{codelang}.py") == False:
                 return code
             compiler = fs.read(f"{codelang}.py")
-            compiler = spawner(compiler, "season.wiz.compiler", logger)
+            compiler = spawner(compiler, "season.wiz.compiler", logger, wiz=self)
             return compiler['compile'](self, code, kwargs)
         except Exception as e:
             logger(e)
@@ -570,7 +570,7 @@ class Wiz(season.stdClass):
 
         logger = self.logger(f"[app][{app_namespace}]", 93)
         dic = self.__dic__('app', app_id)
-        controllerfn = spawner(app['controller'], 'season.wiz.app', logger, controller=ctrl, dic=dic)
+        controllerfn = spawner(app['controller'], 'season.wiz.app', logger, controller=ctrl, dic=dic, wiz=self)
         kwargs = controllerfn['process'](self, **kwargs)
         kwargs['query'] = framework.request.query()
         
@@ -1393,7 +1393,7 @@ class Model:
         namespace = app['package']['namespace']
         logger = wiz.logger(f"[app][{namespace}][socket]")
         dic = wiz.__dic__('app', app_id)
-        socketfn = spawner(socket_api, 'season.wiz.app.socket', logger, dic=dic)
+        socketfn = spawner(socket_api, 'season.wiz.app.socket', logger, dic=dic, wiz=wiz)
         return socketfn, wiz
 
     def api(self, app_id):
@@ -1421,7 +1421,7 @@ class Model:
         namespace = app['package']['namespace']
         logger = wiz.logger(f"[app][{namespace}][api]")
         dic = wiz.__dic__('app', app_id)
-        apifn = spawner(view_api, 'season.wiz.app.api', logger, controller=ctrl, dic=dic)
+        apifn = spawner(view_api, 'season.wiz.app.api', logger, controller=ctrl, dic=dic, wiz=wiz)
         return apifn, wiz
 
     def route(self):
@@ -1475,7 +1475,7 @@ class Model:
         
         logger = wiz.logger(f"[route][{request_uri}]", 93)
         dic = wiz.__dic__('route', app_id)
-        controllerfn = spawner(route['controller'], 'season.wiz.route', logger, controller=ctrl, dic=dic)
+        controllerfn = spawner(route['controller'], 'season.wiz.route', logger, controller=ctrl, dic=dic, wiz=wiz)
         controllerfn['process'](wiz)
 
 

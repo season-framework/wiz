@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.8
+
+- wiz instance as global in wiz api
+
 ### 0.5.7
 
 - bug fixed in theme function
