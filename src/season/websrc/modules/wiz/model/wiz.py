@@ -437,6 +437,42 @@ class Wiz(season.stdClass):
         layout = framework.response.template_from_string(layout, **kwargs)
         return layout
 
+    def match(self, route):
+        endpoint = "exist"
+        url_map = []
+
+        if route == "/":
+            url_map.append(Rule(route, endpoint=endpoint))
+        else:
+            if route[-1] == "/":
+                url_map.append(Rule(route[:-1], endpoint=endpoint))
+            elif route[-1] == ">":
+                rpath = route
+                while rpath[-1] == ">":
+                    rpath = rpath.split("/")[:-1]
+                    rpath = "/".join(rpath)
+                    url_map.append(Rule(rpath, endpoint=endpoint))
+                    if rpath[-1] != ">":
+                        url_map.append(Rule(rpath + "/", endpoint=endpoint))
+            url_map.append(Rule(route, endpoint=endpoint))
+
+        url_map = Map(url_map)
+        url_map = url_map.bind("", "/")
+
+        def matcher(url):
+            try:
+                endpoint, kwargs = url_map.match(url, "GET")
+                return endpoint, kwargs
+            except:
+                return None, {}
+                
+        request_uri = self.request.uri()
+        endpoint, segment = matcher(request_uri)
+        if endpoint is None:
+            return None
+        segment = season.stdClass(segment)
+        return segment
+
     def __view__(self, *args, **kwargs):
         if len(args) == 0: return ""
 

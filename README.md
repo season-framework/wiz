@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.5
+
+- add `match` api at wiz instance
+
 ### 0.5.4
 
 - api error logger bug fixed
