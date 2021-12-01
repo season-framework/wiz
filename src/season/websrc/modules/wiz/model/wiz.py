@@ -963,9 +963,6 @@ class Merge(Git):
 
         _git = Git(wiz, branch=branch, reload=True)
         branch_commit = _git.current()
-
-        if len(branch_commit.diff(origin_commit)) == 0:
-            raise Exception("No changes")
         
         self.repo = repo = git.Repo.init(path)
         self.remote_repo = remote_repo = git.Repo.init(remote_origin)

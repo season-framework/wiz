@@ -37,6 +37,11 @@ wiz clean
 
 ## Release Note
 
+### 0.5.9
+
+- git merge bug fixed
+
+
 ### 0.5.8
 
 - wiz instance as global in wiz api
