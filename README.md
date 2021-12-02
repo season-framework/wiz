@@ -37,6 +37,31 @@ wiz clean
 
 ## Release Note
 
+### 0.5.9
+
+- git merge bug fixed
+
+
+### 0.5.8
+
+- wiz instance as global in wiz api
+
+### 0.5.7
+
+- bug fixed in theme function
+
+### 0.5.6
+
+- bug fixed in theme function
+
+### 0.5.5
+
+- add `match` api at wiz instance
+
+### 0.5.4
+
+- api error logger bug fixed
+
 ### 0.5.3
 
 - support plugin storage

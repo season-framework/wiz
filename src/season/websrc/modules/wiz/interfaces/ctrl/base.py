@@ -2,6 +2,8 @@ import season
 import datetime
 import json
 import os
+import time
+import traceback
 
 class base:
     def __startup__(self, framework):
@@ -130,4 +132,12 @@ class api(base):
         super().__startup__(framework)
 
     def __error__(self, framework, e):
+        try:
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+            errorlog = f"\033[91m[" + timestamp + "}][wiz][error]\n" + traceback.format_exc() + "\033[0m"
+            branch = framework.wiz.branch()
+            framework.socketio.emit("log", errorlog, namespace="/wiz", to=branch, broadcast=True)
+        except:
+            print("error")
+            pass
         framework.response.status(500, str(e))

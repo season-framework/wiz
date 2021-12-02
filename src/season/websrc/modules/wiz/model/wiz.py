@@ -362,7 +362,7 @@ class Wiz(season.stdClass):
             if fs.isfile(f"{codelang}.py") == False:
                 return code
             compiler = fs.read(f"{codelang}.py")
-            compiler = spawner(compiler, "season.wiz.compiler", logger)
+            compiler = spawner(compiler, "season.wiz.compiler", logger, wiz=self)
             return compiler['compile'](self, code, kwargs)
         except Exception as e:
             logger(e)
@@ -433,9 +433,45 @@ class Wiz(season.stdClass):
         kwargs = framework.response.data.get()
         kwargs['wiz'] = self
         if view is not None:
-            kwargs['view'] = view
+            kwargs['view'] = markupsafe.Markup(view)
         layout = framework.response.template_from_string(layout, **kwargs)
-        return layout
+        return markupsafe.Markup(layout)
+
+    def match(self, route):
+        endpoint = "exist"
+        url_map = []
+
+        if route == "/":
+            url_map.append(Rule(route, endpoint=endpoint))
+        else:
+            if route[-1] == "/":
+                url_map.append(Rule(route[:-1], endpoint=endpoint))
+            elif route[-1] == ">":
+                rpath = route
+                while rpath[-1] == ">":
+                    rpath = rpath.split("/")[:-1]
+                    rpath = "/".join(rpath)
+                    url_map.append(Rule(rpath, endpoint=endpoint))
+                    if rpath[-1] != ">":
+                        url_map.append(Rule(rpath + "/", endpoint=endpoint))
+            url_map.append(Rule(route, endpoint=endpoint))
+
+        url_map = Map(url_map)
+        url_map = url_map.bind("", "/")
+
+        def matcher(url):
+            try:
+                endpoint, kwargs = url_map.match(url, "GET")
+                return endpoint, kwargs
+            except:
+                return None, {}
+                
+        request_uri = self.request.uri()
+        endpoint, segment = matcher(request_uri)
+        if endpoint is None:
+            return None
+        segment = season.stdClass(segment)
+        return segment
 
     def __view__(self, *args, **kwargs):
         if len(args) == 0: return ""
@@ -534,7 +570,7 @@ class Wiz(season.stdClass):
 
         logger = self.logger(f"[app][{app_namespace}]", 93)
         dic = self.__dic__('app', app_id)
-        controllerfn = spawner(app['controller'], 'season.wiz.app', logger, controller=ctrl, dic=dic)
+        controllerfn = spawner(app['controller'], 'season.wiz.app', logger, controller=ctrl, dic=dic, wiz=self)
         kwargs = controllerfn['process'](self, **kwargs)
         kwargs['query'] = framework.request.query()
         
@@ -927,9 +963,6 @@ class Merge(Git):
 
         _git = Git(wiz, branch=branch, reload=True)
         branch_commit = _git.current()
-
-        if len(branch_commit.diff(origin_commit)) == 0:
-            raise Exception("No changes")
         
         self.repo = repo = git.Repo.init(path)
         self.remote_repo = remote_repo = git.Repo.init(remote_origin)
@@ -1357,7 +1390,7 @@ class Model:
         namespace = app['package']['namespace']
         logger = wiz.logger(f"[app][{namespace}][socket]")
         dic = wiz.__dic__('app', app_id)
-        socketfn = spawner(socket_api, 'season.wiz.app.socket', logger, dic=dic)
+        socketfn = spawner(socket_api, 'season.wiz.app.socket', logger, dic=dic, wiz=wiz)
         return socketfn, wiz
 
     def api(self, app_id):
@@ -1385,7 +1418,7 @@ class Model:
         namespace = app['package']['namespace']
         logger = wiz.logger(f"[app][{namespace}][api]")
         dic = wiz.__dic__('app', app_id)
-        apifn = spawner(view_api, 'season.wiz.app.api', logger, controller=ctrl, dic=dic)
+        apifn = spawner(view_api, 'season.wiz.app.api', logger, controller=ctrl, dic=dic, wiz=wiz)
         return apifn, wiz
 
     def route(self):
@@ -1439,7 +1472,7 @@ class Model:
         
         logger = wiz.logger(f"[route][{request_uri}]", 93)
         dic = wiz.__dic__('route', app_id)
-        controllerfn = spawner(route['controller'], 'season.wiz.route', logger, controller=ctrl, dic=dic)
+        controllerfn = spawner(route['controller'], 'season.wiz.route', logger, controller=ctrl, dic=dic, wiz=wiz)
         controllerfn['process'](wiz)
 
 
