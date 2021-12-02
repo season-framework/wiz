@@ -575,12 +575,12 @@ class Wiz(season.stdClass):
         kwargs['query'] = framework.request.query()
         
         dicstr = dic()
-        dicstr = json.dumps(dicstr, default=self.json_default)
+        dicstr = json.dumps(dicstr, default=season.json_default)
         dicstr = dicstr.encode('ascii')
         dicstr = base64.b64encode(dicstr)
         dicstr = dicstr.decode('ascii')
 
-        kwargsstr = json.dumps(kwargs, default=self.json_default)
+        kwargsstr = json.dumps(kwargs, default=season.json_default)
         kwargsstr = kwargsstr.encode('ascii')
         kwargsstr = base64.b64encode(kwargsstr)
         kwargsstr = kwargsstr.decode('ascii')

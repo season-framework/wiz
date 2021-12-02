@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.10
+
+- json dumps bug fixed
+
 ### 0.5.9
 
 - git merge bug fixed
