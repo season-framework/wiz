@@ -504,7 +504,7 @@ class Wiz(season.stdClass):
             app_namespace = app['package']['namespace']
             namespace = str(app_namespace)  # namespace for ui
             if len(args) > 1: namespace = args[1]
-            render_id = app['package']['render_id'] = app_id + "_" + framework.lib.util.randomstring(16)
+            render_id = app['package']['render_id'] = "wiz_" + app_id + "_" + framework.lib.util.randomstring(16)
         
             # compile controller
             controller = app['controller']
