@@ -619,4 +619,4 @@ class bootstrap_wiz:
             _logger(LOG_DEV, message=f"{boottime}ms to boot. server running on http://{host}:{port}/ (Press CTRL+C to quit)")
             socketio.run(app, host=host, port=port)
 
-        return socketio
+        return app, socketio

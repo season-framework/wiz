@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.14
+
+- app.py bug fixed
+
 ### 0.5.13
 
 - app.py bug fixed

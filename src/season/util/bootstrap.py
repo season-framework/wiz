@@ -551,4 +551,4 @@ class bootstrap:
             _logger(LOG_DEV, message=f"running on http://{host}:{port}/ (Press CTRL+C to quit)")
             socketio.run(app, host=host, port=port)
 
-        return socketio
+        return app, socketio
