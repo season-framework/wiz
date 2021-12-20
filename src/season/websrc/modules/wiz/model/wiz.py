@@ -995,6 +995,7 @@ class Merge(Git):
             branch_head = repo.create_head(branch, origin.refs[branch]) # src
             base_head = repo.create_head(base_branch, origin.refs[base_branch]) # dst
             
+            branch_head.checkout() # pull 
             base_head.checkout() # init as base branch
             try:
                 repo.git.merge(branch_head)

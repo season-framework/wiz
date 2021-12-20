@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.18
+
+- git merge bug fixed
+
 ### 0.5.17
 
 - update wiz theme render logic
