@@ -47,7 +47,7 @@ class bootstrap:
         self.response = None
         self.season = season
 
-    def bootstrap(self):
+    def bootstrap(self, ismain):
         season = self.season
         boottime = season.boottime
         app = flask.Flask('__main__', static_url_path='')
@@ -547,7 +547,8 @@ class bootstrap:
             if _app is not None:
                 app = app
         
-        _logger(LOG_DEV, message=f"running on http://{host}:{port}/ (Press CTRL+C to quit)")
-        socketio.run(app, host=host, port=port)
+        if ismain:
+            _logger(LOG_DEV, message=f"running on http://{host}:{port}/ (Press CTRL+C to quit)")
+            socketio.run(app, host=host, port=port)
 
-        return app
+        return app, socketio

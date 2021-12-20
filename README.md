@@ -37,6 +37,22 @@ wiz clean
 
 ## Release Note
 
+### 0.5.15
+
+- public directory bug fixed (wiz)
+
+### 0.5.14
+
+- app.py bug fixed
+
+### 0.5.13
+
+- app.py bug fixed
+
+### 0.5.12
+
+- app.py bug fixed
+
 ### 0.5.11
 
 - render id bug fixed

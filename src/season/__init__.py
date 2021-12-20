@@ -480,6 +480,9 @@ class dicClass(dict):
 
 
 def bootstrap(*args, **kwargs):
+    if 'ismain' in kwargs: ismain = kwargs['ismain']
+    else: ismain = True
+
     if FRAMEWORK_MODE == 'web':
         from .util.bootstrap import bootstrap
 
@@ -492,7 +495,7 @@ def bootstrap(*args, **kwargs):
         __DIC__ = __finddic__()
         season.dic = dicClass(__DIC__, __DIC__)
         season.cache = cache
-        return bootstrap(season).bootstrap()
+        return bootstrap(season).bootstrap(ismain)
 
     elif FRAMEWORK_MODE == 'wiz':
         from .util.bootstrap_wiz import bootstrap_wiz
@@ -506,4 +509,4 @@ def bootstrap(*args, **kwargs):
         __DIC__ = __finddic__()
         season.dic = dicClass(__DIC__, __DIC__)
         season.cache = cache
-        return bootstrap_wiz(season).bootstrap()
+        return bootstrap_wiz(season).bootstrap(ismain)

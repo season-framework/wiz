@@ -102,7 +102,7 @@ class bootstrap_wiz:
         self.response = None
         self.season = season
 
-    def bootstrap(self):
+    def bootstrap(self, ismain):
         season = self.season
         boottime = season.boottime
         app = flask.Flask('__main__', static_url_path='')
@@ -615,7 +615,8 @@ class bootstrap_wiz:
                 app = _app
         
         boottime = round(time.time() * 1000) - boottime
-        _logger(LOG_DEV, message=f"{boottime}ms to boot. server running on http://{host}:{port}/ (Press CTRL+C to quit)")
-        socketio.run(app, host=host, port=port)
+        if ismain:
+            _logger(LOG_DEV, message=f"{boottime}ms to boot. server running on http://{host}:{port}/ (Press CTRL+C to quit)")
+            socketio.run(app, host=host, port=port)
 
-        return socketio
+        return app, socketio
