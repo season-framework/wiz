@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.16
+
+- git merge logic changed
+
 ### 0.5.15
 
 - public directory bug fixed (wiz)
