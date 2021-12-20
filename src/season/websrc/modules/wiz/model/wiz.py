@@ -554,11 +554,17 @@ class Wiz(season.stdClass):
             self.app_id = app_id
 
         render_theme = None
+        if 'theme' in kwargs:
+            render_theme = kwargs['theme']
+            if render_theme not in self.__wiz__.themes():
+                render_theme = None
+            self.render_theme = render_theme
+
         if self.render_theme is None:
             if 'theme' in app['package']:
                 render_theme = self.render_theme = app['package']['theme']
             else:
-                render_theme = self.__wiz__.framework.config.load("wiz").get("theme_default", None)
+                render_theme = self.render_theme = self.__wiz__.framework.config.load("wiz").get("theme_default", None)
 
         ctrl = None
         if 'controller' in app['package']:
