@@ -948,8 +948,8 @@ class Merge(Git):
         path = fs.abspath()
 
         remote_origin = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/master").abspath()
-        remote_base = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{base_branch}").abspath()
-        remote_target = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{branch}").abspath()
+        remote_target = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{branch}").abspath() # src
+        remote_base = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{base_branch}").abspath() # dst
 
         if fs.isdir(remote_origin) == False: raise Exception("master branch not exists")
         if fs.isdir(remote_base) == False: raise Exception(f"{base_branch} branch not exists")
@@ -986,25 +986,19 @@ class Merge(Git):
             origin.fetch()
 
             # copy source branch
-            branch_head = repo.create_head(branch, origin.refs[branch])
-            base_head = repo.create_head(base_branch, origin.refs[base_branch])
+            branch_head = repo.create_head(branch, origin.refs[branch]) # src
+            base_head = repo.create_head(base_branch, origin.refs[base_branch]) # dst
             
             base_head.checkout() # init as base branch
+            try:
+                repo.git.merge(branch_head)
+            except:
+                pass
 
-            # delete wiz component files
-            dirs = os.listdir(path)
-            for name in dirs:
-                if name == '.git': continue
-                if fs.isdir(name):
-                    fs.delete(name)
-
-            # copy update files
-            newdirs = os.listdir(remote_target)
-            for name in dirs:
-                if name == '.git': continue
-                copy_path = os.path.join(remote_target, name)
-                if fs.isdir(copy_path):
-                    fs.copy(copy_path, name)
+            unmerged_blobs = repo.index.unmerged_blobs()
+            for path in unmerged_blobs:
+                fs.delete(path)
+                fs.copy(os.path.join(remote_target, path), path)
 
             repo.git.add('--all')
     
