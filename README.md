@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.19
+
+- add `wiz.path()` function
+
 ### 0.5.18
 
 - git merge bug fixed

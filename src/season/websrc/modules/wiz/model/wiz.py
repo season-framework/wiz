@@ -370,6 +370,10 @@ class Wiz(season.stdClass):
 
     def is_dev(self):
         return self.__wiz__.is_dev()
+
+    def path(self, path=""):
+        branch = self.branch()
+        return os.path.join(self.PATH.PROJECT, 'branch', branch, path)
     
     def branch(self):
         return self.__wiz__.branch()
