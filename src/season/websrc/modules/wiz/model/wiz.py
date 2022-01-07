@@ -509,10 +509,7 @@ class Wiz(season.stdClass):
             namespace = str(app_namespace)  # namespace for ui
             if len(args) > 1: namespace = args[1]
             render_id = app['package']['render_id'] = "wiz_" + app_id + "_" + framework.lib.util.randomstring(16)
-            babel = False
-            if "babel" in app['package']:
-                babel = app['package']['babel']
-        
+            
             # compile controller
             controller = app['controller']
             controller = addtabs(controller)
@@ -604,9 +601,9 @@ class Wiz(season.stdClass):
         js = app['js']
         css = app['css']
 
-        script_type = "text/javascript"
-        if babel is True:
-            script_type = "text/babel"
+        script_type = 'text/javascript'
+        if 'script_type' in app['package']: 
+            script_type = app['package']['script_type']
         view = f'{view}<script type="{script_type}">{js}</script><style>{css}</style>'
 
         view = framework.response.template_from_string(view, dicstr=dicstr, kwargs=kwargsstr, dic=dic, **kwargs)
