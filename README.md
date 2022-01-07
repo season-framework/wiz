@@ -37,6 +37,22 @@ wiz clean
 
 ## Release Note
 
+### 0.5.19
+
+- add `wiz.path()` function
+
+### 0.5.18
+
+- git merge bug fixed
+
+### 0.5.17
+
+- update wiz theme render logic
+
+### 0.5.16
+
+- git merge logic changed
+
 ### 0.5.15
 
 - public directory bug fixed (wiz)
