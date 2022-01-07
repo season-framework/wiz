@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.21
+
+- change babel script option to extendable script option
+
 ### 0.5.20
 
 - add babel script option
