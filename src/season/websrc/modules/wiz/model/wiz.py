@@ -81,7 +81,7 @@ WIZ_JS = """if (!window.season_wiz) {
             wiz._response = {};
             wiz._response_activator = {};
 
-            wiz.bind = (name, fn) => {
+            wiz.bind = (name, fn, err = true) => {
                 wiz._event[name] = (data) => new Promise(async (resolve, reject) => {
                     let res = await fn(data);
                     if (res) {
@@ -93,7 +93,7 @@ WIZ_JS = """if (!window.season_wiz) {
                     let response_handler = () => {
                         // if not activate, stop loop
                         if (!wiz._response_activator[name]) {
-                            reject("deprecated event `" + name + "` of `" + wiz.namespace + "`");
+                            if(err) reject("deprecated event `" + name + "` of `" + wiz.namespace + "`");
                             return;
                         }
 
@@ -505,6 +505,9 @@ class Wiz(season.stdClass):
             namespace = str(app_namespace)  # namespace for ui
             if len(args) > 1: namespace = args[1]
             render_id = app['package']['render_id'] = "wiz_" + app_id + "_" + framework.lib.util.randomstring(16)
+            babel = False
+            if "babel" in app['package']:
+                babel = app['package']['babel']
         
             # compile controller
             controller = app['controller']
@@ -591,7 +594,10 @@ class Wiz(season.stdClass):
         js = app['js']
         css = app['css']
 
-        view = f'{view}<script type="text/javascript">{js}</script><style>{css}</style>'
+        script_type = "text/javascript"
+        if babel is True:
+            script_type = "text/babel"
+        view = f'{view}<script type="{script_type}">{js}</script><style>{css}</style>'
 
         view = framework.response.template_from_string(view, dicstr=dicstr, kwargs=kwargsstr, dic=dic, **kwargs)
         if render_theme is None:
