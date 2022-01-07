@@ -37,6 +37,11 @@ wiz clean
 
 ## Release Note
 
+### 0.5.20
+
+- add babel script option
+
+
 ### 0.5.19
 
 - add `wiz.path()` function
