@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.22
+
+- `request` file api changed
+
 ### 0.5.21
 
 - change babel script option to extendable script option
