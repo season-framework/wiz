@@ -1,3 +1,4 @@
+import io
 import json
 import os
 
@@ -39,6 +40,16 @@ class response:
             url = os.path.abspath(os.path.join("/" + self.modulename, url))
         self.status_code = 302
         resp = self._flask.redirect(url)
+        return self._build(resp)
+
+    def response(self, resp):
+        return self._build(resp)
+
+    def pil_image(self, pil_image, type='JPEG', mimetype='image/jpeg', as_attachment=False, filename=None):
+        img_io = io.BytesIO()
+        pil_image.save(img_io, "JPEG")
+        img_io.seek(0)
+        resp = self._flask.send_file(img_io, mimetype='image/jpeg', as_attachment=as_attachment, attachment_filename=filename)
         return self._build(resp)
 
     def download(self, filepath, as_attachment=True, filename=None):
