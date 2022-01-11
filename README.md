@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.23
+
+- add function response(flask_resp) and pil_image at `response`
+
 ### 0.5.22
 
 - `request` file api changed
