@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.24
+
+- wiz `resource_handler` updated
+
 ### 0.5.23
 
 - add function response(flask_resp) and pil_image at `response`
