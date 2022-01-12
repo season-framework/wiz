@@ -368,6 +368,14 @@ class Wiz(season.stdClass):
             logger(e)
             raise e
 
+    def installed(self):
+        try:
+            if len(self.__wiz__.config.data) > 0:
+                return True
+        except:
+            pass
+        return False
+
     def is_dev(self):
         return self.__wiz__.is_dev()
 
@@ -1306,7 +1314,9 @@ class Model:
             self.env[name] = value
     
     def is_dev(self):
-        return self.env.DEVMODE
+        if self.branch() == "master":
+            return self.env.DEVMODE
+        return True
 
     def set_dev(self, DEVMODE):
         """set development mode.
