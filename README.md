@@ -37,6 +37,11 @@ wiz clean
 
 ## Release Note
 
+### 0.5.25
+
+- check installed function (wiz.installed())
+- forced dev mode in dev branch (if not master)
+
 ### 0.5.24
 
 - wiz `resource_handler` updated
