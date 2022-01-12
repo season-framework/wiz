@@ -230,6 +230,9 @@ class Wiz(season.stdClass):
 
         self.__logger__ = self.logger("instance")
 
+        if self.installed() == False:
+            self.response.redirect("/wiz")
+
     def logger(self, tag=None, log_color=94):
         class logger:
             def __init__(self, tag, log_color, wiz):
