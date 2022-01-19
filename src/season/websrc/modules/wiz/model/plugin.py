@@ -548,6 +548,35 @@ class Model:
 
         fs.write_json(info_file, info)
 
+    # def zip(self, plugin_id, plugin_name):
+    #     fs = self.fs
+    #     path = fs.abspath(plugin_id)
+    #     zippath = os.path.join(path, f"{plugin_name}.zip")
+    #     os.system(f"zip -j -r '{zippath}' {path}")
+    #     return zippath
+
+    # def del_zip(self, plugin_id, plugin_name):
+    #     fs = self.fs
+    #     path = fs.abspath(plugin_id)
+    #     zippath = os.path.join(path, f"{plugin_name}.zip")
+    #     fs.delete(zippath)
+    #     return True
+
+    def install(self, plugin_id, **data):
+        fs = self.fs
+        info_file = os.path.join(plugin_id, "plugin.wiz")
+        route_file = os.path.join(plugin_id, "route.wiz")
+        apps_file = os.path.join(plugin_id, "apps.wiz")
+
+        if fs.isfile(info_file):
+            raise Exception(f"Already exist plugin")
+
+        fs.write_json(info_file, data['info'])
+        fs.write_json(route_file, data['route'])
+        fs.write_json(apps_file, data['apps'])
+
+        return True
+
     def update(self, plugin_id, info, apps, route):
         fs = self.fs
         info_file = os.path.join(plugin_id, "plugin.wiz")
