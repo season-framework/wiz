@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.26
+
+- plugin menu bug fixed (cache bug)
+
 ### 0.5.25
 
 - check installed function (wiz.installed())

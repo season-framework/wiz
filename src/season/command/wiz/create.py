@@ -24,7 +24,8 @@ def copytree(src, dst, symlinks=False, ignore=None):
             shutil.copy2(s, d)
 
 @arg('projectname', default='sample-project', help='project name')
-def create(projectname):
+@arg('--uri', help='https://github.com/season-framework/wiz-demo')
+def create(projectname, uri="https://github.com/season-framework/wiz-demo"):
     PATH_FRAMEWORK = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     PATH_PROJECT = os.path.join(os.getcwd(), projectname)
 
@@ -60,8 +61,8 @@ def create(projectname):
     print("install plugin... (theme)")
     Repo.clone_from('https://github.com/season-framework/wiz-plugin-theme', os.path.join(PATH_PROJECT, 'plugin', 'theme'))
 
-    print("install demo branch...")
-    Repo.clone_from('https://github.com/season-framework/wiz-demo', os.path.join(PATH_PROJECT, 'branch', 'master'))
+    print("install base branch...")
+    Repo.clone_from(uri, os.path.join(PATH_PROJECT, 'branch', 'master'))
 
     gitpath = os.path.join(PATH_PROJECT, 'branch', 'master', '.git')
     try:
