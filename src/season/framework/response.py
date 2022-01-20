@@ -12,6 +12,7 @@ class response:
         self.status_code = None
         self.mimetype = None
         self.modulename = framework.modulename
+        self.pil_image = self.PIL
 
     def lang(self, lang):
         self.language(lang)
@@ -45,11 +46,11 @@ class response:
     def response(self, resp):
         return self._build(resp)
 
-    def pil_image(self, pil_image, type='JPEG', mimetype='image/jpeg', as_attachment=False, filename=None):
+    def PIL(self, pil_image, type='JPEG', mimetype='image/jpeg', as_attachment=False, filename=None):
         img_io = io.BytesIO()
-        pil_image.save(img_io, "JPEG")
+        pil_image.save(img_io, type)
         img_io.seek(0)
-        resp = self._flask.send_file(img_io, mimetype='image/jpeg', as_attachment=as_attachment, attachment_filename=filename)
+        resp = self._flask.send_file(img_io, mimetype=mimetype, as_attachment=as_attachment, attachment_filename=filename)
         return self._build(resp)
 
     def download(self, filepath, as_attachment=True, filename=None):

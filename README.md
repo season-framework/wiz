@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.27
+
+- Response PIL Bug fixed
+
 ### 0.5.26
 
 - plugin menu bug fixed (cache bug)
