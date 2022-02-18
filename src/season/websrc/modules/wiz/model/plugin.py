@@ -548,21 +548,6 @@ class Model:
 
         fs.write_json(info_file, info)
 
-    def install(self, plugin_id, **data):
-        fs = self.fs
-        info_file = os.path.join(plugin_id, "plugin.wiz")
-        route_file = os.path.join(plugin_id, "route.wiz")
-        apps_file = os.path.join(plugin_id, "apps.wiz")
-
-        if fs.isfile(info_file):
-            raise Exception(f"Already exist plugin")
-
-        fs.write_json(info_file, data['info'])
-        fs.write_json(route_file, data['route'])
-        fs.write_json(apps_file, data['apps'])
-
-        return True
-
     def update(self, plugin_id, info, apps, route):
         fs = self.fs
         info_file = os.path.join(plugin_id, "plugin.wiz")
@@ -576,8 +561,8 @@ class Model:
         fs.write(apps_file, apps)
         fs.write(route_file, route)
 
-        self.build()
-        
+        self.instance(plugin_id).build()
+
         return True
 
     def delete(self, plugin_id):

@@ -8,15 +8,8 @@ if 'resources' not in cache:
 
 _, ext = os.path.splitext(resource_filepath)
 filepath = os.path.join(resource_dirpath, resource_filepath)
-
-try:
-    mode = flask.request.cookies.get("season-wiz-devmode")
-except:
-    mode = False
-
-if mode != 'true':
-    if filepath in cache.resources:
-        return cache.resources[filepath]
+if filepath in cache.resources:
+    return cache.resources[filepath]
 
 ext = ext.lower()
 
