@@ -481,6 +481,9 @@ class Wiz(season.stdClass):
 
         for env_key in os.environ:
             if env_key[:4] == 'WIZ_':
+                key = env_key[:4]
+                if key in kwargs:
+                    continue
                 val = os.environ[env_key]
                 if val == 'True': val = True
                 elif val == 'true': val = True
