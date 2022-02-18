@@ -366,7 +366,10 @@ class Wiz(season.stdClass):
                 return code
             compiler = fs.read(f"{codelang}.py")
             compiler = spawner(compiler, "season.wiz.compiler", logger, wiz=self)
-            return compiler['compile'](self, code, kwargs)
+            fnname = 'compile'
+            if 'after_compile' in kwargs:
+                fnname = kwargs['after_compile']
+            return compiler[fnname](self, code, kwargs)
         except Exception as e:
             logger(e)
             raise e
@@ -505,6 +508,7 @@ class Wiz(season.stdClass):
         if app is None: app = cache.get(f"apps/bynamespace/{app_id}")
         if app is None: app = cache.get(f"apps/byid/{app_id}")
 
+        codelang_js = None
         # if cache not exists, find app
         if app is None:
             inst = wiz.cls.App(self.__wiz__)
@@ -552,7 +556,10 @@ class Wiz(season.stdClass):
             # compile reformat default language 
             app['html'] = self.__compiler__('html', app['html'], **compile_args)
             app['css'] = self.__compiler__('css', app['css'], **compile_args)
-            app['js'] = self.__compiler__('javascript', app['js'], **compile_args)
+            if 'js_compile' not in kwargs:
+                kwargs['js_compile'] = True
+            if kwargs['js_compile'] == True:
+                app['js'] = self.__compiler__('javascript', app['js'], **compile_args)
 
             # save cache
             cache.set(f"apps/byid/{app_id}", app)
@@ -615,6 +622,20 @@ class Wiz(season.stdClass):
         script_type = 'text/javascript'
         if 'script_type' in app['package']: 
             script_type = app['package']['script_type']
+        after_compile = None
+        if 'after_compile' in kwargs:
+            if kwargs['after_compile'] == True:
+                s = "{"
+                e = "}"
+                js = f"""
+                function __init_{render_id}() {s}
+                    if(!window.wiz) window.wiz = {s}{e};
+                    const kwargs = JSON.parse(atob('{kwargsstr}'));
+                    const dic = JSON.parse(atob('{dicstr}'));
+                    window.wiz['{namespace}'] = {s} kwargs, dic {e};
+                {e}
+                __init_{render_id}();
+                """
         view = f'{view}<script type="{script_type}">{js}</script><style>{css}</style>'
 
         view = framework.response.template_from_string(view, dicstr=dicstr, kwargs=kwargsstr, dic=dic, **kwargs)
@@ -627,6 +648,15 @@ class Wiz(season.stdClass):
 
         view = f'<script type="text/javascript">{WIZ_JS}</script>\n{view}'
         view = self.theme(themename, layoutname, 'layout.pug', view=view)
+
+        after_compile_fnname = None
+        if 'after_compile' in kwargs:
+            if kwargs['after_compile'] == True:
+                after_compile_fnname = 'after_compile'
+            if type(kwargs['after_compile']) == str:
+                after_compile_fnname = kwargs['after_compile']
+        if after_compile_fnname is not None:
+            self.__compiler__(codelang_js, app['js'], after_compile=after_compile_fnname)
 
         return markupsafe.Markup(view)
 
