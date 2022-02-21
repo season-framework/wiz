@@ -479,6 +479,7 @@ class Wiz(season.stdClass):
     def __view__(self, *args, **kwargs):
         if len(args) == 0: return ""
 
+        env_key_list = []
         for env_key in os.environ:
             if env_key[:4] == 'WIZ_':
                 key = env_key[:4]
@@ -490,6 +491,7 @@ class Wiz(season.stdClass):
                 elif val == 'False': val = False
                 elif val == 'false': val = False
                 kwargs[env_key[4:]] = val
+                env_key_list.append(env_key[4:])
 
         wiz = self.__wiz__
         cache = wiz.cache
@@ -575,8 +577,11 @@ class Wiz(season.stdClass):
         dicstr = dicstr.decode('ascii')
 
         kwargs_copy = kwargs.copy()
-        kwargs_copy.pop("js_compile")
-        kwargs_copy.pop("after_compile")
+        for key in env_key_list:
+            try:
+                kwargs_copy.pop(key)
+            except:
+                pass
         kwargsstr = json.dumps(kwargs, default=season.json_default)
         kwargsstr = kwargsstr.encode('ascii')
         kwargsstr = base64.b64encode(kwargsstr)
