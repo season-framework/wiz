@@ -107,7 +107,10 @@ class Model:
     def copy(self, filepath1, filepath2):
         filepath1 = self.abspath(filepath1)
         filepath2 = self.abspath(filepath2)
-        shutil.copytree(filepath1, filepath2)
+        if os.path.isfile(filepath1):
+            shutil.copy(filepath1, filepath2)
+        else:
+            shutil.copytree(filepath1, filepath2)
 
     def abspath(self, filepath=""):
         target_path = os.path.join(self.basepath(), filepath)

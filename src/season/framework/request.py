@@ -64,15 +64,15 @@ class request:
             return cookies[key]
         return default
 
-    def file(self):
+    def file(self, namespace='file'):
         try:
-            return self._flask.request.files['file']
+            return self._flask.request.files[namespace]
         except:
             return None
 
-    def files(self):
+    def files(self, namespace='file'):
         try:
-            return self._flask.request.files.getlist('file[]')
+            return self._flask.request.files.getlist(f'{namespace}[]')
         except:
             return []
 
