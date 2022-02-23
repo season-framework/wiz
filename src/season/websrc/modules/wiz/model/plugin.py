@@ -561,8 +561,8 @@ class Model:
         fs.write(apps_file, apps)
         fs.write(route_file, route)
 
-        self.build()
-        
+        self.instance(plugin_id).build()
+
         return True
 
     def delete(self, plugin_id):

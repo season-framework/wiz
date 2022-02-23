@@ -230,9 +230,6 @@ class Wiz(season.stdClass):
 
         self.__logger__ = self.logger("instance")
 
-        if self.installed() == False:
-            self.response.redirect("/wiz")
-
     def logger(self, tag=None, log_color=94):
         class logger:
             def __init__(self, tag, log_color, wiz):
@@ -366,25 +363,16 @@ class Wiz(season.stdClass):
                 return code
             compiler = fs.read(f"{codelang}.py")
             compiler = spawner(compiler, "season.wiz.compiler", logger, wiz=self)
-            return compiler['compile'](self, code, kwargs)
+            fnname = 'compile'
+            if 'after_compile' in kwargs:
+                fnname = kwargs['after_compile']
+            return compiler[fnname](self, code, kwargs)
         except Exception as e:
             logger(e)
             raise e
 
-    def installed(self):
-        try:
-            if len(self.__wiz__.config.data) > 0:
-                return True
-        except:
-            pass
-        return False
-
     def is_dev(self):
         return self.__wiz__.is_dev()
-
-    def path(self, path=""):
-        branch = self.branch()
-        return os.path.join(self.PATH.PROJECT, 'branch', branch, path)
     
     def branch(self):
         return self.__wiz__.branch()
@@ -491,6 +479,20 @@ class Wiz(season.stdClass):
     def __view__(self, *args, **kwargs):
         if len(args) == 0: return ""
 
+        env_key_list = []
+        for env_key in os.environ:
+            if env_key[:4] == 'WIZ_':
+                key = env_key[:4]
+                if key in kwargs:
+                    continue
+                val = os.environ[env_key]
+                if val == 'True': val = True
+                elif val == 'true': val = True
+                elif val == 'False': val = False
+                elif val == 'false': val = False
+                kwargs[env_key[4:]] = val
+                env_key_list.append(env_key[4:])
+
         wiz = self.__wiz__
         cache = wiz.cache
         framework = wiz.framework
@@ -505,8 +507,10 @@ class Wiz(season.stdClass):
         if app is None: app = cache.get(f"apps/bynamespace/{app_id}")
         if app is None: app = cache.get(f"apps/byid/{app_id}")
 
+        codelang_js = None
+        is_cached = app is not None
         # if cache not exists, find app
-        if app is None:
+        if is_cached == False:
             inst = wiz.cls.App(self.__wiz__)
             app = inst.get(app_id)
 
@@ -527,6 +531,64 @@ class Wiz(season.stdClass):
             controller = f"def process(wiz, **kwargs):\n    framework = wiz\n{controller}\n    return kwargs"
             app['controller'] = controller
 
+        # set render_theme
+        render_theme = None
+        if 'theme' in kwargs:
+            render_theme = kwargs['theme']
+            if render_theme not in self.__wiz__.themes():
+                render_theme = None
+            self.render_theme = render_theme
+
+        if self.render_theme is None:
+            if 'theme' in app['package']:
+                render_theme = self.render_theme = app['package']['theme']
+            else:
+                render_theme = self.render_theme = self.__wiz__.framework.config.load("wiz").get("theme_default", None)
+
+        # get app package info
+        app_id = app['package']['id']
+        app_namespace = app['package']['namespace']
+        namespace = str(app_namespace)  # namespace for ui
+        if len(args) > 1: namespace = args[1]
+        render_id = app['package']['render_id']
+
+        if self.app_id is None:
+            self.app_id = app_id
+
+        # ctrl, logger, dic, kwargs, ...
+        ctrl = None
+        if 'controller' in app['package']:
+            ctrl = app['package']['controller']
+            ctrl = self.controller(ctrl)
+            if ctrl is not None:
+                ctrl = ctrl()
+                ctrl.__startup__(self)
+
+        logger = self.logger(f"[app][{app_namespace}]", 93)
+        dic = self.__dic__('app', app_id)
+        controllerfn = spawner(app['controller'], 'season.wiz.app', logger, controller=ctrl, dic=dic, wiz=self)
+        kwargs = controllerfn['process'](self, **kwargs)
+        kwargs['query'] = framework.request.query()
+        
+        dicstr = dic()
+        dicstr = json.dumps(dicstr, default=season.json_default)
+        dicstr = dicstr.encode('ascii')
+        dicstr = base64.b64encode(dicstr)
+        dicstr = dicstr.decode('ascii')
+
+        kwargs_copy = kwargs.copy()
+        for key in env_key_list:
+            try:
+                kwargs_copy.pop(key)
+            except:
+                pass
+        kwargsstr = json.dumps(kwargs, default=season.json_default)
+        kwargsstr = kwargsstr.encode('ascii')
+        kwargsstr = base64.b64encode(kwargsstr)
+        kwargsstr = kwargsstr.decode('ascii')
+
+        # set cache
+        if is_cached == False:
             # compile codes
             def load_property(key, default=None):
                 try:
@@ -552,59 +614,25 @@ class Wiz(season.stdClass):
             # compile reformat default language 
             app['html'] = self.__compiler__('html', app['html'], **compile_args)
             app['css'] = self.__compiler__('css', app['css'], **compile_args)
-            app['js'] = self.__compiler__('javascript', app['js'], **compile_args)
+            if 'js_compile' not in kwargs:
+                kwargs['js_compile'] = True
+            if kwargs['js_compile'] == True:
+                app['js'] = self.__compiler__('javascript', app['js'], **compile_args)
+
+            after_compile_fnname = None
+            if 'after_compile' in kwargs:
+                if kwargs['after_compile'] == True:
+                    after_compile_fnname = 'after_compile'
+                if type(kwargs['after_compile']) == str:
+                    after_compile_fnname = kwargs['after_compile']
+            if after_compile_fnname is not None:
+                if render_theme is not None:
+                    self.__compiler__(codelang_js, app['js'], after_compile=after_compile_fnname)
 
             # save cache
             cache.set(f"apps/byid/{app_id}", app)
             cache.set(f"apps/bynamespace/{app_namespace}", app)
             cache.set(f"apps/byviewnamespace/{namespace}", app)
-
-        app_id = app['package']['id']
-        app_namespace = app['package']['namespace']
-        namespace = str(app_namespace)  # namespace for ui
-        if len(args) > 1: namespace = args[1]
-        render_id = app['package']['render_id']
-
-        if self.app_id is None:
-            self.app_id = app_id
-
-        render_theme = None
-        if 'theme' in kwargs:
-            render_theme = kwargs['theme']
-            if render_theme not in self.__wiz__.themes():
-                render_theme = None
-            self.render_theme = render_theme
-
-        if self.render_theme is None:
-            if 'theme' in app['package']:
-                render_theme = self.render_theme = app['package']['theme']
-            else:
-                render_theme = self.render_theme = self.__wiz__.framework.config.load("wiz").get("theme_default", None)
-
-        ctrl = None
-        if 'controller' in app['package']:
-            ctrl = app['package']['controller']
-            ctrl = self.controller(ctrl)
-            if ctrl is not None:
-                ctrl = ctrl()
-                ctrl.__startup__(self)
-
-        logger = self.logger(f"[app][{app_namespace}]", 93)
-        dic = self.__dic__('app', app_id)
-        controllerfn = spawner(app['controller'], 'season.wiz.app', logger, controller=ctrl, dic=dic, wiz=self)
-        kwargs = controllerfn['process'](self, **kwargs)
-        kwargs['query'] = framework.request.query()
-        
-        dicstr = dic()
-        dicstr = json.dumps(dicstr, default=season.json_default)
-        dicstr = dicstr.encode('ascii')
-        dicstr = base64.b64encode(dicstr)
-        dicstr = dicstr.decode('ascii')
-
-        kwargsstr = json.dumps(kwargs, default=season.json_default)
-        kwargsstr = kwargsstr.encode('ascii')
-        kwargsstr = base64.b64encode(kwargsstr)
-        kwargsstr = kwargsstr.decode('ascii')
 
         kwargs['wiz'] = self
 
@@ -615,6 +643,20 @@ class Wiz(season.stdClass):
         script_type = 'text/javascript'
         if 'script_type' in app['package']: 
             script_type = app['package']['script_type']
+        after_compile = None
+        if 'after_compile' in kwargs:
+            if kwargs['after_compile'] == True or type(kwargs['after_compile']) == str:
+                s = "{"
+                e = "}"
+                js = f"""
+                function __init_{render_id}() {s}
+                    if(!window.wiz) window.wiz = {s}{e};
+                    const kwargs = JSON.parse(atob('{kwargsstr}'));
+                    const dic = JSON.parse(atob('{dicstr}'));
+                    window.wiz['{namespace}'] = {s} kwargs, dic {e};
+                {e}
+                __init_{render_id}();
+                """
         view = f'{view}<script type="{script_type}">{js}</script><style>{css}</style>'
 
         view = framework.response.template_from_string(view, dicstr=dicstr, kwargs=kwargsstr, dic=dic, **kwargs)
@@ -972,8 +1014,8 @@ class Merge(Git):
         path = fs.abspath()
 
         remote_origin = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/master").abspath()
-        remote_target = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{branch}").abspath() # src
-        remote_base = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{base_branch}").abspath() # dst
+        remote_base = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{base_branch}").abspath()
+        remote_target = wiz.framework.model("wizfs", module="wiz").use(f"wiz/branch/{branch}").abspath()
 
         if fs.isdir(remote_origin) == False: raise Exception("master branch not exists")
         if fs.isdir(remote_base) == False: raise Exception(f"{base_branch} branch not exists")
@@ -1010,20 +1052,25 @@ class Merge(Git):
             origin.fetch()
 
             # copy source branch
-            branch_head = repo.create_head(branch, origin.refs[branch]) # src
-            base_head = repo.create_head(base_branch, origin.refs[base_branch]) # dst
+            branch_head = repo.create_head(branch, origin.refs[branch])
+            base_head = repo.create_head(base_branch, origin.refs[base_branch])
             
-            branch_head.checkout() # pull 
             base_head.checkout() # init as base branch
-            try:
-                repo.git.merge(branch_head)
-            except:
-                pass
 
-            unmerged_blobs = repo.index.unmerged_blobs()
-            for path in unmerged_blobs:
-                fs.delete(path)
-                fs.copy(os.path.join(remote_target, path), path)
+            # delete wiz component files
+            dirs = os.listdir(path)
+            for name in dirs:
+                if name == '.git': continue
+                if fs.isdir(name):
+                    fs.delete(name)
+
+            # copy update files
+            newdirs = os.listdir(remote_target)
+            for name in dirs:
+                if name == '.git': continue
+                copy_path = os.path.join(remote_target, name)
+                if fs.isdir(copy_path):
+                    fs.copy(copy_path, name)
 
             repo.git.add('--all')
     
@@ -1317,9 +1364,7 @@ class Model:
             self.env[name] = value
     
     def is_dev(self):
-        if self.branch() == "master":
-            return self.env.DEVMODE
-        return True
+        return self.env.DEVMODE
 
     def set_dev(self, DEVMODE):
         """set development mode.
