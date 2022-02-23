@@ -491,6 +491,20 @@ class Wiz(season.stdClass):
     def __view__(self, *args, **kwargs):
         if len(args) == 0: return ""
 
+        env_key_list = []
+        for env_key in os.environ:
+            if env_key[:4] == 'WIZ_':
+                key = env_key[:4]
+                if key in kwargs:
+                    continue
+                val = os.environ[env_key]
+                if val == 'True': val = True
+                elif val == 'true': val = True
+                elif val == 'False': val = False
+                elif val == 'false': val = False
+                kwargs[env_key[4:]] = val
+                env_key_list.append(env_key[4:])
+
         wiz = self.__wiz__
         cache = wiz.cache
         framework = wiz.framework
@@ -505,8 +519,10 @@ class Wiz(season.stdClass):
         if app is None: app = cache.get(f"apps/bynamespace/{app_id}")
         if app is None: app = cache.get(f"apps/byid/{app_id}")
 
+        codelang_js = None
+        is_cached = app is not None
         # if cache not exists, find app
-        if app is None:
+        if is_cached == False:
             inst = wiz.cls.App(self.__wiz__)
             app = inst.get(app_id)
 
@@ -527,6 +543,64 @@ class Wiz(season.stdClass):
             controller = f"def process(wiz, **kwargs):\n    framework = wiz\n{controller}\n    return kwargs"
             app['controller'] = controller
 
+        # set render_theme
+        render_theme = None
+        if 'theme' in kwargs:
+            render_theme = kwargs['theme']
+            if render_theme not in self.__wiz__.themes():
+                render_theme = None
+            self.render_theme = render_theme
+
+        if self.render_theme is None:
+            if 'theme' in app['package']:
+                render_theme = self.render_theme = app['package']['theme']
+            else:
+                render_theme = self.render_theme = self.__wiz__.framework.config.load("wiz").get("theme_default", None)
+
+        # get app package info
+        app_id = app['package']['id']
+        app_namespace = app['package']['namespace']
+        namespace = str(app_namespace)  # namespace for ui
+        if len(args) > 1: namespace = args[1]
+        render_id = app['package']['render_id']
+
+        if self.app_id is None:
+            self.app_id = app_id
+
+        # ctrl, logger, dic, kwargs, ...
+        ctrl = None
+        if 'controller' in app['package']:
+            ctrl = app['package']['controller']
+            ctrl = self.controller(ctrl)
+            if ctrl is not None:
+                ctrl = ctrl()
+                ctrl.__startup__(self)
+
+        logger = self.logger(f"[app][{app_namespace}]", 93)
+        dic = self.__dic__('app', app_id)
+        controllerfn = spawner(app['controller'], 'season.wiz.app', logger, controller=ctrl, dic=dic, wiz=self)
+        kwargs = controllerfn['process'](self, **kwargs)
+        kwargs['query'] = framework.request.query()
+        
+        dicstr = dic()
+        dicstr = json.dumps(dicstr, default=season.json_default)
+        dicstr = dicstr.encode('ascii')
+        dicstr = base64.b64encode(dicstr)
+        dicstr = dicstr.decode('ascii')
+
+        kwargs_copy = kwargs.copy()
+        for key in env_key_list:
+            try:
+                kwargs_copy.pop(key)
+            except:
+                pass
+        kwargsstr = json.dumps(kwargs, default=season.json_default)
+        kwargsstr = kwargsstr.encode('ascii')
+        kwargsstr = base64.b64encode(kwargsstr)
+        kwargsstr = kwargsstr.decode('ascii')
+
+        # set cache
+        if is_cached == False:
             # compile codes
             def load_property(key, default=None):
                 try:
@@ -552,59 +626,25 @@ class Wiz(season.stdClass):
             # compile reformat default language 
             app['html'] = self.__compiler__('html', app['html'], **compile_args)
             app['css'] = self.__compiler__('css', app['css'], **compile_args)
-            app['js'] = self.__compiler__('javascript', app['js'], **compile_args)
+            if 'js_compile' not in kwargs:
+                kwargs['js_compile'] = True
+            if kwargs['js_compile'] == True:
+                app['js'] = self.__compiler__('javascript', app['js'], **compile_args)
+
+            after_compile_fnname = None
+            if 'after_compile' in kwargs:
+                if kwargs['after_compile'] == True:
+                    after_compile_fnname = 'after_compile'
+                if type(kwargs['after_compile']) == str:
+                    after_compile_fnname = kwargs['after_compile']
+            if after_compile_fnname is not None:
+                if render_theme is not None:
+                    self.__compiler__(codelang_js, app['js'], after_compile=after_compile_fnname)
 
             # save cache
             cache.set(f"apps/byid/{app_id}", app)
             cache.set(f"apps/bynamespace/{app_namespace}", app)
             cache.set(f"apps/byviewnamespace/{namespace}", app)
-
-        app_id = app['package']['id']
-        app_namespace = app['package']['namespace']
-        namespace = str(app_namespace)  # namespace for ui
-        if len(args) > 1: namespace = args[1]
-        render_id = app['package']['render_id']
-
-        if self.app_id is None:
-            self.app_id = app_id
-
-        render_theme = None
-        if 'theme' in kwargs:
-            render_theme = kwargs['theme']
-            if render_theme not in self.__wiz__.themes():
-                render_theme = None
-            self.render_theme = render_theme
-
-        if self.render_theme is None:
-            if 'theme' in app['package']:
-                render_theme = self.render_theme = app['package']['theme']
-            else:
-                render_theme = self.render_theme = self.__wiz__.framework.config.load("wiz").get("theme_default", None)
-
-        ctrl = None
-        if 'controller' in app['package']:
-            ctrl = app['package']['controller']
-            ctrl = self.controller(ctrl)
-            if ctrl is not None:
-                ctrl = ctrl()
-                ctrl.__startup__(self)
-
-        logger = self.logger(f"[app][{app_namespace}]", 93)
-        dic = self.__dic__('app', app_id)
-        controllerfn = spawner(app['controller'], 'season.wiz.app', logger, controller=ctrl, dic=dic, wiz=self)
-        kwargs = controllerfn['process'](self, **kwargs)
-        kwargs['query'] = framework.request.query()
-        
-        dicstr = dic()
-        dicstr = json.dumps(dicstr, default=season.json_default)
-        dicstr = dicstr.encode('ascii')
-        dicstr = base64.b64encode(dicstr)
-        dicstr = dicstr.decode('ascii')
-
-        kwargsstr = json.dumps(kwargs, default=season.json_default)
-        kwargsstr = kwargsstr.encode('ascii')
-        kwargsstr = base64.b64encode(kwargsstr)
-        kwargsstr = kwargsstr.decode('ascii')
 
         kwargs['wiz'] = self
 
@@ -615,6 +655,20 @@ class Wiz(season.stdClass):
         script_type = 'text/javascript'
         if 'script_type' in app['package']: 
             script_type = app['package']['script_type']
+        after_compile = None
+        if 'after_compile' in kwargs:
+            if kwargs['after_compile'] == True or type(kwargs['after_compile']) == str:
+                s = "{"
+                e = "}"
+                js = f"""
+                function __init_{render_id}() {s}
+                    if(!window.wiz) window.wiz = {s}{e};
+                    const kwargs = JSON.parse(atob('{kwargsstr}'));
+                    const dic = JSON.parse(atob('{dicstr}'));
+                    window.wiz['{namespace}'] = {s} kwargs, dic {e};
+                {e}
+                __init_{render_id}();
+                """
         view = f'{view}<script type="{script_type}">{js}</script><style>{css}</style>'
 
         view = framework.response.template_from_string(view, dicstr=dicstr, kwargs=kwargsstr, dic=dic, **kwargs)
@@ -629,7 +683,6 @@ class Wiz(season.stdClass):
         view = self.theme(themename, layoutname, 'layout.pug', view=view)
 
         return markupsafe.Markup(view)
-
 
 """Data Management APIs
 
