@@ -366,7 +366,10 @@ class Wiz(season.stdClass):
                 return code
             compiler = fs.read(f"{codelang}.py")
             compiler = spawner(compiler, "season.wiz.compiler", logger, wiz=self)
-            return compiler['compile'](self, code, kwargs)
+            fnname = 'compile'
+            if 'after_compile' in kwargs:
+                fnname = kwargs['after_compile']
+            return compiler[fnname](self, code, kwargs)
         except Exception as e:
             logger(e)
             raise e
