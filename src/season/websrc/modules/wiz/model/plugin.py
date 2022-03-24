@@ -561,6 +561,36 @@ class Model:
         fs.write(apps_file, apps)
         fs.write(route_file, route)
 
+        # generate src for trace code
+        srcbase = os.path.join(plugin_id, "src")
+        appbase = os.path.join(srcbase, "apps")
+        routebase = os.path.join(srcbase, "route")
+        
+        fs.delete(srcbase)
+        fs.makedirs(srcbase)
+        fs.makedirs(routebase)
+        fs.makedirs(appbase)
+
+        try:
+            apps = json.loads(apps)
+
+            for app in apps:
+                app_id = app['id']
+                fs.makedirs(os.path.join(appbase, app_id))
+                if 'controller' in app: fs.write(os.path.join(appbase, app_id, "controller.py"), app['controller'])
+                if 'api' in app: fs.write(os.path.join(appbase, app_id, "api.py"), app['api'])
+                if 'html' in app: fs.write(os.path.join(appbase, app_id, "view.html"), app['html'])
+                if 'js' in app: fs.write(os.path.join(appbase, app_id, "view.js"), app['js'])
+                if 'css' in app: fs.write(os.path.join(appbase, app_id, "view.css"), app['css'])            
+        except:
+            pass
+        try:
+            route = json.loads(route)
+            if 'route' in route: fs.write(os.path.join(routebase, "route.py"), route['route'])
+            if 'builder' in route: fs.write(os.path.join(routebase, "builder.py"), route['builder'])
+        except:
+            pass
+
         self.build()
         
         return True

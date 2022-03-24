@@ -37,6 +37,11 @@ wiz clean
 
 ## Release Note
 
+### 0.5.28
+
+- core render bug fixed
+- add src folder for tracing plugin code
+
 ### 0.5.27
 
 - Response PIL Bug fixed
