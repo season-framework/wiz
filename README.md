@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.29
+
+- packages version bug fixed (jinja2, werkzeug)
+
 ### 0.5.28
 
 - core render bug fixed

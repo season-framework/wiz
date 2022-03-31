@@ -44,6 +44,8 @@ setup(
         'wiz = season.cmd_wiz:main [season]'
     ]},
     install_requires=[
+        'werkzeug==2.0.3',
+        'jinja2==3.0.3',
         'flask',
         'watchdog',
         'argh',
