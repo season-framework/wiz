@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.30
+
+- socketio config (cors_allowed_origins)
+
 ### 0.5.29
 
 - packages version bug fixed (jinja2, werkzeug)

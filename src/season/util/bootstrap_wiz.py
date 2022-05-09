@@ -105,8 +105,14 @@ class bootstrap_wiz:
     def bootstrap(self, ismain):
         season = self.season
         boottime = season.boottime
+
+        config = season.config.load()
+        cors_allowed_origins = config.get("cors_allowed_origins", [])
+        host = config.get("host", "0.0.0.0")
+        port = int(config.get("port", 3000))
+
         app = flask.Flask('__main__', static_url_path='')
-        socketio = flask_socketio.SocketIO(app)
+        socketio = flask_socketio.SocketIO(app, cors_allowed_origins=cors_allowed_origins)
         
         HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
         
@@ -127,11 +133,6 @@ class bootstrap_wiz:
             return ERROR_INFO
         
         # Handler
-        config = season.config.load()
-
-        host = config.get("host", "0.0.0.0")
-        port = int(config.get("port", 3000))
-
         handler = stdClass()
         handler.onerror = config.get('on_error', None)
         handler.before_request = config.get('before_request', None)
