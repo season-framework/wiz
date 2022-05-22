@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.32
+
+- socketio config (config/socketio.py)
+
 ### 0.5.30
 
 - socketio config (cors_allowed_origins)

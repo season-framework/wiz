@@ -107,12 +107,13 @@ class bootstrap_wiz:
         boottime = season.boottime
 
         config = season.config.load()
-        cors_allowed_origins = config.get("cors_allowed_origins", [])
+        sioconfig = season.config.load("socketio")
+
         host = config.get("host", "0.0.0.0")
         port = int(config.get("port", 3000))
 
         app = flask.Flask('__main__', static_url_path='')
-        socketio = flask_socketio.SocketIO(app, cors_allowed_origins=cors_allowed_origins)
+        socketio = flask_socketio.SocketIO(app, **sioconfig.get("app", dict()))
         
         HTTP_METHODS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
         
@@ -565,7 +566,10 @@ class bootstrap_wiz:
                             try:
                                 getattr(controller, fnname)(framework, namespace, data)
                             except:
-                                getattr(controller, fnname)(framework, data)
+                                try:
+                                    getattr(controller, fnname)(framework, data)
+                                except:
+                                    pass
 
                         return socketwrap
 
@@ -578,7 +582,7 @@ class bootstrap_wiz:
                     if regist(controller, fnname, framework, namespace):
                         reglist.append(fnname)
                 reglist = ", ".join(reglist)
-                # _logger(LOG_INFO, message=f"socketio event binding on '{reglist}' with namespace '{namespace}'")
+                _logger(LOG_DEBUG, message=f"socketio event binding on '{reglist}' with namespace '{namespace}'")
                     
                 if hasattr(controller, 'namespaces'):
                     namespaces = controller.namespaces
@@ -596,7 +600,7 @@ class bootstrap_wiz:
                             if regist(controller, fnname, framework, _namespace):
                                 reglist.append(fnname)
                         reglist = ", ".join(reglist)
-                        # _logger(LOG_INFO, message=f"socketio event binding on '{reglist}' with namespace '{_namespace}'")
+                        _logger(LOG_DEBUG, message=f"socketio event binding on '{reglist}' with namespace '{_namespace}'")
 
         socket_binder()
 
@@ -618,6 +622,10 @@ class bootstrap_wiz:
         boottime = round(time.time() * 1000) - boottime
         if ismain:
             _logger(LOG_DEV, message=f"{boottime}ms to boot. server running on http://{host}:{port}/ (Press CTRL+C to quit)")
-            socketio.run(app, host=host, port=port)
+
+            siorunconfig = sioconfig.get("run", dict())
+            siorunconfig.host = host
+            siorunconfig.port = port
+            socketio.run(app, **siorunconfig)
 
         return app, socketio
