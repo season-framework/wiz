@@ -4,14 +4,14 @@ from werkzeug.routing import Map, Rule
 
 import season
 
-from season.core.lib.wiz.request import request
-from season.core.lib.wiz.response import response
+from season.core.lib.request import request
+from season.core.lib.response import response
 
-from season.core.src.app import App
-from season.core.src.route import Route
-from season.core.src.config import Config
-from season.core.src.compiler import Compiler
-from season.core.src.theme import Theme
+from season.component.wiz.app import App
+from season.component.wiz.route import Route
+from season.component.wiz.config import Config
+from season.component.wiz.compiler import Compiler
+from season.component.wiz.theme import Theme
 
 class wiz(season.util.std.stdClass):
     def __init__(self, server, **kwargs):
@@ -23,6 +23,9 @@ class wiz(season.util.std.stdClass):
         self.compiler = Compiler(self)
         self.theme = Theme(self)
         self.log = self.logger()
+
+        # TODO: cache controller
+        self.cache = None
 
         # deprecated functions
         self.flask = server.flask

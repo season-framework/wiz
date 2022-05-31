@@ -33,7 +33,9 @@ class HTTP:
         @app.errorhandler(season.exception.ResponseException)
         def handle_response(e):
             tracer = wiz.tracer
-            tags = ["response"]
+            code = wiz.response.status_code
+            if code is None: code = 200
+            tags = [tracer.branch, "response", code]
             wiz.log(tracer.path, level=season.log.info, tags=tags)
             code, response = e.get_response()
             return response, code
@@ -46,7 +48,9 @@ class HTTP:
         @app.errorhandler(season.exception.ErrorException)
         def handle_exception_error(e):
             tracer = wiz.tracer
-            tags = [tracer.branch]
+            code = wiz.response.status_code
+            if code is None: code = 500
+            tags = [tracer.branch, code]
             errormsg = tracer.path + "\n" + tracer.error
             wiz.log(errormsg, level=season.log.error, tags=tags, color=91)
             return e.get_response()
@@ -55,16 +59,16 @@ class HTTP:
         @app.errorhandler(HTTPException)
         def handle_exception_http(e):
             tracer = wiz.tracer
-            tags = [tracer.branch]
-            errormsg = tracer.path + "\n" + tracer.error
-            wiz.log(errormsg, level=season.log.error, tags=tags, color=91)
+            tags = [tracer.branch, e.code]
+            errormsg = tracer.path
+            wiz.log(errormsg, level=season.log.warning, tags=tags, color=93)
             return e.get_response()
 
         # Internal Error Handler
         @app.errorhandler(Exception)
         def handle_exception(e):
             tracer = wiz.tracer
-            tags = [tracer.branch]
+            tags = [tracer.branch, 500]
             errormsg = tracer.path + "\n" + traceback.format_exc()
             wiz.log(errormsg, level=season.log.critical, tags=tags, color=91)
             return '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"><title>500 Internal Server Error</title><h1>Internal Server Error</h1><p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>', 500
@@ -148,11 +152,15 @@ class HTTP:
         wizurl = config.wiz.url
         if wizurl[-1] == "/": wizurl = wizurl[:-1]
 
+        # base request path
         @app.route(wizurl, methods=HTTP_METHODS)
         @app.route(wizurl + "/", methods=HTTP_METHODS)
         def wiz_index_handler(*args, **kwargs):
             wiz.response.status(404)
 
+        # app's api request path
+        @app.route(wizurl + "/api", methods=HTTP_METHODS)
+        @app.route(wizurl + "/api/", methods=HTTP_METHODS)
         @app.route(wizurl + "/api/<path:path>", methods=HTTP_METHODS)
         def wiz_api_handler(*args, **kwargs):
             try:
@@ -180,7 +188,31 @@ class HTTP:
             
             wiz.response.status(404)
 
-        # TODO: plugins
+        # plugin resources request path
+        @app.route(wizurl + "/resources", methods=HTTP_METHODS)
+        @app.route(wizurl + "/resources/", methods=HTTP_METHODS)
+        @app.route(wizurl + "/resources/<path:path>", methods=HTTP_METHODS)
+        def wiz_resource_handler(*args, **kwargs):
+            try:
+                segment = wiz.match(f"{wizurl}/resources/<plugin_id>/<path:path>")
+                plugin_id = segment.plugin_id
+                path = segment.path
+                filepath = os.path.join(season.path.project, "plugin", plugin_id, "resources", path)
+                if os.path.isfile(filepath):
+                    dirname = os.path.dirname(filepath)
+                    filename = os.path.basename(filepath)
+                    response = wiz.server.flask.send_from_directory(dirname, filename)
+                    raise season.exception.ResponseException(200, response)
+                wiz.response.abort(404)
+            except season.exception.ResponseException as e:
+                raise e
+            except HTTPException as e:
+                raise e
+            except Exception as e:
+                wiz.tracer.error = traceback.format_exc()
+                raise season.exception.ErrorException()
+            
+        # TODO: plugin request path
         @app.route(wizurl + "/ui/<path:path>", methods=HTTP_METHODS)
         def wiz_plugin_handler(*args, **kwargs):
             try:

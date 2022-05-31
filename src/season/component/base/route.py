@@ -3,23 +3,20 @@ import datetime
 import git
 import os
 from werkzeug.routing import Map, Rule
+from abc import *
 
-class Route:
+class Route(metaclass=ABCMeta):
     def __init__(self, wiz):
         self.wiz = wiz
         self.branch = wiz.branch
 
+    @abstractmethod
     def basepath(self):
-        branch = self.branch()
-        return os.path.join(season.path.project, "branch", branch, "routes")
+        pass
 
+    @abstractmethod
     def cachepath(self):
-        branch = self.branch()
-        return os.path.join(season.path.project, "cache", "branch", branch, "routes")
-
-    def clean(self):
-        fs = season.util.os.FileSystem(self.cachepath())
-        fs.delete()
+        pass
     
     def list(self):
         fs = season.util.os.FileSystem(self.basepath())
@@ -31,6 +28,15 @@ class Route:
                 res.append(pkg.data(code=False))
         res.sort(key=lambda x: x['package']['id'])
         return res
+    
+    def cachefs(self):
+        path = self.cachepath()
+        fs = season.util.os.FileSystem(path)
+        return fs
+
+    def clean(self):
+        fs = self.cachefs()
+        fs.delete()
 
     def build(self):
         url_map = []
@@ -66,12 +72,12 @@ class Route:
                         url_map.append(Rule(rpath + "/", endpoint=endpoint))
             url_map.append(Rule(route, endpoint=endpoint))
 
-        fs = season.util.os.FileSystem(self.cachepath())
+        fs = self.cachefs()
         fs.write.pickle("urlmap", url_map)
         return url_map
 
     def match(self, uri):
-        fs = season.util.os.FileSystem(self.cachepath())
+        fs = self.cachefs()
         urlmap = fs.read.pickle("urlmap", None)
         if urlmap is None:
             urlmap = self.build()

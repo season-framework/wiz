@@ -8,29 +8,21 @@ import time
 import markupsafe
 from werkzeug.routing import Map, Rule
 import io
+from abc import *
 
-class App:
+class App(metaclass=ABCMeta):
     def __init__(self, wiz):
         self.wiz = wiz
         self.branch = wiz.branch
 
+    @abstractmethod
     def basepath(self):
-        branch = self.branch()
-        return os.path.join(season.path.project, "branch", branch, "apps")
+        pass
 
+    @abstractmethod
     def cachepath(self):
-        branch = self.branch()
-        return os.path.join(season.path.project, "cache", "branch", branch, "apps")
+        pass
 
-    def cachefs(self):
-        path = self.cachepath()
-        fs = season.util.os.FileSystem(path)
-        return fs
-
-    def clean(self):
-        fs = self.cachefs()
-        fs.delete()
-    
     def list(self):
         fs = season.util.os.FileSystem(self.basepath())
         routes = fs.files()
@@ -42,6 +34,15 @@ class App:
         res.sort(key=lambda x: x['package']['id'])
         return res
 
+    def cachefs(self):
+        path = self.cachepath()
+        fs = season.util.os.FileSystem(path)
+        return fs
+
+    def clean(self):
+        fs = self.cachefs()
+        fs.delete()
+    
     def __call__(self, id):
         if id is None: return None
         return self.Package(self, id)
