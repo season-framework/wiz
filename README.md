@@ -37,6 +37,10 @@ wiz clean
 
 ## Release Note
 
+### 0.5.33
+
+- socketio config bug fixed
+
 ### 0.5.32
 
 - socketio config (config/socketio.py)
