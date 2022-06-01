@@ -2,8 +2,8 @@ import os
 
 from season import util
 from season.core import exception
-from season.core.lib.instance.wiz import wiz
-from season.core.lib.instance.plugin import plugin
+from season.core.lib.instances.wiz import wiz
+from season.core.lib.instances.plugin import plugin
 from season.core.server import Server
 from season.core.bootstrap import bootstrap
 
