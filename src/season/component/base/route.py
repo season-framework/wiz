@@ -1,6 +1,5 @@
 import season
 import datetime
-import git
 import os
 from werkzeug.routing import Map, Rule
 from abc import *
@@ -144,7 +143,10 @@ class Route(metaclass=ABCMeta):
 
             fs = self.fs
             wiz = self.manager.wiz
-            dicdata = fs.read.json("dic.json")
+            try:
+                dicdata = fs.read.json("dic.json")
+            except:
+                dicdata = dict()
             return dicClass(wiz, dicdata)
 
         def proceed(self):
@@ -154,7 +156,7 @@ class Route(metaclass=ABCMeta):
 
             data = self.data()
             ctrl = None
-            if 'controller' in data['package']:
+            if 'controller' in data['package'] and len(data['package']['controller']) > 0:
                 ctrl = data['package']['controller']
                 ctrl = wiz.controller(ctrl, startup=True)
 

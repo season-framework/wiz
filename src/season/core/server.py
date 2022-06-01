@@ -44,15 +44,10 @@ class Server:
 
         # create wiz instance
         self.wiz = season.wiz(self)
+        self.plugin = season.plugin(self)
 
         # http events
         http = HTTP(self)
-        http.trigger()
-        http.response()
-        http.error()
-        http.wiz()
-        http.resources()
-        http.route()
     
     def load_config(self):
         self.config.server = Config.load("server")

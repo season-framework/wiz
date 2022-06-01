@@ -1,9 +1,9 @@
 import os
-
 import season
-from season.component.base.app import App as BaseApp
 
-class App(BaseApp):
+from season.component.base.app import App as Base
+
+class App(Base):
     def __init__(self, wiz):
         super().__init__(wiz)
 

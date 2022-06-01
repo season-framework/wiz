@@ -37,6 +37,13 @@ wiz clean
 
 ## Release Note
 
+### 0.6.0
+
+- remove season-flask concept
+- enhanced performance
+- logging for wiz concept
+- upgrade plugin develop env
+
 ### 0.5.33
 
 - socketio config bug fixed

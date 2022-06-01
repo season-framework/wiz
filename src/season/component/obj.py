@@ -1,36 +1,38 @@
 import os
 import time
 from werkzeug.routing import Map, Rule
+from abc import *
 
 import season
 
-from season.core.lib.request import request
-from season.core.lib.response import response
-
-from season.component.wiz.app import App
-from season.component.wiz.route import Route
-from season.component.wiz.config import Config
-from season.component.wiz.compiler import Compiler
-from season.component.wiz.theme import Theme
-
-class wiz(season.util.std.stdClass):
+class InstanceObject(season.util.std.stdClass):
     def __init__(self, server, **kwargs):
         self.server = server
-        self.request = request(self)
-        self.response = response(self)
-        self.route = Route(self)
-        self.app = App(self)
-        self.compiler = Compiler(self)
-        self.theme = Theme(self)
         self.log = self.logger()
+        self.cache = season.stdClass()
 
-        # TODO: cache controller
-        self.cache = None
-
+        self.initialize()
+        
         # deprecated functions
         self.flask = server.flask
         self.socketio = server.flask_socketio
         self.flask_socketio = server.flask_socketio
+
+    @abstractmethod
+    def initialize(self):
+        pass
+
+    @abstractmethod
+    def config(self, namespace="config"):
+        pass
+
+    @abstractmethod
+    def basepath(self):
+        pass
+
+    @abstractmethod
+    def tag(self):
+        pass
 
     def trace(self):
         self.tracer = season.util.std.stdClass()
@@ -41,8 +43,7 @@ class wiz(season.util.std.stdClass):
 
         self.memory = season.stdClass()
 
-        self.request = request(self)
-        self.response = response(self)
+        self.initialize()
 
     # TODO: check installed
     def installed(self):
@@ -63,7 +64,7 @@ class wiz(season.util.std.stdClass):
     def set_dev(self, DEVMODE):
         if DEVMODE == False: DEVMODE = "false"
         if DEVMODE == True: DEVMODE = "true"
-        self.framework.response.cookies.set("season-wiz-devmode", DEVMODE)
+        self.response.cookies.set("season-wiz-devmode", DEVMODE)
 
     def branch(self, branch=None):
         if branch is None:
@@ -96,14 +97,8 @@ class wiz(season.util.std.stdClass):
         self.response.cookies.set("season-wiz-branch", branch)
         return branch
 
-    def config(self, namespace="config"):
-        branch = self.branch()
-        c = Config.load(branch, namespace)
-        return c
-
     def model(self, id):
-        branch = self.branch()
-        path = os.path.join(season.path.project, 'branch', branch, 'interfaces', 'model')
+        path = os.path.join(self.basepath(), 'interfaces', 'model')
         fs = season.util.os.FileSystem(path)
         code = fs.read(id + ".py")
         logger = self.logger(f"[model][{id}]", 94)
@@ -116,8 +111,7 @@ class wiz(season.util.std.stdClass):
             if controller_id in self.memory:
                 return self.memory[controller_id]
 
-        branch = self.branch()
-        path = os.path.join(season.path.project, 'branch', branch, 'interfaces', 'controller')
+        path = os.path.join(self.basepath(), 'interfaces', 'controller')
         fs = season.util.os.FileSystem(path)
         code = fs.read(id + ".py")
         logger = self.logger(f"[controller][{id}]", 94)
@@ -205,7 +199,7 @@ class wiz(season.util.std.stdClass):
                 tagmap = ['debug', 'info', 'dev', 'warning', 'error', 'critical']
                 
                 if level < len(tagmap): tag = "[" + tagmap[level] + "]" + tag
-                tag = "[wiz]" + tag
+                tag = "[" + wiz.tag() + "]" + tag
 
                 if wiz.tracer.timestamp is not None:
                     tag = tag + "[" + str(round((time.time() - wiz.tracer.timestamp) * 1000)) + "ms]"

@@ -2,19 +2,26 @@ import season
 import io
 import json
 import os
-from werkzeug.routing import Map, Rule
+from abc import *
 
-class response:
+class Response(metaclass=ABCMeta):
     def __init__(self, wiz):
         self.wiz = wiz
         self._flask = wiz.server.flask
-        self.data = response._data(wiz)
+        self.data = self._data(wiz)
         self.headers = self._headers()
         self.cookies = self._cookies()
         self.status_code = None
         self.mimetype = None
-        self.modulename = wiz.modulename
         self.pil_image = self.PIL
+
+    @abstractmethod
+    def render(self, *args, **kwargs):
+        pass
+    
+    @abstractmethod
+    def redirect(self, url):
+        pass
 
     def lang(self, lang):
         self.language(lang)
@@ -35,13 +42,7 @@ class response:
     def error(self, code=404, response="ERROR"):
         event = season.exception.ResponseException(code=code, response=response)
         raise event
-        
-    # response functions
-    def redirect(self, url):
-        self.status_code = 302
-        resp = self._flask.redirect(url)
-        return self._build(resp)
-
+    
     def response(self, resp):
         return self._build(resp)
 
@@ -99,66 +100,6 @@ class response:
         data = self.data.get()
         html = wiz.server.flask.render_template_string(template_string, **data)
         return html
-
-    def render(self, *args, **kwargs):
-        wiz = self.wiz
-        if len(args) == 0:
-            return self
-
-        if len(args) == 1:
-            app_id = args[0]
-        else:
-            route = args[0]
-            endpoint = args[1]
-
-            if route is None: return self
-            if len(route) == 0: return self
-            url_map = []
-            if route[-1] == "/":
-                url_map.append(Rule(route[:-1], endpoint=endpoint))
-            elif route[-1] == ">":
-                rpath = route
-                while rpath[-1] == ">":
-                    rpath = rpath.split("/")[:-1]
-                    rpath = "/".join(rpath)
-                    url_map.append(Rule(rpath, endpoint=endpoint))
-                    if rpath[-1] != ">":
-                        url_map.append(Rule(rpath + "/", endpoint=endpoint))
-            url_map.append(Rule(route, endpoint=endpoint))
-            url_map = Map(url_map)
-            url_map = url_map.bind("", "/")
-
-            def matcher(url):
-                try:
-                    endpoint, kwargs = url_map.match(url, "GET")
-                    return endpoint, kwargs
-                except:
-                    return None, {}
-                    
-            request_uri = wiz.request.uri()
-            app_id, segment = matcher(request_uri)
-            wiz.request.segment = season.stdClass(**segment)
-
-        if app_id is None:
-            return self
-
-        app = wiz.app(app_id)
-        app.use_controller = True
-        view = app.view(app_id, **kwargs)
-
-        render_theme = app.data(False)['package']['theme']        
-        render_theme = render_theme.split("/")
-        themename = render_theme[0]
-        layoutname = render_theme[1]
-
-        fs = season.util.os.FileSystem(season.path.lib)
-        wizjs = fs.read("wiz.js")
-        wizjs = wizjs.replace("{$BASEPATH$}", wiz.server.config.wiz.url)
-        view = f'<script type="text/javascript">{wizjs}</script>\n{view}'
-
-        view = wiz.theme(themename).layout(layoutname).view('layout.pug', view)
-        
-        self.send(view, "text/html")
 
     # template varialbes
     class _data:

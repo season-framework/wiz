@@ -7,5 +7,4 @@ class Theme(Base):
         super().__init__(wiz)
 
     def basepath(self):
-        branch = self.branch()
-        return os.path.join(season.path.project, "branch", branch, "themes")
+        return os.path.join(season.path.project, 'plugin', 'themes')

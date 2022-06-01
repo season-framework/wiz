@@ -1,14 +1,26 @@
 import re
+from abc import *
 
-class request:
+class Request(metaclass=ABCMeta):
     def __init__(self, wiz):
+        self.wiz = wiz
         self._flask = wiz.server.flask
-        
+
+    @abstractmethod
+    def uri(self):
+        pass
+
     def method(self):
         return self._flask.request.method
-        
+
+    def ip(self):
+        return self.client_ip()
+
     def client_ip(self):
         return self._flask.request.environ.get('HTTP_X_REAL_IP', self._flask.request.remote_addr)
+
+    def lang(self):
+        return self.language()
 
     def language(self):
         try:
@@ -23,9 +35,6 @@ class request:
             return lang.upper()
         except:
             return "DEFAULT"
-
-    def uri(self):
-        return self.request().path
 
     def match(self, pattern):
         uri = self.uri()

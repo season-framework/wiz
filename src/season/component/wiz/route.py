@@ -1,9 +1,8 @@
 import os
-
 import season
-from season.component.base.route import Route as BaseRoute
+from season.component.base.route import Route as Base
 
-class Route(BaseRoute):
+class Route(Base):
     def __init__(self, wiz):
         super().__init__(wiz)
 

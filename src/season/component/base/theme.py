@@ -1,22 +1,16 @@
 import season
 import os
-import base64
-import json
-import datetime
-import git
-import time
 import markupsafe
-from werkzeug.routing import Map, Rule
-import io
+from abc import *
 
-class Theme:
+class Theme(metaclass=ABCMeta):
     def __init__(self, wiz):
         self.wiz = wiz
         self.branch = wiz.branch
 
+    @abstractmethod
     def basepath(self):
-        branch = self.branch()
-        return os.path.join(season.path.project, "branch", branch, "themes")
+        pass
 
     def list(self):
         fs = season.util.os.FileSystem(self.basepath())

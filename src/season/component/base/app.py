@@ -3,11 +3,7 @@ import os
 import base64
 import json
 import datetime
-import git
-import time
 import markupsafe
-from werkzeug.routing import Map, Rule
-import io
 from abc import *
 
 class App(metaclass=ABCMeta):
@@ -63,6 +59,18 @@ class App(metaclass=ABCMeta):
             fs = self.fs
             pkg = dict()
             pkg["package"] = fs.read.json(f"app.json")
+            
+            def load_property(key, default=None):
+                try:
+                    return pkg['package']['properties'][key]
+                except:
+                    return default
+            codelang_html = load_property("html", "pug")
+            codelang_css = load_property("css", "scss")
+            codelang_js = load_property("js", "javascript")
+            jsmap = {"javascript": "js", "typescript": "ts"}
+            codelang_js = jsmap[codelang_js]
+
             def readfile(key, filename, default=""):
                 try: pkg[key] = fs.read(filename)
                 except: pkg[key] = default
@@ -72,9 +80,19 @@ class App(metaclass=ABCMeta):
                 pkg = readfile("controller", "controller.py")
                 pkg = readfile("api", "api.py")
                 pkg = readfile("socketio", "socketio.py")
-                pkg = readfile("html", "html.dat")
-                pkg = readfile("js", "js.dat")
-                pkg = readfile("css", "css.dat")
+                
+                if fs.isfile(f"view.{codelang_html}"): pkg["html"] = fs.read(f"view.{codelang_html}")
+                elif fs.isfile("html.dat"): pkg["html"] = fs.read("html.dat")
+                else: pkg["html"] = ""
+
+                if fs.isfile(f"view.{codelang_js}"): pkg["js"] = fs.read(f"view.{codelang_js}")
+                elif fs.isfile("js.dat"): pkg["js"] = fs.read("js.dat")
+                else: pkg["js"] = ""
+
+                if fs.isfile(f"view.{codelang_css}"): pkg["css"] = fs.read(f"view.{codelang_css}")
+                elif fs.isfile("css.dat"): pkg["css"] = fs.read("css.dat")
+                else: pkg["css"] = ""
+
                 try:
                     pkg['dic'] = fs.read.json("dic.json")
                 except:
@@ -122,7 +140,7 @@ class App(metaclass=ABCMeta):
             data = self.data()
 
             ctrl = None
-            if 'controller' in data['package']:
+            if 'controller' in data['package'] and len(data['package']['controller']) > 0:
                 ctrl = data['package']['controller']
                 ctrl = wiz.controller(ctrl, startup=True)
 
@@ -217,7 +235,7 @@ class App(metaclass=ABCMeta):
                 return None
 
             ctrl = None
-            if 'controller' in app['package']:
+            if 'controller' in app['package'] and len(app['package']['controller']) > 0:
                 ctrl = app['package']['controller']
                 ctrl = wiz.controller(ctrl, startup=True)
             

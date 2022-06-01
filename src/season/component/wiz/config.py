@@ -1,5 +1,4 @@
 import os
-import time
 import season
 
 class Config(season.util.std.stdClass):

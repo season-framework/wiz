@@ -8,7 +8,7 @@ class Compiler:
 
     def basepath(self):
         branch = self.branch()
-        return os.path.join(season.path.project, "branch", branch, "compiler")
+        return os.path.join(season.path.project, 'plugin', 'compiler')
 
     def list(self):
         fs = season.util.os.FileSystem(self.basepath())
@@ -37,5 +37,5 @@ class Compiler:
             if fs.isfile(lang + ".py") == False: return code
             logger = wiz.logger(f"[compiler][{lang}]")
             compiler = fs.read(lang + ".py")
-            compiler = season.util.os.compiler(compiler, f"wiz.compiler.{lang}", logger=logger, wiz=wiz)
+            compiler = season.util.os.compiler(compiler, f"wiz.plugin.compiler.{lang}", logger=logger, wiz=wiz)
             return compiler['compile'](wiz, code, kwargs)
