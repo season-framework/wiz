@@ -2,6 +2,7 @@ import season
 import io
 import json
 import os
+import traceback
 from abc import *
 
 class Response(metaclass=ABCMeta):
@@ -94,11 +95,15 @@ class Response(metaclass=ABCMeta):
         res = json.dumps(res, default=season.util.string.json_default, ensure_ascii=False)
         return self.send(res, content_type='application/json')
 
-    def template(self, template_string, **kwargs):
-        wiz = self.wiz
-        self.data.set(**kwargs)
-        data = self.data.get()
-        html = wiz.server.flask.render_template_string(template_string, **data)
+    def template(self, template_string, filename="wiz-template", **kwargs):
+        try:
+            wiz = self.wiz
+            self.data.set(**kwargs)
+            data = self.data.get()
+            html = wiz.server.flask.render_template_string(template_string, **data)
+        except Exception as e:
+            message = traceback.format_exc()
+            raise season.exception.CompileException(filename, message)
         return html
 
     # template varialbes

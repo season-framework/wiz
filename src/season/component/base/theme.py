@@ -55,6 +55,6 @@ class Theme(metaclass=ABCMeta):
                     kwargs['view'] = markupsafe.Markup(view)
 
                 code = wiz.compiler(ext).compile(code)
-                code = wiz.response.template(code, **kwargs)
+                code = wiz.response.template(code, filename=self.fs.abspath(viewpath), **kwargs)
 
                 return markupsafe.Markup(code)

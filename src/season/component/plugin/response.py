@@ -8,7 +8,12 @@ class Response(Base):
         super().__init__(wiz)
 
     def redirect(self, url):
-        # TODO: add prefix
+        if url[0] == "/":
+            baseurl = self.wiz.baseurl + "/ui/"
+            url = baseurl + url[1:]
+        else:
+            baseurl = self.wiz.baseurl + "/ui/" + self.wiz.id + "/"
+            url = baseurl + url
         self.status_code = 302
         resp = self._flask.redirect(url)
         return self._build(resp)
@@ -56,17 +61,21 @@ class Response(Base):
             return self
 
         app = wiz.app(app_id)
-        app.use_controller = True
         view = app.view(app_id, **kwargs)
 
-        render_theme = app.data(False)['package']['theme']        
-        render_theme = render_theme.split("/")
-        themename = render_theme[0]
-        layoutname = render_theme[1]
-
+        themename = wiz.server.config.wiz.theme
+        try:
+            layoutname = app.data(False)['package']['theme']
+        except:
+            layoutname = "base"
+        if layoutname is None:
+            layoutname = "base"
+        
         fs = season.util.os.FileSystem(season.path.lib)
         wizjs = fs.read("wiz.js")
-        wizjs = wizjs.replace("{$BASEPATH$}", wiz.server.config.wiz.url)
+        wizurl = wiz.server.config.server.wiz_url
+        if wizurl[-1] == "/": wizurl = wizurl[:-1]
+        wizjs = wizjs.replace("{$BASEPATH$}", wizurl + "/plugin_api/" + wiz.id)
         view = f'<script type="text/javascript">{wizjs}</script>\n{view}'
 
         view = wiz.theme(themename).layout(layoutname).view('layout.pug', view)

@@ -7,6 +7,9 @@ from season.core.lib.instances.plugin import plugin
 from season.core.server import Server
 from season.core.bootstrap import bootstrap
 
+from .version import VERSION_STRING as VERSION
+version = __version__ = __VERSION__ = VERSION
+
 stdClass = util.std.stdClass
 
 path = stdClass()

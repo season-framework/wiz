@@ -5,8 +5,7 @@ class Request(Base):
         super().__init__(wiz)
         
     def uri(self):
-        wizurl = self.wiz.url
+        wizurl = self.wiz.baseurl
         if self.wiz.id is not None:
             wizurl = wizurl + "/ui/" + self.wiz.id
-            
         return self.request().path[len(wizurl):]

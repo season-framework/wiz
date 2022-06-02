@@ -14,8 +14,8 @@ window.season_wiz = (() => {
         if (window.io) {
             wiz.socket.active = true;
             wiz.socket.get = (socketnamespace) => {
-                let socketns = "{$BASEPATH$}/api/" + app_id;
-                if (socketnamespace) socketns = "{$BASEPATH$}/api/" + socketnamespace;
+                let socketns = "{$BASEPATH$}/" + app_id;
+                if (socketnamespace) socketns = "{$BASEPATH$}/" + socketnamespace;
                 if (wiz.branch != 'master') socketns = socketns + "/" + wiz.branch;
 
                 wiz.socket_instance = window.io(socketns);
@@ -24,7 +24,7 @@ window.season_wiz = (() => {
         }
 
         wiz.API = {
-            url: (fnname) => '{$BASEPATH$}/api/' + app_id + '/' + fnname,
+            url: (fnname) => '{$BASEPATH$}/' + app_id + '/' + fnname,
             function: (fnname, data, cb, opts) => {
                 let _url = wiz.API.url(fnname);
                 let ajax = {

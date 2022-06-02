@@ -26,7 +26,7 @@ class Router(Base):
                 raise e
             except Exception as e:
                 wiz.tracer.error = traceback.format_exc()
-                raise season.exception.ErrorException()
+                raise e
 
             wiz.response.abort(404)
 
@@ -70,6 +70,6 @@ class Resources(Base):
                 raise e
             except Exception as e:
                 wiz.tracer.error = traceback.format_exc()
-                raise season.exception.ErrorException()
+                raise e
 
             wiz.response.abort(404)

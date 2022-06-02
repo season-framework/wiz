@@ -35,7 +35,7 @@ class Compiler:
             if code is None: return ""
             if len(code) == 0: return ""
             if fs.isfile(lang + ".py") == False: return code
-            logger = wiz.logger(f"[compiler][{lang}]")
+            logger = wiz.logger(f"[compiler/{lang}]")
             compiler = fs.read(lang + ".py")
-            compiler = season.util.os.compiler(compiler, f"wiz.compiler.{lang}", logger=logger, wiz=wiz)
+            compiler = season.util.os.compiler(compiler, fs.abspath(lang + ".py"), logger=logger, wiz=wiz)
             return compiler['compile'](wiz, code, kwargs)

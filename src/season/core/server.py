@@ -16,13 +16,11 @@ class Server:
         self.boottime = time.time()
 
         # load config
-        self.config = season.util.std.stdClass()
-        self.load_config()
-        config = self.config
-
+        config = Config()
+        self.config = config
+        
         # create flask server & set env
         app = flask.Flask('__main__', static_url_path='')
-
         log = logging.getLogger('werkzeug')
         log.disabled = True
         app.logger.disabled = True
@@ -36,6 +34,11 @@ class Server:
         sioconfig = config.socketio.get("app", dict())
         socketio = flask_socketio.SocketIO(app, **sioconfig)
 
+        if config.server.build is not None:
+            res = season.util.fn.call(config.server.build, app=app, socketio=socketio)
+            if res is not None:
+                self.app = app
+
         # set server
         self.app = app
         self.socketio = socketio
@@ -43,16 +46,15 @@ class Server:
         self.flask_socketio = flask_socketio
 
         # create wiz instance
-        self.wiz = season.wiz(self)
+        self.wiz = season.wiz(self)      
         self.plugin = season.plugin(self)
-
+        self.wiz.plugin = self.plugin
+        config.set(wiz=self.wiz)
+        
         # http events
-        http = HTTP(self)
-    
-    def load_config(self):
-        self.config.server = Config.load("server")
-        self.config.wiz = Config.load("wiz")
-        self.config.socketio = Config.load("socketio")
+        HTTP(self)
+
+
 
     def run(self):
         config = self.config

@@ -94,9 +94,12 @@ class Route(metaclass=ABCMeta):
         id, segment = matcher(uri)
         return self(id), segment
 
-    def __call__(self, id):
+    def load(self, id):
         if id is None: return None
         return self.Package(self, id)
+
+    def __call__(self, id):
+        return self.load(id)
 
     class Package:
         def __init__(self, manager, id):
@@ -160,10 +163,12 @@ class Route(metaclass=ABCMeta):
                 ctrl = data['package']['controller']
                 ctrl = wiz.controller(ctrl, startup=True)
 
-            logger = wiz.logger(f"[route][{app_id}]", 93)
+            tag = wiz.tag()
+            logger = wiz.logger(f"[{tag}/route/{app_id}]", 94)
             dic = self.dic()
 
-            season.util.os.compiler(data['controller'], name='wiz.route.' + app_id, logger=logger, controller=ctrl, dic=dic, wiz=wiz)
+            name = os.path.join('branch', wiz.branch(), 'routes', app_id, 'controller.py')
+            season.util.os.compiler(data['controller'], name=name, logger=logger, controller=ctrl, dic=dic, wiz=wiz)
 
         def update(self, data):
             # check structure

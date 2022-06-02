@@ -16,6 +16,7 @@ from season.component.wiz.theme import Theme
 
 class wiz(InstanceObject):
     def __init__(self, server, **kwargs):
+        self.baseurl = "/"
         super().__init__(server, **kwargs)
 
     def initialize(self):
@@ -37,3 +38,8 @@ class wiz(InstanceObject):
         
     def tag(self):
         return "wiz"
+
+    def clean(self):
+        path = os.path.join(season.path.project, 'cache', 'branch')
+        fs = season.util.os.FileSystem(path)
+        fs.remove()

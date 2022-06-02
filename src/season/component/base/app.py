@@ -39,9 +39,12 @@ class App(metaclass=ABCMeta):
         fs = self.cachefs()
         fs.delete()
     
-    def __call__(self, id):
+    def load(self, id):
         if id is None: return None
         return self.Package(self, id)
+
+    def __call__(self, id):
+        return self.load(id)
 
     class Package:
         def __init__(self, manager, id):
@@ -49,7 +52,6 @@ class App(metaclass=ABCMeta):
             self.fs = season.util.os.FileSystem(os.path.join(manager.basepath(), id))
             self.id = id
             self.memory_id = f'app.{id}'
-            self.use_controller = False
 
         def data(self, code=True):
             wiz = self.manager.wiz
@@ -59,6 +61,7 @@ class App(metaclass=ABCMeta):
             fs = self.fs
             pkg = dict()
             pkg["package"] = fs.read.json(f"app.json")
+            pkg["package"]['id'] = self.id
             
             def load_property(key, default=None):
                 try:
@@ -98,7 +101,8 @@ class App(metaclass=ABCMeta):
                 except:
                     pkg['dic'] = dict()
 
-            wiz.memory[self.memory_id] = pkg
+                wiz.memory[self.memory_id] = pkg
+
             return pkg
 
         def dic(self):
@@ -127,7 +131,10 @@ class App(metaclass=ABCMeta):
 
             fs = self.fs
             wiz = self.manager.wiz
-            dicdata = fs.read.json("dic.json")
+            try:
+                dicdata = fs.read.json("dic.json")
+            except:
+                dicdata = dict()
             return dicClass(wiz, dicdata)
 
         def view(self, namespace, **kwargs):
@@ -144,11 +151,13 @@ class App(metaclass=ABCMeta):
                 ctrl = data['package']['controller']
                 ctrl = wiz.controller(ctrl, startup=True)
 
-            logger = wiz.logger(f"[app][{app_id}]", 93)
+            tag = wiz.tag()
+            logger = wiz.logger(f"[{tag}/app/{app_id}]", 94)
             dic = self.dic()
 
             # proceed app controller
-            proceed = season.util.os.compiler(data['controller'], name='wiz.app.' + app_id, logger=logger, controller=ctrl, dic=dic, wiz=wiz, kwargs=kwargs)
+            name = os.path.join('branch', wiz.branch(), 'apps', app_id, 'controller.py')
+            proceed = season.util.os.compiler(data['controller'], name=name, logger=logger, controller=ctrl, dic=dic, wiz=wiz, kwargs=kwargs)
 
             dicstr = dic()
             dicstr = json.dumps(dicstr, default=season.util.string.json_default)
@@ -219,7 +228,9 @@ class App(metaclass=ABCMeta):
             js = data['js']
             css = data['css']
             view = f'{view}<script type="{script_type}">{js}</script><style>{css}</style>'
-            view = wiz.response.template(view, dicstr=dicstr, kwargs=kwargsstr, dic=dic, wiz=wiz, **kwargs)
+            
+            filename = os.path.join('branch', wiz.branch(), 'apps', app_id, f'view.{codelang_html}')
+            view = wiz.response.template(view, filename=filename, dicstr=dicstr, kwargs=kwargsstr, dic=dic, wiz=wiz, **kwargs)
             
             return markupsafe.Markup(view)
 
@@ -239,9 +250,11 @@ class App(metaclass=ABCMeta):
                 ctrl = app['package']['controller']
                 ctrl = wiz.controller(ctrl, startup=True)
             
-            logger = wiz.logger(f"[api][{app_id}]", 93)
+            tag = wiz.tag()
+            logger = wiz.logger(f"[{tag}/app/{app_id}/api]", 94)
             dic = self.dic()
-            apifn = season.util.os.compiler(view_api, name='wiz.app.api.' + app_id, logger=logger, controller=ctrl, dic=dic, wiz=wiz)
+            name = os.path.join('branch', wiz.branch(), 'apps', app_id, 'api.py')
+            apifn = season.util.os.compiler(view_api, name=name, logger=logger, controller=ctrl, dic=dic, wiz=wiz)
 
             return apifn
 
@@ -275,15 +288,27 @@ class App(metaclass=ABCMeta):
             package['updated'] = timestamp
             data['package'] = package
 
+            # extensions
+            def load_property(key, default=None):
+                try:
+                    return data['package']['properties'][key]
+                except:
+                    return default
+            codelang_html = load_property("html", "pug")
+            codelang_css = load_property("css", "scss")
+            codelang_js = load_property("js", "javascript")
+            jsmap = {"javascript": "js", "typescript": "ts"}
+            codelang_js = jsmap[codelang_js]
+
             # save file
             self.fs.write.json("app.json", data['package'])
             self.fs.write.json("dic.json", data['dic'])
             self.fs.write("controller.py", data['controller'])
             self.fs.write("api.py", data['api'])
             self.fs.write("socketio.py", data['socketio'])
-            self.fs.write("html.dat", data['html'])
-            self.fs.write("js.dat", data['js'])
-            self.fs.write("css.dat", data['css'])
+            self.fs.write(f"view.{codelang_html}", data['html'])
+            self.fs.write(f"view.{codelang_js}", data['js'])
+            self.fs.write(f"view.{codelang_css}", data['css'])
 
             # update cache
             fs = self.fs

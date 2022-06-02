@@ -24,10 +24,8 @@ class Response(Base):
         @app.errorhandler(season.exception.ResponseException)
         def handle_response(e):
             tracer = wiz.tracer
-            code = wiz.response.status_code
-            if code is None: code = 200
-            tags = [tracer.branch, "response", code]
-            wiz.log(tracer.path, level=season.log.info, tags=tags)
+            tracer.code = wiz.response.status_code
+            wiz.log(tracer.path, level=season.log.info)
             code, response = e.get_response()
             return response, code
 
@@ -39,25 +37,35 @@ class Error(Base):
             tracer = wiz.tracer
             code = wiz.response.status_code
             if code is None: code = 500
-            tags = [tracer.branch, code]
+            tracer.code = code
             errormsg = tracer.path + "\n" + tracer.error
-            wiz.log(errormsg, level=season.log.error, tags=tags, color=91)
+            wiz.log(errormsg, level=season.log.error, color=91)
+            return e.get_response()
+
+        @app.errorhandler(season.exception.CompileException)
+        def handle_exception_compile_error(e):
+            tracer = wiz.tracer
+            code = wiz.response.status_code
+            if code is None: code = 500
+            tracer.code = code
+            errormsg = tracer.path + "\n" + e.message + "\n" + "file: " + e.filename
+            wiz.log(errormsg, level=season.log.error, color=91)
             return e.get_response()
 
         # HTTP Exception Handler 
         @app.errorhandler(HTTPException)
         def handle_exception_http(e):
             tracer = wiz.tracer
-            tags = [tracer.branch, e.code]
+            tracer.code = e.code
             errormsg = tracer.path
-            wiz.log(errormsg, level=season.log.warning, tags=tags, color=93)
+            wiz.log(errormsg, level=season.log.warning, color=93)
             return e.get_response()
 
         # Internal Error Handler
         @app.errorhandler(Exception)
         def handle_exception(e):
             tracer = wiz.tracer
-            tags = [tracer.branch, 500]
+            tracer.code = 500
             errormsg = tracer.path + "\n" + traceback.format_exc()
-            wiz.log(errormsg, level=season.log.critical, tags=tags, color=91)
+            wiz.log(errormsg, level=season.log.critical, color=91)
             return '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"><title>500 Internal Server Error</title><h1>Internal Server Error</h1><p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>', 500

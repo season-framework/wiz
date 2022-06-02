@@ -14,7 +14,7 @@ import season
 def compiler(code, name=None, logger=print, **kwargs):
     fn = {'__file__': name, '__name__': name, 'print': logger, 'season': season}
     for key in kwargs: fn[key] = kwargs[key]
-    exec(compile(code, name, 'exec'), fn)
+    exec(compile(code, os.path.join(season.path.project, name), 'exec'), fn)
     return fn
 
 # function timer util
@@ -227,11 +227,11 @@ class FileSystem:
     def pwd(self):
         return self.abspath()
 
-    def ls(self):
-        return self.files()
+    def ls(self, filepath=""):
+        return self.files(filepath=filepath)
 
-    def list(self):
-        return self.files()
+    def list(self, filepath=""):
+        return self.files(filepath=filepath)
 
     def files(self, filepath="", page=None, dump=20, recursive=False):
         try:

@@ -55,7 +55,6 @@ class Response(Base):
             return self
 
         app = wiz.app(app_id)
-        app.use_controller = True
         view = app.view(app_id, **kwargs)
 
         render_theme = app.data(False)['package']['theme']        
@@ -65,7 +64,9 @@ class Response(Base):
 
         fs = season.util.os.FileSystem(season.path.lib)
         wizjs = fs.read("wiz.js")
-        wizjs = wizjs.replace("{$BASEPATH$}", wiz.server.config.wiz.url)
+        wizurl = wiz.server.config.server.wiz_url
+        if wizurl[-1] == "/": wizurl = wizurl[:-1]
+        wizjs = wizjs.replace("{$BASEPATH$}", wizurl + "/api")
         view = f'<script type="text/javascript">{wizjs}</script>\n{view}'
 
         view = wiz.theme(themename).layout(layoutname).view('layout.pug', view)

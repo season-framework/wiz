@@ -5,6 +5,26 @@ from abc import *
 
 import season
 
+from season.component.wiz.app import App as wiz_app
+from season.component.wiz.route import Route as wiz_route
+from season.component.plugin.app import App as plugin_app
+from season.component.plugin.route import Route as plugin_route
+
+import urllib
+
+class Url:
+    def __init__(self, wiz):
+        self.wiz = wiz
+        self.base = wiz.baseurl
+        if self.base == '/':
+            self.base = ''
+    
+    def __call__(self, path=""):
+        return urllib.parse.urljoin(self.base + "/", path)
+    
+    def resource(self, path=""):
+        return urllib.parse.urljoin(self.base + "/resources/", path)
+
 class InstanceObject(season.util.std.stdClass):
     def __init__(self, server, **kwargs):
         self.server = server
@@ -17,6 +37,15 @@ class InstanceObject(season.util.std.stdClass):
         self.flask = server.flask
         self.socketio = server.flask_socketio
         self.flask_socketio = server.flask_socketio
+
+        self.src = season.stdClass()
+        self.src.app = wiz_app(self)
+        self.src.route = wiz_route(self)
+        self.src.plugin = season.stdClass()
+        self.src.plugin.app = plugin_app(self)
+        self.src.plugin.route = plugin_route(self)
+
+        self.url = Url(self)
 
     @abstractmethod
     def initialize(self):
@@ -101,8 +130,8 @@ class InstanceObject(season.util.std.stdClass):
         path = os.path.join(self.basepath(), 'interfaces', 'model')
         fs = season.util.os.FileSystem(path)
         code = fs.read(id + ".py")
-        logger = self.logger(f"[model][{id}]", 94)
-        model = season.util.os.compiler(code, name='wiz.model.' + id, logger=logger, wiz=self)
+        logger = self.logger(f"[model/{id}]", 94)
+        model = season.util.os.compiler(code, name=fs.abspath(id + ".py"), logger=logger, wiz=self)
         return model['Model']
 
     def controller(self, id, startup=False):
@@ -114,8 +143,8 @@ class InstanceObject(season.util.std.stdClass):
         path = os.path.join(self.basepath(), 'interfaces', 'controller')
         fs = season.util.os.FileSystem(path)
         code = fs.read(id + ".py")
-        logger = self.logger(f"[controller][{id}]", 94)
-        ctrl = season.util.os.compiler(code, name='wiz.controller.' + id, logger=logger, wiz=self)
+        logger = self.logger(f"[controller/{id}]", 94)
+        ctrl = season.util.os.compiler(code, name=fs.abspath(id + ".py"), logger=logger, wiz=self)
         ctrl = ctrl['Controller']
 
         if startup is True:
@@ -183,7 +212,7 @@ class InstanceObject(season.util.std.stdClass):
                 self.log_color = log_color
                 self.wiz = wiz
 
-            def log(self, *args, level=season.log.dev, tags=[], color=None):
+            def log(self, *args, level=season.log.dev, color=None):
                 tag = self.tag
                 if color is None: color = self.log_color
                 wiz = self.wiz
@@ -191,19 +220,17 @@ class InstanceObject(season.util.std.stdClass):
                     return
 
                 if tag is None: tag = ""
-                if type(tags) == str:
-                    tag = f"[{tags}]{tag}"
-                if type(tags) == list:
-                    for t in tags: 
-                        tag = f"{tag}[{t}]"
+                try:
+                    if wiz.tracer.code is not None:
+                        tag = "[" + str(wiz.tracer.code) + "]" + tag
+                    if wiz.tracer.timestamp is not None:
+                        tag = "[" + str(round((time.time() - wiz.tracer.timestamp) * 1000)) + "ms]" + tag
+                except:
+                    pass
+                
                 tagmap = ['debug', 'info', 'dev', 'warning', 'error', 'critical']
-                
                 if level < len(tagmap): tag = "[" + tagmap[level] + "]" + tag
-                tag = "[" + wiz.tag() + "]" + tag
 
-                if wiz.tracer.timestamp is not None:
-                    tag = tag + "[" + str(round((time.time() - wiz.tracer.timestamp) * 1000)) + "ms]"
-                
                 args = list(args)
                 for i in range(len(args)): 
                     args[i] = str(args[i])
@@ -211,8 +238,11 @@ class InstanceObject(season.util.std.stdClass):
                 logdata = f"\033[{color}m[{timestamp}]{tag}\033[0m " + " ".join(args)
 
                 print(logdata)
-                if self.wiz.is_dev():
-                    branch = wiz.branch()
-                    wiz.server.socketio.emit("log", logdata + "\n", namespace="/wiz", to=branch, broadcast=True)
+                try:
+                    if self.wiz.is_dev():
+                        branch = wiz.branch()
+                        wiz.server.socketio.emit("log", logdata + "\n", namespace="/wiz", to=branch, broadcast=True)
+                except:
+                    pass
                 
         return logger(tag, log_color, self).log
