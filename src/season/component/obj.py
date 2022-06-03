@@ -7,6 +7,7 @@ import season
 
 from season.component.wiz.app import App as wiz_app
 from season.component.wiz.route import Route as wiz_route
+from season.component.wiz.theme import Theme as wiz_theme
 from season.component.plugin.app import App as plugin_app
 from season.component.plugin.route import Route as plugin_route
 
@@ -41,6 +42,8 @@ class InstanceObject(season.util.std.stdClass):
         self.src = season.stdClass()
         self.src.app = wiz_app(self)
         self.src.route = wiz_route(self)
+        self.src.theme = wiz_theme(self)
+
         self.src.plugin = season.stdClass()
         self.src.plugin.app = plugin_app(self)
         self.src.plugin.route = plugin_route(self)
@@ -125,6 +128,17 @@ class InstanceObject(season.util.std.stdClass):
         # set branch
         self.response.cookies.set("season-wiz-branch", branch)
         return branch
+
+    def branchpath(self):
+        branch = self.branch()
+        return os.path.join(season.path.project, 'branch', branch)
+    
+    def branchfs(self):
+        return season.util.os.FileSystem(self.branchpath())
+
+    def branches(self):
+        fs = season.util.os.FileSystem(os.path.join(season.path.project, 'branch'))
+        return fs.list()
 
     def model(self, id):
         path = os.path.join(self.basepath(), 'interfaces', 'model')

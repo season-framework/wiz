@@ -158,6 +158,22 @@ class Router(Base):
         @app.route(wizurl + "/ui/<path:path>", methods=HTTP_METHODS)
         def wiz_plugin_handler(*args, **kwargs):
             try:
+                # set dev
+                dev = wiz.request.query("dev", None)
+                if dev is not None:
+                    if dev == "false" : wiz.set_dev("false")
+                    else: wiz.set_dev("true")
+                    wiz.response.redirect(wiz.request.uri())
+
+                # set branch
+                branch = wiz.request.query("branch", None)
+                if branch is not None and len(branch) > 0:
+                    if branch in wiz.branches():
+                        wiz.response.cookies.set("season-wiz-branch", branch)
+                    wiz.response.redirect(wiz.request.uri())
+
+                # TODO: ACL
+
                 config.reload()
                 segment = wiz.match(f"{wizurl}/ui/<plugin_id>/<path:path>")
                 if segment is None: segment = wiz.match(f"{wizurl}/ui/<plugin_id>/")
@@ -171,6 +187,9 @@ class Router(Base):
                     plugin = wiz.plugin.load(plugin_id)
                     plugin.trace()
                     plugin.clean()
+
+                    # set default data
+                    plugin.response.data.set(branch=wiz.branch(), branches=wiz.branches(), is_dev=wiz.is_dev())
 
                     # set menu
                     plugins = wiz.server.config.wiz.plugin

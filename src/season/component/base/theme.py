@@ -14,10 +14,12 @@ class Theme(metaclass=ABCMeta):
 
     def list(self):
         fs = season.util.os.FileSystem(self.basepath())
-        compilers = fs.files()
+        themes = fs.files()
         res = []
-        for filename in compilers:
-            res.append(os.path.splitext(filename)[0])
+        for filename in themes:
+            layouts = fs.files(os.path.join(filename, 'layout'))
+            for layout in layouts:
+                res.append(filename + "/" + layout)
         return res
 
     def __call__(self, id):

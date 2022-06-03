@@ -74,6 +74,9 @@ class App(metaclass=ABCMeta):
             jsmap = {"javascript": "js", "typescript": "ts"}
             codelang_js = jsmap[codelang_js]
 
+            if 'controller' not in pkg['package']: pkg['package']['controller'] = ''
+            if 'theme' not in pkg['package']: pkg['package']['theme'] = ''
+
             def readfile(key, filename, default=""):
                 try: pkg[key] = fs.read(filename)
                 except: pkg[key] = default
@@ -194,11 +197,6 @@ class App(metaclass=ABCMeta):
             codelang_css = load_property("css", "scss")
             codelang_js = load_property("js", "javascript")
 
-            # check script type (js)
-            script_type = 'text/javascript'
-            if 'script_type' in data['package']: 
-                script_type = data['package']['script_type']
-
             # compile to default html language
             if cachefs.isfile("view.html"):
                 data['html'] = cachefs.read("view.html")
@@ -219,15 +217,14 @@ class App(metaclass=ABCMeta):
                 data['js'] = cachefs.read("view.js")
             else:
                 if codelang_js != 'javascript': data['js'] = wiz.compiler(codelang_js).compile(data['js'], **compile_args)
-                if script_type == 'text/javascript':
-                    data['js'] = wiz.compiler('javascript').compile(data['js'], **compile_args)
+                data['js'] = wiz.compiler('javascript').compile(data['js'], **compile_args)
                 cachefs.write("view.js", data['js'])
 
             # generate view
             view = data['html']
             js = data['js']
             css = data['css']
-            view = f'{view}<script type="{script_type}">{js}</script><style>{css}</style>'
+            view = f'{view}<script type="text/javascript">{js}</script><style>{css}</style>'
             
             filename = os.path.join('branch', wiz.branch(), 'apps', app_id, f'view.{codelang_html}')
             view = wiz.response.template(view, filename=filename, dicstr=dicstr, kwargs=kwargsstr, dic=dic, wiz=wiz, **kwargs)
