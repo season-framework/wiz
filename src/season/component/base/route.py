@@ -177,23 +177,24 @@ class Route(metaclass=ABCMeta):
                 if key not in data: 
                     raise Exception(f"'`{key}`' not defined")
 
-            required = ['id', 'namespace']
+            required = ['id', 'route']
             for key in required:
                 if key not in data['package']: 
                     raise Exception(f"'`package.{key}`' not defined")
+
+            package = data['package']
 
             # check id format
             id = package['id']
             if len(id) < 4:
                 raise Exception(f"id length at least 4")
 
-            allowed = "qwertyuiopasdfghjklzxcvbnm._1234567890"
+            allowed = "qwertyuiopasdfghjklzxcvbnm.1234567890"
             for c in id:
                 if c not in allowed:
-                    raise Exception(f"only alphabet and number and _ in package id")
+                    raise Exception(f"only alphabet and number and . in package id")
 
             # update timestamp
-            package = data['package']
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if 'created' not in package:
                 package['created'] = timestamp
