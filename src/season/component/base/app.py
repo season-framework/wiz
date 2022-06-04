@@ -267,6 +267,8 @@ class App(metaclass=ABCMeta):
                 if key not in data['package']: 
                     raise Exception(f"'`package.{key}`' not defined")
 
+            package = data['package']
+
             # check id format
             id = package['id']
             if len(id) < 4:
@@ -278,7 +280,6 @@ class App(metaclass=ABCMeta):
                     raise Exception(f"only alphabet and number and . in package id")
 
             # update timestamp
-            package = data['package']
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if 'created' not in package:
                 package['created'] = timestamp
