@@ -8,6 +8,7 @@ import flask_socketio
 
 import season
 from season.core.lib.server.http import HTTP
+from season.core.lib.server.socketio import SocketIO
 from season.core.lib.server.config import Config
 
 class Server:
@@ -53,8 +54,7 @@ class Server:
         
         # http events
         HTTP(self)
-
-
+        SocketIO(self)
 
     def run(self):
         config = self.config

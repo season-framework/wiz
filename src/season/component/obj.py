@@ -99,34 +99,37 @@ class InstanceObject(season.util.std.stdClass):
         self.response.cookies.set("season-wiz-devmode", DEVMODE)
 
     def branch(self, branch=None):
-        if branch is None:
-            branch = self.request.cookies("season-wiz-branch", "main")
-            
-            # if branch exists
-            branchpath = os.path.join(season.path.project, 'branch', branch)
-            if os.path.isdir(branchpath):
-                self.response.cookies.set("season-wiz-branch", branch)
-                return branch
-            
-            # if branch not exists, check main
-            branch = "main"
-            branchpath = os.path.join(season.path.project, 'branch', branch)
-            if os.path.isdir(branchpath):
-                self.response.cookies.set("season-wiz-branch", branch)
-                return branch
+        try:
+            if branch is None:
+                branch = self.request.cookies("season-wiz-branch", "main")
+                
+                # if branch exists
+                branchpath = os.path.join(season.path.project, 'branch', branch)
+                if os.path.isdir(branchpath):
+                    self.response.cookies.set("season-wiz-branch", branch)
+                    return branch
+                
+                # if branch not exists, check main
+                branch = "main"
+                branchpath = os.path.join(season.path.project, 'branch', branch)
+                if os.path.isdir(branchpath):
+                    self.response.cookies.set("season-wiz-branch", branch)
+                    return branch
 
-            # if branch not exists, check master
-            branch = "master"
-            branchpath = os.path.join(season.path.project, 'branch', branch)
-            if os.path.isdir(branchpath):
-                self.response.cookies.set("season-wiz-branch", branch)
-                return branch
+                # if branch not exists, check master
+                branch = "master"
+                branchpath = os.path.join(season.path.project, 'branch', branch)
+                if os.path.isdir(branchpath):
+                    self.response.cookies.set("season-wiz-branch", branch)
+                    return branch
 
-            # if no branches in project
-            raise Exception("branch not found")
+                # if no branches in project
+                raise Exception("branch not found")
 
-        # set branch
-        self.response.cookies.set("season-wiz-branch", branch)
+            # set branch
+            self.response.cookies.set("season-wiz-branch", branch)
+        except:
+            branch = self.__branch__
         return branch
 
     def branchpath(self):
@@ -219,12 +222,13 @@ class InstanceObject(season.util.std.stdClass):
         segment = season.stdClass(segment)
         return segment
 
-    def logger(self, tag=None, log_color=94):
+    def logger(self, tag=None, log_color=94, trace=True):
         class logger:
-            def __init__(self, tag, log_color, wiz):
+            def __init__(self, tag, log_color, wiz, trace=True):
                 self.tag = tag
                 self.log_color = log_color
                 self.wiz = wiz
+                self.trace = trace
 
             def log(self, *args, level=season.log.dev, color=None):
                 tag = self.tag
@@ -235,10 +239,11 @@ class InstanceObject(season.util.std.stdClass):
 
                 if tag is None: tag = ""
                 try:
-                    if wiz.tracer.code is not None:
-                        tag = "[" + str(wiz.tracer.code) + "]" + tag
-                    if wiz.tracer.timestamp is not None:
-                        tag = "[" + str(round((time.time() - wiz.tracer.timestamp) * 1000)) + "ms]" + tag
+                    if self.trace:
+                        if wiz.tracer.code is not None:
+                            tag = "[" + str(wiz.tracer.code) + "]" + tag
+                        if wiz.tracer.timestamp is not None:
+                            tag = "[" + str(round((time.time() - wiz.tracer.timestamp) * 1000)) + "ms]" + tag
                 except:
                     pass
                 
@@ -259,4 +264,4 @@ class InstanceObject(season.util.std.stdClass):
                 except:
                     pass
                 
-        return logger(tag, log_color, self).log
+        return logger(tag, log_color, self, trace=trace).log

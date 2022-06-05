@@ -147,6 +147,9 @@ class App(metaclass=ABCMeta):
             app_id = self.id
             request_uri = wiz.request.uri()
 
+            # clean data
+            if self.memory_id in wiz.memory:
+                del wiz.memory[self.memory_id]
             data = self.data()
 
             ctrl = None

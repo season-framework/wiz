@@ -16,7 +16,6 @@ class Response(Base):
         wiz = self.wiz
         if len(args) == 0:
             return self
-
         if len(args) == 1:
             app_id = args[0]
         else:

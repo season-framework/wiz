@@ -14,11 +14,10 @@ window.season_wiz = (() => {
         if (window.io) {
             wiz.socket.active = true;
             wiz.socket.get = (socketnamespace) => {
-                let socketns = "{$BASEPATH$}/" + app_id;
-                if (socketnamespace) socketns = "{$BASEPATH$}/" + socketnamespace;
-                if (wiz.branch != 'master') socketns = socketns + "/" + wiz.branch;
-
+                let socketns = "{$BASEPATH$}/" + wiz.branch + "/" + app_id;
+                if (socketnamespace) socketns = "{$BASEPATH$}/" + wiz.branch + "/" + socketnamespace;
                 wiz.socket_instance = window.io(socketns);
+                console.log(socketns);
                 return wiz.socket_instance;
             }
         }
@@ -80,7 +79,7 @@ window.season_wiz = (() => {
                 let response_handler = () => {
                     // if not activate, stop loop
                     if (!wiz._response_activator[name]) {
-                        if(err) reject("deprecated event `" + name + "` of `" + wiz.namespace + "`");
+                        if (err) reject("deprecated event `" + name + "` of `" + wiz.namespace + "`");
                         return;
                     }
 
