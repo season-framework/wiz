@@ -117,7 +117,10 @@ class Route(metaclass=ABCMeta):
                 return pkg
             if code:
                 pkg = readfile("controller", "controller.py")
-                pkg = readfile("dic", "dic.json")
+            try:
+                pkg['dic'] = fs.read.json("dic.json")
+            except:
+                pkg['dic'] = dict()
             return pkg
 
         def dic(self):

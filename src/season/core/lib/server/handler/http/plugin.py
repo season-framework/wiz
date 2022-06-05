@@ -212,7 +212,7 @@ class Router(Base):
                     app, segment = plugin.route.match(path)
 
                     if app is not None:
-                        wiz.request.segment = season.stdClass(**segment)
+                        plugin.request.segment = season.stdClass(**segment)
                         app.proceed()
                 
                 wiz.response.abort(404)
