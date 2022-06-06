@@ -39,7 +39,6 @@ class app(base):
         elif attr == 'http_port': return int(obj) if obj is not None else 3000
         elif attr == 'http_method': return obj if obj is not None else ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
         elif attr == 'dev': return bool(obj) if obj is not None else False
-        elif attr == 'log_level': return int(obj) if obj is not None else 2
         elif attr == 'jinja_variable_start_string': return str(obj) if obj is not None else '{$'
         elif attr == 'jinja_variable_end_string': return str(obj) if obj is not None else '$}'
         elif attr == 'build': return obj if obj is not None else None
@@ -50,6 +49,7 @@ class wizconfig(base):
     def __getattr__(self, attr):
         obj = super(wizconfig, self).__getattr__(attr)
         if attr == 'theme': return obj if obj is not None else "default"
+        elif attr == 'log_level': return int(obj) if obj is not None else 2
         elif attr == 'home': return obj if obj is not None else "ui/workspace"
         elif attr == 'plugin': return obj if obj is not None else ['workspace', 'branch']
         elif attr == 'category': return obj if obj is not None else [
@@ -153,7 +153,6 @@ class Config(season.util.std.stdClass):
                     wiz = self.kwargs['wiz']
                     errormsg = f"error: config/{name}.py\n" + traceback.format_exc()        
                     wiz.log(errormsg, level=season.log.error, color=91)
-                pass
 
             config = season.stdClass()
             for key in env:

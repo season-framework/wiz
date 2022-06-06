@@ -34,6 +34,8 @@ class InstanceObject(season.util.std.stdClass):
 
         self.__branch__ = None
 
+        self.version = season.version
+
         self.initialize()
         
         # deprecated functions
@@ -255,7 +257,7 @@ class InstanceObject(season.util.std.stdClass):
                 tag = self.tag
                 if color is None: color = self.log_color
                 wiz = self.wiz
-                if level < wiz.server.config.server.log_level:
+                if level < wiz.server.config.wiz.log_level:
                     return
 
                 if tag is None: tag = ""
