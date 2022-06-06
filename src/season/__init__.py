@@ -19,11 +19,11 @@ path.public = os.path.join(path.project, 'public')
 path.config = os.path.join(path.project, 'config')
 
 log = stdClass()
-log.debug = 0
-log.info = 1
-log.dev = 2
-log.warning = 3
-log.error = 4
-log.critical = 5
+log.debug = 0      # response info
+log.info = 1       # server process messages
+log.warning = 2    # http error
+log.dev = 3        # user log
+log.error = 4      # code error
+log.critical = 5   # uncatched error
 
 cache = stdClass()

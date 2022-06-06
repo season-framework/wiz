@@ -37,12 +37,13 @@ wiz clean
 
 ## Release Note
 
-### 0.6.0
+### 1.0.0
 
 - remove season-flask concept
 - enhanced performance
 - logging for wiz concept
 - upgrade plugin develop env
+- config structure changed
 
 ### 0.5.33
 

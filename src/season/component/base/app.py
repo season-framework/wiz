@@ -316,6 +316,7 @@ class App(metaclass=ABCMeta):
             wiz = self.manager.wiz
             dicdata = fs.read.json("dic.json")
 
+            wiz.server.socket.bind()
             return self
 
         def delete(self):

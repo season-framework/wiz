@@ -27,6 +27,8 @@ class Server:
         app.logger.disabled = True
         os.environ["WERKZEUG_RUN_MAIN"] = "true"
 
+        app.secret_key = config.server.secret_key
+
         app.jinja_env.variable_start_string = config.server.jinja_variable_start_string
         app.jinja_env.variable_end_string = config.server.jinja_variable_end_string
         app.jinja_env.add_extension('pypugjs.ext.jinja.PyPugJSExtension')
@@ -47,14 +49,14 @@ class Server:
         self.flask_socketio = flask_socketio
 
         # create wiz instance
-        self.wiz = season.wiz(self)      
+        self.wiz = season.wiz(self)
         self.plugin = season.plugin(self)
         self.wiz.plugin = self.plugin
         config.set(wiz=self.wiz)
         
         # http events
         HTTP(self)
-        SocketIO(self)
+        self.socket = SocketIO(self)
 
     def run(self):
         config = self.config

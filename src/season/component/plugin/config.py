@@ -28,9 +28,14 @@ class Config(season.util.std.stdClass):
         with open(config_path, mode="rb") as file:
             code = file.read().decode('utf-8')
             logger = wiz.logger(f"[plugin/config/{name}]")
-            config = season.util.os.compiler(code, name=config_path, logger=logger, wiz=wiz)
-            if 'config' in config: config = config['config']
-            else: config = dict()
+            env = season.util.os.compiler(code, name=config_path, logger=logger, wiz=wiz)
+            predefined = ['logger', 'wiz', 'season']
+
+            config = season.stdClass()
+            for key in env:
+                if key in predefined: continue
+                if key.startswith("__") and key.endswith("__"): continue
+                config[key] = env[key]
             return configclass(config)
         
         return configclass()

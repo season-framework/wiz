@@ -10,14 +10,14 @@ window.season_wiz = (() => {
 
         wiz.socket = {};
         wiz.socket.active = false;
+        wiz.url = "{$URL$}";
 
         if (window.io) {
             wiz.socket.active = true;
             wiz.socket.get = (socketnamespace) => {
-                let socketns = "{$BASEPATH$}/" + wiz.branch + "/" + app_id;
-                if (socketnamespace) socketns = "{$BASEPATH$}/" + wiz.branch + "/" + socketnamespace;
+                let socketns = wiz.url + "/" + wiz.branch + "/" + app_id;
+                if (socketnamespace) socketns = wiz.url + "/" + wiz.branch + "/" + socketnamespace;
                 wiz.socket_instance = window.io(socketns);
-                console.log(socketns);
                 return wiz.socket_instance;
             }
         }

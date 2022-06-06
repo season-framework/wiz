@@ -14,6 +14,7 @@ class Router(Base):
         @app.route("/<string:module>/<path:path>", methods=HTTP_METHODS)
         def request_handler(*args, **kwargs):
             try:
+                wiz.installed()
                 path = wiz.request.uri()
                 app, segment = wiz.route.match(path)
 
@@ -57,9 +58,8 @@ class Resources(Base):
                 if os.path.isfile(filepath):
                     dirname = os.path.dirname(filepath)
                     filename = os.path.basename(filepath)
-
-                    if wiz.server.config.server.build_resource is not None:
-                        res = season.util.fn.call(wiz.server.config.server.build_resource, wiz=wiz, resource_dirpath=dirname, resource_filepath=filename)
+                    if wiz.server.config.wiz.build_resource is not None:
+                        res = season.util.fn.call(wiz.server.config.wiz.build_resource, wiz=wiz, resource_dirpath=dirname, resource_filepath=filename)
                         if res is not None: return res
 
                     response = wiz.server.flask.send_from_directory(dirname, filename)

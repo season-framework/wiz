@@ -65,7 +65,7 @@ class Response(Base):
         wizjs = fs.read("wiz.js")
         wizurl = wiz.server.config.server.wiz_url
         if wizurl[-1] == "/": wizurl = wizurl[:-1]
-        wizjs = wizjs.replace("{$BASEPATH$}", wizurl + "/api")
+        wizjs = wizjs.replace("{$BASEPATH$}", wizurl + "/api").replace("{$URL$}", wizurl)
         view = f'<script type="text/javascript">{wizjs}</script>\n{view}'
 
         view = wiz.theme(themename).layout(layoutname).view('layout.pug', view)

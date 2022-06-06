@@ -76,6 +76,8 @@ class Route(metaclass=ABCMeta):
         return url_map
 
     def match(self, uri):
+        if len(uri) > 1 and uri[-1] == "/": uri = uri[:-1]
+
         fs = self.cachefs()
         urlmap = fs.read.pickle("urlmap", None)
         if urlmap is None:

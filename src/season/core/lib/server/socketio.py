@@ -43,6 +43,7 @@ class SocketHandler:
         if to is not None: acts['to'] = to
         self.emit(channel, msg, **acts)
 
+# for plugins
 def wrapper(namespace, wiz, ctrl, fnname):
     def proceed(*args, **kwargs):
         data = None
@@ -56,6 +57,7 @@ def wrapper(namespace, wiz, ctrl, fnname):
 
     return proceed
 
+# for apps
 def wrapper_code(namespace, wiz, logger, fs, path, fnname):
     def proceed(*args, **kwargs):
         code = fs.read(path)
@@ -96,27 +98,35 @@ class SocketIO:
             socketio.on_event(fnname, wrapper(wizurl, wiz, ctrl, fnname), namespace=wizurl)
 
         # namespace for wiz apps
-        branches = wiz.branches()
-        for branch in branches:
-            wiz.__branch__ = branch
-            path = os.path.join(season.path.project, 'branch', branch, 'apps')
-            fs = season.util.os.FileSystem(path)
-            apps = fs.list()
-            for app_id in apps:
-                logger_dev = wiz.logger(tag=f"[socketio][{branch}][{app_id}]", trace=False)
-                try:
-                    code = fs.read(os.path.join(app_id, 'socketio.py'))
-                    siopath = fs.abspath(os.path.join(app_id, 'socketio.py'))
-                    if len(code) == 0: continue
+        def wiz_socket_bind():
+            branches = server.wiz.branches()
+            
+            for branch in branches:
+                wiz = season.wiz(server)
+                wiz.__branch__ = branch
+                path = os.path.join(season.path.project, 'branch', branch, 'apps')
+                fs = season.util.os.FileSystem(path)
+                apps = fs.list()
+                for app_id in apps:
+                    logger_dev = wiz.logger(tag=f"[socketio][{branch}][{app_id}]", trace=False)
+                    try:
+                        code = fs.read(os.path.join(app_id, 'socketio.py'))
+                        siopath = fs.abspath(os.path.join(app_id, 'socketio.py'))
+                        if len(code) == 0: continue
 
-                    ctrl = season.util.os.compiler(code, name=siopath, logger=logger_dev, wiz=wiz)
-                    ctrl = ctrl['Controller']
-                    ctrl = ctrl(wiz)
-                    fnlist = dir(ctrl)
+                        ctrl = season.util.os.compiler(code, name=siopath, logger=logger_dev, wiz=wiz)
+                        ctrl = ctrl['Controller']
+                        ctrl = ctrl(wiz)
+                        fnlist = dir(ctrl)
 
-                    for fnname in fnlist:
-                        if fnname.startswith("__") and fnname.endswith("__"): continue
-                        namespace = wizurl + f"/api/{branch}/{app_id}"
-                        socketio.on_event(fnname, wrapper_code(namespace, wiz, logger_dev, fs, os.path.join(app_id, 'socketio.py'), fnname), namespace=namespace)
-                except Exception as e:
-                    logger(f"`{app_id}` socketio file not binded at `{branch}` branch:\n" + str(e))
+                        for fnname in fnlist:
+                            if fnname.startswith("__") and fnname.endswith("__"): continue
+                            namespace = wizurl + f"/{branch}/{app_id}"
+                            socketio.on_event(fnname, wrapper_code(namespace, wiz, logger_dev, fs, os.path.join(app_id, 'socketio.py'), fnname), namespace=namespace)
+
+                        logger(f"socketio binded: `{namespace}`", color=94, level=season.log.info)
+                    except Exception as e:
+                        logger(f"`{app_id}` socketio file not binded at `{branch}` branch:\n" + str(e))
+
+        self.bind = wiz_socket_bind
+        wiz_socket_bind()

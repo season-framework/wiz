@@ -28,7 +28,6 @@ class API(Base):
         @app.route(wizurl + "/api/<path:path>", methods=HTTP_METHODS)
         def wiz_api_handler(*args, **kwargs):
             try:
-                config.reload()
                 segment = wiz.match(f"{wizurl}/api/<app_id>/<fnname>/<path:path>")
                 if segment is not None:
                     app_id = segment.app_id
@@ -60,6 +59,11 @@ class API(Base):
         @app.route(wizurl + "/plugin_api/<path:path>", methods=HTTP_METHODS)
         def wiz_plugin_api_handler(*args, **kwargs):
             try:
+                # ACL
+                aclfn = wiz.server.config.wiz.acl
+                if aclfn is not None:
+                    season.util.fn.call(aclfn, wiz=wiz)
+                    
                 config.reload()
                 segment = wiz.match(f"{wizurl}/plugin_api/<plugin_id>/<app_id>/<fnname>/<path:path>")
                 if segment is not None:
@@ -121,9 +125,8 @@ class Resources(Base):
                 if os.path.isfile(filepath):
                     dirname = os.path.dirname(filepath)
                     filename = os.path.basename(filepath)
-
-                    if wiz.server.config.server.build_resource is not None:
-                        res = season.util.fn.call(wiz.server.config.server.build_resource, wiz=wiz, resource_dirpath=dirname, resource_filepath=filename)
+                    if wiz.server.config.wiz.build_resource is not None:
+                        res = season.util.fn.call(wiz.server.config.wiz.build_resource, wiz=wiz, resource_dirpath=dirname, resource_filepath=filename)
                         if res is not None: return res
 
                     response = wiz.server.flask.send_from_directory(dirname, filename)
@@ -158,6 +161,8 @@ class Router(Base):
         @app.route(wizurl + "/ui/<path:path>", methods=HTTP_METHODS)
         def wiz_plugin_handler(*args, **kwargs):
             try:
+                wiz.installed()
+                
                 # set dev
                 dev = wiz.request.query("dev", None)
                 if dev is not None:
@@ -172,8 +177,12 @@ class Router(Base):
                         wiz.response.cookies.set("season-wiz-branch", branch)
                     wiz.response.redirect(wiz.request.uri())
 
-                # TODO: ACL
+                # ACL
+                aclfn = wiz.server.config.wiz.acl
+                if aclfn is not None:
+                    season.util.fn.call(aclfn, wiz=wiz)
 
+                # find plugin route
                 config.reload()
                 segment = wiz.match(f"{wizurl}/ui/<plugin_id>/<path:path>")
                 if segment is None: segment = wiz.match(f"{wizurl}/ui/<plugin_id>/")

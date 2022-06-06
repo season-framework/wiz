@@ -32,6 +32,8 @@ class InstanceObject(season.util.std.stdClass):
         self.log = self.logger()
         self.cache = season.stdClass()
 
+        self.__branch__ = None
+
         self.initialize()
         
         # deprecated functions
@@ -39,6 +41,7 @@ class InstanceObject(season.util.std.stdClass):
         self.socketio = server.flask_socketio
         self.flask_socketio = server.flask_socketio
 
+        # attach source
         self.src = season.stdClass()
         self.src.app = wiz_app(self)
         self.src.route = wiz_route(self)
@@ -49,6 +52,10 @@ class InstanceObject(season.util.std.stdClass):
         self.src.plugin.route = plugin_route(self)
 
         self.url = Url(self)
+
+        wizurl = server.config.server.wiz_url
+        if wizurl[-1] == "/": wizurl = wizurl[:-1]
+        self.wizurl = wizurl
 
     @abstractmethod
     def initialize(self):
@@ -77,9 +84,18 @@ class InstanceObject(season.util.std.stdClass):
 
         self.initialize()
 
-    # TODO: check installed
     def installed(self):
-        pass
+        wiz = self
+        if wiz.server.config.installed.started is None:
+            install_uri = wiz.wizurl + "/ui/install"
+            requri = wiz.request.uri()
+            if requri != install_uri:
+                wiz.response.redirect(install_uri)
+        else:
+            install_uri = wiz.wizurl + "/ui/install"
+            requri = wiz.request.uri()
+            if requri == install_uri:
+                wiz.response.redirect(wiz.wizurl)
 
     def is_dev(self):
         try:
@@ -99,37 +115,42 @@ class InstanceObject(season.util.std.stdClass):
         self.response.cookies.set("season-wiz-devmode", DEVMODE)
 
     def branch(self, branch=None):
-        try:
-            if branch is None:
-                branch = self.request.cookies("season-wiz-branch", "main")
-                
-                # if branch exists
-                branchpath = os.path.join(season.path.project, 'branch', branch)
-                if os.path.isdir(branchpath):
-                    self.response.cookies.set("season-wiz-branch", branch)
-                    return branch
-                
-                # if branch not exists, check main
-                branch = "main"
-                branchpath = os.path.join(season.path.project, 'branch', branch)
-                if os.path.isdir(branchpath):
-                    self.response.cookies.set("season-wiz-branch", branch)
-                    return branch
+        # used not request flow
+        if self.__branch__ is not None:
+            return self.__branch__
 
-                # if branch not exists, check master
-                branch = "master"
-                branchpath = os.path.join(season.path.project, 'branch', branch)
-                if os.path.isdir(branchpath):
-                    self.response.cookies.set("season-wiz-branch", branch)
-                    return branch
+        # find branch
+        if branch is None:
+            branch = self.request.cookies("season-wiz-branch", "main")
+            
+            # if branch exists
+            branchpath = os.path.join(season.path.project, 'branch', branch)
+            if os.path.isdir(branchpath):
+                self.response.cookies.set("season-wiz-branch", branch)
+                return branch
+            
+            # if branch not exists, check main
+            branch = "main"
+            branchpath = os.path.join(season.path.project, 'branch', branch)
+            if os.path.isdir(branchpath):
+                self.response.cookies.set("season-wiz-branch", branch)
+                return branch
 
-                # if no branches in project
-                raise Exception("branch not found")
+            # if branch not exists, check master
+            branch = "master"
+            branchpath = os.path.join(season.path.project, 'branch', branch)
+            if os.path.isdir(branchpath):
+                self.response.cookies.set("season-wiz-branch", branch)
+                return branch
 
-            # set branch
-            self.response.cookies.set("season-wiz-branch", branch)
-        except:
-            branch = self.__branch__
+            # if no branches in project
+            raise Exception("branch not found")
+        
+        else:
+            branchpath = os.path.join(season.path.project, 'branch', branch)
+            if os.path.isdir(branchpath):
+                self.response.cookies.set("season-wiz-branch", branch)
+        
         return branch
 
     def branchpath(self):
@@ -247,7 +268,7 @@ class InstanceObject(season.util.std.stdClass):
                 except:
                     pass
                 
-                tagmap = ['debug', 'info', 'dev', 'warning', 'error', 'critical']
+                tagmap = ['DEBUG', 'INFO', 'WARN', 'DEV', 'ERR', 'CRIT']
                 if level < len(tagmap): tag = "[" + tagmap[level] + "]" + tag
 
                 args = list(args)

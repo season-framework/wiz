@@ -29,7 +29,7 @@ class wiz(InstanceObject):
 
     def config(self, namespace="config"):
         branch = self.branch()
-        c = Config.load(branch, namespace)
+        c = Config.load(self, branch, namespace)
         return c
 
     def basepath(self):
