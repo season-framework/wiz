@@ -21,30 +21,30 @@ class Server:
         self.config = config
         
         # create flask server & set env
-        app = flask.Flask('__main__', static_url_path='')
+        wsgi_flask = flask.Flask('__main__', static_url_path='')
         log = logging.getLogger('werkzeug')
         log.disabled = True
-        app.logger.disabled = True
+        wsgi_flask.logger.disabled = True
         os.environ["WERKZEUG_RUN_MAIN"] = "true"
-
-        app.secret_key = config.server.secret_key
-
-        app.jinja_env.variable_start_string = config.server.jinja_variable_start_string
-        app.jinja_env.variable_end_string = config.server.jinja_variable_end_string
-        app.jinja_env.add_extension('pypugjs.ext.jinja.PyPugJSExtension')
+        wsgi_flask.secret_key = config.server.secret_key
+        wsgi_flask.jinja_env.variable_start_string = config.server.jinja_variable_start_string
+        wsgi_flask.jinja_env.variable_end_string = config.server.jinja_variable_end_string
+        wsgi_flask.jinja_env.add_extension('pypugjs.ext.jinja.PyPugJSExtension')
 
         # create socketio server
         sioconfig = config.socketio.get("app", dict())
-        socketio = flask_socketio.SocketIO(app, **sioconfig)
+        wsgi_socketio = flask_socketio.SocketIO(wsgi_flask, **sioconfig)
 
+        # set wsgi server
+        self.wsgi = season.stdClass()
+        self.wsgi.flask = wsgi_flask
+        self.wsgi.socketio = wsgi_socketio
+
+        # build server on config
         if config.server.build is not None:
-            res = season.util.fn.call(config.server.build, app=app, socketio=socketio)
-            if res is not None:
-                self.app = app
+            season.util.fn.call(config.server.build, wsgi=self.wsgi)
 
-        # set server
-        self.app = app
-        self.socketio = socketio
+        # set server libs
         self.flask = flask
         self.flask_socketio = flask_socketio
 
@@ -54,7 +54,7 @@ class Server:
         self.wiz.plugin = self.plugin
         config.set(wiz=self.wiz)
         
-        # http events
+        # bind events
         HTTP(self)
         self.socket = SocketIO(self)
 
@@ -64,7 +64,7 @@ class Server:
         sioconfig['host'] = config.server.http_host
         sioconfig['port'] = config.server.http_port
 
-        socketio = self.socketio
-        app = self.app
+        socketio = self.wsgi.socketio
+        app = self.wsgi.flask
 
         socketio.run(app, **sioconfig)

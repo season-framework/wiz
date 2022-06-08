@@ -4,7 +4,7 @@ class Base(metaclass=ABCMeta):
     def __init__(self, server):
         self.server = server
         wiz = server.wiz
-        app = server.app
+        app = server.wsgi.flask
         config = server.config
         self.route(wiz, app, config)
     

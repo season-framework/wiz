@@ -5,15 +5,17 @@ class Controller:
     def connect(self):
         pass
 
-    def join(self, wiz, data, handler):
+    def join(self, wiz, data, io):
         sid = wiz.flask.request.sid
+        if 'id' not in data: return
         room = data['id']
-        handler.join(room)
+        io.join(room)
 
-    def leave(self, wiz, data, handler):
+    def leave(self, wiz, data, io):
         sid = wiz.flask.request.sid
+        if 'id' not in data: return
         room = data['id']
-        handler.leave(room)
+        io.leave(room)
 
-    def disconnect(self, wiz, handler):
+    def disconnect(self, wiz, io):
         sid = wiz.flask.request.sid

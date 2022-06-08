@@ -172,7 +172,7 @@ class Route(metaclass=ABCMeta):
             logger = wiz.logger(f"[{tag}/route/{app_id}]", 94)
             dic = self.dic()
 
-            name = os.path.join('branch', wiz.branch(), 'routes', app_id, 'controller.py')
+            name = os.path.join(wiz.basepath(), 'routes', app_id, 'controller.py')
             season.util.os.compiler(data['controller'], name=name, logger=logger, controller=ctrl, dic=dic, wiz=wiz)
 
         def update(self, data):
@@ -191,8 +191,8 @@ class Route(metaclass=ABCMeta):
 
             # check id format
             id = package['id']
-            if len(id) < 4:
-                raise Exception(f"id length at least 4")
+            if len(id) < 3:
+                raise Exception(f"id length at least 3")
 
             allowed = "qwertyuiopasdfghjklzxcvbnm.1234567890"
             for c in id:

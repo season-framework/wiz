@@ -102,8 +102,7 @@ class Response(metaclass=ABCMeta):
             data = self.data.get()
             html = wiz.server.flask.render_template_string(template_string, **data)
         except Exception as e:
-            message = traceback.format_exc()
-            raise season.exception.CompileException(filename, message)
+            raise season.exception.CompileException(filename)
         return html
 
     # template varialbes

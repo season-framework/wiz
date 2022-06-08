@@ -31,7 +31,8 @@ class InstanceObject(season.util.std.stdClass):
         self.server = server
         self.log = self.logger()
         self.cache = season.stdClass()
-
+        self.memory = season.stdClass()
+        
         self.__branch__ = None
 
         self.version = season.version
@@ -40,7 +41,6 @@ class InstanceObject(season.util.std.stdClass):
         
         # deprecated functions
         self.flask = server.flask
-        self.socketio = server.flask_socketio
         self.flask_socketio = server.flask_socketio
 
         # attach source
@@ -283,7 +283,7 @@ class InstanceObject(season.util.std.stdClass):
                 try:
                     if self.wiz.is_dev():
                         branch = wiz.branch()
-                        wiz.server.socketio.emit("log", logdata + "\n", namespace="/wiz", to=branch, broadcast=True)
+                        wiz.server.wsgi.socketio.emit("log", logdata + "\n", namespace="/wiz", to=branch, broadcast=True)
                 except:
                     pass
                 

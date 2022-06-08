@@ -15,8 +15,8 @@ window.season_wiz = (() => {
         if (window.io) {
             wiz.socket.active = true;
             wiz.socket.get = (socketnamespace) => {
-                let socketns = wiz.url + "/" + wiz.branch + "/" + app_id;
-                if (socketnamespace) socketns = wiz.url + "/" + wiz.branch + "/" + socketnamespace;
+                let socketns = "{$SOCKETBASEPATH$}" + "/" + app_id;
+                if (socketnamespace) socketns = "{$SOCKETBASEPATH$}" + "/" + socketnamespace;
                 wiz.socket_instance = window.io(socketns);
                 return wiz.socket_instance;
             }

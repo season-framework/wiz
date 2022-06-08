@@ -8,7 +8,6 @@ class Trigger(Base):
     def route(self, wiz, app, config):
         @app.before_request
         def before_request():
-            wiz.trace()
             if config.wiz.before_request is not None:
                 season.util.fn.call(config.wiz.before_request, wiz=wiz)
 
@@ -33,9 +32,9 @@ class Error(Base):
     def route(self, wiz, app, config):
         def error_handler(e):
             try:
-                uri = wiz.request.uri()
-                if uri[:len(wiz.wizurl)] == wiz.wizurl:
-                    wiz.response.redirect(wiz.wizurl)
+                # uri = wiz.request.uri()
+                # if uri[:len(wiz.wizurl)] == wiz.wizurl:
+                #     wiz.response.redirect(wiz.wizurl)
                 if wiz.server.config.wiz.on_error is not None: 
                     season.util.fn.call(wiz.server.config.wiz.on_error, wiz=wiz, error=e, e=e)
             except season.exception.ResponseException as e1:
@@ -50,7 +49,7 @@ class Error(Base):
             code = wiz.response.status_code
             if code is None: code = 500
             tracer.code = code
-            errormsg = tracer.path + "\n" + tracer.error
+            errormsg = wiz.request.uri() + "\n" + traceback.format_exc()
             wiz.log(errormsg, level=season.log.error, color=91)
             res = error_handler(e)
             if res is not None: return res
@@ -62,7 +61,7 @@ class Error(Base):
             code = wiz.response.status_code
             if code is None: code = 500
             tracer.code = code
-            errormsg = tracer.path + "\n" + e.message + "\n" + "file: " + e.filename
+            errormsg = wiz.request.uri() + "\n" + traceback.format_exc()
             wiz.log(errormsg, level=season.log.error, color=91)
             res = error_handler(e)
             if res is not None: return res
@@ -73,7 +72,7 @@ class Error(Base):
         def handle_exception_http(e):
             tracer = wiz.tracer
             tracer.code = e.code
-            errormsg = tracer.path
+            errormsg = wiz.request.uri()
             wiz.log(errormsg, level=season.log.warning, color=93)
             res = error_handler(e)
             if res is not None: return res

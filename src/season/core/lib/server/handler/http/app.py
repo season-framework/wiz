@@ -1,5 +1,4 @@
 import os
-import traceback
 import season
 from werkzeug.exceptions import HTTPException
 from season.core.lib.server.handler.http.base import Base
@@ -14,6 +13,7 @@ class Router(Base):
         @app.route("/<string:module>/<path:path>", methods=HTTP_METHODS)
         def request_handler(*args, **kwargs):
             try:
+                wiz.trace()
                 wiz.installed()
                 path = wiz.request.uri()
                 app, segment = wiz.route.match(path)
@@ -26,7 +26,6 @@ class Router(Base):
             except HTTPException as e:
                 raise e
             except Exception as e:
-                wiz.tracer.error = traceback.format_exc()
                 raise e
 
             wiz.response.abort(404)
@@ -38,6 +37,7 @@ class Resources(Base):
         @app.route('/resources/<path:path>')
         def resources_handler(*args, **kwargs):
             try:
+                wiz.trace()
                 branch = wiz.branch()
 
                 path = wiz.request.uri()
@@ -69,7 +69,6 @@ class Resources(Base):
             except HTTPException as e:
                 raise e
             except Exception as e:
-                wiz.tracer.error = traceback.format_exc()
                 raise e
 
             wiz.response.abort(404)

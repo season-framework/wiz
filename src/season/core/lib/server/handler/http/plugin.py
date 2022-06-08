@@ -1,5 +1,4 @@
 import os
-import traceback
 from werkzeug.exceptions import HTTPException
 
 import season
@@ -14,6 +13,7 @@ class Index(Base):
         @app.route(wizurl, methods=HTTP_METHODS)
         @app.route(wizurl + "/", methods=HTTP_METHODS)
         def wiz_index_handler(*args, **kwargs):
+            wiz.trace()
             homeurl = wiz.plugin.url(config.wiz.home)
             wiz.response.redirect(homeurl)
 
@@ -28,6 +28,7 @@ class API(Base):
         @app.route(wizurl + "/api/<path:path>", methods=HTTP_METHODS)
         def wiz_api_handler(*args, **kwargs):
             try:
+                wiz.trace()
                 segment = wiz.match(f"{wizurl}/api/<app_id>/<fnname>/<path:path>")
                 if segment is not None:
                     app_id = segment.app_id
@@ -49,7 +50,6 @@ class API(Base):
             except HTTPException as e:
                 raise e
             except Exception as e:
-                wiz.tracer.error = traceback.format_exc()
                 raise e
             
             wiz.response.abort(404)
@@ -59,6 +59,8 @@ class API(Base):
         @app.route(wizurl + "/plugin_api/<path:path>", methods=HTTP_METHODS)
         def wiz_plugin_api_handler(*args, **kwargs):
             try:
+                wiz.trace()
+
                 # ACL
                 aclfn = wiz.server.config.wiz.acl
                 if aclfn is not None:
@@ -91,7 +93,6 @@ class API(Base):
             except HTTPException as e:
                 raise e
             except Exception as e:
-                wiz.tracer.error = traceback.format_exc()
                 raise e
             
             wiz.response.abort(404)
@@ -107,6 +108,7 @@ class Resources(Base):
         @app.route(wizurl + "/resources/<path:path>", methods=HTTP_METHODS)
         def wiz_resource_handler(*args, **kwargs):
             try:
+                wiz.trace()
                 plugin = wiz.plugin
 
                 # find plugin resources
@@ -138,7 +140,6 @@ class Resources(Base):
             except HTTPException as e:
                 raise e
             except Exception as e:
-                wiz.tracer.error = traceback.format_exc()
                 raise e
 
 class Router(Base):
@@ -161,6 +162,7 @@ class Router(Base):
         @app.route(wizurl + "/ui/<path:path>", methods=HTTP_METHODS)
         def wiz_plugin_handler(*args, **kwargs):
             try:
+                wiz.trace()
                 wiz.installed()
                 
                 # set dev
@@ -230,7 +232,6 @@ class Router(Base):
             except HTTPException as e:
                 raise e
             except Exception as e:
-                wiz.tracer.error = traceback.format_exc()
                 raise e
             
             wiz.response.abort(404)

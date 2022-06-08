@@ -142,6 +142,12 @@ class App(metaclass=ABCMeta):
 
         def view(self, namespace, **kwargs):
             wiz = self.manager.wiz
+
+            respdata = wiz.response.data.get()
+            for key in respdata:
+                if key not in kwargs:
+                    kwargs[key] = respdata[key]
+
             cachefs = season.util.os.FileSystem(os.path.join(self.manager.cachepath(), namespace))
 
             app_id = self.id
@@ -162,7 +168,7 @@ class App(metaclass=ABCMeta):
             dic = self.dic()
 
             # proceed app controller
-            name = os.path.join('branch', wiz.branch(), 'apps', app_id, 'controller.py')
+            name = os.path.join(wiz.basepath(), 'apps', app_id, 'controller.py')
             proceed = season.util.os.compiler(data['controller'], name=name, logger=logger, controller=ctrl, dic=dic, wiz=wiz, kwargs=kwargs)
 
             dicstr = dic()
@@ -229,8 +235,13 @@ class App(metaclass=ABCMeta):
             css = data['css']
             view = f'{view}<script type="text/javascript">{js}</script><style>{css}</style>'
             
-            filename = os.path.join('branch', wiz.branch(), 'apps', app_id, f'view.{codelang_html}')
-            view = wiz.response.template(view, filename=filename, dicstr=dicstr, kwargs=kwargsstr, dic=dic, wiz=wiz, **kwargs)
+            filename = os.path.join(wiz.basepath(), 'apps', app_id, f'view.{codelang_html}')
+            kwargs['filename'] = filename
+            kwargs['kwargs'] = kwargsstr
+            kwargs['dicstr'] = dicstr
+            kwargs['dic'] = dic
+            kwargs['wiz'] = wiz
+            view = wiz.response.template(view, **kwargs)
             
             return markupsafe.Markup(view)
 
@@ -253,7 +264,7 @@ class App(metaclass=ABCMeta):
             tag = wiz.tag()
             logger = wiz.logger(f"[{tag}/app/{app_id}/api]", 94)
             dic = self.dic()
-            name = os.path.join('branch', wiz.branch(), 'apps', app_id, 'api.py')
+            name = os.path.join(wiz.basepath(), 'apps', app_id, 'api.py')
             apifn = season.util.os.compiler(view_api, name=name, logger=logger, controller=ctrl, dic=dic, wiz=wiz)
 
             return apifn
@@ -274,8 +285,8 @@ class App(metaclass=ABCMeta):
 
             # check id format
             id = package['id']
-            if len(id) < 4:
-                raise Exception(f"id length at least 4")
+            if len(id) < 3:
+                raise Exception(f"id length at least 3")
 
             allowed = "qwertyuiopasdfghjklzxcvbnm.1234567890"
             for c in id:
