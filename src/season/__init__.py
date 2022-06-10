@@ -5,6 +5,7 @@ from season.core import exception
 from season.core.lib.instances.wiz import wiz
 from season.core.lib.instances.plugin import plugin
 from season.core.server import Server
+from season import cmd
 
 from .version import VERSION_STRING as VERSION
 version = __version__ = __VERSION__ = VERSION

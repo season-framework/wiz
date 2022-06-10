@@ -139,7 +139,7 @@ class FileSystem:
                 f.write(data)
                 f.close()
 
-            def json(self, filepath, obj, default=None, indent=None):
+            def json(self, filepath, obj, default=None, indent=4):
                 def json_default(value):
                     if isinstance(value, datetime.date): 
                         return value.strftime('%Y-%m-%d %H:%M:%S')

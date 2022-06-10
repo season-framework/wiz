@@ -63,14 +63,11 @@ class Response(Base):
         app = wiz.app(app_id)
         view = app.view(app_id, **kwargs)
 
-        themename = wiz.server.config.wiz.theme
-        try:
-            layoutname = app.data(False)['package']['theme']
-        except:
-            layoutname = "base"
-        if layoutname is None:
-            layoutname = "base"
-        
+        render_theme = app.data(False)['package']['theme']        
+        render_theme = render_theme.split("/")
+        themename = render_theme[0]
+        layoutname = render_theme[1]
+
         fs = season.util.os.FileSystem(season.path.lib)
         wizjs = fs.read("wiz.js")
         wizurl = wiz.server.config.server.wiz_url
