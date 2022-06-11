@@ -3,6 +3,7 @@
 - SEASON WIZ is framework & IDE for web development.
 - SEASON WIZ Support git flow
 
+![screenshot](https://github.com/season-framework/wiz/blob/main/screenshot/wiz.gif)
 
 ## Installation
 
@@ -10,7 +11,6 @@
 pip install season             # install
 pip install season --upgrade   # upgrade lastest
 ```
-
 
 ## Usage
 
