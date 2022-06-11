@@ -51,7 +51,6 @@ setup(
         'pypugjs',
         'lesscpy',
         'libsass',
-        'dukpy',
         'GitPython',
         'numpy',
         'pandas',

@@ -134,6 +134,10 @@ path = "/var/www/wiki/data"
 
 ## Release Note
 
+### 1.0.2
+
+- remove dukpy (windows install bug)
+
 ### 1.0.1
 
 - support macosx
