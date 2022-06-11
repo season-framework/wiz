@@ -6,6 +6,7 @@ from season.core.lib.server.handler.http.base import Base
 
 class Index(Base):
     def route(self, wiz, app, config):
+        server = wiz.server
         HTTP_METHODS = config.server.http_method
         wizurl = config.server.wiz_url
         if wizurl[-1] == "/": wizurl = wizurl[:-1]
@@ -13,12 +14,19 @@ class Index(Base):
         @app.route(wizurl, methods=HTTP_METHODS)
         @app.route(wizurl + "/", methods=HTTP_METHODS)
         def wiz_index_handler(*args, **kwargs):
-            wiz.trace()
-            homeurl = wiz.plugin.url(config.wiz.home)
-            wiz.response.redirect(homeurl)
+            wiz = season.wiz(server)
+            try:
+                wiz.trace()
+                homeurl = wiz.server.plugin.url(config.wiz.home)
+                wiz.response.redirect(homeurl)
+            except Exception as e:
+                e.wiz = wiz
+                raise e
+
 
 class API(Base):
     def route(self, wiz, app, config):
+        server = wiz.server
         HTTP_METHODS = config.server.http_method
         wizurl = config.server.wiz_url
         if wizurl[-1] == "/": wizurl = wizurl[:-1]
@@ -27,6 +35,7 @@ class API(Base):
         @app.route(wizurl + "/api/", methods=HTTP_METHODS)
         @app.route(wizurl + "/api/<path:path>", methods=HTTP_METHODS)
         def wiz_api_handler(*args, **kwargs):
+            wiz = season.wiz(server)
             try:
                 wiz.trace()
                 segment = wiz.match(f"{wizurl}/api/<app_id>/<fnname>/<path:path>")
@@ -46,10 +55,13 @@ class API(Base):
 
                     season.util.fn.call(apifn[fnname], wiz=wiz)
             except season.exception.ResponseException as e:
+                e.wiz = wiz
                 raise e
             except HTTPException as e:
+                e.wiz = wiz
                 raise e
             except Exception as e:
+                e.wiz = wiz
                 raise e
             
             wiz.response.abort(404)
@@ -58,6 +70,7 @@ class API(Base):
         @app.route(wizurl + "/plugin_api/", methods=HTTP_METHODS)
         @app.route(wizurl + "/plugin_api/<path:path>", methods=HTTP_METHODS)
         def wiz_plugin_api_handler(*args, **kwargs):
+            wiz = season.wiz(server)
             try:
                 wiz.trace()
 
@@ -73,7 +86,7 @@ class API(Base):
                     app_id = segment.app_id
                     fnname = segment.fnname
 
-                    plugin = wiz.plugin.load(plugin_id)
+                    plugin = wiz.server.plugin.load(plugin_id)
                     plugin.trace()
                     plugin.clean()
                     plugin.request.segment = segment
@@ -89,16 +102,20 @@ class API(Base):
 
                     season.util.fn.call(apifn[fnname], wiz=plugin)
             except season.exception.ResponseException as e:
+                e.wiz = wiz
                 raise e
             except HTTPException as e:
+                e.wiz = wiz
                 raise e
             except Exception as e:
+                e.wiz = wiz
                 raise e
             
             wiz.response.abort(404)
 
 class Resources(Base):
     def route(self, wiz, app, config):
+        server = wiz.server
         HTTP_METHODS = config.server.http_method
         wizurl = config.server.wiz_url
         if wizurl[-1] == "/": wizurl = wizurl[:-1]
@@ -107,9 +124,9 @@ class Resources(Base):
         @app.route(wizurl + "/resources/", methods=HTTP_METHODS)
         @app.route(wizurl + "/resources/<path:path>", methods=HTTP_METHODS)
         def wiz_resource_handler(*args, **kwargs):
+            wiz = season.wiz(server)
             try:
                 wiz.trace()
-                plugin = wiz.plugin
 
                 # find plugin resources
                 segment = wiz.match(f"{wizurl}/resources/<plugin_id>/<path:path>")
@@ -136,14 +153,18 @@ class Resources(Base):
 
                 wiz.response.abort(404)
             except season.exception.ResponseException as e:
+                e.wiz = wiz
                 raise e
             except HTTPException as e:
+                e.wiz = wiz
                 raise e
             except Exception as e:
+                e.wiz = wiz
                 raise e
 
 class Router(Base):
     def route(self, wiz, app, config):
+        server = wiz.server
         HTTP_METHODS = config.server.http_method
         wizurl = config.server.wiz_url
         if wizurl[-1] == "/": wizurl = wizurl[:-1]
@@ -161,6 +182,7 @@ class Router(Base):
 
         @app.route(wizurl + "/ui/<path:path>", methods=HTTP_METHODS)
         def wiz_plugin_handler(*args, **kwargs):
+            wiz = season.wiz(server)
             try:
                 wiz.trace()
                 wiz.installed()
@@ -195,7 +217,7 @@ class Router(Base):
                     wiz.request.segment = segment
 
                     # set plugin
-                    plugin = wiz.plugin.load(plugin_id)
+                    plugin = wiz.server.plugin.load(plugin_id)
                     plugin.trace()
                     plugin.clean()
 
@@ -228,10 +250,13 @@ class Router(Base):
                 
                 wiz.response.abort(404)
             except season.exception.ResponseException as e:
+                e.wiz = wiz
                 raise e
             except HTTPException as e:
+                e.wiz = wiz
                 raise e
             except Exception as e:
+                e.wiz = wiz
                 raise e
             
             wiz.response.abort(404)

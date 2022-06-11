@@ -18,6 +18,7 @@ extra_files = package_files(os.path.join(PKGPATH, "command"))
 extra_files = extra_files + package_files(os.path.join(PKGPATH, "component"))
 extra_files = extra_files + package_files(os.path.join(PKGPATH, "core"))
 extra_files = extra_files + package_files(os.path.join(PKGPATH, "util"))
+extra_files = extra_files + package_files(os.path.join(PKGPATH, "data"))
 
 setup(
     name='season',
@@ -41,7 +42,7 @@ setup(
     ]},
     install_requires=[
         'werkzeug==2.0.3',
-        'jinja2==3.0.3',
+        'jinja2',
         'flask',
         'flask_socketio',
         'watchdog',

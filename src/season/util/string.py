@@ -21,11 +21,11 @@ def json_default(value):
 
 def translate_id(value):
     value = value.replace("/", ".").replace(" ", "")
-    allowed = "qwertyuiopasdfghjklzxcvbnm._1234567890"
+    allowed = "qwertyuiopasdfghjklzxcvbnm.1234567890"
     nvalue = ""
     for c in value:
         if c not in allowed:
-            nvalue = nvalue + "_"
+            nvalue = nvalue
         else:
             nvalue = nvalue + c
     if nvalue[0] == ".": nvalue = nvalue[1:]

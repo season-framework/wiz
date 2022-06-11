@@ -5,6 +5,7 @@ from season.core.lib.server.handler.http.base import Base
 
 class Router(Base):
     def route(self, wiz, app, config):
+        server = wiz.server
         HTTP_METHODS = config.server.http_method
 
         @app.route("/", methods=HTTP_METHODS)
@@ -12,6 +13,7 @@ class Router(Base):
         @app.route("/<string:module>/", methods=HTTP_METHODS)
         @app.route("/<string:module>/<path:path>", methods=HTTP_METHODS)
         def request_handler(*args, **kwargs):
+            wiz = season.wiz(server)
             try:
                 wiz.trace()
                 wiz.installed()
@@ -21,21 +23,27 @@ class Router(Base):
                 if app is not None:
                     wiz.request.segment = season.stdClass(**segment)
                     app.proceed()
+
+                wiz.response.abort(404)
             except season.exception.ResponseException as e:
+                e.wiz = wiz
                 raise e
             except HTTPException as e:
+                e.wiz = wiz
                 raise e
             except Exception as e:
+                e.wiz = wiz
                 raise e
-
-            wiz.response.abort(404)
 
 class Resources(Base):
     def route(self, wiz, app, config):
+        server = wiz.server
+
         @app.route('/resources')
         @app.route('/resources/')
         @app.route('/resources/<path:path>')
         def resources_handler(*args, **kwargs):
+            wiz = season.wiz(server)
             try:
                 wiz.trace()
                 branch = wiz.branch()
@@ -64,11 +72,15 @@ class Resources(Base):
 
                     response = wiz.server.flask.send_from_directory(dirname, filename)
                     raise season.exception.ResponseException(200, response)
+
+                wiz.response.abort(404)
             except season.exception.ResponseException as e:
+                e.wiz = wiz
                 raise e
             except HTTPException as e:
+                e.wiz = wiz
                 raise e
             except Exception as e:
+                e.wiz = wiz
                 raise e
 
-            wiz.response.abort(404)

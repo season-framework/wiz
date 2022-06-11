@@ -22,6 +22,7 @@ class Response(Base):
     def route(self, wiz, app, config):
         @app.errorhandler(season.exception.ResponseException)
         def handle_response(e):
+            wiz = e.wiz
             tracer = wiz.tracer
             tracer.code = wiz.response.status_code
             wiz.log(tracer.path, level=season.log.debug)
@@ -32,9 +33,6 @@ class Error(Base):
     def route(self, wiz, app, config):
         def error_handler(e):
             try:
-                # uri = wiz.request.uri()
-                # if uri[:len(wiz.wizurl)] == wiz.wizurl:
-                #     wiz.response.redirect(wiz.wizurl)
                 if wiz.server.config.wiz.on_error is not None: 
                     season.util.fn.call(wiz.server.config.wiz.on_error, wiz=wiz, error=e, e=e)
             except season.exception.ResponseException as e1:
@@ -45,6 +43,7 @@ class Error(Base):
         # Controlled Exception Error
         @app.errorhandler(season.exception.ErrorException)
         def handle_exception_error(e):
+            wiz = e.wiz
             tracer = wiz.tracer
             code = wiz.response.status_code
             if code is None: code = 500
@@ -57,6 +56,7 @@ class Error(Base):
 
         @app.errorhandler(season.exception.CompileException)
         def handle_exception_compile_error(e):
+            wiz = e.wiz
             tracer = wiz.tracer
             code = wiz.response.status_code
             if code is None: code = 500
@@ -70,6 +70,7 @@ class Error(Base):
         # HTTP Exception Handler 
         @app.errorhandler(HTTPException)
         def handle_exception_http(e):
+            wiz = e.wiz
             tracer = wiz.tracer
             tracer.code = e.code
             errormsg = wiz.request.uri()
@@ -80,7 +81,8 @@ class Error(Base):
 
         # Internal Error Handler
         @app.errorhandler(Exception)
-        def handle_exception(e):            
+        def handle_exception(e):
+            wiz = e.wiz    
             tracer = wiz.tracer
             tracer.code = 500
             errormsg = tracer.path + "\n" + traceback.format_exc()

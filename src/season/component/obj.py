@@ -75,6 +75,10 @@ class InstanceObject(season.util.std.stdClass):
     def tag(self):
         pass
 
+    def path(self, *args):
+        path = [self.basepath()] + list(args)
+        return os.path.join(*path)
+
     def trace(self):
         self.tracer = season.util.std.stdClass()
         self.tracer.branch = self.branch()

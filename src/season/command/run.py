@@ -1,3 +1,4 @@
+import sys
 from argh import arg, expects_obj
 import os
 import subprocess
@@ -5,17 +6,18 @@ import psutil
 import season
 import multiprocessing as mp
 
-def run(*args, **kwargs):
+def run():
     publicpath = os.path.join(season.path.project, 'public')
     apppath = os.path.join(publicpath, 'app.py')
-
     if os.path.isfile(apppath) == False:
-        print("Invalid Project path: dizest structure not found in this folder.")
+        print("Invalid Project path: wiz structure not found in this folder.")
         return
 
     def run_ctrl():
-        cmd = "python {}".format(apppath)
-        subprocess.call(cmd, shell=True)
+        env = os.environ.copy()
+        env['WERKZEUG_RUN_MAIN'] = 'true'
+        cmd = str(sys.executable) + " " +  str(apppath)
+        subprocess.call(cmd, env=env, shell=True)
 
     while True:
         try:

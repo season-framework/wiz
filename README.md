@@ -3,230 +3,171 @@
 - SEASON WIZ is framework & IDE for web development.
 - SEASON WIZ Support git flow
 
+
 ## Installation
 
 ```bash
-pip install season
+pip install season             # install
+pip install season --upgrade   # upgrade lastest
 ```
+
 
 ## Usage
 
 - create project
 
-```
+```bash
 cd <workspace>
 wiz create myapp
 cd myapp
 wiz run
 ```
 
-- `127.0.0.1:3000/wiz` on your web browser
+> `http://127.0.0.1:3000/wiz` on your web browser
 
-- cleaning cache and init plugins
+- create from git repo
 
+```bash
+wiz create myapp --uri=https://your-custom/git/project
 ```
-cd <workspace>
+
+- cleaning cache
+
+```bash
 wiz clean
 ```
 
+- update ide
 
-## Roadmap
+```bash
+wiz update ide  # update to default ide
+wiz update ide --uri=https://your-custom/git/ide/project
+```
 
-- git flow
-    - support management for remote branches
+
+## Upgrade project from old wiz (under 0.5.x)
+
+- transform structure
+
+```
+cd <project-path>
+wiz upgrade
+```
+
+- in theme, change methods like before
+
+```
+# wiz.theme('default', 'base', 'header.pug')
+wiz.theme('default').layout('base').view('header.pug')
+```
+
+- compiler update, `javascript.py` 
+
+```python
+def compile(wiz, js, data):
+    if 'render_id' not in data:
+        return js
+
+    app_id = data['app_id']
+    render_id = data['render_id']
+    namespace = data['namespace']
+
+    o = "{"
+    e = "}"
+    kwargsstr = "{$ kwargs $}"
+    dicstr = "{$ dicstr $}"
+    branch = wiz.branch()
+
+    js = f"""
+    function __init_{render_id}() {o}
+        let wiz = season_wiz.load('{app_id}', '{namespace}', '{render_id}');
+        wiz.branch = '{branch}';
+        wiz.data = wiz.kwargs = wiz.options = JSON.parse(atob('{kwargsstr}'));
+        wiz.dic = wiz.DIC = JSON.parse(atob('{dicstr}'));
+        
+        {js};
+
+        try {o}
+            app.controller('{render_id}', wiz_controller); 
+        {e} catch (e) {o} 
+            app.controller('{render_id}', ()=> {o} {e} ); 
+        {e} 
+    {e}; 
+    __init_{render_id}();
+    """
+
+    return js
+```
+
+- compiler update, `html.py`
+
+```python
+def compile(wiz, html, data):
+    if 'render_id' not in data:
+        return html
+        
+    app_id = data['app_id']
+    render_id = data['render_id']
+    namespace = data['namespace']
+
+    html = html.split(">")
+    if len(html) > 1:
+        html = html[0] + f" id='{render_id}' ng-controller='{render_id}'>" + ">".join(html[1:])
+    else:
+        html = f"<div id='{render_id}' ng-controller='{render_id}'>" + ">".join(html) + "</div>"
+
+    return html
+```
+
+- config file update
+
+```python
+## old version
+from season import stdClass
+config = stdClass()
+config.path = "/var/www/wiki/data"
+
+## new version
+path = "/var/www/wiki/data"
+```
+
 
 ## Release Note
 
 ### 1.0.0
 
+- clean code
+- full changed ide
 - remove season-flask concept
 - enhanced performance
 - logging for wiz concept
-- upgrade plugin develop env
+- upgrade plugin structure
 - config structure changed
+- stable version for git merge
 
-### 0.5.33
-
-- socketio config bug fixed
-
-### 0.5.32
-
-- socketio config (config/socketio.py)
-
-### 0.5.30
-
-- socketio config (cors_allowed_origins)
-
-### 0.5.29
-
-- packages version bug fixed (jinja2, werkzeug)
-
-### 0.5.28
-
-- core render bug fixed
-- add src folder for tracing plugin code
-
-### 0.5.27
-
-- Response PIL Bug fixed
-
-### 0.5.26
-
-- plugin menu bug fixed (cache bug)
-
-### 0.5.25
-
-- check installed function (wiz.installed())
-- forced dev mode in dev branch (if not master)
-
-### 0.5.24
-
-- wiz `resource_handler` updated
-
-### 0.5.23
-
-- add function response(flask_resp) and pil_image at `response`
-
-### 0.5.22
-
-- `request` file api changed
-
-### 0.5.21
-
-- change babel script option to extendable script option
-
-### 0.5.20
-
-- add babel script option
-
-
-### 0.5.19
-
-- add `wiz.path()` function
-
-### 0.5.18
-
-- git merge bug fixed
-
-### 0.5.17
-
-- update wiz theme render logic
-
-### 0.5.16
-
-- git merge logic changed
-
-### 0.5.15
-
-- public directory bug fixed (wiz)
-
-### 0.5.14
-
-- app.py bug fixed
-
-### 0.5.13
-
-- app.py bug fixed
-
-### 0.5.12
-
-- app.py bug fixed
-
-### 0.5.11
-
-- render id bug fixed
-
-
-### 0.5.10
-
-- json dumps bug fixed
-
-### 0.5.9
-
-- git merge bug fixed
-
-
-### 0.5.8
-
-- wiz instance as global in wiz api
-
-### 0.5.7
-
-- bug fixed in theme function
-
-### 0.5.6
-
-- bug fixed in theme function
-
-### 0.5.5
-
-- add `match` api at wiz instance
-
-### 0.5.4
-
-- api error logger bug fixed
-
-### 0.5.3
+### 0.5.x
 
 - support plugin storage
-
-### 0.5.2
-
-- route bug fixed
-
-### 0.5.1
-
 - port scan when wiz project created
-
-### 0.5.0
-
 - wiz based online plugin development env
 - support programmable api for plugins
 - remove useless resources
+- socketio config (config/socketio.py)
+- packages version bug fixed (jinja2, werkzeug)
+- add src folder for tracing plugin code
+- check installed function (wiz.installed())
+- forced dev mode in dev branch (if not master)
+- wiz `resource_handler` updated
+- add function response(flask_resp) and pil_image at `response`
+- add babel script option
+- add `wiz.path()` function
+- git merge bug fixed
+- update wiz theme render logic
+- git merge logic changed
+- wiz instance as global in wiz api
+- add `match` api at wiz instance
 
-### 0.4.8
-
-- scroll bug fixed in logger
-
-
-### 0.4.7
-
-- scroll bug fixed in logger
-
-### 0.4.6
-
-- dictionary bug fixed in App HTML
-- history display ui changed (workspace)
-- app browse in route workspace
-
-### 0.4.5
-
-- cache bug fixed
-- add cache clean in workspace
-
-### 0.4.4
-
-- git bug changed (if author is not set, default user to `wiz`)
-
-### 0.4.3
-
-- full size log viewer
-- keyword changed
-- cache bug fixed
-- socketio performance upgrade 
-
-### 0.4.2
-
-- wiz.js embeded
-- developer/production mode
-    - developer: enabled socketio logger on every pages
-    - production: disabled socketio logger
-
-### 0.4.1
-
-- WIZ API (js) changed (async mode)
-
-### 0.4.0
+### 0.4.x
 
 - Integrate WIZ & Season Flask
 - support git flow
@@ -234,111 +175,46 @@ wiz clean
 - base code workspace changed (mysql to filesystem)
 - UI upgrade
 - support installer
+- developer/production mode
+    - developer: enabled socketio logger on every pages
+    - production: disabled socketio logger
+- dictionary bug fixed in App HTML
+- history display ui changed (workspace)
+- app browse in route workspace
+- add cache clean in workspace
+- git bug changed (if author is not set, default user to `wiz`)
+- full size log viewer
+- keyword changed
+- cache bug fixed
+- socketio performance upgrade 
+- wiz.js embeded
+- WIZ API (js) changed (async mode)
 
-### 0.3.12
+### 0.3.x
 
+- add socket.io 
 - framework on build
-
-### 0.3.11
-
-- socketio error display
-
-### 0.3.10
-
-- socket bug fixed
-
-### 0.3.9
-
 - command run modified (add pattern, ignores)
-
-### 0.3.7
-
 - change Framework Object
 
-### 0.3.6
-
-- Socket.io disconnect bug fixed
-
-### 0.3.3
-
-- Socket.io Namespace Injection
-
-### 0.3.2
-
-- Socket.io bug fixed
-
-### 0.3.1
-
-- Socket.io bug fixed
-
-
-### 0.3.0
-
-- add Socket.io 
-
-
-### 0.2.14
-
-- add response.template_from_string function
-
-### 0.2.13
-
-- add response.template function
-
-### 0.2.12
-
-- add variable expression change option
-
-### 0.2.11
-
-- interface loader update
-
-
-### 0.2.10
-
-- config onerror changed 
-
-### 0.2.9
-
-- add response.abort
-
-### 0.2.8
-
-- error handler in controller `__error__`
-
-### 0.2.7
-
-- response redirect update (relative module path)
-
-### 0.2.6
-
-- logger upgrade (file trace bug fixed)
-
-### 0.2.5
-
-- logger upgrade (log executed file trace)
-
-### 0.2.4
-
-- logger upgrade (code trace)
-
-### 0.2.3
-
-- error handler bug fixed
-
-### 0.2.2
-
-- apache wsgi bug fixed (public/app.py)
-
-### 0.2.1
-
-- apache wsgi bug fixed
-
-### 0.2.0
+### 0.2.x
 
 - framework structure upgraded
 - command line tool function changed
 - submodule structure added
 - logging 
 - simplify public directory structure
-
+- add response.template_from_string function
+- add response.template function
+- add variable expression change option
+- interface loader update
+- config onerror changed 
+- add response.abort
+- error handler in controller `__error__`
+- response redirect update (relative module path)
+- logger upgrade (file trace bug fixed)
+- logger upgrade (log executed file trace)
+- logger upgrade (code trace)
+- error handler bug fixed
+- apache wsgi bug fixed (public/app.py)
+- apache wsgi bug fixed

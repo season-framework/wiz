@@ -1,3 +1,4 @@
+import os
 import season
 from werkzeug.routing import Map, Rule
 
@@ -62,7 +63,7 @@ class Response(Base):
         layoutname = render_theme[1]
 
         fs = season.util.os.FileSystem(season.path.lib)
-        wizjs = fs.read("wiz.js")
+        wizjs = fs.read(os.path.join('component', 'wiz.js'))
         wizurl = wiz.server.config.server.wiz_url
         if wizurl[-1] == "/": wizurl = wizurl[:-1]
         wizjs = wizjs.replace("{$BASEPATH$}", wizurl + "/api").replace("{$URL$}", wizurl).replace("{$SOCKETBASEPATH$}", wizurl + "/app/" + wiz.branch())
