@@ -1,6 +1,7 @@
-import os
-PATH_CWD = os.path.dirname(os.path.dirname(__file__))
-os.chdir(PATH_CWD)
+import sys
 import season
-ismain = __name__ == '__main__'
-app, socketio = season.bootstrap(ismain=ismain)
+
+if __name__ == '__main__':
+    server = season.Server()
+    server.run()
+    

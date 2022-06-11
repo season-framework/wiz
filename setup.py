@@ -2,9 +2,9 @@ import importlib.util
 import os
 from setuptools import setup, find_packages
 
-SRC_DIR = 'src'
-SEASON_PKG_DIR = os.path.join(SRC_DIR, 'season')
-spec = importlib.util.spec_from_file_location('version', os.path.join(SEASON_PKG_DIR, 'version.py'))
+SRCPATH = os.path.join('src')
+PKGPATH = os.path.join('src', 'season')
+spec = importlib.util.spec_from_file_location('version', os.path.join(PKGPATH, 'version.py'))
 version = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(version)
 
@@ -12,15 +12,13 @@ def package_files(directory):
     paths = []
     for (path, directories, filenames) in os.walk(directory):
         for filename in filenames:
-            paths.append(os.path.join(path, filename)[len(SEASON_PKG_DIR) + 1:])
+            paths.append(os.path.join(path, filename)[len(PKGPATH) + 1:])
     return paths
-
-extra_files = package_files(os.path.join(SEASON_PKG_DIR, 'command'))
-extra_files = extra_files + package_files(os.path.join(SEASON_PKG_DIR, 'data'))
-extra_files = extra_files + package_files(os.path.join(SEASON_PKG_DIR, 'framework')) 
-extra_files = extra_files + package_files(os.path.join(SEASON_PKG_DIR, 'util')) 
-extra_files = extra_files + package_files(os.path.join(SEASON_PKG_DIR, 'websrc'))
-extra_files = extra_files + package_files(os.path.join(SEASON_PKG_DIR, 'wiz'))
+extra_files = package_files(os.path.join(PKGPATH, "command"))
+extra_files = extra_files + package_files(os.path.join(PKGPATH, "component"))
+extra_files = extra_files + package_files(os.path.join(PKGPATH, "core"))
+extra_files = extra_files + package_files(os.path.join(PKGPATH, "util"))
+extra_files = extra_files + package_files(os.path.join(PKGPATH, "data"))
 
 setup(
     name='season',
@@ -32,21 +30,21 @@ setup(
     author='proin',
     author_email='proin@season.co.kr',
     license='MIT',
-    package_dir={'': SRC_DIR},
-    packages=find_packages(SRC_DIR),
+    package_dir={'': SRCPATH},
+    packages=find_packages(SRCPATH),
     include_package_data=True,
     package_data = {
         'season': extra_files
     },
     zip_safe=False,
     entry_points={'console_scripts': [
-        'sf = season.cmd:main [season]',
-        'wiz = season.cmd_wiz:main [season]'
+        'wiz = season.cmd:main [season]'
     ]},
     install_requires=[
         'werkzeug==2.0.3',
-        'jinja2==3.0.3',
+        'jinja2',
         'flask',
+        'flask_socketio',
         'watchdog',
         'argh',
         'psutil',
@@ -54,8 +52,11 @@ setup(
         'lesscpy',
         'libsass',
         'dukpy',
-        'flask_socketio',
-        'GitPython'
+        'GitPython',
+        'numpy',
+        'pandas',
+        'Pillow',
+        'requests'
     ],
     python_requires='>=3.6',
     classifiers=[
