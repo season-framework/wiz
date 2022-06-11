@@ -5,6 +5,7 @@ import subprocess
 import psutil
 import season
 import multiprocessing as mp
+import platform
 
 def run():
     publicpath = os.path.join(season.path.project, 'public')
@@ -19,14 +20,18 @@ def run():
         cmd = str(sys.executable) + " " +  str(apppath)
         subprocess.call(cmd, env=env, shell=True)
 
-    while True:
-        try:
-            proc = mp.Process(target=run_ctrl)
-            proc.start()
-            proc.join()
-        except KeyboardInterrupt:
-            for child in psutil.Process(proc.pid).children(recursive=True):
-                child.kill()
-            return
-        except:
-            pass
+    ostype = platform.system().lower()
+    if ostype == 'linux':
+        while True:
+            try:
+                proc = mp.Process(target=run_ctrl)
+                proc.start()
+                proc.join()
+            except KeyboardInterrupt:
+                for child in psutil.Process(proc.pid).children(recursive=True):
+                    child.kill()
+                return
+            except:
+                pass
+    else:
+        run_ctrl()

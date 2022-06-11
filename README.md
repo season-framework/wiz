@@ -134,6 +134,10 @@ path = "/var/www/wiki/data"
 
 ## Release Note
 
+### 1.0.1
+
+- support macosx
+
 ### 1.0.0
 
 - clean code
