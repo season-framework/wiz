@@ -275,6 +275,8 @@ class App(metaclass=ABCMeta):
             for key in required:
                 if key not in data: 
                     raise Exception(f"'`{key}`' not defined")
+                elif type(data[key]) is str:
+                    data[key] = data[key].replace('', '')
 
             required = ['id']
             for key in required:
