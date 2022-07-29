@@ -55,7 +55,9 @@ setup(
         'numpy',
         'pandas',
         'Pillow',
-        'requests'
+        'requests',
+        'eventlet',
+        'gevent'
     ],
     python_requires='>=3.6',
     classifiers=[

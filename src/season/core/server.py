@@ -61,10 +61,11 @@ class Server:
     def run(self):
         config = self.config
         sioconfig = config.socketio.run
-        sioconfig['host'] = config.server.http_host
-        sioconfig['port'] = config.server.http_port
+        host = sioconfig['host'] = config.server.http_host
+        port = sioconfig['port'] = config.server.http_port
 
         socketio = self.wsgi.socketio
         app = self.wsgi.flask
 
+        print(f"wiz server is running on... http://{host}:{port}")
         socketio.run(app, **sioconfig)

@@ -131,8 +131,13 @@ config.path = "/var/www/wiki/data"
 path = "/var/www/wiki/data"
 ```
 
-
 ## Release Note
+
+### 1.0.4
+
+- Socket.IO transport
+- server starting log
+- auto remove invalid character on update
 
 ### 1.0.3
 
