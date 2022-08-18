@@ -44,6 +44,13 @@ wiz update ide  # update to default ide
 wiz update ide --uri=https://your-custom/git/ide/project
 ```
 
+- daemon server
+
+```bash
+wiz server start # start daemon server
+wiz server stop  # stop daemon server
+```
+
 
 ## Upgrade project from old wiz (under 0.5.x)
 
