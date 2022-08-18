@@ -140,6 +140,10 @@ path = "/var/www/wiki/data"
 
 ## Release Note
 
+### 1.0.6
+
+- print bug fixed
+
 ### 1.0.5
 
 - add daemon server command

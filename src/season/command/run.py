@@ -121,7 +121,7 @@ class Daemon:
             for child in psutil.Process(pid).children(recursive=True):
                 counter = counter + 1
                 child.kill()
-            print(f"killed {counter} dizest subprocess")
+            print(f"killed {counter} subprocess")
         except:
             pass
 
