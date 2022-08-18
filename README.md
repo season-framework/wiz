@@ -133,6 +133,10 @@ path = "/var/www/wiki/data"
 
 ## Release Note
 
+### 1.0.5
+
+- add daemon server command
+
 ### 1.0.4
 
 - Socket.IO transport
