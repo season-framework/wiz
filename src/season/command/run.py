@@ -10,6 +10,7 @@ import signal
 import atexit
 import contextlib
 import multiprocessing as mp
+import threading
 
 PATH_WEBSRC = os.getcwd()
 PATH_PUBLIC = os.path.join(PATH_WEBSRC, 'public')
@@ -74,8 +75,8 @@ class Daemon:
         sys.stdout.flush()
         sys.stderr.flush()
 
-        so = open(self.stdout, 'w')
-        se = open(self.stderr, 'w')
+        so = open("/dev/null", 'w')
+        se = open("/dev/null", 'w')
         contextlib.redirect_stdout(so)
         contextlib.redirect_stderr(se)
 
@@ -99,9 +100,9 @@ class Daemon:
             message = "pidfile %s already exist. Daemon already running?\n"
             sys.stderr.write(message % self.pidfile)
             sys.exit(1)
-        
+
         self.daemonize()
-        self.run()
+        self.run(self.stdout, self.stderr)
 
     def stop(self):
         try:
@@ -137,13 +138,16 @@ class Daemon:
             else:
                 sys.exit(1)
 
-def runnable():
+def runnable(stdout, stderr):
+    if stdout == '/dev/null': None
+    if stderr == '/dev/null': None
     while True:
         try:
             env = os.environ.copy()
             env['WERKZEUG_RUN_MAIN'] = 'true'
+            if stdout is not None: env['WIZ_LOGGER'] = stdout
             process = subprocess.Popen([str(sys.executable), str(PATH_APP)], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            process.communicate()
+            process.wait()
         except Exception as e:
             pass
         except:
@@ -153,13 +157,17 @@ def runnable():
                 child.kill()
             sys.exit(0)
 
+@arg('--log', help='log file path')
 @arg('action', default=None, help="start|stop|restart")
-def server(action):
+def server(action, log=None):
     if os.path.isfile(PATH_APP) == False:
         print("Invalid Project path: wiz structure not found in this folder.")
         return
 
-    daemon = Daemon(PATH_PID, target=runnable)
+    if log is None: log = '/dev/null'
+    else: log = os.path.realpath(os.path.join(os.getcwd(), log))
+
+    daemon = Daemon(PATH_PID, target=runnable, stdout=log, stderr=log)
     if action == 'start':
         print(f"WIZ server started")
         daemon.start()
@@ -176,3 +184,6 @@ def server(action):
         daemon.start()
     else:
         print(f"`wiz server` not support `{action}`. (start|stop|restart)")
+
+def kill():
+    os.system("kill -9 $(ps -ef | grep python | grep wiz | awk '{print $2}')")

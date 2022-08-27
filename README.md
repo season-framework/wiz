@@ -140,6 +140,10 @@ path = "/var/www/wiki/data"
 
 ## Release Note
 
+### 1.0.7
+
+- add `wiz server start --log <file>` method 
+
 ### 1.0.6
 
 - print bug fixed

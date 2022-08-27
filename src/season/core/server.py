@@ -1,3 +1,4 @@
+import sys
 import os
 import traceback
 import time
@@ -26,6 +27,14 @@ class Server:
         log.disabled = True
         wsgi_flask.logger.disabled = True
         os.environ["WERKZEUG_RUN_MAIN"] = "true"
+
+        try:
+            self.logger = os.environ["WIZ_LOGGER"]
+            with open(self.logger, "w") as f:
+                f.write("")
+        except Exception as e:
+            self.logger = None
+
         wsgi_flask.secret_key = config.server.secret_key
         wsgi_flask.jinja_env.variable_start_string = config.server.jinja_variable_start_string
         wsgi_flask.jinja_env.variable_end_string = config.server.jinja_variable_end_string

@@ -283,7 +283,11 @@ class InstanceObject(season.util.std.stdClass):
                 timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
                 logdata = f"\033[{color}m[{timestamp}]{tag}\033[0m " + " ".join(args)
 
-                print(logdata)
+                if wiz.server.logger is not None:
+                    with open(wiz.server.logger, "a") as f:
+                        f.write(logdata + "\n")
+                else:
+                    print(logdata)
                 try:
                     if self.wiz.is_dev():
                         branch = wiz.branch()
