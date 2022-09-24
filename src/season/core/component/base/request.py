@@ -1,10 +1,12 @@
 import re
+import season
+from werkzeug.routing import Map, Rule
 from abc import *
 
 class Request(metaclass=ABCMeta):
     def __init__(self, wiz):
         self.wiz = wiz
-        self._flask = wiz.server.flask
+        self._flask = wiz.server.package.flask
 
     @abstractmethod
     def uri(self):
@@ -14,13 +16,7 @@ class Request(metaclass=ABCMeta):
         return self._flask.request.method
 
     def ip(self):
-        return self.client_ip()
-
-    def client_ip(self):
         return self._flask.request.environ.get('HTTP_X_REAL_IP', self._flask.request.remote_addr)
-
-    def lang(self):
-        return self.language()
 
     def language(self):
         try:
@@ -37,10 +33,45 @@ class Request(metaclass=ABCMeta):
             return "DEFAULT"
 
     def match(self, pattern):
-        uri = self.uri()
-        x = re.search(pattern, uri)
-        if x: return True
-        return False
+        endpoint = "exist"
+        url_map = []
+        if pattern == "/":
+            url_map.append(Rule(pattern, endpoint=endpoint))
+        else:
+            if pattern[-1] == "/":
+                url_map.append(Rule(pattern[:-1], endpoint=endpoint))
+            elif pattern[-1] == ">":
+                rpath = pattern
+                try:
+                    while rpath[-1] == ">":
+                        try:
+                            rpath = rpath.split("/")[:-1]
+                            rpath = "/".join(rpath)
+                            url_map.append(Rule(rpath, endpoint=endpoint))
+                            if rpath[-1] != ">":
+                                url_map.append(Rule(rpath + "/", endpoint=endpoint))
+                        except:
+                            pass
+                except:
+                    pass
+            url_map.append(Rule(pattern, endpoint=endpoint))
+
+        url_map = Map(url_map)
+        url_map = url_map.bind("", "/")
+
+        def matcher(url):
+            try:
+                endpoint, kwargs = url_map.match(url, "GET")
+                return endpoint, kwargs
+            except:
+                return None, {}
+                
+        request_uri = self.uri()
+        endpoint, segment = matcher(request_uri)
+        if endpoint is None:
+            return None
+        segment = season.util.std.stdClass(segment)
+        return segment
 
     def query(self, key=None, default=None):
         request = self.request()

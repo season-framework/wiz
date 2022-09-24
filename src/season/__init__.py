@@ -1,30 +1,18 @@
 import os
 
 from season import util
-from season.core import exception
-from season.core.lib.instances.wiz import wiz
-from season.core.lib.instances.plugin import plugin
-from season.core.server import Server
-from season import cmd
+from season import core
+
+from season.lib.server import Server as app
 
 from .version import VERSION_STRING as VERSION
 version = __version__ = __VERSION__ = VERSION
 
-stdClass = util.std.stdClass
+LOG_DEBUG = 0
+LOG_INFO = 1
+LOG_WARNING = 2
+LOG_DEV = 3
+LOG_ERROR = 4
+LOG_CRIT = LOG_CRITICAL = 5
 
-path = stdClass()
-path.lib =  os.path.dirname(__file__)
-path.project =  os.path.join(os.getcwd())
-path.websrc = os.path.join(path.project, 'websrc')
-path.public = os.path.join(path.project, 'public')
-path.config = os.path.join(path.project, 'config')
-
-log = stdClass()
-log.debug = 0      # response info
-log.info = 1       # server process messages
-log.warning = 2    # http error
-log.dev = 3        # user log
-log.error = 4      # code error
-log.critical = 5   # uncatched error
-
-cache = stdClass()
+PATH_LIB = os.path.dirname(__file__)

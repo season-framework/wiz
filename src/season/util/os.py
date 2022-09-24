@@ -14,7 +14,7 @@ import season
 def compiler(code, name=None, logger=print, **kwargs):
     fn = {'__file__': name, '__name__': name, 'print': logger, 'season': season}
     for key in kwargs: fn[key] = kwargs[key]
-    exec(compile(code, os.path.join(season.path.project, name), 'exec'), fn)
+    exec(compile(code, name, 'exec'), fn)
     return fn
 
 # function timer util

@@ -14,3 +14,6 @@ def call(fn, **kwargs):
             args[i] = None
     
     return fn(*args)
+
+def dummy():
+    return

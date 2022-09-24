@@ -1,6 +1,6 @@
 class ResponseException(Exception):
     def __init__(self, code=200, response=None):
-        super().__init__("season.exception.response")
+        super().__init__("season.core.exception.response")
         self.code = code
         self.response = response
 
@@ -9,7 +9,7 @@ class ResponseException(Exception):
 
 class ErrorException(Exception):
     def __init__(self):
-        super().__init__("season.exception.error")
+        super().__init__("season.core.exception.error")
         self.code = 500
 
     def get_response(self):
