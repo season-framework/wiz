@@ -248,8 +248,12 @@ class Wiz(season.util.std.stdClass):
         self.request = None
         self.response = None
         self.tracer = None
+        self.mode = None
                 
-    def workspace(self, mode='service'):
+    def workspace(self, mode=None):
+        if self.mode is not None:
+            if mode is None: mode = self.mode()
+        if mode is None: mode = 'service'
         if mode == 'ide':
             return component.ide.Workspace(self)
         return component.service.Workspace(self)
@@ -263,7 +267,7 @@ class Wiz(season.util.std.stdClass):
         return model['Model']
 
     def controller(self, id):
-        path = os.path.join(self.workspace.path(), 'controller')
+        path = os.path.join(self.workspace().path(), 'controller')
         fs = season.util.os.FileSystem(path)
         code = fs.read(id + ".py")
         logger = self.logger(f"[ctrl/{id}]")

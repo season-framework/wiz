@@ -10,7 +10,10 @@ class ServiceHandler:
         wiz = self.wiz
         workspace = wiz.workspace('service')
 
-        # TODO: route policy
+        request_uri = wiz.request.uri()
+        route, segment = workspace.route.match(request_uri)
+        if route.is_instance():
+            route.proceed()
 
         # dist binding
         fs = workspace.fs("dist")
@@ -18,13 +21,14 @@ class ServiceHandler:
             wiz.response.download(fs.abspath(path), as_attachment=False)
 
         # default: index.html
-        wiz.response.download(fs.abspath("index.html"), as_attachment=False)
+        if fs.exists("index.html"):
+            wiz.response.download(fs.abspath("index.html"), as_attachment=False)
 
     def asset(self, path):
         wiz = self.wiz
         build_resource = wiz.server.config.service.build_resource
         workspace = wiz.workspace('service')
-        fs = workspace.fs("asset")
+        fs = workspace.fs("assets")
         if fs.exists(path):
             filepath = fs.abspath(path)
             res = season.util.fn.call(build_resource, wiz=wiz, file=filepath)
@@ -147,6 +151,7 @@ class HTTP:
                 handler = IdeHandler(wiz)
             else:
                 handler = ServiceHandler(wiz)
-
+            
             handler()
+
             wiz.response.abort(404)
