@@ -64,7 +64,7 @@ class serviceConfig(base):
     DEFAULT_VALUES = {
         'log_level': (int, 3),
         'baseurl': (str, '/'),
-        'asseturl': (str, '/asset'),
+        'asseturl': (str, '/assets'),
         'wizurl': (str, '/wiz'),
         'build_resource': (None, season.util.fn.dummy),
         'before_request': (None, season.util.fn.dummy),
@@ -82,7 +82,7 @@ class ideConfig(base):
 class buildConfig(base):
     DEFAULT_VALUES = {
         'command_ng': (str, 'ng'),
-        'folder': (str, 'build'),
+        'folder': (str, 'builder'),
         'init': (None, None),
         'build': (None, None)
     }

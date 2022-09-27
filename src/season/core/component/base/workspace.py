@@ -6,6 +6,7 @@ import datetime
 import markupsafe
 from abc import *
 import subprocess
+import time
 
 ESBUILD_SCRIPT = """const fs = require('fs');
 const pug = require('pug');
@@ -29,6 +30,10 @@ if (target) {
 }
 """
 
+ENV_SCRIPT = """export const environment = {
+  production: true
+};"""
+
 def build_cmd(workspace, cmd):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
@@ -49,121 +54,192 @@ def build_default_init(workspace, config):
     build_cmd(workspace, f'cd {build_dir} && npm install ngc-esbuild pug > /dev/null')
     
     fs = workspace.fs(build_dir)
-    fs.write('esbuild.js', ESBUILD_SCRIPT)
+    fs.write('wizbuild.js', ESBUILD_SCRIPT)
+    fs.write(os.path.join('src', 'environments', 'environment.ts'), ENV_SCRIPT)
 
-    packagejson = fs.read.json("package.json")
-    packagejson["scripts"]["esbuild"] = "node esbuild"
-    fs.write.json("package.json", packagejson)
-
-def build_default(workspace, app):
-    def build_app(app):
-        cmd = f"cd {workspace.build.path()} && node esbuild"
-        build_folder = workspace.build.folder()
-
-        appids = app.id.split(".")
-        targetfs = workspace.fs(build_folder, "src", "app", *appids)
-        srcfs = app.fs()        
-        package = app.data(code=False)['package']
-
-        if srcfs.exists():
-            filename = appids[-1] + ".component"
-            componentname = []
-            for wsappname in appids:
-                componentname.append(wsappname.capitalize())
-            componentname = "".join(componentname)
-
-            if targetfs.isdir() == False:
-                targetfs.makedirs()
-            targetfs.copy(srcfs.abspath("view.pug"), filename + ".pug")
-            targetfs.copy(srcfs.abspath("view.scss"), filename + ".scss")
-
-            # convert customized typescript
-            tsfile = srcfs.read("view.ts")
-            
-            implements = 'OnInit'
-            if 'ng.implements' in package:
-                implements = package['ng.implements']
-            if len(implements) < 3:
-                implements = "OnInit"
-
-            importstr = "import { Component, OnInit } from '@angular/core';\n"
-
-            if implements != 'OnInit':
-                implementsarr = implements.split(".")
-                implementsfilename = implementsarr[-1] + ".component"
-                implementscomp = []
-                for wsappname in implementsarr:
-                    implementscomp.append(wsappname.capitalize())
-                implementscomp = "".join(implementscomp) + "Component"
-                implementsfrom = "../".join(['' for x in range(len(appids) + 1)]) + "/".join(implements.split(".")) + "/" + implementsfilename
-                importstr = f"{importstr}import {implementscomp} from '{implementsfrom}';\n"
-            else:
-                implementscomp = implements
-
-            tsfile = tsfile.replace('export class Controller', f'export class {componentname}Component implements {implementscomp}')
-            
-            tsfile = f"{importstr}\n" \
-                + "@Component({\n    selector: 'app-" + "-".join(appids) + "',\n    templateUrl: './" + filename + ".html',\n    styleUrls: ['./" + filename + ".scss']\n})\n" \
-                + tsfile.strip()
-
-            targetfs.write(filename + ".ts", tsfile)
-
-            target = targetfs.abspath(filename)
-            cmd = f"{cmd} {target}"
-            build_cmd(workspace, cmd)
-
-            return dict(name=componentname + "Component", path="./" + "/".join(appids) + "/" + filename)
-        else:
-            targetfs.delete()
-
+def build_default(workspace, filepath):
+    fs = workspace.fs()
+    buildfs = workspace.build.fs()
     build_folder = workspace.build.folder()
+    pugfiles = []
 
-    modules = []
-    if app.is_instance():
-        item = build_app(app)
-        if item is not None:
-            modules.append(item)
-    else:
-        apps = app.list()
-        fs = workspace.fs(build_folder, "src", "app")
-        for item in fs.list():
-            if fs.isdir(item):
-                fs.delete(item)
+    if len(filepath) == 0:
+        buildfs.delete("src/app")
+        buildfs.delete("src/service")
 
-        for pkg in apps:
-            app_id = pkg['package']['id']
-            _app = app(app_id)
-            item = build_app(_app)
-            if item is not None:
-                modules.append(item)
+    # build file and pug cache
+    def build_file(target_file):
+        target_file_split = target_file.split("/")
+        target_folder = ['angular', 'app', '']
+        target = target_file_split[0]
+        if target not in target_folder:
+            return
 
+        if fs.exists(target_file) == False:
+            fs.delete(target_file)
+            return
+
+        if fs.isdir(target_file):
+            files = fs.files(target_file)
+            for file in files:
+                build_file(os.path.join(target_file, file))
+            return
+        
+        extension = os.path.splitext(target_file)[-1]
+
+        # catch pug files
+        if extension == '.pug':
+            pugbuildpath = fs.abspath(target_file[:-len(extension)])
+            pugfiles.append(pugbuildpath)
+            return
+
+        # if app src
+        if target == 'app':
+            copyfile = os.path.join("src", target_file)
+            copyfolder = os.path.dirname(copyfile)
+            if buildfs.isdir(copyfolder) == False:
+                buildfs.makedirs(copyfolder)
+
+            if extension == ".ts":
+                app_id = target_file_split[1]
+                app_id_split = app_id.split(".")
+
+                filename = app_id + ".component"
+
+                componentname = []
+                for wsappname in app_id_split:
+                    componentname.append(wsappname.capitalize())
+                componentname = "".join(componentname)
+
+                code = fs.read(target_file)
+                appjson = fs.read.json(os.path.join(os.path.dirname(target_file), "app.json"), dict())
+                
+                importstr = "import { Component, OnInit } from '@angular/core';\n"
+                implements = 'OnInit'
+                if 'ng.implements' in appjson:
+                    implements = appjson['ng.implements']
+                if len(implements) < 3:
+                    implements = "OnInit"
+
+                if implements != 'OnInit':
+                    implementsarr = implements.split(".")
+                    implementsfilename = implementsarr[-1] + ".component"
+                    implementscomp = []
+                    for wsappname in implementsarr:
+                        implementscomp.append(wsappname.capitalize())
+                    implementscomp = "".join(implementscomp) + "Component"
+                    implementsfrom = "../".join(['' for x in range(len(app_id_split) + 1)]) + implements + "/" + implementsfilename
+                    importstr = f"{importstr}import {implementscomp} from '{implementsfrom}';\n"
+                else:
+                    implementscomp = implements
+
+                code = code.replace("@wiz.service", "src/service")
+                code = code.replace("@wiz.app", "src/app")
+                code = code.replace('export class Controller', "@Component({\n    selector: 'app-" + "-".join(app_id_split) + "',\n    templateUrl: './view.html',\n    styleUrls: ['./view.scss']\n})\n" + f'export class {componentname}Component implements {implementscomp}')
+                code = f"{importstr}\n" + code.strip()
+
+                copyfile = os.path.join(copyfolder, filename + ".ts")                
+                buildfs.write(copyfile, code)
+
+                appjson["ng.build"] = dict(id=app_id, name=componentname + "Component", path="./" + app_id + "/" + filename)
+                fs.write(os.path.join(os.path.dirname(target_file), "app.json"), json.dumps(appjson, indent=4))
+            else:
+                buildfs.copy(fs.abspath(target_file), copyfile)
+        
+        elif target == 'angular':
+            ngtarget = target_file_split[1]
+            ngfilepath = os.path.join(*target_file.split("/")[1:])
+
+            copyfile = os.path.join("src", ngfilepath)
+            copyfolder = os.path.dirname(copyfile)
+            if buildfs.isdir(copyfolder) == False:
+                buildfs.makedirs(copyfolder)
+
+            if ngtarget == 'service':
+                code = fs.read(target_file)
+                code = code.replace("export class", "import { Injectable } from '@angular/core';\n@Injectable({ providedIn: 'root' })\nexport class")
+                buildfs.write(copyfile, code)
+            elif ngtarget in ['app', 'index.html', 'styles.scss']:
+                buildfs.copy(fs.abspath(target_file), copyfile)
+            elif ngtarget == 'angular.build.options.json':
+                ng_build_options = fs.read.json(target_file)
+                angularjson = buildfs.read.json("angular.json", dict())
+                for key in ng_build_options:
+                    if key in ["outputPath", "index", "main", "polyfills", "tsConfig", "inlineStyleLanguage"]: continue
+                    angularjson["projects"][build_folder]["architect"]["build"]["options"][key] = ng_build_options[key]
+                buildfs.write("angular.json", json.dumps(angularjson, indent=4))
+
+    build_file(filepath)
+        
+    # compile pug files as bulk
+    pugfilepaths = " ".join(pugfiles)
+    cmd = f"cd {buildfs.abspath()} && node wizbuild {pugfilepaths}"
+    build_cmd(workspace, cmd)
+
+    for pugfile in pugfiles:
+        pugfile = pugfile[len(fs.abspath()) + 1:]
+        target = pugfile.split("/")[0]
+        htmlfile = pugfile + ".html"
+        
+        if target == 'app':
+            copyfile = os.path.join("src", pugfile + ".html")
+            copyfolder = os.path.dirname(copyfile)
+            if buildfs.isdir(copyfolder) == False:
+                buildfs.makedirs(copyfolder)
+            buildfs.copy(fs.abspath(htmlfile), copyfile)
+
+        elif htmlfile == 'angular/index.html':
+            copyfile = os.path.join("src", "index.html")
+            buildfs.copy(fs.abspath(htmlfile), copyfile)
+
+        elif htmlfile == 'angular/app/app.component.html':
+            copyfile = os.path.join("src", "app", "app.component.html")
+            buildfs.copy(fs.abspath(htmlfile), copyfile)
+
+    # load apps
+    apps = workspace.app.list()
+    appsmap = dict()
+    _apps = []
+    for app in apps:
+        try:
+            _apps.append(app['package']['ng.build'])
+            appsmap[app['package']['id']] = app['package']['ng.build']
+        except:
+            pass
+    apps = _apps
+
+    component_import = "\n".join(["import { " + x['name'] + " } from '" + x['path'] + "';" for x in apps])
+    component_declarations = "AppComponent,\n" + ",\n".join(["    " + x['name'] for x in apps])
     
-    cmd = f"cd {workspace.build.path()} && node esbuild"
-    fs = workspace.fs(build_folder, "src", "app")
-
-    # TODO update: app.component.scss
-    # TODO update: app.component.html
-
     # auto build: app.module.ts
-    imports = 'BrowserModule,AppRoutingModule'.split(",")
-    app_modules = "import { NgModule } from '@angular/core';\nimport { BrowserModule } from '@angular/platform-browser';\n\n"
-    app_modules = app_modules + "import { AppRoutingModule } from './app-routing.module';\nimport { AppComponent } from './app.component';\n\n"
-    app_modules = app_modules + "\n".join(["import { " + x['name'] + " } from '" + x['path'] + "';" for x in modules])
-    app_modules = app_modules + "\n\n@NgModule({\n  declarations: [\n    AppComponent,\n"
-    app_modules = app_modules + ",\n".join(["    " + x['name'] for x in modules])
-    app_modules = app_modules + "\n  ],\n  imports: [\n"
-    app_modules = app_modules + ",\n".join(["    " + x for x in imports])
-    app_modules = app_modules + "\n  ],\n  providers: [],\n  bootstrap: [AppComponent]\n})\nexport class AppModule { }"
+    app_module_ts = fs.read(os.path.join("angular", "app.module.ts"))
+    app_module_ts = app_module_ts.replace("WizComponentDeclarations", component_declarations)
+    app_module_ts = component_import + "\n\n" + app_module_ts
+    buildfs.write(os.path.join("src", "app", "app.module.ts"), app_module_ts)
 
-    fs.write("app.module.ts", app_modules)
+    # auto build: app-routing.modules.ts
+    app_routings = fs.read.json(os.path.join("angular", "routing.json"), [])
+    app_routing_json = []
+    for app_routing in app_routings:
+        if app_routing['app'] not in appsmap:
+            continue
+        _path = app_routing['path']
+        _component = appsmap[app_routing['app']]['name']
+        app_routing_json.append("{ path : '" + _path + "', component: " + _component + " }")
     
-    # TODO auto build: app-routing.modules.ts
-    
+    app_routing_ts = "import { NgModule } from '@angular/core';\nimport { RouterModule, Routes } from '@angular/router';\n"
+    app_routing_ts = app_routing_ts + "\n" + component_import
+    app_routing_ts = app_routing_ts + "\n\n" + "const routes: Routes = [\n    " + ",\n    ".join(app_routing_json) + "\n];"
+    app_routing_ts = app_routing_ts + "\n\n" + "@NgModule({ imports: [RouterModule.forRoot(routes)], exports: [RouterModule] })"
+    app_routing_ts = app_routing_ts + "\n" + "export class AppRoutingModule { }"
+    buildfs.write(os.path.join("src", "app", "app-routing.module.ts"), app_routing_ts)
+
     # run esbuild
+    cmd = f"cd {workspace.build.path()} && node wizbuild"
     build_cmd(workspace, cmd)
 
     # copy to dist
-    fs = workspace.fs()
+    if fs.isdir("dist"): fs.remove("dist")
     fs.copy(fs.abspath(os.path.join(build_folder, "dist", build_folder)), "dist")
 
 def localized(fn):
@@ -330,12 +406,6 @@ class App:
         self.wiz = workspace.wiz
         self.id  = None
 
-    # general functions
-    def build(self):
-        workspace = self.workspace
-        workspace.build.init()
-        workspace.build(self)
-
     def list(self):
         fs = self.workspace.fs('app')
         apps = fs.files()
@@ -359,6 +429,12 @@ class App:
 
     # localized functions: app id required
     @localized
+    def build(self):
+        filepath = None
+        if self.is_instance():
+            filepath = self.fs().abspath()
+        self.workspace.build(filepath)
+
     def fs(self, *args):
         return self.workspace.fs('app', self.id, *args)
 
@@ -533,11 +609,11 @@ class Build:
         config = wiz.server.config.build
         return config.folder
     
+    def fs(self, *args):
+        return self.workspace.fs(self.folder())
+
     def path(self, *args):
-        workspace = self.workspace
-        wiz = workspace.wiz
-        config = wiz.server.config.build
-        return workspace.fs(config.folder).abspath()
+        return self.fs().abspath()
 
     def init(self):
         workspace = self.workspace
@@ -554,25 +630,31 @@ class Build:
         workspace = self.workspace
         wiz = workspace.wiz
         config = wiz.server.config.build
-        fs = workspace.fs()
-        if fs.exists(config.folder):
-            fs.delete(config.folder)
-        self.init()
-        self()
+        
+        fs = self.fs()
+        if fs.exists():
+            fs.delete()
 
-    def __call__(self, app=None):
+        self.init()
+
+    def __call__(self, filepath=None):
         workspace = self.workspace
         wiz = workspace.wiz
         config = wiz.server.config.build
-
-        if app is None:
-            app = workspace.app
 
         fn = build_default
         if config.build is not None:
             fn = config.build
 
-        season.util.fn.call(fn, wiz=wiz, workspace=workspace, season=season, config=config, app=app)
+        rootpath = workspace.fs().abspath()
+        if filepath is None:
+            filepath = ""
+        elif filepath.startswith(rootpath):
+            filepath = filepath[len(rootpath):]
+            if len(filepath) > 0 and filepath[0] == "/":
+                filepath = filepath[1:]
+
+        season.util.fn.call(fn, wiz=wiz, workspace=workspace, season=season, config=config, filepath=filepath)
 
 class Workspace(metaclass=ABCMeta):
     def __init__(self, wiz):
