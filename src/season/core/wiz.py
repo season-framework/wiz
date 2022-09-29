@@ -252,27 +252,19 @@ class Wiz(season.util.std.stdClass):
                 
     def workspace(self, mode=None):
         if self.mode is not None:
-            if mode is None: mode = self.mode()
-        if mode is None: mode = 'service'
+            if mode is None: 
+                mode = self.mode()
+        if mode is None: 
+            mode = 'service'
         if mode == 'ide':
             return component.ide.Workspace(self)
         return component.service.Workspace(self)
 
     def model(self, id):
-        path = os.path.join(self.workspace.path(), 'model')
-        fs = season.util.os.FileSystem(path)
-        code = fs.read(id + ".py")
-        logger = self.logger(f"[model/{id}]")
-        model = season.util.os.compiler(code, name=fs.abspath(id + ".py"), logger=logger, wiz=self)
-        return model['Model']
+        return self.workspace().model(namespace)
 
-    def controller(self, id):
-        path = os.path.join(self.workspace().path(), 'controller')
-        fs = season.util.os.FileSystem(path)
-        code = fs.read(id + ".py")
-        logger = self.logger(f"[ctrl/{id}]")
-        ctrl = season.util.os.compiler(code, name=fs.abspath(id + ".py"), logger=logger, wiz=self)
-        return ctrl['Controller']
+    def controller(self, namespace):
+        return self.workspace().controller(namespace)
 
     def logger(self, tag=None):
         return Logger(self, tag)

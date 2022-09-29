@@ -82,7 +82,7 @@ class ideConfig(base):
 class buildConfig(base):
     DEFAULT_VALUES = {
         'command_ng': (str, 'ng'),
-        'folder': (str, 'builder'),
+        'folder': (str, 'build'),
         'init': (None, None),
         'build': (None, None)
     }
