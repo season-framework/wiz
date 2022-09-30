@@ -1,6 +1,7 @@
 import season
 import os
 import datetime
+import subprocess
 from abc import *
 
 def localized(fn):
@@ -10,7 +11,7 @@ def localized(fn):
         return fn(self, *args, **kwargs)
     return wrapper_function
     
-class App
+class App:
     def __init__(self, workspace):
         self.workspace = workspace
         self.wiz = workspace.wiz
@@ -137,7 +138,7 @@ class App
         dic = self.dic()
         name = self.fs().abspath("api.py")
         apifn = season.util.os.compiler(code, name=name, logger=logger, controller=ctrl, dic=dic, wiz=wiz)
-
+        
         return apifn
 
     @localized

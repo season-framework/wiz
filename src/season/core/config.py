@@ -63,6 +63,7 @@ class bootConfig(base):
 class serviceConfig(base):
     DEFAULT_VALUES = {
         'log_level': (int, 3),
+        'title': (str, 'WIZ Sample Service'),
         'baseurl': (str, '/'),
         'asseturl': (str, '/assets'),
         'wizurl': (str, '/wiz'),
