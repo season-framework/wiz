@@ -1,6 +1,6 @@
 from season.core.component.base.workspace import Workspace as Base, App as AppBase
 from season.core.component.base.workspace import localized
-from season.core.build.service import Build
+from season.core.builder.service import Build
 
 import season
 import os
