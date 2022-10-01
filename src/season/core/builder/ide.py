@@ -54,6 +54,8 @@ class Converter:
     def syntax_app(self, code):
         def convert(match_obj):
             val = match_obj.group(1)
+            if len(val.split("/")) > 1:
+                return f'"src/app/{val}"'
             return f'"src/app/{val}/{val}.component"'
         pattern = r'"@wiz\/app\/(.*)"'
         code = re.sub(pattern, convert, code)
@@ -148,6 +150,9 @@ class Compiler:
             if buildfs.isdir(buildfolder) == False:
                 buildfs.makedirs(buildfolder)
 
+            if basename == 'service.ts':
+                return season.util.fn.call(self.app_service_ts, buildfile=buildfile, **self.params)
+
             if basename == 'view.ts':
                 return season.util.fn.call(self.app_view_ts, buildfile=buildfile, **self.params)
             
@@ -172,10 +177,10 @@ class Compiler:
             if ngtarget == 'angular.build.options.json':
                 return season.util.fn.call(self.ng_angular_json, buildfile=buildfile, **self.params)
 
-            elif ngtarget == 'app' and ngfilepath == 'app/app.component.ts':
+            if ngtarget == 'app' and ngfilepath == 'app/app.component.ts':
                 return season.util.fn.call(self.ng_app_component, buildfile=buildfile, **self.params)
 
-            if ngtarget in ['app', 'index.html']:
+            if ngtarget in ['app', 'wiz.ts']:
                 return season.util.fn.call(self.ng_files, buildfile=buildfile, **self.params)
 
         return None, None
@@ -184,37 +189,36 @@ class Compiler:
         buildfs.copy(srcfs.abspath(filepath), buildfile)
         return 'app/files', True
 
+    def app_service_ts(self, wiz, filepath, buildfs, srcfs, segment, converter):
+        app_id = segment[1]
+        baseuri = wiz.uri.ide()
+        
+        code = srcfs.read(filepath)
+        code = f"import Wiz from 'src/wiz';\nlet wiz = new Wiz('{baseuri}').app('{app_id}');\n" + code
+        code = code.replace("export class", "import { Injectable } from '@angular/core';\n\n@Injectable({ providedIn: 'root' })\nexport class")
+        buildfile = os.path.join('src', os.path.dirname(filepath), "service.ts")
+        buildfs.write(buildfile, code)
+        return 'app/service_ts', True
+
     def app_view_ts(self, wiz, filepath, buildfs, srcfs, segment, converter):
         appjsonfile = os.path.join(os.path.dirname(filepath), "app.json")
         app_id = segment[1]
         componentname = converter.component_name(app_id)
         appjson = srcfs.read.json(appjsonfile, dict())
 
-        importstr = "import { Component, OnInit } from '@angular/core';\n"
-        
-        # generate implements
-        implements = 'OnInit'
-        if 'ng.implements' in appjson:
-            implements = appjson['ng.implements']
-        if len(implements) < 3:
-            implements = "OnInit"
-
-        if implements != 'OnInit':
-            implements_componentname = converter.component_name(implements) + "Component"
-            implements_from = "src/app/" + implements + "/" + implements + ".component"
-            importstr += "import {" + implements_componentname +  "} from '" + implements_from + "';\n"
-        else:
-            implements_componentname = implements
+        importstr = "import { Component } from '@angular/core';\n"
+     
+        baseuri = wiz.uri.ide()
         
         # read src code
         code = srcfs.read(filepath)
-        code = srcfs.read(os.path.join("angular", "wiz.ts")) + "\n" + code
+        code = f"import Wiz from 'src/wiz';\nlet wiz = new Wiz('{baseuri}').app('{app_id}');\n" + code
 
         # convert syntax
         code = converter.syntax(code, app_id=app_id)
 
         # convert export class
-        code = code.replace('export class Component', "@Component({\n    selector: '" + converter.component_selector(app_id) + "',\n    templateUrl: './view.html',\n    styleUrls: ['./view.scss']\n})\n" + f'export class {componentname}Component implements {implements_componentname}')
+        code = code.replace('export class Component', "@Component({\n    selector: '" + converter.component_selector(app_id) + "',\n    templateUrl: './view.html',\n    styleUrls: ['./view.scss']\n})\n" + f'export class {componentname}Component')
         code = f"{importstr}\n" + code.strip()
         code = code + f"\n\nexport default {componentname}Component;"
 
@@ -231,8 +235,9 @@ class Compiler:
         return 'angular/files', True
 
     def ng_app_component(self, wiz, filepath, buildfile, buildfs, srcfs, converter):
+        baseuri = wiz.uri.ide()
         code = srcfs.read(filepath)
-        baseuri = wiz.server.config.service.wizurl
+        code = f"import Wiz from 'src/wiz';\nlet wiz = new Wiz('{baseuri}');\n" + code
         code = converter.syntax(code)
         buildfs.write(buildfile, code)
         return 'app/app.component.ts', True
@@ -297,7 +302,7 @@ class Build(Base):
             buildfs.delete("src/service")
             buildfs.delete("src/styles")
 
-        baseuri = wiz.server.config.service.wizurl
+        baseuri = wiz.uri.ide()
         title = wiz.server.config.service.title
         build_folder = 'build'
         compiler = Compiler(self, srcfs, buildfs, distfs)

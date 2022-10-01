@@ -245,6 +245,7 @@ class Wiz(season.util.std.stdClass):
         self.memory = season.util.std.stdClass()
         self.server = server
         self.branch = Branch(self)
+        self.uri = Uri(self)
         self.request = None
         self.response = None
         self.tracer = None
@@ -274,6 +275,5 @@ class Wiz(season.util.std.stdClass):
         wiz.tracer = Tracer(wiz)
         wiz.mode = Mode(wiz, mode)
         wiz.branch = Branch(wiz)
-        wiz.uri = Uri(wiz)
         wiz.dev = Dev(wiz)
         return wiz
