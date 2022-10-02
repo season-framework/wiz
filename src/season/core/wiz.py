@@ -50,7 +50,9 @@ class Branch:
         branchpath = os.path.join(branchbasepath, branch)
         if os.path.isdir(branchpath):
             if wiz.response is not None:
-                wiz.response.cookies.set("season-wiz-branch", branch)
+                param = dict()
+                param["season-wiz-branch"] = branch
+                wiz.response.cookies.set(**param)
             self._branch = branch
         return self._branch
 
@@ -170,7 +172,9 @@ class Dev:
         else: DEVMODE = "false"
         if DEVMODE == 'true': self._status = True
         else: self._status = False
-        wiz.response.cookies.set("season-wiz-devmode", DEVMODE)
+        param = dict()
+        param["season-wiz-devmode"] = DEVMODE
+        wiz.response.cookies.set(**param)
         
     def __call__(self):
         return self._status
@@ -200,7 +204,7 @@ class Logger:
     def __call__(self, *args, level=3):
         server = self.server
         tag = self.tag
-        wiz = self.wiz
+        wiz = self.server.wiz()
 
         if level < server.config.service.log_level: return
         if tag is None: tag = ""
@@ -236,8 +240,8 @@ class Logger:
         try:
             if wiz is not None and wiz.tracer is not None and wiz.dev():
                 branch = wiz.branch()
-                server.app.socketio.emit("log", logdata + "\n", namespace=wiz.uri.wiz(), to=branch, broadcast=True)
-        except:
+                server.app.socketio.emit("log", logdata + "\n", namespace=wiz.uri.ide(), to=branch, broadcast=True)
+        except Exception as e:
             pass
 
 class Wiz(season.util.std.stdClass):

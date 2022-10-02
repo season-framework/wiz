@@ -16,7 +16,8 @@ class ServiceHandler:
             route.proceed()
 
         # dist binding
-        fs = workspace.fs("dist")
+        fs = workspace.build.distfs()
+
         if fs.isfile(path):
             wiz.response.download(fs.abspath(path), as_attachment=False)
 
@@ -60,6 +61,10 @@ class ServiceHandler:
         segment = wiz.request.match(wiz.uri.wiz("api/<id>/<function>/<path:path>"))
         if segment is not None:
             self.api(segment)
+
+        segment = wiz.request.match(wiz.uri.wiz("<path:path>"))
+        if segment is not None:
+            wiz.response.redirect(wiz.uri.ide())
         
         # if route
         segment = wiz.request.match(wiz.uri.base("<path:path>"))            
@@ -93,7 +98,7 @@ class IdeHandler:
         workspace = wiz.workspace('ide')
 
         # dist binding
-        fs = workspace.fs("dist")
+        fs = workspace.build.distfs()
         if fs.isfile(path):
             wiz.response.download(fs.abspath(path), as_attachment=False)
 
@@ -115,6 +120,19 @@ class IdeHandler:
     def __call__(self):
         wiz = self.wiz
 
+        # if request dev
+        dev = wiz.request.query("dev", None)
+        if dev is not None:
+            if dev == "false" : wiz.dev.set(False)
+            else: wiz.dev.set(True)
+            wiz.response.redirect(wiz.request.uri())
+
+        branch = wiz.request.query("branch", None)
+        if branch is not None and len(branch) > 0:
+            if branch in wiz.branch.list():
+                wiz.branch(branch)
+            wiz.response.redirect(wiz.request.uri())
+
         # if asset request
         segment = wiz.request.match(wiz.uri.asset("<path:path>"))
         if segment is not None:
@@ -131,8 +149,6 @@ class IdeHandler:
         if segment is not None:
             path = segment.path
         self.route(path)
-
-        wiz.response.abort(404)
 
 class HTTP:
     def __init__(self, server):

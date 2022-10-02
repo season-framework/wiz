@@ -66,6 +66,7 @@ class Data:
 
 class Response(metaclass=ABCMeta):
     def __init__(self, wiz):
+        self.wiz =  wiz
         self._flask = wiz.server.package.flask
         self.data = Data()
         self.headers = Headers()

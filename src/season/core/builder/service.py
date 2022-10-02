@@ -181,7 +181,7 @@ class Compiler:
 
     def app_service_ts(self, wiz, filepath, buildfs, srcfs, segment, converter):
         app_id = segment[1]
-        baseuri = wiz.uri.ide()
+        baseuri = wiz.uri.wiz()
 
         code = srcfs.read(filepath)
         code = f"import Wiz from 'src/wiz';\nlet wiz = new Wiz('{baseuri}').app('{app_id}');\n" + code
@@ -257,6 +257,12 @@ class Build(Base):
         self.cache = season.util.std.stdClass()
         self.cache.pugfiles = []
 
+    def params(self):
+        obj = super().params()
+        obj.fs.dist = obj.workspace.fs(obj.buildfs.abspath(os.path.join("dist", obj.config.folder)))
+        obj.distfs = obj.fs.dist
+        return obj
+
     # init project build
     def event_init(self, workspace, config, srcfs, buildfs, workspacefs, execute):
         working_dir = workspacefs.abspath()
@@ -316,7 +322,8 @@ class Build(Base):
 
         # compile pug files as bulk
         pugfilepaths = " ".join(pugfiles)
-        execute(f"cd {buildfs.abspath()} && node wizbuild {pugfilepaths}")
+        if len(pugfiles) > 0:
+            execute(f"cd {buildfs.abspath()} && node wizbuild {pugfilepaths}")
 
         for pugfile in pugfiles:
             pugfile = pugfile[len(srcfs.abspath()) + 1:]
@@ -372,6 +379,4 @@ class Build(Base):
         # run esbuild
         execute(f"cd {buildfs.abspath()} && node wizbuild")
 
-        if distfs.isdir(): distfs.delete()
-        srcfs.copy(buildfs.abspath(os.path.join("dist", build_folder)), distfs.abspath())
         srcfs.copy(buildfs.abspath("package.json"), os.path.join("angular", "package.json"))

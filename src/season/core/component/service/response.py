@@ -5,7 +5,6 @@ class Response(Base):
         super().__init__(wiz)
     
     def redirect(self, url):
-        wiz = self.wiz
         url = self.wiz.uri.base(url)
         self.status_code = 302
         resp = self._flask.redirect(url)

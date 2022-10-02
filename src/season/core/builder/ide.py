@@ -128,7 +128,7 @@ class Compiler:
         self.params.buildfs = buildfs
         self.params.distfs = distfs
         
-        baseuri = self.params.wiz.server.config.service.wizurl
+        baseuri = self.params.wiz.uri.ide()
         title = self.params.wiz.server.config.service.title
         self.params.converter = Converter(baseuri=baseuri, title=title)
 
@@ -269,8 +269,12 @@ class Build(Base):
         obj = super().params()
         obj.fs.build = obj.workspace.fs("build")
         obj.fs.src = obj.workspace.fs()
+        obj.fs.dist = obj.workspace.fs(os.path.join("build", "dist", "build"))
+
         obj.buildfs = obj.fs.build
+        obj.distfs = obj.fs.dist
         obj.srcfs = obj.fs.src
+
         obj.path = obj.buildfs.abspath()
         return obj
 
@@ -334,7 +338,8 @@ class Build(Base):
 
         # compile pug files as bulk
         pugfilepaths = " ".join(pugfiles)
-        execute(f"cd {buildfs.abspath()} && node wizbuild {pugfilepaths}")
+        if len(pugfiles) > 0:
+            execute(f"cd {buildfs.abspath()} && node wizbuild {pugfilepaths}")
 
         for pugfile in pugfiles:
             pugfile = pugfile[len(srcfs.abspath()) + 1:]
@@ -382,7 +387,4 @@ class Build(Base):
 
         # run esbuild
         execute(f"cd {buildfs.abspath()} && node wizbuild")
-
-        if distfs.isdir(): distfs.delete()
-        srcfs.copy(buildfs.abspath(os.path.join("dist", build_folder)), distfs.abspath())
         srcfs.copy(buildfs.abspath("package.json"), os.path.join("angular", "package.json"))

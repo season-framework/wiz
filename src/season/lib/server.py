@@ -53,11 +53,12 @@ class Server:
         # build server on config
         season.util.fn.call(config.boot.bootstrap, app=self.app, config=config)
         
-        # bind events
+        # bind events http / socketio
         http = season.core.http(self)
         http.bind()
 
-        # self.socket = SocketIO(self)
+        socket = season.core.socket(self)
+        socket.bind()
 
     def flask(self):
         return self.package.flask

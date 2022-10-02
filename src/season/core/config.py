@@ -49,6 +49,7 @@ class bootConfig(base):
         }
 
     DEFAULT_VALUES = {
+        'python_executable': (None, None),
         'allowed_method': (list, ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']),
         'bootstrap': (None, season.util.fn.dummy),
         'dev': (bool, False),
