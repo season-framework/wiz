@@ -204,7 +204,7 @@ class Logger:
     def __call__(self, *args, level=3):
         server = self.server
         tag = self.tag
-        wiz = self.server.wiz()
+        wiz = self.wiz
 
         if level < server.config.service.log_level: return
         if tag is None: tag = ""
@@ -238,7 +238,7 @@ class Logger:
             print(logdata)
     
         try:
-            if wiz is not None and wiz.tracer is not None and wiz.dev():
+            if wiz is not None and wiz.dev():
                 branch = wiz.branch()
                 server.app.socketio.emit("log", logdata + "\n", namespace=wiz.uri.ide(), to=branch, broadcast=True)
         except Exception as e:
@@ -276,8 +276,20 @@ class Wiz(season.util.std.stdClass):
 
     def __call__(self, mode="service"):
         wiz = Wiz(self.server)
-        wiz.tracer = Tracer(wiz)
-        wiz.mode = Mode(wiz, mode)
-        wiz.branch = Branch(wiz)
-        wiz.dev = Dev(wiz)
+        try:
+            wiz.tracer = Tracer(wiz)
+        except:
+            pass
+        try:
+            wiz.mode = Mode(wiz, mode)
+        except:
+            pass
+        try:
+            wiz.branch = Branch(wiz)
+        except:
+            pass
+        try:
+            wiz.dev = Dev(wiz)
+        except:
+            pass
         return wiz

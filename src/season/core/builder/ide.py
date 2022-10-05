@@ -58,6 +58,7 @@ class Converter:
         code = wrapper(self.syntax_title, code)        
         code = wrapper(self.syntax_app, code)
         code = wrapper(self.syntax_service, code)
+        code = wrapper(self.syntax_libs, code)
         code = wrapper(self.syntax_namespace, code)
         code = wrapper(self.syntax_baseuri, code)
         code = wrapper(self.syntax_module_declarations, code)
@@ -92,6 +93,16 @@ class Converter:
         pattern = r'"@wiz\/service\/(.*)"'
         code = re.sub(pattern, convert, code)
         pattern = r"'@wiz\/service\/(.*)'"
+        code = re.sub(pattern, convert, code)
+        return code
+
+    def syntax_libs(self, code):
+        def convert(match_obj):
+            val = match_obj.group(1)
+            return f'"src/libs/{val}"'
+        pattern = r'"@wiz\/libs\/(.*)"'
+        code = re.sub(pattern, convert, code)
+        pattern = r"'@wiz\/libs\/(.*)'"
         code = re.sub(pattern, convert, code)
         return code
 
@@ -216,7 +227,7 @@ class Compiler:
             if ngtarget == 'app' and ngfilepath == 'app/app.component.ts':
                 return season.util.fn.call(self.ng_app_component, buildfile=buildfile, **self.params)
 
-            if ngtarget in ['app', 'wiz.ts']:
+            if ngtarget in ['app', 'libs', 'wiz.ts']:
                 return season.util.fn.call(self.ng_files, buildfile=buildfile, **self.params)
 
         return None, None

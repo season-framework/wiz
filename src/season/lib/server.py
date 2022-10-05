@@ -57,7 +57,7 @@ class Server:
         http = season.core.http(self)
         http.bind()
 
-        socket = season.core.socket(self)
+        self.socket = socket = season.core.socket(self)
         socket.bind()
 
     def flask(self):
