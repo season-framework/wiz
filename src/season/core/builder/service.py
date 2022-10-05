@@ -6,7 +6,7 @@ from season.core.builder.base import Build as Base, ESBUILD_SCRIPT, ENV_SCRIPT
 
 class Converter:
     def __init__(self, **kwargs):
-        self.kwargs = dict(app_id=None, declarations=None, baseuri=None)
+        self.kwargs = dict(app_id=None, declarations=None, baseuri=None, imports=None)
         for key in kwargs:
             self.kwargs[key] = kwargs[key]
 
@@ -21,6 +21,18 @@ class Converter:
     def component_selector(self, namespace):
         return "wiz-" + "-".join(namespace.split("."))
 
+    def dependencies(self, code):
+        result = dict()
+        pattern = re.compile('@dependencies\(([^\).]*)\)', re.DOTALL)
+        res = pattern.findall(code)
+        for data in res:
+            data = data.replace("'", '').replace('"', '').replace(',', '').replace(' ', '')
+            pattern = re.compile('(.*):(.*)')
+            finded = pattern.findall(data)
+            for item in finded:
+                result[item[0]] = item[1]
+        return result
+
     def syntax_route(self, code):
         def convert(match_obj):
             val = match_obj.group(1)
@@ -29,6 +41,8 @@ class Converter:
         code = re.sub(pattern, convert, code)
         pattern = r'component.*:.*"(.*)"'
         code = re.sub(pattern, convert, code)
+        code = code.replace("'component", "component")
+        code = code.replace('"component', "component")
         return code
     
     def syntax(self, code, **skwargs):
@@ -47,7 +61,17 @@ class Converter:
         code = wrapper(self.syntax_service, code)
         code = wrapper(self.syntax_namespace, code)
         code = wrapper(self.syntax_baseuri, code)
-        code = wrapper(self.syntax_declarations, code)
+        code = wrapper(self.syntax_module_declarations, code)
+        code = wrapper(self.syntax_module_imports, code)
+        code = wrapper(self.syntax_dependencies, code)
+        return code
+
+    def syntax_dependencies(self, code):
+        def convert(match_obj):
+            val1 = match_obj.group(1)
+            return ""
+        pattern = re.compile('@dependencies\(([^\).]*)\)', re.DOTALL)
+        code = re.sub(pattern, convert, code)
         return code
 
     def syntax_app(self, code):
@@ -95,7 +119,7 @@ class Converter:
         code = code.replace("@wiz.baseuri", baseuri)
         return code
     
-    def syntax_declarations(self, code, declarations):
+    def syntax_module_declarations(self, code, declarations):
         if declarations is None: return code
         pattern = r'"@wiz.declarations\((.*)\)"'
         def convert(match_obj):
@@ -107,6 +131,20 @@ class Converter:
         code = re.sub(pattern, convert, code)
         code = code.replace("'@wiz.declarations'", declarations)
         code = code.replace('"@wiz.declarations"', declarations)
+        return code
+
+    def syntax_module_imports(self, code, imports):
+        if imports is None: return code
+        pattern = r'"@wiz.imports\((.*)\)"'
+        def convert(match_obj):
+            return imports
+        code = re.sub(pattern, convert, code)
+        pattern = r"'@wiz.imports\((.*)\)'"
+        def convert(match_obj):
+            return imports
+        code = re.sub(pattern, convert, code)
+        code = code.replace("'@wiz.imports'", imports)
+        code = code.replace('"@wiz.imports"', imports)
         return code
 
 class Compiler:
@@ -348,30 +386,63 @@ class Build(Base):
         apps = workspace.app.list()
         appsmap = dict()
         _apps = []
+        apps_routing = dict()
         for app in apps:
             try:
                 _apps.append(app['ng.build'])
                 appsmap[app['id']] = app['ng.build']
             except Exception as e:
                 pass
+            try:
+                if app['mode'] == 'page':
+                    if app['layout'] not in apps_routing:
+                        apps_routing[app['layout']] = []
+                    if len(app['viewuri']) > 0:
+                        routing_uri = app['viewuri']
+                        if routing_uri[0] == "/":
+                            routing_uri = routing_uri[1:]
+                        apps_routing[app['layout']].append(dict(path=routing_uri, component=app['id']))
+            except Exception as e:
+                pass
         apps = _apps
         
+        # auto build: app.module.ts
         component_import = "\n".join(["import { " + x['name'] + " } from '" + x['path'] + "';" for x in apps])
         component_declarations = "AppComponent,\n" + ",\n".join(["        " + x['name'] for x in apps])
+        ngmodule_imports = []
+        apps = srcfs.files(os.path.join("app"))
+        for app in apps:
+            if srcfs.exists(os.path.join("app", app, "view.ts")):
+                text = srcfs.read(os.path.join("app", app, "view.ts"))
+                deps = converter.dependencies(text)
+                for dep in deps:
+                    pkg = deps[dep]
+                    component_import = component_import + "\nimport { "+ dep +" } from '" + pkg + "'"
+                    ngmodule_imports.append(dep)
+        ngmodule_imports = ",\n".join(["        " + x for x in ngmodule_imports])
 
-        # auto build: app.module.ts
         app_module_ts = srcfs.read(os.path.join("angular", "app", "app.module.ts"))
         app_module_ts = component_import + "\n\n" + app_module_ts
-        app_module_ts = converter.syntax(app_module_ts, declarations=component_declarations)
+        app_module_ts = converter.syntax(app_module_ts, declarations=component_declarations, imports=ngmodule_imports)
         buildfs.write(os.path.join("src", "app", "app.module.ts"), app_module_ts)
 
         # auto build: app-routing.modules.ts
-        app_routing_opt = srcfs.read(os.path.join("angular", "app", "app-routing.module.ts"))
+        app_routing_auto = [] 
+        for layout in apps_routing:
+            children = []
+            for child in apps_routing[layout]:
+                children.append(child)
+            app_routing_auto.append(dict(path="", component=layout, children=children))
+
+        app_routing_opt = "let from_config: Routes = " + srcfs.read(os.path.join("angular", "app", "app-routing.module.ts")) + ";"
+        app_routing_opt = app_routing_opt + "\n\nlet from_app: Routes = " + json.dumps(app_routing_auto, indent=4) + ";"
+        app_routing_opt = app_routing_opt + "\n\nconst routes: Routes = from_app.concat(from_config);"
         app_routing_opt = converter.syntax_route(app_routing_opt)
 
         app_routing_ts = "import { NgModule } from '@angular/core';\nimport { RouterModule, Routes } from '@angular/router';\n"
         app_routing_ts = app_routing_ts + "\n" + component_import
-        app_routing_ts = app_routing_ts + "\n\n" + "const routes: Routes = " + app_routing_opt
+        app_routing_ts = app_routing_ts + "\n\n" + app_routing_opt
+        # app_routing_ts = app_routing_ts + "\n\n" + "const routes: Routes = " + app_routing_opt
         app_routing_ts = app_routing_ts + "\n\n" + "@NgModule({ imports: [RouterModule.forRoot(routes)], exports: [RouterModule] })"
         app_routing_ts = app_routing_ts + "\n" + "export class AppRoutingModule { }"
         buildfs.write(os.path.join("src", "app", "app-routing.module.ts"), app_routing_ts)

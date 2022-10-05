@@ -15,13 +15,18 @@ class ServiceHandler:
         if route.is_instance():
             route.proceed()
 
+        # use dist on production mode
+        fs = workspace.fs("dist")
+        if wiz.dev() == False and fs.exists():
+            if fs.isfile(path):
+                wiz.response.download(fs.abspath(path), as_attachment=False)
+            if fs.exists("index.html"):
+                wiz.response.download(fs.abspath("index.html"), as_attachment=False)
+
         # dist binding
         fs = workspace.build.distfs()
-
         if fs.isfile(path):
             wiz.response.download(fs.abspath(path), as_attachment=False)
-
-        # default: index.html
         if fs.exists("index.html"):
             wiz.response.download(fs.abspath("index.html"), as_attachment=False)
 
