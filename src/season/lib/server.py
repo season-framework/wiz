@@ -48,6 +48,7 @@ class Server:
         def before_request():
             self.package.flask.g.wiz = None
             wiz = self.wiz()
+            wiz.onapp = True
             season.util.fn.call(config.service.before_request, wiz=wiz)
 
         # build server on config

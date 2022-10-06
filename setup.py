@@ -57,6 +57,7 @@ setup(
         'Pillow',
         'requests',
         'eventlet',
+        'natsort',
         'gevent'
     ],
     python_requires='>=3.6',

@@ -208,7 +208,7 @@ class Logger:
 
         if level < server.config.service.log_level: return
         if tag is None: tag = ""
-        if wiz.tracer is not None:
+        if wiz.tracer is not None and wiz.onapp:
             tag = wiz.tracer() + tag
 
         tagmap = ['DEBUG', 'INFO_', 'WARN_', 'DEV__', 'ERROR', 'CRIT_']
@@ -254,6 +254,7 @@ class Wiz(season.util.std.stdClass):
         self.response = None
         self.tracer = None
         self.mode = None
+        self.onapp = False
                 
     def workspace(self, mode=None):
         if self.mode is not None:

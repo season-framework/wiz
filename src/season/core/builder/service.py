@@ -234,7 +234,7 @@ class Compiler:
 
         code = srcfs.read(filepath)
         code = f"import Wiz from 'src/wiz';\nlet wiz = new Wiz('{baseuri}').app('{app_id}');\n" + code
-        code = code.replace("export class", "import { Injectable } from '@angular/core';\n\n@Injectable({ providedIn: 'root' })\nexport class")
+        # code = code.replace("export class", "import { Injectable } from '@angular/core';\n\n@Injectable({ providedIn: 'root' })\nexport class")
         buildfile = os.path.join('src', os.path.dirname(filepath), "service.ts")
         buildfs.write(buildfile, code)
         return 'app/service_ts', True
@@ -282,7 +282,7 @@ class Compiler:
 
     def ng_service(self, filepath, buildfile, srcfs, buildfs):
         code = srcfs.read(filepath)
-        code = code.replace("export class", "import { Injectable } from '@angular/core';\n\n@Injectable({ providedIn: 'root' })\nexport class")
+        # code = code.replace("export class", "import { Injectable } from '@angular/core';\n\n@Injectable({ providedIn: 'root' })\nexport class")
         buildfs.write(buildfile, code)
         return 'angular/service', True
 
@@ -339,6 +339,7 @@ class Build(Base):
             buildfs.delete("src/app")
             buildfs.delete("src/service")
             buildfs.delete("src/styles")
+            buildfs.delete("src/libs")
 
         baseuri = wiz.uri.wiz()
         build_folder = config.folder
