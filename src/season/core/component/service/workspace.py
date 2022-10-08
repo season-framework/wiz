@@ -106,6 +106,7 @@ class Route:
         if 'controller' in data['package'] and len(data['package']['controller']) > 0:
             ctrl = data['package']['controller']
             ctrl = self.workspace.controller(ctrl)
+            ctrl = ctrl()
 
         tag = wiz.mode()
         logger = wiz.logger(f"[{tag}/route/{app_id}]")

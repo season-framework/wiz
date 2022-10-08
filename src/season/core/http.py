@@ -138,6 +138,8 @@ class IdeHandler:
                 wiz.branch(branch)
             wiz.response.redirect(wiz.request.uri())
 
+        season.util.fn.call(wiz.server.config.ide.acl, wiz=wiz)
+
         # if asset request
         segment = wiz.request.match(wiz.uri.asset("<path:path>"))
         if segment is not None:

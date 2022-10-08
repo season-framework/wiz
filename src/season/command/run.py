@@ -11,23 +11,39 @@ import atexit
 import contextlib
 import multiprocessing as mp
 import threading
+import season
+import git
 
 PATH_WEBSRC = os.getcwd()
 PATH_PUBLIC = os.path.join(PATH_WEBSRC, 'public')
 PATH_APP = os.path.join(PATH_PUBLIC, 'app.py')
 PATH_PID = os.path.join(PATH_WEBSRC, "wiz.pid")
 
-def run():
+@arg('--host', help='0.0.0.0')
+@arg('--port', help='3000')
+@arg('--log', help='log filename')
+def run(host='0.0.0.0', port=None, log=None):
     if os.path.isfile(PATH_APP) == False:
         print("Invalid Project path: wiz structure not found in this folder.")
         return
 
-    def run_ctrl():
-        env = os.environ.copy()
-        env['WERKZEUG_RUN_MAIN'] = 'true'
-        cmd = str(sys.executable) + " " +  str(PATH_APP)
-        subprocess.call(cmd, env=env, shell=True)
+    repo = git.Repo.init(os.path.join(PATH_WEBSRC, "branch", "main"))
 
+    if os.path.exists(os.path.join(PATH_WEBSRC, "branch")) == False:
+        os.mkdir(os.path.join(PATH_WEBSRC, "branch"))
+
+    if port is not None: 
+        port = int(port)
+
+    runconfig = dict(host=host, port=port, log=log)
+
+    def run_ctrl():
+        app = season.app(path=PATH_WEBSRC)
+        workspace = app.wiz().workspace("ide")
+        workspace.build()
+        os.environ['WERKZEUG_RUN_MAIN'] = 'true'
+        app.run(**runconfig)
+        
     ostype = platform.system().lower()
     if ostype == 'linux':
         while True:
@@ -75,10 +91,12 @@ class Daemon:
         sys.stdout.flush()
         sys.stderr.flush()
 
-        so = open("/dev/null", 'w')
-        se = open("/dev/null", 'w')
-        contextlib.redirect_stdout(so)
-        contextlib.redirect_stderr(se)
+        so = open(self.stdout, 'w')
+        se = open(self.stderr, 'w')
+        os.dup2(so.fileno(), sys.stdout.fileno())
+        os.dup2(se.fileno(), sys.stderr.fileno())
+        # contextlib.redirect_stdout(so)
+        # contextlib.redirect_stderr(se)
 
         # write pidfile
         atexit.register(self.delpid)
@@ -139,15 +157,11 @@ class Daemon:
                 sys.exit(1)
 
 def runnable(stdout, stderr):
-    if stdout == '/dev/null': None
-    if stderr == '/dev/null': None
     while True:
         try:
-            env = os.environ.copy()
-            env['WERKZEUG_RUN_MAIN'] = 'true'
-            if stdout is not None: env['WIZ_LOGGER'] = stdout
-            process = subprocess.Popen([str(sys.executable), str(PATH_APP)], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            process.wait()
+            app = season.app(path=PATH_WEBSRC)
+            os.environ['WERKZEUG_RUN_MAIN'] = 'true'
+            app.run()
         except Exception as e:
             pass
         except:
@@ -157,15 +171,19 @@ def runnable(stdout, stderr):
                 child.kill()
             sys.exit(0)
 
+@arg('--force', help='force run')
 @arg('--log', help='log file path')
 @arg('action', default=None, help="start|stop|restart")
-def server(action, log=None):
+def server(action, force=False, log=None):
     if os.path.isfile(PATH_APP) == False:
         print("Invalid Project path: wiz structure not found in this folder.")
         return
 
     if log is None: log = '/dev/null'
     else: log = os.path.realpath(os.path.join(os.getcwd(), log))
+
+    if os.path.exists(PATH_PID) and force == 'true':
+        os.remove(PATH_PID)
 
     daemon = Daemon(PATH_PID, target=runnable, stdout=log, stderr=log)
     if action == 'start':

@@ -64,7 +64,7 @@ class bootConfig(base):
 class serviceConfig(base):
     DEFAULT_VALUES = {
         'log_level': (int, 3),
-        'title': (str, 'WIZ Sample Service'),
+        'title': (str, 'WIZ IDE'),
         'baseurl': (str, '/'),
         'asseturl': (str, '/assets'),
         'wizurl': (str, '/wiz'),
@@ -76,8 +76,6 @@ class serviceConfig(base):
 
 class ideConfig(base):
     DEFAULT_VALUES = {
-        'bind': (str, 'app/workspace'),
-        'plugin': (list, ['workspace', 'branch']),
         'acl': (None, season.util.fn.dummy)
     }
 

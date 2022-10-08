@@ -128,14 +128,15 @@ class App:
         if len(code) == 0:
             return None
 
-        ctrl = None
-        if 'controller' in app['package'] and len(app['package']['controller']) > 0:
-            ctrl = app['package']['controller']
-            ctrl = wiz.controller(ctrl)
-        
         tag = wiz.mode()
         logger = wiz.logger(f"[{tag}/app/{APP_ID}/api]")
         dic = self.dic()
+
+        ctrl = None
+        if 'controller' in app['package'] and len(app['package']['controller']) > 0:
+            ctrl = app['package']['controller']
+            ctrl = wiz.controller(ctrl)()
+
         name = self.fs().abspath("api.py")
         apifn = season.util.os.compiler(code, name=name, logger=logger, controller=ctrl, dic=dic, wiz=wiz)
         

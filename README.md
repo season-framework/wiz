@@ -1,11 +1,22 @@
-# SEASON WIZ Framework
+# WIZ Framework
 
-- SEASON WIZ is framework & IDE for web development.
-- SEASON WIZ Support git flow
+- WIZ is IDE for web development
+- Using angular more easy
 
 ![screenshot](https://github.com/season-framework/wiz/blob/main/screenshot/wiz.gif)
 
 ## Installation
+
+- install nodejs, npm, angular
+
+```bash
+apt install nodejs npm
+npm i -g n
+n stable
+npm install -g @angular/cli
+```
+
+- install wiz python package
 
 ```bash
 pip install season             # install
@@ -20,7 +31,7 @@ pip install season --upgrade   # upgrade lastest
 cd <workspace>
 wiz create myapp
 cd myapp
-wiz run
+wiz run --port 3000
 ```
 
 > `http://127.0.0.1:3000/wiz` on your web browser
@@ -31,19 +42,6 @@ wiz run
 wiz create myapp --uri=https://your-custom/git/project
 ```
 
-- cleaning cache
-
-```bash
-wiz clean
-```
-
-- update ide
-
-```bash
-wiz update ide  # update to default ide
-wiz update ide --uri=https://your-custom/git/ide/project
-```
-
 - daemon server
 
 ```bash
@@ -51,94 +49,16 @@ wiz server start # start daemon server
 wiz server stop  # stop daemon server
 ```
 
-
-## Upgrade project from old wiz (under 0.5.x)
-
-- transform structure
-
-```
-cd <project-path>
-wiz upgrade
-```
-
-- in theme, change methods like before
-
-```
-# wiz.theme('default', 'base', 'header.pug')
-wiz.theme('default').layout('base').view('header.pug')
-```
-
-- compiler update, `javascript.py` 
-
-```python
-def compile(wiz, js, data):
-    if 'render_id' not in data:
-        return js
-
-    app_id = data['app_id']
-    render_id = data['render_id']
-    namespace = data['namespace']
-
-    o = "{"
-    e = "}"
-    kwargsstr = "{$ kwargs $}"
-    dicstr = "{$ dicstr $}"
-    branch = wiz.branch()
-
-    js = f"""
-    function __init_{render_id}() {o}
-        let wiz = season_wiz.load('{app_id}', '{namespace}', '{render_id}');
-        wiz.branch = '{branch}';
-        wiz.data = wiz.kwargs = wiz.options = JSON.parse(atob('{kwargsstr}'));
-        wiz.dic = wiz.DIC = JSON.parse(atob('{dicstr}'));
-        
-        {js};
-
-        try {o}
-            app.controller('{render_id}', wiz_controller); 
-        {e} catch (e) {o} 
-            app.controller('{render_id}', ()=> {o} {e} ); 
-        {e} 
-    {e}; 
-    __init_{render_id}();
-    """
-
-    return js
-```
-
-- compiler update, `html.py`
-
-```python
-def compile(wiz, html, data):
-    if 'render_id' not in data:
-        return html
-        
-    app_id = data['app_id']
-    render_id = data['render_id']
-    namespace = data['namespace']
-
-    html = html.split(">")
-    if len(html) > 1:
-        html = html[0] + f" id='{render_id}' ng-controller='{render_id}'>" + ">".join(html[1:])
-    else:
-        html = f"<div id='{render_id}' ng-controller='{render_id}'>" + ">".join(html) + "</div>"
-
-    return html
-```
-
-- config file update
-
-```python
-## old version
-from season import stdClass
-config = stdClass()
-config.path = "/var/www/wiki/data"
-
-## new version
-path = "/var/www/wiki/data"
-```
-
 ## Release Note
+
+### 2.0.0
+
+- upgrade base project to angular 14.2.0
+- UI/UX full changed
+- Drag and Drop Interface
+- git branch to project (multiple project in workspace)
+- Enhanced IDE Plugin and easily develop 3rd party apps
+- support pip and npm on ui
 
 ### 1.0.7
 

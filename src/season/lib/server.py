@@ -89,3 +89,6 @@ class Server:
         logger = self.wiz().logger("[BOOT]")
         logger(f"server is running on... http://{config.boot.run.host}:{config.boot.run.port}", level=season.LOG_DEV)
         socketio.run(app, **config.boot.run)
+
+    def wsgi(self):
+        return self.app.flask

@@ -163,7 +163,7 @@ class Build(BaseBuild):
                         routing_uri = app['viewuri']
                         if routing_uri[0] == "/":
                             routing_uri = routing_uri[1:]
-                        apps_routing[app['layout']].append(dict(path=routing_uri, component=app['id']))
+                        apps_routing[app['layout']].append(dict(path=routing_uri, component=app['id'], app_id=app['id']))
             except Exception as e:
                 pass
         apps = _apps
