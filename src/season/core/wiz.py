@@ -2,6 +2,7 @@ import os
 import time
 from werkzeug.routing import Map, Rule
 import urllib
+import traceback
 
 import season
 from season.core import component
@@ -244,12 +245,94 @@ class Logger:
         except Exception as e:
             pass
 
+class Config(season.util.std.stdClass):
+    def __init__(self, wiz, **env):
+        self.wiz = wiz
+        env['wiz'] = wiz
+        self.__env__ = env
+        self.__cache__ = dict()
+
+    def set(self, **env):
+        for key in env:
+            self.__env__[key] = env[key]
+
+    def clean(self):
+        self.__cache__ = dict()
+
+    def __call__(self, name):
+        return self.__getattr__(name)
+
+    def __getattr__(self, name):
+        if name in self.__cache__:
+            return self.__cache__[name]
+
+        class ConfigBase(season.util.std.stdClass):
+            DEFAULT_VALUES = dict()
+
+            def __init__(self, values=dict()):
+                default = self.DEFAULT_VALUES
+                for key in default:
+                    _type, val = default[key]
+                    if key not in values:
+                        if _type is not None:
+                            val = _type(val)
+                        values[key] = val
+                    else:
+                        if _type is not None:
+                            values[key] = _type(values[key])
+                super(ConfigBase, self).__init__(values)
+                
+            def __getattr__(self, attr):
+                val = super(ConfigBase, self).__getattr__(attr)
+                if attr in self.DEFAULT_VALUES:
+                    _type, _default = self.DEFAULT_VALUES[attr]
+                    if val is None: val = _default
+                    if _type is not None: val = _type(val)
+                return val
+
+        def build_config(base_config=dict()):
+            config = ConfigBase(base_config)
+            self.__cache__[name] = config
+            return config
+
+        wiz = self.wiz
+        workspace = wiz.workspace()
+        fs = workspace.fs("config")
+        config_path = name + '.py'
+        if fs.isfile(config_path) == False:
+            return build_config()
+
+        _code = fs.read(config_path, "")
+
+        env = dict()
+        env['__name__'] = config_path
+        env['__file__'] = config_path
+
+        logger = wiz.logger("[config/{name}]")
+        env['print'] = logger
+        env['display'] = logger
+
+        try:
+            exec(compile(_code, config_path, 'exec'), env)
+        except Exception as e:
+            if logger is not None:
+                errormsg = f"error: config/{name}.py\n" + traceback.format_exc()
+                logger(errormsg, level=season.LOG_CRITICAL)
+        
+        config = season.util.std.stdClass()
+        for key in env:
+            if key.startswith("__") and key.endswith("__"): continue
+            config[key] = env[key]
+
+        return build_config(config)
+
 class Wiz(season.util.std.stdClass):
     def __init__(self, server, **kwargs):
         self.memory = season.util.std.stdClass()
         self.server = server
         self.branch = Branch(self)
         self.uri = Uri(self)
+        self.config = Config(self)
         self.request = None
         self.response = None
         self.tracer = None
@@ -266,7 +349,7 @@ class Wiz(season.util.std.stdClass):
             return component.ide.Workspace(self)
         return component.service.Workspace(self)
 
-    def model(self, id):
+    def model(self, namespace):
         return self.workspace().model(namespace)
 
     def controller(self, namespace):

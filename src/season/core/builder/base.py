@@ -39,6 +39,24 @@ class Converter:
         for key in kwargs:
             self.kwargs[key] = kwargs[key]
 
+    def angular_component_info(self, code):
+        res = dict(inputs=[], outputs=[])
+        def convert(match_obj):
+            val = match_obj.group(1).replace(" ", "")
+            res['inputs'].append(val)
+            return val
+        pattern = re.compile('@Input\(\)([^=\:\n\;]*)')
+        re.sub(pattern, convert, code)
+        
+        def convert(match_obj):
+            val = match_obj.group(1).replace(" ", "")
+            res['outputs'].append(val)
+            return val
+        pattern = re.compile('@Output\(\)([^=\:\n\;]*)')
+        re.sub(pattern, convert, code)
+        
+        return res
+
     def component_name(self, namespace):
         app_id_split = namespace.split(".")
         componentname = []
@@ -298,7 +316,18 @@ class Compiler:
         buildfile = os.path.join('src', os.path.dirname(filepath), app_id + ".component.ts")
         buildfs.write(buildfile, code)
 
+        try:
+            nginfo = converter.angular_component_info(code)
+        except:
+            nginfo = dict()
+
         appjson["ng.build"] = dict(id=app_id, name=componentname + "Component", path="./" + app_id + "/" + app_id + ".component")
+        ngtemplate = appjson["ng"] = dict(selector=converter.component_selector(app_id), **nginfo)
+        
+        injector = [f'[{x}]=""' for x in ngtemplate['inputs']] + [f'({x})=""' for x in ngtemplate['outputs']]
+        injector = ", ".join(injector)
+        appjson['template'] = ngtemplate['selector'] + "(" + injector + ")"
+        
         srcfs.write(appjsonfile, json.dumps(appjson, indent=4))
 
         return 'app/view_ts', True

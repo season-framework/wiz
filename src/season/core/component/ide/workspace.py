@@ -120,7 +120,7 @@ class Workspace(Base):
     
     def controller(self, namespace):
         wiz = self.wiz
-        fs = self.fs("src", "controller")
+        fs = self.fs("controller")
         code = fs.read(f"{namespace}.py")
         logger = wiz.logger(f"[ctrl/{namespace}]")
         ctrl = season.util.os.compiler(code, name=fs.abspath(namespace + ".py"), logger=logger, wiz=wiz)
@@ -128,7 +128,7 @@ class Workspace(Base):
     
     def model(self, namespace):
         wiz = self.wiz
-        fs = self.fs("src", "model")
+        fs = self.fs("model")
         code = fs.read(f"{namespace}.py")
         logger = wiz.logger(f"[model/{namespace}]")
         model = season.util.os.compiler(code, name=fs.abspath(namespace + ".py"), logger=logger, wiz=wiz)
