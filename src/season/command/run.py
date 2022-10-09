@@ -41,7 +41,7 @@ def run(host='0.0.0.0', port=None, log=None):
         app = season.app(path=PATH_WEBSRC)
         workspace = app.wiz().workspace("ide")
         workspace.build()
-        os.environ['WERKZEUG_RUN_MAIN'] = 'true'
+        os.environ['WERKZEUG_RUN_MAIN'] = 'false'
         app.run(**runconfig)
         
     ostype = platform.system().lower()
@@ -160,7 +160,7 @@ def runnable(stdout, stderr):
     while True:
         try:
             app = season.app(path=PATH_WEBSRC)
-            os.environ['WERKZEUG_RUN_MAIN'] = 'true'
+            os.environ['WERKZEUG_RUN_MAIN'] = 'false'
             app.run()
         except Exception as e:
             pass

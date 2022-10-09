@@ -51,6 +51,10 @@ wiz server stop  # stop daemon server
 
 ## Release Note
 
+### 2.0.1
+
+- threading bug fixed (flask, socketio)
+
 ### 2.0.0
 
 - upgrade base project to angular 14.2.0

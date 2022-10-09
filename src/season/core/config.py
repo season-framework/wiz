@@ -31,6 +31,7 @@ class base(stdClass):
 class bootConfig(base):
     class socketioConfig(base):
         DEFAULT_VALUES = {
+            'async_mode': (str, 'threading'),
             'cors_allowed_origins': (str, '*'),
             'async_handlers': (bool, True),
             'always_connect': (bool, False),
@@ -44,8 +45,9 @@ class bootConfig(base):
         DEFAULT_VALUES = {
             'host': (str, '0.0.0.0'),
             'port': (int, 3000),
-            'debug': (None, None),
-            'use_reloader': (bool, False)
+            'debug': (None, False),
+            'use_reloader': (bool, False),
+            'allow_unsafe_werkzeug': (None, True)
         }
 
     DEFAULT_VALUES = {

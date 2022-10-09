@@ -75,7 +75,7 @@ class Server:
         except:
             return self._wiz
 
-    def run(self, host=None, port=None, log=None):
+    def run(self, host=None, port=None, log=None, **kwargs):
         config = self.config
         socketio = self.app.socketio
         app = self.app.flask
@@ -84,7 +84,10 @@ class Server:
         if port is not None: config.boot.run.port = port
         if log is not None: config.boot.log = log
 
-        app.name = None
+        for key in kwargs:
+            config.boot[key] = kwargs[key]
+
+        app.name = "__main__"
 
         logger = self.wiz().logger("[BOOT]")
         logger(f"server is running on... http://{config.boot.run.host}:{config.boot.run.port}", level=season.LOG_DEV)

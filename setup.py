@@ -41,7 +41,7 @@ setup(
         'wiz = season.cmd:main [season]'
     ]},
     install_requires=[
-        'werkzeug==2.0.3',
+        'werkzeug',
         'jinja2',
         'flask',
         'flask_socketio',
