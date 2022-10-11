@@ -98,7 +98,7 @@ class Socket:
                 elif len(args) > 1:
                     data = args
                 wiz = server.wiz()
-                fn = getattr(ctrl, fnname)
+                fn = getattr(controller, fnname)
                 handler = SocketHandler(server, namespace)
                 season.util.fn.call(fn, server=server, wiz=wiz, socketio=server.app.socketio, flask_socketio=server.package.flask_socketio, flask=server.package.flask, io=handler, data=data)
 
