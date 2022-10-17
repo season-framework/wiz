@@ -16,14 +16,14 @@ class ServiceHandler:
             route.proceed()
 
         # use dist on production mode
-        fs = workspace.fs("dist")
+        fs = workspace.fs("dist", "www")
         if wiz.dev() == False and fs.exists():
             if fs.isfile(path):
                 wiz.response.download(fs.abspath(path), as_attachment=False)
             if fs.exists("index.html"):
                 wiz.response.download(fs.abspath("index.html"), as_attachment=False)
 
-        # dist binding
+        # code binding
         fs = workspace.build.distfs()
         if fs.isfile(path):
             wiz.response.download(fs.abspath(path), as_attachment=False)
@@ -34,6 +34,17 @@ class ServiceHandler:
         wiz = self.wiz
         build_resource = wiz.server.config.service.build_resource
         workspace = wiz.workspace('service')
+
+        # use dist on production mode
+        fs = workspace.fs("dist", "assets")
+        if wiz.dev() == False and fs.exists():
+            filepath = fs.abspath(path)
+            res = season.util.fn.call(build_resource, wiz=wiz, file=filepath)
+            if res is not None:
+                wiz.response.response(res)
+            wiz.response.download(filepath, as_attachment=False)
+
+        # code binding
         fs = workspace.fs("src", "assets")
         if fs.exists(path):
             filepath = fs.abspath(path)
@@ -41,6 +52,7 @@ class ServiceHandler:
             if res is not None:
                 wiz.response.response(res)
             wiz.response.download(filepath, as_attachment=False)
+
         wiz.response.abort(404)
 
     def api(self, segment):

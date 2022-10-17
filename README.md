@@ -51,6 +51,10 @@ wiz server stop  # stop daemon server
 
 ## Release Note
 
+### 2.0.3
+
+- config bug fixed
+
 ### 2.0.2
 
 - socketio bug fixed (ide controller)

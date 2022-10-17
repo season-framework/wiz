@@ -311,6 +311,8 @@ class Config(season.util.std.stdClass):
         logger = wiz.logger("[config/{name}]")
         env['print'] = logger
         env['display'] = logger
+        env['server'] = wiz.server
+        env['workspace'] = workspace
 
         try:
             exec(compile(_code, config_path, 'exec'), env)

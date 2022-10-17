@@ -146,7 +146,9 @@ class Config(season.util.std.stdClass):
                 logger = wiz.logger(f"[server/config/{name}]")
                 env['print'] = logger
                 env['display'] = logger
-            
+
+            env['server'] = server
+
             try:
                 exec(compile(_code, config_path, 'exec'), env)
             except Exception as e:
