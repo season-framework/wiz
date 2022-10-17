@@ -51,6 +51,10 @@ wiz server stop  # stop daemon server
 
 ## Release Note
 
+### 2.0.4
+
+- update wiz server command (multiprocess)
+
 ### 2.0.3
 
 - config bug fixed

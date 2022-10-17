@@ -157,20 +157,24 @@ class Daemon:
                 sys.exit(1)
 
 def runnable(stdout, stderr):
+    def run_ctrl():
+        app = season.app(path=PATH_WEBSRC)
+        os.environ['WERKZEUG_RUN_MAIN'] = 'false'
+        app.run()
+        
     while True:
         try:
-            app = season.app(path=PATH_WEBSRC)
-            os.environ['WERKZEUG_RUN_MAIN'] = 'false'
-            app.run()
-        except Exception as e:
-            pass
-        except:
-            counter = 0
-            for child in psutil.Process(os.getpid()).children(recursive=True):
-                counter = counter + 1
+            proc = mp.Process(target=run_ctrl)
+            proc.start()
+            proc.join()
+        except KeyboardInterrupt:
+            for child in psutil.Process(proc.pid).children(recursive=True):
                 child.kill()
             sys.exit(0)
-
+            return
+        except:
+            pass
+        
 @arg('--force', help='force run')
 @arg('--log', help='log file path')
 @arg('action', default=None, help="start|stop|restart")
