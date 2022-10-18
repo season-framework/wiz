@@ -348,6 +348,8 @@ class Workspace(Base):
         self.route = Route(self)
 
     def path(self, *args):
+        if self.wiz.server.is_bundle:
+            return os.path.join(self.wiz.server.path.root, "project", *args)
         return self.wiz.branch.path(*args)
     
     def controller(self, namespace):

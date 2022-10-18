@@ -16,12 +16,13 @@ class ServiceHandler:
             route.proceed()
 
         # use dist on production mode
-        fs = workspace.fs("dist", "www")
-        if wiz.dev() == False and fs.exists():
-            if fs.isfile(path):
-                wiz.response.download(fs.abspath(path), as_attachment=False)
-            if fs.exists("index.html"):
-                wiz.response.download(fs.abspath("index.html"), as_attachment=False)
+        fs = workspace.fs("www")
+        if fs.exists():
+            if wiz.dev() == False or wiz.server.is_bundle:
+                if fs.isfile(path):
+                    wiz.response.download(fs.abspath(path), as_attachment=False)
+                if fs.exists("index.html"):
+                    wiz.response.download(fs.abspath("index.html"), as_attachment=False)
 
         # code binding
         fs = workspace.build.distfs()
@@ -34,15 +35,6 @@ class ServiceHandler:
         wiz = self.wiz
         build_resource = wiz.server.config.service.build_resource
         workspace = wiz.workspace('service')
-
-        # use dist on production mode
-        fs = workspace.fs("dist", "assets")
-        if wiz.dev() == False and fs.exists():
-            filepath = fs.abspath(path)
-            res = season.util.fn.call(build_resource, wiz=wiz, file=filepath)
-            if res is not None:
-                wiz.response.response(res)
-            wiz.response.download(filepath, as_attachment=False)
 
         # code binding
         fs = workspace.fs("src", "assets")
@@ -239,12 +231,15 @@ class HTTP:
             request_uri = wiz.request.request().path
 
             # change ide mode
-            ideuri = wiz.uri.ide()
-            if request_uri[:len(ideuri) + 1] == ideuri + "/" or ideuri == request_uri:
-                handler = IdeHandler(wiz)
-            else:
+            handler = None
+            if self.server.is_bundle == False:
+                ideuri = wiz.uri.ide()
+                if request_uri[:len(ideuri) + 1] == ideuri + "/" or ideuri == request_uri:
+                    handler = IdeHandler(wiz)
+                
+            if handler is None:
                 handler = ServiceHandler(wiz)
-            
+
             handler()
 
             wiz.response.abort(404)

@@ -12,6 +12,10 @@ class Branch:
         self._wiz = wiz
         self._branch = None
 
+        if wiz.server.is_bundle:
+            self._branch = "main"
+            return
+
         if wiz.request is not None:
             branch = wiz.request.cookies("season-wiz-branch", "main")
             if self.exists(branch):

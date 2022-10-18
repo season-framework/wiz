@@ -10,9 +10,11 @@ import flask_socketio
 import season
 
 class Server:
-    def __init__(self, path=None):
+    def __init__(self, path=None, bundle=False):
         self.boottime = time.time()
         self._wiz = None
+
+        self.is_bundle = bundle
 
         # set server libs
         self.package = season.util.std.stdClass()
