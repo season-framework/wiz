@@ -13,7 +13,7 @@
 apt install nodejs npm
 npm i -g n
 n stable
-npm install -g @angular/cli
+npm install -g @angular/cli@14.2.3
 ```
 
 - install wiz python package
