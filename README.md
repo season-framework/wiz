@@ -51,6 +51,10 @@ wiz server stop  # stop daemon server
 
 ## Release Note
 
+### 2.0.6
+
+- flask response bug fixed (on filesend)
+
 ### 2.0.5
 
 - wiz bundle mode
