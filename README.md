@@ -13,7 +13,6 @@
 apt install nodejs npm
 npm i -g n
 n stable
-npm install -g @angular/cli
 ```
 
 - install wiz python package
@@ -50,6 +49,10 @@ wiz server stop  # stop daemon server
 ```
 
 ## Release Note
+
+### 2.0.8
+
+- auto install `@angular/cli`
 
 ### 2.0.7
 

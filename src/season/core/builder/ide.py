@@ -65,12 +65,12 @@ class Build(BaseBuild):
         working_dir = workspacefs.abspath()
         build_dir = buildfs.abspath()
         build_name = 'build'
-        command_ng = config.command_ng
-
         if buildfs.exists():
             return
 
-        execute(f'cd {working_dir} && {command_ng} new {build_name} --routing true --style scss --interactive false  --skip-tests true --skip-git true')    
+        command_ng = f"{working_dir}/node_modules/@angular/cli/bin/ng.js"
+        execute(f'cd {working_dir} && npm i @angular/cli')
+        execute(f'cd {working_dir} && {command_ng} new {build_name} --routing true --style scss --interactive false  --skip-tests true --skip-git true')
         
         buildfs.write('wizbuild.js', ESBUILD_SCRIPT)
         buildfs.write(os.path.join('src', 'environments', 'environment.ts'), ENV_SCRIPT)
