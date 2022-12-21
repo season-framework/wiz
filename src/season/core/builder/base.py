@@ -267,7 +267,10 @@ class Compiler:
                 return season.util.fn.call(self.ng_service, buildfile=buildfile, **self.params)
 
             if ngtarget == 'angular.build.options.json':
-                return season.util.fn.call(self.ng_angular_json, buildfile=buildfile, **self.params)
+                return season.util.fn.call(self.ng_angular_json_build_options, buildfile=buildfile, **self.params)
+            
+            if ngtarget == 'angular.build.json':
+                return season.util.fn.call(self.ng_angular_json_build, buildfile=buildfile, **self.params)
 
             if ngtarget == 'app' and ngfilepath == 'app/app.component.ts':
                 return season.util.fn.call(self.ng_app_component, buildfile=buildfile, **self.params)
@@ -353,13 +356,23 @@ class Compiler:
         buildfs.write(buildfile, srcfs.read(filepath))
         return 'angular/styles', True
 
-    def ng_angular_json(self, build, filepath, buildfile, srcfs, buildfs):
+    def ng_angular_json_build_options(self, build, filepath, buildfile, srcfs, buildfs):
         build_folder = build.config.folder
         ng_build_options = srcfs.read.json(filepath)
         angularjson = buildfs.read.json("angular.json", dict())
         for key in ng_build_options:
             if key in ["outputPath", "index", "main", "polyfills", "tsConfig", "inlineStyleLanguage"]: continue
             angularjson["projects"][build_folder]["architect"]["build"]["options"][key] = ng_build_options[key]
+        buildfs.write("angular.json", json.dumps(angularjson, indent=4))
+        return 'angular/angular.json', True
+
+    def ng_angular_json_build(self, build, filepath, buildfile, srcfs, buildfs):
+        build_folder = build.config.folder
+        ng_build_options = srcfs.read.json(filepath)
+        angularjson = buildfs.read.json("angular.json", dict())
+        for key in ng_build_options:
+            if key in ["outputPath", "index", "main", "polyfills", "tsConfig", "inlineStyleLanguage"]: continue
+            angularjson["projects"][build_folder]["architect"]["build"][key] = ng_build_options[key]
         buildfs.write("angular.json", json.dumps(angularjson, indent=4))
         return 'angular/angular.json', True
 
