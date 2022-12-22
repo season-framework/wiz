@@ -50,6 +50,10 @@ wiz server stop  # stop daemon server
 
 ## Release Note
 
+### 2.0.9
+
+- ide socket
+
 ### 2.0.8
 
 - auto install `@angular/cli`

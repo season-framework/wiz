@@ -81,6 +81,7 @@ class Socket:
     def bind(self):
         server = self.server
         socketio = server.app.socketio
+        app = server.app.flask
         wiz = server.wiz()
 
         @socketio.on_error_default
@@ -88,29 +89,6 @@ class Socket:
             logger = server.wiz().logger("[SOCKET]")
             errormsg = traceback.format_exc()
             logger(errormsg, level=season.LOG_ERROR)
-
-        # ide socket
-        if server.is_bundle == False:
-            def wrapper(namespace, server, controller, fnname):
-                def proceed(*args, **kwargs):
-                    data = None
-                    if len(args) == 1:
-                        data = args[0]
-                    elif len(args) > 1:
-                        data = args
-                    wiz = server.wiz()
-                    fn = getattr(controller, fnname)
-                    handler = SocketHandler(server, namespace)
-                    season.util.fn.call(fn, server=server, wiz=wiz, socketio=server.app.socketio, flask_socketio=server.package.flask_socketio, flask=server.package.flask, io=handler, data=data)
-
-                return proceed
-
-            namespace = wiz.uri.ide()
-            ctrl = IdeController(server)
-            for fnname in dir(ctrl):
-                if fnname.startswith("__") and fnname.endswith("__"): continue
-                proceed = season.util.fn.call(wrapper, namespace=namespace, server=server, controller=ctrl, fnname=fnname)
-                socketio.on_event(fnname, proceed, namespace=namespace)
 
         # app socket
         def wrapper_app(namespace, gwiz, fs, path, fnname):
@@ -138,6 +116,60 @@ class Socket:
 
             return proceed
 
+        # ide socket
+        if server.is_bundle == False:
+            def wrapper(namespace, server, controller, fnname):
+                def proceed(*args, **kwargs):
+                    data = None
+                    if len(args) == 1:
+                        data = args[0]
+                    elif len(args) > 1:
+                        data = args
+                    wiz = server.wiz()
+                    fn = getattr(controller, fnname)
+                    handler = SocketHandler(server, namespace)
+                    season.util.fn.call(fn, server=server, wiz=wiz, socketio=server.app.socketio, flask_socketio=server.package.flask_socketio, flask=server.package.flask, io=handler, data=data)
+
+                return proceed
+
+            # default
+            namespace = wiz.uri.ide()
+            ctrl = IdeController(server)
+            for fnname in dir(ctrl):
+                if fnname.startswith("__") and fnname.endswith("__"): continue
+                proceed = season.util.fn.call(wrapper, namespace=namespace, server=server, controller=ctrl, fnname=fnname)
+                socketio.on_event(fnname, proceed, namespace=namespace)
+
+            # ide apps
+            workspace = wiz.workspace('ide')
+            fs = workspace.fs("app")
+            apps = fs.ls()
+            logger = wiz.logger("[SOCKET]")
+            for app_id in apps:
+                try:
+                    socketiofile = os.path.join(app_id, 'socket.py')
+                    if fs.exists(socketiofile) == False:
+                        continue
+
+                    code = fs.read(socketiofile)
+                    siopath = fs.abspath(socketiofile)
+                    if len(code) == 0: continue
+
+                    ctrl = season.util.os.compiler(code, name=siopath, logger=logger, wiz=wiz)
+                    ctrl = ctrl['Controller']
+                    ctrl = season.util.fn.call(ctrl, server=server, wiz=wiz, socketio=server.app.socketio, flask_socketio=server.package.flask_socketio, flask=server.package.flask)
+                    fnlist = dir(ctrl)
+                    for fnname in fnlist:
+                        if fnname.startswith("__") and fnname.endswith("__"): continue
+                        namespace = wiz.uri.ide() + f"/app/{app_id}"
+                        proceed = wrapper_app(namespace, wiz, fs, socketiofile, fnname)
+                        socketio.on_event(fnname, proceed, namespace=namespace)
+
+                    logger(f"socketio binded: `{namespace}`", level=season.LOG_INFO)
+                except Exception as e:
+                    logger(f"`{app_id}` socketio file not binded at /wiz/ide:\n" + str(e), level=season.LOG_ERROR)
+
+        # branch sockets
         branches = wiz.branch.list()
         if server.is_bundle:
             branches = ["main"]
