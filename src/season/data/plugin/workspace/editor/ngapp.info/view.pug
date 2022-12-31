@@ -1,0 +1,62 @@
+.editor-info
+    .editor-info-container.area-round
+        h3 App Info
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Title
+            .col
+                input.form-control.form-control-sm(type="text" placeholder="App Title", [(ngModel)]="data.title")
+        
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Namespace
+            .col
+                .input-group
+                    span.input-group-text(*ngIf="editor.namespace_prefix") {{editor.namespace_prefix}}
+                    input.form-control.form-control-sm(type="text" placeholder="auth.login", [(ngModel)]="data.namespace")
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Category
+            .col
+                input.form-control.form-control-sm(type="text" placeholder="general", [(ngModel)]="data.category")
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Preview URL
+            .col
+                input.form-control.form-control-sm(type="text" placeholder="/main", [(ngModel)]="data.viewuri")
+
+        .form-group.row.mb-3
+            label.form-label.col-3.col-form-label Controller
+            .col
+                .form-selectgroup
+                    label.form-selectgroup-item
+                        input.form-selectgroup-input(type="radio", name="ctrl-{{editor.id}}", value="", [(ngModel)]="data.controller")
+                        span.form-selectgroup-label
+                            span None
+                    label.form-selectgroup-item(*ngFor="let item of ctrls")
+                        input.form-selectgroup-input(type="radio", name="ctrl-{{editor.id}}", value="{{item}}", [(ngModel)]="data.controller")
+                        span.form-selectgroup-label
+                            span {{item}}
+
+        hr
+
+        .form-group.row(*ngIf="editor.path")
+            .col
+                button.btn.btn-outline-blue.btn-block((click)="editor.update()") Update
+
+        .form-group.row(*ngIf="editor.path")
+            .col
+                button.btn.btn-outline-blue.btn-block((click)="download()") Download
+
+        .form-group.row(*ngIf="editor.path")
+            .col
+                button.btn.btn-outline-red.btn-block((click)="editor.delete()") Delete
+
+        .form-group.row(*ngIf="!editor.path")
+            .col
+                button.btn.btn-outline-blue.btn-block((click)="editor.update()") Create
+
+    ngx-loading([show]="loading")

@@ -1,0 +1,19 @@
+{
+    "id": "ng.app.list",
+    "ng.build": {
+        "id": "ng.app.list",
+        "name": "NgAppListComponent",
+        "path": "./ng.app.list/ng.app.list.component"
+    },
+    "title": "Ng App List",
+    "category": "app",
+    "ng": {
+        "selector": "wiz-ng-app-list",
+        "inputs": [
+            "title",
+            "mode"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-ng-app-list([title]=\"\", [mode]=\"\")"
+}

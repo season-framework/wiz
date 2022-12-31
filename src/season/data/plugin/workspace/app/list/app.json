@@ -1,0 +1,17 @@
+{
+    "id": "core.workspace",
+    "title": "Workspace",
+    "viewuri": "",
+    "category": "app",
+    "ng.build": {
+        "id": "core.workspace",
+        "name": "CoreWorkspaceComponent",
+        "path": "./core.workspace/core.workspace.component"
+    },
+    "ng": {
+        "selector": "wiz-core-workspace",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-workspace-app-list()"
+}

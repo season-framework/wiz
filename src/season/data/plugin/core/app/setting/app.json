@@ -1,0 +1,16 @@
+{
+    "ng.build": {
+        "id": "core.system.setting",
+        "name": "CoreSystemSettingComponent",
+        "path": "./core.system.setting/core.system.setting.component"
+    },
+    "id": "core.system.setting",
+    "title": "System Setting",
+    "category": "app",
+    "ng": {
+        "selector": "wiz-core-system-setting",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-core-app-setting()"
+}

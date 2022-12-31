@@ -1,0 +1,9 @@
+{
+    "assets": [],
+    "styles": [
+        "src/styles.scss",
+        "node_modules/@tabler/core/dist/css/tabler.min.css",
+        "node_modules/toastr/build/toastr.min.css"
+    ],
+    "scripts": []
+}

@@ -1,0 +1,18 @@
+{
+    "ng.build": {
+        "id": "ng.app.info.page",
+        "name": "NgAppInfoPageComponent",
+        "path": "./ng.app.info.page/ng.app.info.page.component"
+    },
+    "id": "ng.app.info.page",
+    "title": "Ng Page Info",
+    "category": "editor",
+    "ng": {
+        "selector": "wiz-ng-app-info-page",
+        "inputs": [
+            "editor"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-ng-app-info-page([editor]=\"\")"
+}

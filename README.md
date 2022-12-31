@@ -50,6 +50,12 @@ wiz server stop  # stop daemon server
 
 ## Release Note
 
+### 2.1.0
+
+- ide plugin concept changed
+- ide layout changed
+- ide config concept added
+
 ### 2.0.9
 
 - ide socket

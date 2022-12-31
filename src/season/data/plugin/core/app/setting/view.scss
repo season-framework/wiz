@@ -1,0 +1,35 @@
+.side-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--wiz-color-background-lt);
+}
+
+.side-heading {
+    display: flex;
+    padding: 8px 16px;
+    color: var(--wiz-color-blue);
+
+    .actions {
+        margin-left: auto;
+
+        >* {
+            margin-left: 6px;
+            min-width: 24px;
+            height: 24px;
+        }
+    }
+}
+
+.side-body {
+    padding: 24px;
+
+    .card {
+        margin-bottom: 16px;
+        cursor: pointer;
+
+        :hover {
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+        }
+    }
+}

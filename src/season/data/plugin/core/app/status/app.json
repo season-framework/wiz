@@ -1,0 +1,16 @@
+{
+    "ng.build": {
+        "id": "core.system.status",
+        "name": "CoreSystemStatusComponent",
+        "path": "./core.system.status/core.system.status.component"
+    },
+    "id": "core.system.status",
+    "category": "app",
+    "title": "System Status",
+    "ng": {
+        "selector": "wiz-core-system-status",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-core-system-status()"
+}

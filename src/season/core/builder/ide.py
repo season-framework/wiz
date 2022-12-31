@@ -87,6 +87,71 @@ class Build(BaseBuild):
             buildfs.delete("src/app")
             buildfs.delete("src/service")
             buildfs.delete("src/libs")
+        
+            wpfs = workspace.fs()
+            wpfs.delete("app")
+            wpfs.makedirs("app")
+
+            pluginfs = workspace.fs("..", "plugin")
+            plugins = pluginfs.ls()
+
+            for plugin in plugins:
+                pluginpath = os.path.join(plugin, "plugin.json")
+                if pluginfs.exists(pluginpath) == False:
+                    continue
+                plugininfo = pluginfs.read.json(pluginpath)
+                if plugininfo is None:
+                    continue
+                
+                apptypes = ['app', 'editor', 'system']
+                for apptype in apptypes:
+                    appsrcpath = os.path.join(plugin, apptype)
+                    if pluginfs.exists(appsrcpath) == False: continue
+                    apps = pluginfs.ls(appsrcpath)
+
+                    for app in apps:
+                        apppath = os.path.join(plugin, apptype, app)
+                        app_id = f"{plugin}.{apptype}.{app}"
+                        wpfs.copy(pluginfs.abspath(apppath), os.path.join("app", app_id))
+            
+            configfs = workspace.fs("..", "config")
+            menus = configfs.read.json("plugin.json", dict())
+
+            def build_menu_pug(targets, pug):
+                for menu in targets:
+                    namespace = menu["id"]
+                    attributes = ['*ngIf="menu.mode == ' + "'" + menu["id"] + "'" + '"']
+                    if "values" in menu:
+                        values = menu["values"]
+                        for key in values:
+                            v = values[key]
+                            attributes.append(f'[{key}]="{v}"')
+                    if "event" in menu:
+                        values = menu["event"]
+                        for key in values:
+                            v = values[key]
+                            attributes.append(f'({key})="{v}"')
+                    
+                    template = "wiz-" + namespace.replace(".", "-") + '(' + ", ".join(attributes) + ')'
+                    pug.append(template)
+                return pug
+
+            pug = []
+            if 'main' in menus:
+                pug = build_menu_pug(menus['main'], pug)
+            if 'sub' in menus:
+                pug = build_menu_pug(menus['sub'], pug)
+            pug = "\n".join(pug)
+            wpfs.write(os.path.join("app", "core.system.config.leftmenu", "view.pug"), pug)
+            
+            pug = []
+            if 'app' in menus:
+                pug = build_menu_pug(menus['app'], pug)
+            if 'setting' in menus:
+                pug = build_menu_pug(menus['setting'], pug)
+            pug = "\n".join(pug)
+            wpfs.write(os.path.join("app", "core.system.config.rightmenu", "view.pug"), pug)
+            configfs.copy("plugin.json", wpfs.abspath(os.path.join("angular", "libs", "plugin.json")))
 
         baseuri = wiz.uri.ide()
         title = wiz.server.config.service.title

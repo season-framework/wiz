@@ -1,0 +1,20 @@
+.side-container
+    .side-heading
+        h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
+            span Commit History
+
+    .side-body
+        table.table.table-sm.mb-0
+            tbody(*ngFor="let commit of commits")
+                tr
+                    td.bg-lt
+                        i.fa-solid.fa-code-commit.mr-1
+                        span {{commit.id.substring(0, 8)}}
+                    td.text-left.bg-lt
+                        span.text-muted.mr-1 {{commit.committer}}
+                    td.text-right.bg-lt
+                        span {{datedisplay(commit.datetime)}}
+                tr
+                    td.p-3(colspan=3) {{commit.message}}
+
+ngx-loading([show]="loading")

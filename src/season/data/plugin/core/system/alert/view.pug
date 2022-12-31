@@ -1,0 +1,25 @@
+.wiz-modal(*ngIf="model.isshow")
+    .modal
+        .modal-dialog.modal-sm(role='document')
+            .modal-content
+                .btn-close(type='button', (click)="model.hide()")
+                .modal-status(
+                    *ngIf="model.opts.status", 
+                    [class.bg-red]="model.opts.status == 'error'",
+                    [class.bg-blue]="model.opts.status == 'success'",
+                    [class.bg-yellow]="model.opts.status == 'warning'")
+                .modal-body.text-center.py-4
+                    h3 {{model.opts.title}}
+                    .text-muted {{model.opts.message}}
+                .modal-footer.d-flex
+                    a.btn.btn-link((click)="model.hide()", *ngIf="model.opts.cancel")
+                        | Cancel
+                    .ml-auto
+                    a.btn(
+                        (click)="model.action()", 
+                        *ngIf="model.opts.action",
+                        [class.w-100]="!model.opts.cancel",
+                        [class.btn-red]="model.opts.actionBtn == 'error'",
+                        [class.btn-blue]="model.opts.actionBtn == 'success'",
+                        [class.btn-yellow]="model.opts.actionBtn == 'warning'")
+                        | {{model.opts.action}}

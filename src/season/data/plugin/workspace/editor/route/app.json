@@ -1,0 +1,18 @@
+{
+    "ng.build": {
+        "id": "season.route.info",
+        "name": "SeasonRouteInfoComponent",
+        "path": "./season.route.info/season.route.info.component"
+    },
+    "id": "season.route.info",
+    "title": "Route Info",
+    "category": "editor",
+    "ng": {
+        "selector": "wiz-season-route-info",
+        "inputs": [
+            "editor"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-season-route-info([editor]=\"\")"
+}

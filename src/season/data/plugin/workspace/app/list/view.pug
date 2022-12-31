@@ -1,0 +1,37 @@
+.side-container
+    .side-heading
+        h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
+            span Workspace
+        .ml-auto
+        a.btn.btn-primary.btn-sm.pr-2.pl-2(href="?dev={{!isdev}}") {{isdev ? 'develop' : 'product'}}
+
+    .side-search.area-round
+        input.form-control(type="text" placeholder="project", [(ngModel)]="keyword")
+        button.btn.btn-primary.ms-1((click)="create()")
+            i.fa-solid.fa-plus
+        button.btn.btn-primary.ms-1((click)="upload()")
+            i.fa-solid.fa-upload
+
+    .side-body.area-round
+        table.table.table-hover
+            tbody
+                tr(*ngFor="let item of data")
+                    ng-container(*ngIf="match(item)")
+                        th
+                            h4.m-0 {{item.title ? item.title : item.id}}
+                            span.mt-1(*ngIf="item.description") {{ item.description }}
+                        td.w-1.nowrap.text-right
+                            a.btn.btn-sm.me-1([ngClass]="current == item.id ? 'btn-primary' : 'btn-white'", href="?branch={{item.id}}")
+                                i.fa-solid.fa-check
+                            a.btn.btn-sm.btn-white.me-1((click)="download(item)")
+                                i.fa-solid.fa-download
+                            a.btn.btn-sm.btn-white.me-1((click)="ng_download(item)")
+                                i.fa-brands.fa-angular
+                            a.btn.btn-sm.btn-white((click)="open(item)")
+                                i.fa-solid.fa-cog
+
+div(style="display: none;")
+    form#file-form
+        input#file-upload.form-control(type='file', name='file[]', (change)="upload_file()", webkitdirectory, mozdirectory, msdirectory, odirectory, directory, multiple)
+
+ngx-loading([show]="loading")

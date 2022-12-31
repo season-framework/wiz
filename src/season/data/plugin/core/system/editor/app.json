@@ -1,0 +1,18 @@
+{
+    "ng.build": {
+        "id": "core.editor",
+        "name": "CoreEditorComponent",
+        "path": "./core.editor/core.editor.component"
+    },
+    "id": "core.editor",
+    "title": "Editor",
+    "category": "core",
+    "ng": {
+        "selector": "wiz-core-editor",
+        "inputs": [
+            "editor"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-core-editor([editor]=\"\")"
+}

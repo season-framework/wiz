@@ -1,0 +1,33 @@
+.editor-info
+    .editor-info-container.area-round
+        h3 Git User
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Git User Name
+            .col
+                input.form-control.form-control-sm(type="text" placeholder="App Title", [(ngModel)]="data.git.author.name")
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Git Email
+            .col
+                input.form-control.form-control-sm(type="email" placeholder="email", [(ngModel)]="data.git.author.email")
+
+        .form-group.row
+            .col-3
+            .col
+                button.btn.btn-outline-blue.btn-block((click)="update_git(data.git.author.name, data.git.author.email)") Update
+
+    .editor-info-container.area-round.mt-5
+        h3 Project Management
+
+        .form-group.row
+            .col
+                button.btn.btn-outline-blue.btn-block((click)="rebuild()") Rebuild
+
+        .form-group.row
+            .col
+                button.btn.btn-outline-red.btn-block((click)="delete()") Delete
+
+ngx-loading([show]="loading")

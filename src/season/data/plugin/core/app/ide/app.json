@@ -1,0 +1,6 @@
+{
+    "title": "Plugins",
+    "viewuri": "",
+    "category": "app",
+    "template": "wiz-core-app-ide([title]=\"\")"
+}

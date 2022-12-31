@@ -16,8 +16,8 @@ class Request(metaclass=ABCMeta):
         return self._flask.request.method
 
     def ip(self):
-        return self._flask.request.environ.get('HTTP_X_REAL_IP', self._flask.request.remote_addr)
-
+        return self._flask.request.environ.get('HTTP_X_FORWARDED_FOR', self._flask.request.environ.get('HTTP_X_REAL_IP', self._flask.request.remote_addr))
+        
     def language(self):
         try:
             lang = "DEFAULT"

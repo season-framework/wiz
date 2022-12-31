@@ -1,0 +1,28 @@
+.browser-container
+    .browser-search
+        input.form-control.form-control-sm.search-form(type="text" placeholder="Search...", [(ngModel)]="keyword")
+        button.btn.btn-sm.btn-primary.ml-1.pl-3.pr-3((click)="upload()")
+            i.fa-solid.fa-upload
+        button.btn.btn-sm.btn-primary.ml-1.pl-3.pr-3((click)="create()")
+            i.fa-solid.fa-plus
+
+    .browser-list
+        .browser-list-wrapper(*ngFor="let category of categories")
+            .browser-category(*ngIf="categories.length > 1")
+                span {{category}}
+                small.ml-1.text-muted ({{apps[category].length}})
+            
+            ng-container(*ngFor="let item of apps[category]")
+                .browser-info(*ngIf="match(item)", (click)="open(item)", [ngClass]="active(item)", draggable="true", (dragstart)="drag($event, item)")
+                    .avatar-area.avatar-area-sm.mr-3
+                        .avatar-container
+                            i.fa-solid.fa-cube
+                    .title-area
+                        .item-header.mb-1 {{item.title}}
+                        .item-namespace.text-muted {{item.id}}
+                    .ml-auto.active-marker
+                        i.fa-solid.fa-circle.text-blue(style="font-size: 8px;")
+
+div(style="display: none;")
+    form#file-form-app
+        input.form-control(type='file', name='file[]', accept=".wizapp", (change)="upload_file()", multiple)

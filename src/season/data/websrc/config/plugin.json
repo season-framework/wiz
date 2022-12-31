@@ -1,0 +1,112 @@
+{
+    "main": [
+        {
+            "name": "Workspace",
+            "id": "workspace.app.list",
+            "icon": "fa-solid fa-diagram-project",
+            "width": 240
+        },
+        {
+            "name": "Explorer",
+            "id": "workspace.app.explore",
+            "icon": "fa-solid fa-folder-tree",
+            "width": 240
+        },
+        {
+            "name": "NPM Package",
+            "id": "workspace.app.npm",
+            "icon": "fa-solid fa-boxes-packing",
+            "width": 360
+        },
+        {
+            "name": "PIP Pacakge",
+            "id": "workspace.app.pip",
+            "icon": "fa-brands fa-python",
+            "width": 360
+        },
+        {
+            "name": "Commit",
+            "id": "git.app.commit",
+            "icon": "fa-solid fa-code-commit",
+            "width": 360
+        },
+        {
+            "name": "Commit History",
+            "id": "git.app.history",
+            "icon": "fa-solid fa-code-branch",
+            "width": 360
+        }
+    ],
+    "sub": [
+        {
+            "name": "Page",
+            "id": "workspace.app.ngapp",
+            "icon": "fa-solid fa-window-restore",
+            "width": 240,
+            "values": {
+                "mode": "'page'"
+            }
+        },
+        {
+            "name": "Component",
+            "id": "workspace.app.ngapp",
+            "icon": "fa-solid fa-cubes",
+            "width": 240,
+            "values": {
+                "mode": "'layout'"
+            }
+        },
+        {
+            "name": "Layout",
+            "id": "workspace.app.ngapp",
+            "icon": "fa-solid fa-table-columns",
+            "width": 240,
+            "values": {
+                "mode": "'component'"
+            }
+        },
+        {
+            "name": "Angular",
+            "id": "workspace.app.angular",
+            "icon": "fa-brands fa-angular",
+            "width": 240
+        }
+    ],
+    "app": [
+        {
+            "name": "Preview",
+            "id": "workspace.app.preview",
+            "icon": "fa-solid fa-eye",
+            "width": 360,
+            "event": {
+                "binding": "service.event.bind($event.id, $event.data)"
+            }
+        },
+        {
+            "name": "HTML2PUG",
+            "id": "utility.app.html2pug",
+            "icon": "fa-brands fa-html5",
+            "width": 360
+        }
+    ],
+    "setting": [
+        {
+            "name": "Plugin",
+            "id": "core.app.ide",
+            "icon": "fa-solid fa-plug",
+            "width": 280
+        },
+        {
+            "name": "System Setting",
+            "id": "core.app.setting",
+            "icon": "fa-solid fa-wrench",
+            "width": 280
+        },
+        {
+            "name": "System Status",
+            "id": "core.app.status",
+            "icon": "fa-solid fa-heart-pulse",
+            "width": 280
+        }
+    ]
+}

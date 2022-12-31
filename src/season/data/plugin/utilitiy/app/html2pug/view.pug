@@ -1,0 +1,15 @@
+.side-container
+    .side-heading
+        h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
+            span HTML2PUG
+
+    .html-code
+        nu-monaco-editor([(ngModel)]="data", [options]="monaco", height="300px")
+    
+    .border-top.p-3.text-center
+        .btn.btn-block.btn-blue((click)="convert()")
+            i.fa-solid.fa-arrow-down
+            span.ml-2 Convert
+
+    .border-top.side-body
+        nu-monaco-editor([(ngModel)]="pug", [options]="monacoPug", height="100%")

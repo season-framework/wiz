@@ -1,0 +1,18 @@
+{
+    "ng.build": {
+        "id": "config.leftmenu",
+        "name": "ConfigLeftmenuComponent",
+        "path": "./config.leftmenu/config.leftmenu.component"
+    },
+    "id": "config.leftmenu",
+    "category": "config",
+    "title": "Left Menu",
+    "ng": {
+        "selector": "wiz-config-leftmenu",
+        "inputs": [
+            "menu"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-core-system-config-leftmenu([menu]=\"\")"
+}

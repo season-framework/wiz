@@ -1,0 +1,8 @@
+wiz-workspace-app-preview(*ngIf="menu.mode == 'preview'", (binding)="service.event.bind($event.id, $event.data)")
+
+wiz-core-app-ide(*ngIf="menu.mode == 'system.ide.apps'")
+wiz-core-app-status(*ngIf="menu.mode == 'system.status'")
+wiz-core-app-setting(*ngIf="menu.mode == 'system.setting'")
+
+wiz-converter-app-html2pug(*ngIf="menu.mode == 'html2pug'")
+wiz-xterm-app-term(*ngIf="menu.mode == 'xterm'")

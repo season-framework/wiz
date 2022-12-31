@@ -1,0 +1,55 @@
+.side-container
+    .side-heading.area-round
+        h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
+            span {{title}}
+        .ml-auto
+        .btn.btn-white.btn-sm.me-1((click)="refresh();")
+            i.fa-solid.fa-refresh.text-blue
+        .btn.btn-white.btn-sm.me-1((click)="create(null, 'file');")
+            i.fa-solid.fa-plus.text-blue
+        .dropdown(ngbDropdown="")
+            .btn.btn-white.btn-sm(ngbDropdownToggle="dropdown", aria-expanded="false")
+                i.fa-solid.fa-ellipsis-vertical
+            ul.dropdown-menu.dropdown-menu-dark(ngbDropdownMenu="")
+                a(ngbDropdownItem="", (click)="create(null, 'file');") New File
+                a(ngbDropdownItem="", (click)="create(null, 'folder');") New Folder
+                a(ngbDropdownItem="", (click)="upload(null, 'file');") File Upload
+                a(ngbDropdownItem="", (click)="upload(null, 'folder');") Folder Upload
+                a(ngbDropdownItem="", (click)="download();") Download
+
+    .side-body.area-round
+        mat-tree.file-tree([dataSource]="dataSource", [treeControl]="treeControl")
+            mat-tree-node(*matTreeNodeDef="let node", matTreeNodePadding="", matTreeNodePaddingIndent="16px", (click)="open(node)", [ngClass]="active(node) ? 'active' : ''")
+                i.tree-icon.fa-regular.fa-file-lines.mr-2((click)="node.editable = !node.editable; $event.stopPropagation(); service.render()")
+                .file-title(style="flex: auto; overflow: hidden;") 
+                    span(*ngIf="!node.editable") {{node.name}}
+                    input.form-control.form-control-sm([(ngModel)]="node.rename", placeholder="{{node.type.split('.')[1]}} name", (keyup.enter)="move(node);", *ngIf="node.editable", (click)="$event.stopPropagation();")
+                i.icon-action.fa-solid.fa-download((click)="download(node); $event.stopPropagation();")
+                i.icon-action.fa-solid.fa-trash-can((click)="delete(node); $event.stopPropagation();")
+
+            mat-tree-node(*matTreeNodeDef="let node; when: isNew", matTreeNodePadding="", matTreeNodePaddingIndent="16px", (click)="open(node)")
+                i.tree-icon.fa-regular.fa-file.mr-2(*ngIf="node.type == 'new.file'")
+                i.tree-icon.fa-regular.fa-folder.mr-2(*ngIf="node.type == 'new.folder'")
+                .file-title(style="flex: auto; overflow: hidden;") 
+                    input.form-control.form-control-sm([(ngModel)]="node.name", placeholder="{{node.type.split('.')[1]}} name", (keyup.enter)="create(node);")
+                i.icon-action-always.fa-solid.fa-xmark((click)="delete(node); $event.stopPropagation();")
+                i.icon-action-always.fa-solid.fa-check((click)="create(node); $event.stopPropagation();")
+
+            mat-tree-node(*matTreeNodeDef="let node; when: isFolder", matTreeNodePadding="", matTreeNodeToggle="", matTreeNodePaddingIndent="16px", [ngClass]="active(node) ? 'active' : ''")
+                i.tree-icon.mr-2([ngClass]="node.extended ? 'fa-regular fa-folder-open' : 'fa-solid fa-folder'", (click)="node.editable = !node.editable; $event.stopPropagation(); service.render()")
+                .file-title(style="flex: auto; overflow: hidden;")
+                    span(*ngIf="!node.editable") {{node.name}}
+                    input.form-control.form-control-sm([(ngModel)]="node.rename", placeholder="{{node.type.split('.')[1]}} name", (keyup.enter)="move(node);", *ngIf="node.editable", (click)="$event.stopPropagation();")
+                
+                i.icon-action.fa-solid.fa-trash-can((click)="delete(node); $event.stopPropagation();")
+                i.icon-action.fa-solid.fa-arrow-up-from-bracket((click)="upload(node, 'file'); $event.stopPropagation();")
+                i.icon-action.fa-solid.fa-download((click)="download(node); $event.stopPropagation();")
+                i.icon-action.fa-solid.fa-folder-plus((click)="create(node, 'folder'); $event.stopPropagation();")
+                i.icon-action.fa-solid.fa-plus((click)="create(node, 'file'); $event.stopPropagation();")
+
+div(style="display: none;")
+    form#file-form
+        input#file-upload.form-control(*ngIf="upload_mode == 'folder'", type='file', name='file[]', (change)="upload_file()", webkitdirectory, mozdirectory, msdirectory, odirectory, directory, multiple)
+        input#file-upload.form-control(*ngIf="upload_mode == 'file'", type='file', name='file[]', (change)="upload_file()", multiple)
+
+ngx-loading([show]="loading")

@@ -1,0 +1,50 @@
+.side-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.side-heading {
+    display: flex;
+    padding: 8px 16px;
+    background: var(--wiz-color-blue-lt);
+    color: var(--wiz-color-blue);
+
+    .actions {
+        margin-left: auto;
+
+        >* {
+            margin-left: 6px;
+            min-width: 24px;
+            height: 24px;
+        }
+    }
+}
+
+.side-commit {
+    padding: 16px;
+    border-bottom: 1px solid var(--wiz-color-border);
+}
+
+.side-body {
+    flex: auto;
+    width: 100%;
+    overflow: auto;
+    padding: 0;
+
+    tr,
+    td {
+        vertical-align: middle;
+        word-break: break-all;
+        white-space: nowrap;
+    }
+
+}
+
+.link {
+    cursor: pointer;
+
+    &:hover {
+        color: var(--wiz-color-blue);
+    }
+}

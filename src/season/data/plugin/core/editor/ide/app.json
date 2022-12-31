@@ -1,0 +1,18 @@
+{
+    "ng.build": {
+        "id": "core.app.info",
+        "name": "CoreAppInfoComponent",
+        "path": "./core.app.info/core.app.info.component"
+    },
+    "id": "core.app.info",
+    "category": "editor",
+    "title": "IDE App Info",
+    "ng": {
+        "selector": "wiz-core-app-info",
+        "inputs": [
+            "editor"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-core-editor-ide([editor]=\"\")"
+}

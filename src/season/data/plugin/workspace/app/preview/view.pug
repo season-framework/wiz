@@ -1,0 +1,14 @@
+.side-container
+    .side-heading
+        h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
+            span Preview
+
+    .side-search
+        input.form-control.form-control-sm(type="text" placeholder="/main", [(ngModel)]="url", (keyup.enter)="move(url)")
+        button.btn.btn-sm.btn-primary.ms-1((click)="move(url)")
+            i.fa-solid.fa-arrow-right
+
+    .side-body.area-round
+        iframe([src]="urlSafe")
+
+    ngx-loading([show]="loading")

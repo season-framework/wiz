@@ -1,0 +1,16 @@
+{
+    "ng.build": {
+        "id": "ng.npm",
+        "name": "NgNpmComponent",
+        "path": "./ng.npm/ng.npm.component"
+    },
+    "id": "ng.npm",
+    "title": "NPM Manager",
+    "category": "app",
+    "ng": {
+        "selector": "wiz-ng-npm",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-ng-npm()"
+}

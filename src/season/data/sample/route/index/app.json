@@ -1,0 +1,10 @@
+{
+    "id": "index",
+    "title": "/",
+    "route": "/",
+    "created": "2022-01-11 23:04:23",
+    "updated": "2022-06-13 21:23:48",
+    "controller": "base",
+    "category": "main",
+    "viewuri": "/"
+}

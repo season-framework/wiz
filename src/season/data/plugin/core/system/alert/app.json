@@ -1,0 +1,18 @@
+{
+    "ng.build": {
+        "id": "core.alert",
+        "name": "CoreAlertComponent",
+        "path": "./core.alert/core.alert.component"
+    },
+    "id": "core.alert",
+    "category": "core",
+    "title": "Alert",
+    "ng": {
+        "selector": "wiz-core-alert",
+        "inputs": [
+            "model"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-core-alert([model]=\"\")"
+}

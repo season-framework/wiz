@@ -1,0 +1,21 @@
+.side-container
+    .side-heading
+        h3.nowrap.m-0(style="overflow: hidden; text-overflow: ellipsis;")
+            i.fa-solid.fa-wrench.mr-2
+            span System Setting
+
+    .side-body
+        .card((click)="open('boot')")
+            .card-body Boot Option
+        
+        .card((click)="open('service')")
+            .card-body Service Setting
+
+        .card((click)="open('build')")
+            .card-body Build Option
+        
+        .card((click)="open('ide')")
+            .card-body IDE Option
+
+        .card((click)="open('plugin')")
+            .card-body IDE Menu

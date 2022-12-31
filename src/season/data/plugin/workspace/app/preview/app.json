@@ -1,0 +1,18 @@
+{
+    "ng.build": {
+        "id": "season.preview",
+        "name": "SeasonPreviewComponent",
+        "path": "./season.preview/season.preview.component"
+    },
+    "id": "season.preview",
+    "title": "App Preview",
+    "category": "app",
+    "ng": {
+        "selector": "wiz-season-preview",
+        "inputs": [],
+        "outputs": [
+            "binding"
+        ]
+    },
+    "template": "wiz-season-preview((binding)=\"\")"
+}

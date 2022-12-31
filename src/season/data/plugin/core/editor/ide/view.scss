@@ -1,0 +1,31 @@
+.editor-info {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    background-color: var(--wiz-color-light);
+    overflow: auto;
+
+    .editor-info-container {
+        width: 100%;
+        max-width: 640px;
+        border-radius: 16px;
+        padding: 24px;
+        height: fit-content;
+        background-color: white;
+
+        h3 {
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-top: 16px;
+        }
+    }
+}
+
+input, textarea {
+    text-align: left !important;
+    padding: 8px 12px;
+}

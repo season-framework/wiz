@@ -1,0 +1,12 @@
+wiz-workspace-app-list(*ngIf="menu.mode == 'workspace'")
+wiz-workspace-app-explore(*ngIf="menu.mode == 'explorer'")
+wiz-portal-app-modules(*ngIf="menu.mode == 'portal'")
+wiz-git-app-commit(*ngIf="menu.mode == 'commit'")
+wiz-git-app-history(*ngIf="menu.mode == 'commits'")
+wiz-workspace-app-pip(*ngIf="menu.mode == 'pip'")
+wiz-workspace-app-npm(*ngIf="menu.mode == 'npm'")
+
+wiz-workspace-app-angular(*ngIf="menu.mode == 'angular'")
+wiz-workspace-app-ngapp(*ngIf="menu.mode == 'page'", [mode]="'page'")
+wiz-workspace-app-ngapp(*ngIf="menu.mode == 'layout'", [mode]="'layout'")
+wiz-workspace-app-ngapp(*ngIf="menu.mode == 'component'", [mode]="'component'")

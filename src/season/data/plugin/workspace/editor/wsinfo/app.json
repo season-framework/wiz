@@ -1,0 +1,19 @@
+{
+    "id": "core.workspace.info",
+    "title": "Workspace Info",
+    "viewuri": "",
+    "category": "editor",
+    "ng.build": {
+        "id": "core.workspace.info",
+        "name": "CoreWorkspaceInfoComponent",
+        "path": "./core.workspace.info/core.workspace.info.component"
+    },
+    "ng": {
+        "selector": "wiz-core-workspace-info",
+        "inputs": [
+            "editor"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-core-workspace-info([editor]=\"\")"
+}

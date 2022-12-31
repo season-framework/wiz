@@ -1,0 +1,17 @@
+{
+    "id": "core.commit.history",
+    "title": "Commit History",
+    "viewuri": "",
+    "category": "app",
+    "ng.build": {
+        "id": "core.commit.history",
+        "name": "CoreCommitHistoryComponent",
+        "path": "./core.commit.history/core.commit.history.component"
+    },
+    "ng": {
+        "selector": "wiz-core-commit-history",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-core-commit-history()"
+}

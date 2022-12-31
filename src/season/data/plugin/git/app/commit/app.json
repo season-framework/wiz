@@ -1,0 +1,17 @@
+{
+    "id": "core.git.commit",
+    "title": "Git Commit",
+    "viewuri": "",
+    "category": "app",
+    "ng.build": {
+        "id": "core.git.commit",
+        "name": "CoreGitCommitComponent",
+        "path": "./core.git.commit/core.git.commit.component"
+    },
+    "ng": {
+        "selector": "wiz-core-git-commit",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-core-git-commit()"
+}

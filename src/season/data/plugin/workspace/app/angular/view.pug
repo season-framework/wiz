@@ -1,0 +1,15 @@
+.browser-container
+    .browser-list
+        .browser-list-wrapper
+            .browser-category
+                span Angular
+            
+            .browser-info(*ngFor="let item of items", (click)="open(item)", [ngClass]="active(item)")
+                .avatar-area.avatar-area-sm.mr-3
+                    .avatar-container
+                        i.fa-brands.fa-angular
+                .title-area
+                    .item-header.mb-1 {{item.title}}
+                    .item-namespace.text-muted {{item.subtitle}}
+                .ml-auto.active-marker
+                    i.fa-solid.fa-circle.text-blue(style="font-size: 8px;")

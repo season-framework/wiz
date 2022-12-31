@@ -1,0 +1,18 @@
+{
+    "ng.build": {
+        "id": "config.rightmenu",
+        "name": "ConfigRightmenuComponent",
+        "path": "./config.rightmenu/config.rightmenu.component"
+    },
+    "id": "config.rightmenu",
+    "title": "Right Menu",
+    "category": "config",
+    "ng": {
+        "selector": "wiz-config-rightmenu",
+        "inputs": [
+            "menu"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-core-system-config-rightmenu([menu]=\"\")"
+}

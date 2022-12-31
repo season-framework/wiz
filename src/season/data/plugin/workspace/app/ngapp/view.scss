@@ -1,0 +1,119 @@
+.browser-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.browser-search {
+    display: flex;
+    padding: 8px;
+    border-bottom: 1px solid var(--wiz-color-border);
+    height: 40px;
+    background: var(--wiz-color-blue-lt);
+
+    .btn,
+    .form-control {
+        height: 24px;
+    }
+}
+
+.browser-list {
+    flex: auto;
+    height: auto;
+    overflow: auto;
+
+    .no-items {
+        font-size: 18px;
+        font-weight: 1000;
+        color: #555;
+
+        .btn.btn-primary {
+            border-radius: 32px;
+        }
+
+        i {
+            font-size: 48px;
+            color: var(--wiz-color-blue);
+        }
+    }
+
+    .browser-mode {
+        display: flex;
+        background: var(--wiz-color-blue);
+        color: #fff;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--wiz-color-border);
+        font-size: 15px;
+        line-height: 1.2;
+        align-items: center;
+
+        .btn {
+            margin-left: auto;
+        }
+    }
+
+    .browser-category {
+        background: var(--wiz-color-light);
+        color: var(--wiz-color-text);
+        padding: 4px 12px;
+        border-bottom: 1px solid var(--wiz-color-border);
+        font-size: 14px;
+        line-height: 1.2;
+
+        small {
+            font-size: 12px;
+        }
+    }
+
+    .browser-info {
+        border-bottom: 1px solid var(--wiz-color-border);
+        line-height: 1.2;
+        padding: 12px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+
+        .title-area {
+            flex: auto;
+
+            .item-header {
+                font-size: 14px;
+                font-weight: 1000;
+                width: 128px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                border: none;
+                background: transparent;
+            }
+
+            .item-namespace {
+                font-size: 12px;
+            }
+        }
+
+        .active-marker {
+            display: none;
+        }
+
+        &.active {
+            background: var(--wiz-color-blue-lt);
+
+            .active-marker {
+                display: block;
+            }
+        }
+
+        &:hover {
+            background: var(--wiz-color-blue-lt);
+        }
+
+        .btn {
+            i {
+                font-size: 12px;
+                width: 12px;
+                height: 12px;
+            }
+        }
+    }
+}

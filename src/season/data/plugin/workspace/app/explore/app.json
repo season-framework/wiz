@@ -1,0 +1,19 @@
+{
+    "id": "core.browser",
+    "title": "Workspace Browser",
+    "viewuri": "",
+    "category": "app",
+    "ng.build": {
+        "id": "core.browser",
+        "name": "CoreBrowserComponent",
+        "path": "./core.browser/core.browser.component"
+    },
+    "ng": {
+        "selector": "wiz-core-browser",
+        "inputs": [
+            "title"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-core-browser([title]=\"\")"
+}

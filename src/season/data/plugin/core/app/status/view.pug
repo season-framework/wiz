@@ -1,0 +1,58 @@
+.side-container
+    .side-heading
+        h3.nowrap.m-0(style="overflow: hidden; text-overflow: ellipsis;")
+            i.fa-solid.fa-heart-pulse.mr-2
+            span System Status
+
+    .side-body.area-round
+        .info-box
+            h3.mb-4.text-center.text-dark System Info            
+            table
+                tr
+                    td.title.w-1 Process ID
+                    td.spare
+                    td.w-1 {{data.system_pid}}
+            table
+                tr
+                    td.title.w-1 Uptime
+                    td.spare
+                    td.w-1 {{timer(data.system_uptime)}}
+            table
+                tr
+                    td.title.w-1 Python Version
+                    td.spare
+                    td.w-1 {{data.python_version}}
+            table
+                tr
+                    td.title.w-1 WIZ Version
+                    td.spare
+                    td.w-1 {{data.wiz_version}}
+
+        .info-box
+            h3.mb-4.text-center.text-dark System Usage
+            table
+                tr
+                    td.title.w-1 Process
+                    td.spare
+                    td.w-1 {{ data.process_count }}
+            table
+                tr
+                    td.title.w-1 CPU
+                    td.spare
+                    td.w-1 {{ data.cpu_usage | number: '1.0-2' }} %
+            table
+                tr
+                    td.title.w-1 Memory
+                    td.spare
+                    td.w-1 
+                        span {{ data.memory_usage / 1024 / 1024 / 1024 | number: '1.0-2' }} GB
+                        span.mr-1.ml-1 /
+                        span {{ data.memory_total / 1024 / 1024 / 1024 | number: '1.0-2' }} GB
+            table
+                tr
+                    td.title.w-1 Disk
+                    td.spare
+                    td.w-1
+                        span {{ data.disk_used / 1024 / 1024 / 1024 | number: '1.0-0' }} GB
+                        span.mr-1.ml-1 /
+                        span {{ data.disk_total / 1024 / 1024 / 1024 | number: '1.0-0' }} GB

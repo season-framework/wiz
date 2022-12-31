@@ -1,0 +1,76 @@
+.side-container
+    .side-body.area-round
+        mat-tree.file-tree([dataSource]="dataSource", [treeControl]="treeControl")
+            mat-tree-node(*matTreeNodeDef="let node", matTreeNodePadding="", matTreeNodePaddingIndent="16px", (click)="open(node)", [ngClass]="active(node) ? 'active' : ''")
+                ng-container(*ngIf="['app', 'route'].includes(node.type)")
+                    .d-flex.w-100([draggable]="node.type == 'app'", (dragstart)="drag($event, node)")
+                        i.tree-icon.fa-solid.fa-cube.mr-2
+                        .file-title(style="flex: auto; overflow: hidden;") 
+                            span {{node.name}}
+                        i.icon-action.fa-solid.fa-trash-can((click)="delete(node); $event.stopPropagation();")
+                
+                ng-container(*ngIf="node.type == 'angular'")
+                    i.tree-icon.fa-brands.fa-angular.mr-2
+                    .file-title(style="flex: auto; overflow: hidden;") 
+                        span {{node.name}}
+                    i.icon-action.fa-solid.fa-circle-arrow-right
+
+                ng-container(*ngIf="node.type == 'file'")
+                    i.tree-icon.fa-regular.fa-file-lines.mr-2((click)="node.editable = !node.editable; $event.stopPropagation(); service.render()")
+                
+                    .file-title(style="flex: auto; overflow: hidden;") 
+                        span(*ngIf="!node.editable") {{node.name}}
+                        input.form-control.form-control-sm([(ngModel)]="node.rename", placeholder="{{node.type.split('.')[1]}} name", (keyup.enter)="move(node);", *ngIf="node.editable", (click)="$event.stopPropagation();")
+                
+                    i.icon-action.fa-solid.fa-download((click)="download(node); $event.stopPropagation();")
+                    i.icon-action.fa-solid.fa-trash-can((click)="delete(node); $event.stopPropagation();")
+
+            mat-tree-node(*matTreeNodeDef="let node; when: isNew", matTreeNodePadding="", matTreeNodePaddingIndent="16px", (click)="open(node)")
+                i.tree-icon.fa-regular.fa-file.mr-2(*ngIf="node.type == 'new.file'")
+                i.tree-icon.fa-regular.fa-folder.mr-2(*ngIf="node.type == 'new.folder'")
+                .file-title(style="flex: auto; overflow: hidden;") 
+                    input.form-control.form-control-sm([(ngModel)]="node.name", placeholder="{{node.type.split('.')[1]}} name", (keyup.enter)="create(node);")
+                i.icon-action-always.fa-solid.fa-xmark((click)="delete(node); $event.stopPropagation();")
+                i.icon-action-always.fa-solid.fa-check((click)="create(node); $event.stopPropagation();")
+
+            mat-tree-node(*matTreeNodeDef="let node; when: isFolder", matTreeNodePadding="", matTreeNodeToggle="", matTreeNodePaddingIndent="16px", [ngClass]="active(node) ? 'active' : ''")
+                i.tree-icon.mr-2([ngClass]="node.extended ? 'fa-regular fa-folder-open' : 'fa-solid fa-folder'", (click)="node.editable = !node.editable; $event.stopPropagation(); service.render()")
+                
+                .file-title(style="flex: auto; overflow: hidden;")
+                    span(*ngIf="!node.editable") {{node.name}}
+                    input.form-control.form-control-sm([(ngModel)]="node.rename", placeholder="{{node.type.split('.')[1]}} name", (keyup.enter)="move(node);", *ngIf="node.editable", (click)="$event.stopPropagation();")
+                
+                ng-container(*ngIf="isRoot(node)")
+                    i.icon-action.fa-solid.fa-trash-can((click)="delete(node); $event.stopPropagation();")
+                    i.icon-action.fa-solid.fa-download((click)="download(node); $event.stopPropagation();")
+
+                ng-container(*ngIf="!isRoot(node)")
+                    i.icon-action.fa-solid.fa-trash-can((click)="delete(node); $event.stopPropagation();")
+                    i.icon-action.fa-solid.fa-arrow-up-from-bracket((click)="upload(node, 'file'); $event.stopPropagation();")
+                    i.icon-action.fa-solid.fa-download((click)="download(node); $event.stopPropagation();")
+                    i.icon-action.fa-solid.fa-folder-plus((click)="create(node, 'folder'); $event.stopPropagation();")
+                    i.icon-action.fa-solid.fa-plus((click)="create(node, 'file'); $event.stopPropagation();")
+
+            mat-tree-node(*matTreeNodeDef="let node; when: isMod", matTreeNodePadding="", matTreeNodeToggle="", matTreeNodePaddingIndent="16px", [ngClass]="active(node) ? 'active' : ''")
+                i.tree-icon.fa-solid.fa-layer-group.mr-2(*ngIf="'mod.page,mod.component,mod.layout'.split(',').includes(node.type)")
+                i.tree-icon.fa-solid.fa-link.mr-2(*ngIf="'mod.route'.split(',').includes(node.type)")
+                i.tree-icon.fa-brands.fa-css3-alt.mr-2(*ngIf="'mod.styles'.split(',').includes(node.type)")
+                i.tree-icon.fa-solid.fa-book.mr-2(*ngIf="'mod.libs'.split(',').includes(node.type)")
+                i.tree-icon.mr-2([ngClass]="node.extended ? 'fa-regular fa-folder-open' : 'fa-solid fa-folder'", *ngIf="'mod.folder'.split(',').includes(node.type)")
+                .file-title(style="flex: auto; overflow: hidden;")
+                    span {{node.name}}
+                
+                ng-container(*ngIf="'mod.page,mod.component,mod.layout'.split(',').includes(node.type)")
+                    i.icon-action.fa-solid.fa-arrow-up-from-bracket((click)="upload(node, 'app'); $event.stopPropagation();")
+                    i.icon-action.fa-solid.fa-plus((click)="create(node, 'mod.app'); $event.stopPropagation();")
+                
+                ng-container(*ngIf="node.type == 'mod.route'")
+                    i.icon-action.fa-solid.fa-plus((click)="create(node, 'mod.route'); $event.stopPropagation();")
+
+                ng-container(*ngIf="'mod.folder,mod.libs,mod.styles'.split(',').includes(node.type)")
+                    i.icon-action.fa-solid.fa-arrow-up-from-bracket((click)="upload(node, 'file'); $event.stopPropagation();")
+                    i.icon-action.fa-solid.fa-download((click)="download(node); $event.stopPropagation();")
+                    i.icon-action.fa-solid.fa-folder-plus((click)="create(node, 'folder'); $event.stopPropagation();")
+                    i.icon-action.fa-solid.fa-plus((click)="create(node, 'file'); $event.stopPropagation();")
+
+ngx-loading([show]="loading")

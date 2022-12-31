@@ -1,0 +1,18 @@
+{
+    "ng.build": {
+        "id": "season.monaco",
+        "name": "SeasonMonacoComponent",
+        "path": "./season.monaco/season.monaco.component"
+    },
+    "id": "season.monaco",
+    "title": "Monaco Editor",
+    "category": "editor",
+    "ng": {
+        "selector": "wiz-season-monaco",
+        "inputs": [
+            "editor"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-season-monaco([editor]=\"\")"
+}

@@ -1,0 +1,17 @@
+{
+    "id": "html2pug",
+    "title": "HTML to Pug",
+    "viewuri": "",
+    "category": "app",
+    "ng.build": {
+        "id": "season.html2pug",
+        "name": "SeasonHtml2pugComponent",
+        "path": "./season.html2pug/season.html2pug.component"
+    },
+    "ng": {
+        "selector": "wiz-season-html2pug",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-converter-app-html2pug()"
+}

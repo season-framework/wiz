@@ -1,0 +1,25 @@
+.side-container
+    .side-heading
+        h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
+            span PIP Packages
+
+    .side-search.area-round
+        input.form-control(type="text" placeholder="eg) requests", [(ngModel)]="keyword", (keyup.enter)="install(keyword)")
+        button.btn.btn-primary.ms-2((click)="install(keyword)") Install
+
+    .side-body.area-round
+        table.table.table-hover
+            thead
+                th.text-center Package
+                th.text-center Version
+                th.text-center.w-1
+            tbody
+                tr(*ngFor="let item of data")
+                    ng-container(*ngIf="match(item.name)")
+                        th {{item.name}}
+                        td {{item.version}}
+                        td.w-1.nowrap
+                            button.btn.btn-sm.btn-dark.me-1((click)="install(item.name)")
+                                i.fa-solid.fa-arrow-up
+
+    ngx-loading([show]="loading")

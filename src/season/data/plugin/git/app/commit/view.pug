@@ -1,0 +1,52 @@
+.side-container
+    .side-heading.area-round
+        h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
+            span Commit
+        .ml-auto
+        .btn.btn-sm.btn-primary((click)="add()")
+            i.fa-solid.fa-refresh
+
+    .side-commit
+        textarea.form-control(type="text" placeholder="Commit message", [(ngModel)]="message", rows=5)
+        button.btn.btn-primary.btn-block.mt-2((click)="commit(message)") Commit
+        
+    ng-container(*ngIf="files.staged.length == 0 && files.unstaged.length == 0")
+        .side-body
+            table.table.table-sm.table-hover.mb-0
+                tbody
+                    tr
+                        td.text-center.p-4 No Changes
+
+    ng-container(*ngIf="files.staged.length > 0")
+        .side-heading.area-round
+            h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
+                span onstage
+            .me-auto
+            .btn.btn-sm.btn-primary((click)="reset()")
+                i.fa-solid.fa-minus
+
+        .side-body
+            table.table.table-sm.table-hover.mb-0
+                tbody
+                    tr(*ngFor="let item of files.staged")
+                        td
+                            span.badge.badge-sm.mr-1(class="{{item.color}}") {{item.change_type}}
+                            a.link((click)="reset(item.path)") {{item.path}}
+
+    ng-container(*ngIf="files.unstaged.length > 0")
+        .side-heading.area-round
+            h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
+                span unstaged
+            .me-auto
+            .btn.btn-sm.btn-primary((click)="add()")
+                i.fa-solid.fa-plus
+
+        .side-body
+            table.table.table-sm.table-hover.mb-0(*ngIf="files.unstaged.length > 0")
+                tbody
+                    tr(*ngFor="let item of files.unstaged")
+                        td
+                            span.badge.badge-sm.mr-1(class="{{item.color}}") {{item.change_type}}
+                            a.link((click)="add(item.path)") {{item.path}}
+
+ngx-loading([show]="loading")

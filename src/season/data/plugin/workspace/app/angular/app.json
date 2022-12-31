@@ -1,0 +1,16 @@
+{
+    "ng.build": {
+        "id": "ng.angular",
+        "name": "NgAngularComponent",
+        "path": "./ng.angular/ng.angular.component"
+    },
+    "id": "ng.angular",
+    "title": "Angular Config",
+    "category": "app",
+    "ng": {
+        "selector": "wiz-ng-angular",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-ng-angular()"
+}
