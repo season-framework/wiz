@@ -62,6 +62,10 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ## Release Note
 
+### 2.1.1
+
+- plugin bug fixed
+
 ### 2.1.0
 
 - ide plugin concept changed
