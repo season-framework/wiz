@@ -48,6 +48,18 @@ wiz server start # start daemon server
 wiz server stop  # stop daemon server
 ```
 
+- upgrade ide
+
+```bash
+wiz ide upgrade
+```
+
+- install ide plugin
+
+```bash
+wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
+```
+
 ## Release Note
 
 ### 2.1.0
