@@ -51,7 +51,6 @@ def move():
     to = wiz.request.query("to", True)
     if len(path) == 0 or len(to) == 0:
         wiz.response.status(401, False)
-    print(path, to)
     if fs.exists(path) == False:
         wiz.response.status(401, False)
     if fs.exists(to):

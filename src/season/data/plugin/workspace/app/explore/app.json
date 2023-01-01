@@ -15,5 +15,5 @@
         ],
         "outputs": []
     },
-    "template": "wiz-core-browser([title]=\"\")"
+    "template": "wiz-workspace-app-explore([title]=\"\")"
 }

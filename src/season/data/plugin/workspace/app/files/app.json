@@ -15,5 +15,5 @@
         ],
         "outputs": []
     },
-    "template": "wiz-core-files([title]=\"\", [path]=\"\")"
+    "template": "wiz-workspace-app-files([title]=\"\", [path]=\"\")"
 }

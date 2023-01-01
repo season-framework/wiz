@@ -23,7 +23,8 @@ def portchecker(port):
 def create(projectname, uri=None):
     PATH_PROJECT = os.path.join(os.getcwd(), projectname)
     if os.path.isdir(PATH_PROJECT):
-        return print("Already exists project path '{}'".format(PATH_PROJECT))
+        print("Already exists project path '{}'".format(PATH_PROJECT))
+        return
     
     fs = season.util.os.FileSystem(PATH_PROJECT)
 
