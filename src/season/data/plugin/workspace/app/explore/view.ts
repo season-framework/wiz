@@ -62,7 +62,7 @@ export class Component implements OnInit {
     public isFolder = (_: number, node: FileNode) => node.type == 'folder';
     public isMod = (_: number, node: FileNode) => node.type.substring(0, 3) == 'mod';
     public isNew = (_: number, node: FileNode) => node.type == 'new.folder' || node.type == 'new.file';
-    public isRoot = (node: FileNode) => node.path.split("/").length == 2;
+    public isRoot = (node: FileNode) => node.parent == this.rootNode;
 
     constructor(private service: Service) { }
 
