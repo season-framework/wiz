@@ -276,7 +276,6 @@ export class Component implements OnInit {
                     let { code, data } = await wiz.call('read', { path: node.path });
                     if (code != 200) return {};
                     data = JSON.parse(data);
-                    console.log(data);
                     return data;
                 }).bind('update', async (tab) => {
                     let data = await tab.data();
