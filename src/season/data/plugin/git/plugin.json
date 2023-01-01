@@ -1,6 +1,6 @@
 {
     "package": "git",
     "title": "Git",
-    "version": "2.0.0",
-    "repo": "https://github.com/season-framework/wiz-plugin-git"
+    "version": "2.1.2",
+    "repo": "git"
 }

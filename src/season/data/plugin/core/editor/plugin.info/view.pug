@@ -1,0 +1,41 @@
+.editor-info
+    .editor-info-container.area-round
+        h3 Plugin Info
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Package
+            .col
+                input.form-control.form-control-sm(type="text", placeholder="utility", [(ngModel)]="data.package", disabled)
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Title
+            .col
+                input.form-control.form-control-sm(type="text", placeholder="Title", [(ngModel)]="data.title")
+        
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Version
+            .col
+                input.form-control.form-control-sm(type="text", placeholder="1.0.0", [(ngModel)]="data.version")
+        
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Repo
+            .col
+                input.form-control.form-control-sm(type="text", placeholder="https://github.com/repo", [(ngModel)]="data.repo")
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Description
+            .col
+                textarea.form-control.form-control-sm(rows=10, placeholder="Description", [(ngModel)]="data.description")
+        
+        hr
+
+        .form-group.row
+            .col
+                button.btn.btn-outline-blue.btn-block((click)="editor.update()") Save
+
+    ngx-loading([show]="loading")

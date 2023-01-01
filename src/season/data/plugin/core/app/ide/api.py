@@ -11,6 +11,15 @@ from season.core.builder.base import Converter
 workspace = wiz.workspace("ide")
 fs = workspace.fs("..")
 
+def upgrade():
+    plugin_id = wiz.request.query("plugin", True)
+    plugin = season.plugin(wiz.server.path.root)
+    try:
+        plugin.upgrade(plugin_id)
+    except Exception as e:
+        wiz.response.status(500, str(e))
+    wiz.response.status(200)
+
 def list(segment):
     path = wiz.request.query("path", True)
     segment = path.split("/")
@@ -27,11 +36,11 @@ def list(segment):
                 title = name
                 if 'title' in plugin and len(plugin['title']) > 0:
                     title = plugin['title']
-                res.append(dict(name=title, path=fpath, type='folder'))
+                res.append(dict(name=title, path=fpath, type='folder', meta=dict(package=name)))
             wiz.response.status(200, res)
             
         elif len(segment) == 2:
-            res.append(dict(name='Plugin Info', path=os.path.join(path, 'plugin.json'), type='file', meta=dict(icon="fa-solid fa-info")))
+            res.append(dict(name='Plugin Info', path=os.path.join(path, 'plugin.json'), type='file', meta=dict(icon="fa-solid fa-info", editor="info")))
             res.append(dict(name='README', path=os.path.join(path, 'README.md'), type='file', meta=dict(icon="fa-solid fa-book")))
             res.append(dict(name='app', path=os.path.join(path, 'app'), type='mod.app'))
             res.append(dict(name='editor', path=os.path.join(path, 'editor'), type='mod.app'))

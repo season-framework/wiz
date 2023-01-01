@@ -9,6 +9,7 @@ import { FileNode, FileDataSource } from './service';
 
 import MonacoEditor from "@wiz/app/core.editor.monaco";
 import InfoEditor from "@wiz/app/core.editor.ide";
+import PluginInfoEditor from "@wiz/app/core.editor.plugin.info";
 
 const DEFAULT_COMPONENT = `import { OnInit, Input } from '@angular/core';
 
@@ -239,7 +240,7 @@ export class Component implements OnInit {
                 }
 
                 editor.bind("delete", async () => {
-                    let res = await this.service.alert.show({ title: 'Delete App', message: 'Are you sure remove "' + editor.title + '"?', action_text: "Delete", action_class: "btn-danger" });
+                    let res = await this.service.alert.show({ title: 'Delete App', message: 'Are you sure remove "' + editor.title + '"?', action: "Delete", actionBtn: "btn-danger" });
                     if (res !== true) return;
 
                     let targets = await this.service.editor.find(editor);
@@ -251,6 +252,38 @@ export class Component implements OnInit {
 
                 editor.bind("clone", async (location: number = -1) => {
                     await this.open(node, location);
+                });
+
+                await editor.open(location);
+            },
+            info: async () => {
+                let path = node.path.split("/");
+                let app_package = path[path.length - 2];
+
+                let editor = this.service.editor.create({
+                    component_id: this.APP_ID,
+                    path: node.path,
+                    title: app_package,
+                    unique: true,
+                    current: 0
+                });
+
+                editor.create({
+                    name: 'info',
+                    viewref: PluginInfoEditor,
+                    path: node.path
+                }).bind('data', async () => {
+                    let { code, data } = await wiz.call('read', { path: node.path });
+                    if (code != 200) return {};
+                    data = JSON.parse(data);
+                    console.log(data);
+                    return data;
+                }).bind('update', async (tab) => {
+                    let data = await tab.data();
+                    let check = /^[a-z0-9.]+$/.test(data.package);
+                    if (!check) return toastr.error("invalidate package name");
+                    if (data.package.length < 3) return toastr.error("package name at least 3 alphabets");
+                    await this.update(node.path, JSON.stringify(data, null, 4));
                 });
 
                 await editor.open(location);
@@ -302,8 +335,9 @@ export class Component implements OnInit {
             }
         }
 
-        if (openEditor[node.type]) await openEditor[node.type]()
-        else await openEditor.default();
+        if (openEditor[node.type]) return await openEditor[node.type]();
+        if (node.meta && openEditor[node.meta.editor]) return await openEditor[node.meta.editor]();
+        await openEditor.default();
     }
 
     public async upload(node: FileNode | null, mode: string = 'file') {
@@ -400,7 +434,7 @@ export class Component implements OnInit {
     public async delete(node: FileNode, forced: boolean = false) {
         if (node.type != "new.folder" && node.type != "new.file") {
             if (!forced) {
-                let res = await this.service.alert.show({ title: 'Delete', message: 'Are you sure to delete?', action_text: "Delete", action_class: "btn-danger" });
+                let res = await this.service.alert.show({ title: 'Delete', message: 'Are you sure to delete?', action: "Delete", actionBtn: "btn-danger" });
                 if (!res) return;
             }
             await wiz.call("delete", { path: node.path });
@@ -428,10 +462,6 @@ export class Component implements OnInit {
             await this.dataSource.delete(node);
             await this.refresh(node);
         } else if (node.type == "mod.app") {
-            let path = node.path.split("/");
-            let mod_id = path[1];
-            let app_id = path[path.length - 1];
-
             let editor = this.service.editor.create({ component_id: this.APP_ID, title: 'New' });
 
             editor.create({ name: 'info', viewref: InfoEditor })
@@ -472,6 +502,16 @@ export class Component implements OnInit {
             let data = await this.list(this.rootNode);
             this.dataSource.data = data;
         }
+    }
+
+    public async upgrade(node: FileNode) {
+        if (!node.meta.package) return;
+        let res = await this.service.alert.show({ title: 'Upgrade Plugin', message: 'Are you sure upgrade "' + node.name + '"?', action: "Upgrade", actionBtn: "success", status: "success" });
+        if (res !== true) return;
+        await this.loader(true);
+        await wiz.call("upgrade", { plugin: node.meta.package });
+        await wiz.call('build');
+        await this.loader(false);
     }
 
     public async download(node: FileNode | null) {

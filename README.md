@@ -62,9 +62,14 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ## Release Note
 
+### 2.1.2
+
+- [plugin] `core` plugin updated
+- [core] add `lib/plugin` object
+
 ### 2.1.1
 
-- plugin bug fixed
+- [command] bug fixed
 
 ### 2.1.0
 
@@ -72,91 +77,45 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 - ide layout changed
 - ide config concept added
 
-### 2.0.9
+### 2.0.x
 
+- major issues
+    - upgrade base project to angular 14.2.0
+    - UI/UX full changed
+    - Drag and Drop Interface
+    - git branch to project (multiple project in workspace)
+    - Enhanced IDE Plugin and easily develop 3rd party apps
+    - support pip and npm on ui
 - ide socket
-
-### 2.0.8
-
 - auto install `@angular/cli`
-
-### 2.0.7
-
 - angular 15
-
-### 2.0.6
-
 - flask response bug fixed (on filesend)
-
-### 2.0.5
-
 - wiz bundle mode
-
-### 2.0.4
-
 - update wiz server command (multiprocess)
-
-### 2.0.3
-
 - config bug fixed
-
-### 2.0.2
-
 - socketio bug fixed (ide controller)
-
-### 2.0.1
-
 - threading bug fixed (flask, socketio)
 
-### 2.0.0
+### 1.0.x
 
-- upgrade base project to angular 14.2.0
-- UI/UX full changed
-- Drag and Drop Interface
-- git branch to project (multiple project in workspace)
-- Enhanced IDE Plugin and easily develop 3rd party apps
-- support pip and npm on ui
-
-### 1.0.7
-
+- major issue
+    - clean code
+    - full changed ide
+    - remove season-flask concept
+    - enhanced performance
+    - logging for wiz concept
+    - upgrade plugin structure
+    - config structure changed
+    - stable version for git merge
 - add `wiz server start --log <file>` method 
-
-### 1.0.6
-
 - print bug fixed
-
-### 1.0.5
-
 - add daemon server command
-
-### 1.0.4
-
 - Socket.IO transport
 - server starting log
 - auto remove invalid character on update
-
-### 1.0.3
-
 - WSGI Bug Fixed
-
-### 1.0.2
-
 - remove dukpy (windows install bug)
-
-### 1.0.1
-
 - support macosx
-
-### 1.0.0
-
-- clean code
-- full changed ide
-- remove season-flask concept
-- enhanced performance
-- logging for wiz concept
-- upgrade plugin structure
-- config structure changed
-- stable version for git merge
 
 ### 0.5.x
 

@@ -41,16 +41,22 @@
 
             mat-tree-node(*matTreeNodeDef="let node; when: isFolder", matTreeNodePadding="", matTreeNodeToggle="", matTreeNodePaddingIndent="16px", [ngClass]="active(node) ? 'active' : ''")
                 ng-container(*ngIf="isRoot(node)")
-                    i.tree-icon.fa-solid.fa-rocket.mr-2((click)="node.editable = !node.editable; $event.stopPropagation(); service.render()")
+                    i.tree-icon.fa-solid.fa-rocket.mr-2
                 ng-container(*ngIf="!isRoot(node)")
                     i.tree-icon.mr-2([ngClass]="node.extended ? 'fa-regular fa-folder-open' : 'fa-solid fa-folder'", (click)="node.editable = !node.editable; $event.stopPropagation(); service.render()")
                 
-                .file-title(style="flex: auto; overflow: hidden;")
-                    span(*ngIf="!node.editable") {{node.name}}
-                    input.form-control.form-control-sm([(ngModel)]="node.rename", placeholder="{{node.type.split('.')[1]}} name", (keyup.enter)="move(node);", *ngIf="node.editable", (click)="$event.stopPropagation();")
+                ng-container(*ngIf="isRoot(node)")
+                    .file-title(style="flex: auto; overflow: hidden;")
+                        span {{node.name}}
+
+                ng-container(*ngIf="!isRoot(node)")
+                    .file-title(style="flex: auto; overflow: hidden;")
+                        span(*ngIf="!node.editable") {{node.name}}
+                        input.form-control.form-control-sm([(ngModel)]="node.rename", placeholder="{{node.type.split('.')[1]}} name", (keyup.enter)="move(node);", *ngIf="node.editable", (click)="$event.stopPropagation();")
                 
                 ng-container(*ngIf="isRoot(node)")
                     i.icon-action.fa-solid.fa-trash-can((click)="delete(node); $event.stopPropagation();")
+                    i.icon-action.fa-solid.fa-circle-up((click)="upgrade(node); $event.stopPropagation();")
                     i.icon-action.fa-solid.fa-download((click)="download(node); $event.stopPropagation();")
 
                 ng-container(*ngIf="!isRoot(node)")

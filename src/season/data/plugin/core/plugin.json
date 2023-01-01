@@ -1,6 +1,6 @@
 {
     "package": "core",
     "title": "Core",
-    "version": "2.0.0",
-    "repo": "https://github.com/season-framework/wiz-plugin-core"
+    "version": "2.1.2",
+    "repo": "core"
 }
