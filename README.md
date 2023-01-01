@@ -62,6 +62,10 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ## Release Note
 
+### 2.1.4
+
+- [plugin] bug fixed (remove unused file)
+
 ### 2.1.3
 
 - [plugin/workspace] add route build
