@@ -103,9 +103,9 @@ export class Component implements OnInit {
         return data;
     }
 
-    private async update(path: string, data: string) {
+    private async update(path: string, data: string, node: any = null) {
         let res = await wiz.call('update', { path: path, code: data });
-
+        if (node) await this.refresh(node, false);
         if (["route", "controller", "model", "config"].includes(path.split("/")[1])) {
             if (res.code == 200) toastr.info("Updated");
             return
@@ -224,7 +224,7 @@ export class Component implements OnInit {
 
                     node.name = data.title;
                     data = JSON.stringify(data, null, 4);
-                    await this.update(node.path + '/app.json', data);
+                    await this.update(node.path + '/app.json', data, node);
                 });
 
                 let tabs: any = [
@@ -352,7 +352,7 @@ export class Component implements OnInit {
                     }
 
                     data = JSON.stringify(data, null, 4);
-                    await this.update(node.path + '/app.json', data);
+                    await this.update(node.path + '/app.json', data, node);
                 });
 
                 editor.create({
@@ -475,8 +475,8 @@ export class Component implements OnInit {
             await fn('upload', fd);
         }
 
+        await this.refresh(node, false);
         await this.loader(false);
-        await this.refresh(this.rootNode == node ? null : node);
     }
 
     public async move(node: FileNode) {
@@ -555,15 +555,13 @@ export class Component implements OnInit {
                     if (data.namespace.length < 3) return toastr.error("namespace at least 3 alphabets");
 
                     let id = mode + "." + data.namespace;
+                    data.mode = mode;
+                    data.id = id;
                     let res = await wiz.call("exists", { path: node.path + "/" + data.id });
                     if (res.data) return toastr.error("namespace already exists");
-
-                    let appid = data.id;
-                    data.id = id;
                     data = JSON.stringify(data, null, 4);
-
                     editor.close();
-                    await this.update(node.path + "/" + appid + '/app.json', data);
+                    await this.update(node.path + "." + data.namespace + '/app.json', data, node);
                 });
 
             await editor.open();
@@ -584,7 +582,7 @@ export class Component implements OnInit {
                     let appid = data.id;
                     data = JSON.stringify(data, null, 4);
                     editor.close();
-                    await this.update(node.path + "/" + appid + '/app.json', data);
+                    await this.update(node.path + "/" + appid + '/app.json', data, node);
                 });
 
             await editor.open();
@@ -596,10 +594,15 @@ export class Component implements OnInit {
         }
     }
 
-    public async refresh(node: FileNode | null = null) {
-        if (node && node.parent) {
-            await this.dataSource.toggle(node.parent, false);
-            await this.dataSource.toggle(node.parent, true);
+    public async refresh(node: FileNode | null = null, isparent: boolean = true) {
+        if (node) {
+            if (isparent && node.parent) {
+                await this.dataSource.toggle(node.parent, false);
+                await this.dataSource.toggle(node.parent, true);
+            } else {
+                await this.dataSource.toggle(node, false);
+                await this.dataSource.toggle(node, true);
+            }
         } else {
             let data = await this.list(this.rootNode);
             this.dataSource.data = data;

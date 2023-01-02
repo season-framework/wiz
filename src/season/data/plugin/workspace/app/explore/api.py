@@ -183,6 +183,7 @@ def upload_root(segment):
 
 def upload_app(segment):
     path = wiz.request.query("path", True)
+    path = "/".join(path.split("/")[:-1])
     fs = workspace.fs(path)
 
     files = wiz.request.files()

@@ -62,6 +62,11 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ## Release Note
 
+### 2.1.7
+
+- [plugin/workspace] import & create app bug fixed
+
+
 ### 2.1.6
 
 - [plugin/core] remove useless log
