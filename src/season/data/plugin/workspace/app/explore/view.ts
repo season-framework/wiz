@@ -264,8 +264,7 @@ export class Component implements OnInit {
                     tabs[i].bind('data', async (tab) => {
                         editor.meta.info = await editor.tab(0).data();
                         let { code, data } = await wiz.call('read', { path: tab.path });
-                        if (code != 200) return {};
-
+                        if (code != 200) data = null;
                         if (!data) {
                             if (tab.name == 'Component') {
                                 data = DEFAULT_COMPONENT;
@@ -555,13 +554,14 @@ export class Component implements OnInit {
                     if (data.namespace.length < 3) return toastr.error("namespace at least 3 alphabets");
 
                     let id = mode + "." + data.namespace;
+                    let app_namespace = data.namespace;
                     data.mode = mode;
                     data.id = id;
-                    let res = await wiz.call("exists", { path: node.path + "/" + data.id });
+                    let res = await wiz.call("exists", { path: node.path + "." + app_namespace });
                     if (res.data) return toastr.error("namespace already exists");
                     data = JSON.stringify(data, null, 4);
                     editor.close();
-                    await this.update(node.path + "." + data.namespace + '/app.json', data, node);
+                    await this.update(node.path + "." + app_namespace + '/app.json', data, node);
                 });
 
             await editor.open();

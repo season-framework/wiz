@@ -64,6 +64,11 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ### 2.1.7
 
+- [plugin/workspace] page namespace bug fixed
+- [plugin/workspace] set default code if component.ts not exists
+
+### 2.1.7
+
 - [plugin/workspace] import & create app bug fixed
 
 
