@@ -62,7 +62,15 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ## Release Note
 
-### 2.1.7
+### 2.1.9
+
+- [plugin/core] move to app link in monaco editor
+- [plugin/core] add core plugins upgrade button
+- [plugin/core] add restart server button
+- [plugin/workspace] add app/route editor service
+- [plugin/workspace] preview bug fixed
+
+### 2.1.8
 
 - [plugin/workspace] page namespace bug fixed
 - [plugin/workspace] set default code if component.ts not exists

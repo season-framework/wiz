@@ -12,5 +12,5 @@
         "inputs": [],
         "outputs": []
     },
-    "template": "wiz-core-system-status()"
+    "template": "wiz-core-app-status()"
 }

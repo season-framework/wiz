@@ -14,5 +14,5 @@
         ],
         "outputs": []
     },
-    "template": "wiz-ng-app-info([editor]=\"\")"
+    "template": "wiz-workspace-editor-ngapp-info([editor]=\"\")"
 }

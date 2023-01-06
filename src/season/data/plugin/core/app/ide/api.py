@@ -7,7 +7,18 @@ import datetime
 import json
 import season
 from season.core.builder.base import Converter
+import subprocess
+import sys
 
+python_executable = str(sys.executable)
+if wiz.server.config.boot.python_executable is not None:
+    python_executable = wiz.server.config.boot.python_executable
+
+def coreupgrade():
+    package = 'season'
+    output = subprocess.run([python_executable, "-m", "pip", "install", str(package), "--upgrade"], capture_output=True)
+    wiz.response.status(200, str(output.stdout.decode("utf-8")))
+    
 workspace = wiz.workspace("ide")
 fs = workspace.fs("..")
 
@@ -32,11 +43,11 @@ def list(segment):
                 fpath = os.path.join(path, name)
                 if fs.isdir(fpath) == False:
                     continue
-                plugin = fs.read.json(os.path.join(fpath, "plugin.json"), dict())                
+                plugin = fs.read.json(os.path.join(fpath, "plugin.json"), dict())
                 title = name
                 if 'title' in plugin and len(plugin['title']) > 0:
                     title = plugin['title']
-                res.append(dict(name=title, path=fpath, type='folder', meta=dict(package=name)))
+                res.append(dict(name=title, path=fpath, type='folder', meta=plugin))
             wiz.response.status(200, res)
             
         elif len(segment) == 2:

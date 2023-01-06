@@ -19,7 +19,7 @@ export class Component implements OnInit {
     }
 
     public async loadControllers() {
-        let { data } = await wiz.app("workspace.app.list").call("controllers")
+        let { data } = await wiz.app("workspace.app.explore").call("controller")
         return data;
     }
 

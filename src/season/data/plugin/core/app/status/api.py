@@ -1,9 +1,10 @@
-import season
 import os
 import time
 import psutil
 import platform
 import resource
+import signal
+import season
 
 def status():
     process = psutil.Process(os.getpid())
@@ -42,3 +43,11 @@ def status():
     stat.process_children = processes
 
     wiz.response.status(200, stat)
+
+def restart():
+    pid = os.getpid()
+    for child in psutil.Process(pid).children(recursive=True):
+        child.terminate()
+        os.kill(child.pid, signal.SIGKILL)
+    os.kill(pid, signal.SIGKILL)
+    wiz.response.status(200)

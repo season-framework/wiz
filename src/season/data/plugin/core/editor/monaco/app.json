@@ -14,5 +14,5 @@
         ],
         "outputs": []
     },
-    "template": "wiz-season-monaco([editor]=\"\")"
+    "template": "wiz-core-editor-monaco([editor]=\"\")"
 }

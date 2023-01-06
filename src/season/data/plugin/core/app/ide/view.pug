@@ -3,6 +3,8 @@
         h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
             span IDE Plugin
         .ml-auto
+        .btn.btn-white.btn-sm.me-1((click)="coreUpgrade();")
+            i.icon-action.fa-solid.fa-arrow-up.text-blue
         .btn.btn-white.btn-sm.me-1((click)="refresh();")
             i.fa-solid.fa-refresh.text-blue
         .btn.btn-white.btn-sm.me-1((click)="create(null, 'folder');")
@@ -48,6 +50,7 @@
                 ng-container(*ngIf="isRoot(node)")
                     .file-title(style="flex: auto; overflow: hidden;")
                         span {{node.name}}
+                        small.ml-1.text-muted ({{node.meta.version}})
 
                 ng-container(*ngIf="!isRoot(node)")
                     .file-title(style="flex: auto; overflow: hidden;")

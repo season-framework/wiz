@@ -1,5 +1,6 @@
 import { OnInit, Input } from '@angular/core';
 import { Service } from '@wiz/service/service';
+import { Workspace } from 'src/app/workspace.app.explore/service';
 
 export class Component implements OnInit {
     @Input() editor;
@@ -7,7 +8,9 @@ export class Component implements OnInit {
     public loading: boolean = true;
     public data: any = {};
 
-    constructor(public service: Service) { }
+    constructor(public service: Service) {
+        this.workspace = new Workspace(service, wiz);
+    }
 
     public async ngOnInit() {
         await this.loader(true);
@@ -225,6 +228,31 @@ export class Component implements OnInit {
         });
     }
 
+    private addComponentClick(editor) {
+        if (editor.getModel().getLanguageId() != 'pug') return;
+
+        editor.onMouseDown(async ({ event, target }) => {
+            const { metaKey, altKey } = event;
+            if (!metaKey && !altKey) return;
+            const text = target.element.textContent.replace(/\s/g, "");
+            const r = /^wiz\-[a-z\-]+/.exec(text);
+            if (!r) return;
+            const mode = r[0].split("-")[1];
+            const appId = r[0].split("-").slice(1).join(".");
+
+            const { code, data } = await wiz.call("load", { id: appId });
+            if (code !== 200) return;
+
+            if (['component', 'page', 'layout'].includes(mode)) {
+                let location = this.service.editor.indexOf(this.editor);
+                let neweditor = this.workspace.AppEditor(data);
+                await neweditor.open(location + 1);
+                await this.service.render(100);
+                await neweditor.activate();
+            }
+        });
+    }
+
     public async init(e) {
         let editor = this.editor;
         for (let i = 0; i < this.service.shortcuts.length; i++) {
@@ -235,8 +263,10 @@ export class Component implements OnInit {
             this.monacoRecommend();
             window.monacoWIZRecommend = true;
         }
+        this.addComponentClick(e.editor);
 
         editor.meta.monaco = e.editor;
         editor.meta.monaco.focus();
     }
+
 }

@@ -44,7 +44,9 @@ export class Component implements OnInit {
         this.binding.emit({ id, data });
     }
 
-    public async move(url: string) {
+    public async move(url: any) {
+        if (!url) url = this.url;
+        if (!url) url = "/";
         if (url[0] != "/") url = "/" + url;
         this.url = url;
         this.urlSafe = this.sanitizer.bypassSecurityTrustResourceUrl(url);

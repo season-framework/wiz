@@ -14,5 +14,5 @@
             "binding"
         ]
     },
-    "template": "wiz-season-preview((binding)=\"\")"
+    "template": "wiz-workspace-app-preview((binding)=\"\")"
 }

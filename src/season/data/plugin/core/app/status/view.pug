@@ -56,3 +56,5 @@
                         span {{ data.disk_used / 1024 / 1024 / 1024 | number: '1.0-0' }} GB
                         span.mr-1.ml-1 /
                         span {{ data.disk_total / 1024 / 1024 / 1024 | number: '1.0-0' }} GB
+
+        .btn.btn-block.btn-blue.mt-4((click)="restart()") Restart Server

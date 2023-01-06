@@ -33,4 +33,23 @@ export class Component implements OnInit {
         if (this.interval_id > 0)
             clearInterval(this.interval_id);
     }
+
+    public async restart() {
+        await this.service.loading.show();
+        try {
+            await wiz.call("restart");
+        } catch (e) {
+        }
+
+        while (true) {
+            try {
+                await wiz.call("status");
+                break;
+            } catch (e) {
+                await this.service.render(500);
+            }
+        }
+        await this.service.loading.hide();
+    }
+
 }

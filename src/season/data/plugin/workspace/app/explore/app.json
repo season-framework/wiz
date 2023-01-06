@@ -15,5 +15,5 @@
         ],
         "outputs": []
     },
-    "template": "wiz-workspace-app-explore([title]=\"\")"
+    "template": "wiz-workspace-app-explore()"
 }

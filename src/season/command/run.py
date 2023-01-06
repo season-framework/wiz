@@ -1,18 +1,14 @@
 import os
 import sys
 from argh import arg, expects_obj
-import subprocess
 import time
 import psutil
-import datetime
 import platform
 import signal
 import atexit
-import contextlib
 import multiprocessing as mp
-import threading
-import season
 import git
+import importlib
 
 PATH_WEBSRC = os.getcwd()
 PATH_PUBLIC = os.path.join(PATH_WEBSRC, 'public')
@@ -38,6 +34,7 @@ def run(host='0.0.0.0', port=None, log=None):
     runconfig = dict(host=host, port=port, log=log)
 
     def run_ctrl():
+        season = importlib.import_module("season")
         app = season.app(path=PATH_WEBSRC)
         workspace = app.wiz().workspace("ide")
         workspace.build()
@@ -95,8 +92,6 @@ class Daemon:
         se = open(self.stderr, 'w')
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
-        # contextlib.redirect_stdout(so)
-        # contextlib.redirect_stderr(se)
 
         # write pidfile
         atexit.register(self.delpid)
@@ -158,6 +153,7 @@ class Daemon:
 
 def runnable(stdout, stderr):
     def run_ctrl():
+        season = importlib.import_module("season")
         app = season.app(path=PATH_WEBSRC)
         os.environ['WERKZEUG_RUN_MAIN'] = 'false'
         app.run()

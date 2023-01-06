@@ -6,6 +6,7 @@ import time
 import shutil
 import datetime
 import json
+import season
 
 def controllers():
     fs = wiz.workspace("service").fs("src", "controller")
@@ -111,9 +112,8 @@ def upload(segment):
 def create():
     path = wiz.request.query("path", True)
     target_path = fs.abspath(os.path.join(path, "src"))
-    copyfs = wiz.workspace("ide").fs()
+    copyfs = wiz.workspace("ide").fs(os.path.join(season.PATH_LIB, "data"))
     copyfs.copy("sample", target_path)
-    
     current_branch = wiz.branch()
     wiz.branch(path)
     wp = wiz.workspace("service")

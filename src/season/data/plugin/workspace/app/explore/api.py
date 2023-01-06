@@ -9,6 +9,28 @@ import json
 workspace = wiz.workspace("service")
 fs = workspace.fs()
 
+def layout():
+    mode = "layout"
+    apps = workspace.app.list()
+    res = []
+    for app in apps:
+        if app['mode'] == mode:
+            res.append(app)
+    wiz.response.status(200, res)
+
+def controller():
+    fs = wiz.workspace("service").fs("src", "controller")
+    res = []
+    try:
+        ctrls = fs.list()
+        for ctrl in ctrls:
+            if fs.isfile(ctrl) and os.path.splitext(ctrl)[-1] == ".py":
+                res.append(ctrl[:-3])
+    except:
+        pass
+
+    wiz.response.status(200, res)
+
 def list(segment):
     path = wiz.request.query("path", True)
     segment = path.split("/")

@@ -513,6 +513,19 @@ export class Component implements OnInit {
         await this.loader(false);
     }
 
+    public async coreUpgrade() {
+        let res = await this.service.alert.show({ title: 'Upgrade Plugin', message: 'Are you sure upgrade?', action: "Upgrade", actionBtn: "success", status: "success" });
+        if (res !== true) return;
+        await this.loader(true);
+        await wiz.call("coreupgrade");
+        await wiz.call("upgrade", { plugin: 'core' });
+        await wiz.call("upgrade", { plugin: 'git' });
+        await wiz.call("upgrade", { plugin: 'utility' });
+        await wiz.call("upgrade", { plugin: 'workspace' });
+        await wiz.call('build');
+        await this.loader(false);
+    }
+
     public async download(node: FileNode | null) {
         if (!node) node = this.rootNode;
         let target = wiz.url("download/" + node.path);
