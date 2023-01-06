@@ -39,33 +39,6 @@
     ],
     "sub": [
         {
-            "name": "Page",
-            "id": "workspace.app.ngapp",
-            "icon": "fa-solid fa-window-restore",
-            "width": 240,
-            "values": {
-                "mode": "'page'"
-            }
-        },
-        {
-            "name": "Component",
-            "id": "workspace.app.ngapp",
-            "icon": "fa-solid fa-cubes",
-            "width": 240,
-            "values": {
-                "mode": "'layout'"
-            }
-        },
-        {
-            "name": "Layout",
-            "id": "workspace.app.ngapp",
-            "icon": "fa-solid fa-table-columns",
-            "width": 240,
-            "values": {
-                "mode": "'component'"
-            }
-        },
-        {
             "name": "Angular",
             "id": "workspace.app.angular",
             "icon": "fa-brands fa-angular",
