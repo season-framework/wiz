@@ -7,6 +7,26 @@ from season.core.builder.base import Compiler as BaseCompiler
 from season.core.builder.base import Converter as BaseConverter
 from season.core.builder.base import ESBUILD_SCRIPT, ENV_SCRIPT
 
+def shortcutCodeBuilder(name, shortcutcode):
+    PS = "{"
+    PE = "}"
+
+    return f"""export {name} {PS}
+    constructor(private service: Service) {PS} {PE}
+
+    public bind() {PS}
+        let service = this.service;
+        let shortcuts = {shortcutcode};
+
+        for (let i = 0 ; i < shortcuts.length ; i++) {PS}
+            let name = shortcuts[i].name;
+            if(!name) continue;
+            this.service.shortcut.bind(name, shortcuts[i]);
+        {PE}
+    {PE}
+{PE}
+"""
+
 class Converter(BaseConverter):
 
     def syntax(self, code, **skwargs):
@@ -95,6 +115,9 @@ class Build(BaseBuild):
             pluginfs = workspace.fs("..", "plugin")
             plugins = pluginfs.ls()
 
+            shortcutcode = "import Service from './service';\n"
+            shortcutcode += "import { KeyMod, KeyCode } from 'monaco-editor';\n\n"
+
             for plugin in plugins:
                 pluginpath = os.path.join(plugin, "plugin.json")
                 if pluginfs.exists(pluginpath) == False:
@@ -102,6 +125,11 @@ class Build(BaseBuild):
                 plugininfo = pluginfs.read.json(pluginpath)
                 if plugininfo is None:
                     continue
+
+                shortcutpath = os.path.join(plugin, "shortcut.ts")
+                if pluginfs.exists(shortcutpath):
+                    code = pluginfs.read(shortcutpath)
+                    shortcutcode += shortcutCodeBuilder(f"class {plugin}", code) + "\n"
                 
                 apptypes = ['app', 'editor', 'system']
                 for apptype in apptypes:
@@ -113,8 +141,17 @@ class Build(BaseBuild):
                         apppath = os.path.join(plugin, apptype, app)
                         app_id = f"{plugin}.{apptype}.{app}"
                         wpfs.copy(pluginfs.abspath(apppath), os.path.join("app", app_id))
-            
+
+            wpfs.write(os.path.join("angular/service/shortcut.plugin.ts"), shortcutcode)
+
             configfs = workspace.fs("..", "config")
+
+            shortcutcode = "import Service from './service';\n"
+            shortcutcode += "import { KeyMod, KeyCode } from 'monaco-editor';\n\n"
+            code = configfs.read("shortcut.ts", "[]")
+            shortcutcode += shortcutCodeBuilder("default class shortcut", code) + "\n"
+            wpfs.write(os.path.join("angular/service/shortcut.custom.ts"), shortcutcode)
+
             menus = configfs.read.json("plugin.json", dict())
 
             def build_menu_pug(targets, pug):
@@ -143,6 +180,12 @@ class Build(BaseBuild):
                 pug = build_menu_pug(menus['sub'], pug)
             pug = "\n".join(pug)
             wpfs.write(os.path.join("app", "core.system.config.leftmenu", "view.pug"), pug)
+
+            pug = []
+            if 'overlay' in menus:
+                pug = build_menu_pug(menus['overlay'], pug)
+            pug = "\n".join(pug)
+            wpfs.write(os.path.join("app", "core.system.overlay", "view.pug"), pug)
             
             pug = []
             if 'app' in menus:

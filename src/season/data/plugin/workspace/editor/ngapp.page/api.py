@@ -6,7 +6,7 @@ import shutil
 import datetime
 
 workspace = wiz.workspace("service")
-fs = workspace.fs("src", "app")
+fs = workspace.fs()
 
 def download(segment):
     app_id = segment.path

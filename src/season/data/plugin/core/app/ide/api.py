@@ -51,10 +51,11 @@ def list(segment):
             wiz.response.status(200, res)
             
         elif len(segment) == 2:
-            res.append(dict(name='Plugin Info', path=os.path.join(path, 'plugin.json'), type='file', meta=dict(icon="fa-solid fa-info", editor="info")))
-            res.append(dict(name='README', path=os.path.join(path, 'README.md'), type='file', meta=dict(icon="fa-solid fa-book")))
             res.append(dict(name='app', path=os.path.join(path, 'app'), type='mod.app'))
             res.append(dict(name='editor', path=os.path.join(path, 'editor'), type='mod.app'))
+            res.append(dict(name='Plugin Info', path=os.path.join(path, 'plugin.json'), type='file', meta=dict(icon="fa-solid fa-info", editor="info")))
+            res.append(dict(name='Shortcut', path=os.path.join(path, 'shortcut.ts'), type='file', meta=dict(icon="fa-solid fa-keyboard")))
+            res.append(dict(name='README', path=os.path.join(path, 'README.md'), type='file', meta=dict(icon="fa-solid fa-book")))
             wiz.response.status(200, res)
         
         elif len(segment) == 3:

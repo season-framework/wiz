@@ -13,5 +13,5 @@
         "inputs": [],
         "outputs": []
     },
-    "template": "wiz-core-commit-history()"
+    "template": "wiz-git-app-history()"
 }

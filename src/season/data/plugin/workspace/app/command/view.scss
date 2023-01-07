@@ -1,0 +1,68 @@
+.cmd-container {
+    position: fixed;
+    display: block;
+    text-align: center;
+    width: 100vw;
+    height: 100vh;
+    padding-top: 100px;
+}
+
+.cmd-plt {
+    padding: 8px;
+    display: inline-block;
+    width: 500px;
+    background-color: var(--wiz-color-blue);
+    border-radius: 12px;
+    overflow: hidden;
+    color: white;
+
+    .input-wrap {
+        height: auto !important;
+        padding: 2px;
+
+        .form-control {
+            box-shadow: none;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .form-control:focus {
+            box-shadow: rgba(255, 255, 255, 0.1) 0px 1px 1px 0px inset, rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+            border: none;
+            color: #000;
+        }
+
+        i.fa-search {
+            width: 40px;
+            font-size: 24px;
+            line-height: 32px;
+            text-align: center;
+        }
+
+        .root-path {
+            width: 60px;
+            font-size: 12px;
+            line-height: 32px;
+        }
+    }
+
+    .search-result {
+        $line-height: 24px;
+        max-height: $line-height * 10 + 15px;
+        list-style: none;
+        padding: 10px 5px 5px;
+        text-align: left;
+
+        .list-item {
+            padding: 0 5px;
+            border-radius: 5px;
+            line-height: $line-height;
+            font-size: 16px;
+
+            &.active {
+                font-family: 'wiz-eb';
+                background-color: darkblue;
+            }
+        }
+    }
+}

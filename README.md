@@ -48,10 +48,13 @@ wiz server start # start daemon server
 wiz server stop  # stop daemon server
 ```
 
-- upgrade ide
+- upgrade ide from command line
 
 ```bash
-wiz ide upgrade
+pip install season --upgrade # upgrade core
+wiz ide upgrade # ide upgrade
+wiz server stop
+wiz server start --log wiz.log
 ```
 
 - install ide plugin
@@ -60,57 +63,49 @@ wiz ide upgrade
 wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 ```
 
+## Version Info
+
+> x.y.z
+
+- `x`: major update
+    - upgrade not supported
+- `y`: minor update
+    - support command upgrade
+    - core function changed
+    - required server restart
+- `z`: ui update
+    - support upgrade from web ui
+    - not required server restart
+
 ## Release Note
 
-### 2.1.9
+### 2.2.0
 
+- ide overlay menu
+- shortcut config (plugin & user customized)
+
+### 2.1.x
+
+- major issues
+    - ide plugin concept changed
+    - ide layout changed
+    - ide config concept added
 - [plugin/core] move to app link in monaco editor
 - [plugin/core] add core plugins upgrade button
 - [plugin/core] add restart server button
 - [plugin/workspace] add app/route editor service
 - [plugin/workspace] preview bug fixed
-
-### 2.1.8
-
 - [plugin/workspace] page namespace bug fixed
 - [plugin/workspace] set default code if component.ts not exists
-
-### 2.1.7
-
 - [plugin/workspace] import & create app bug fixed
-
-
-### 2.1.6
-
 - [plugin/core] remove useless log
-
-### 2.1.5
-
 - [plugin/workspace] config folder bug fixed
-
-### 2.1.4
-
 - [plugin] bug fixed (remove unused file)
-
-### 2.1.3
-
 - [plugin/workspace] add route build
 - [plugin/workspace] remove useless log
-
-### 2.1.2
-
 - [plugin] `core` plugin updated
 - [core] add `lib/plugin` object
-
-### 2.1.1
-
 - [command] bug fixed
-
-### 2.1.0
-
-- ide plugin concept changed
-- ide layout changed
-- ide config concept added
 
 ### 2.0.x
 

@@ -1,0 +1,16 @@
+{
+    "id": "season.route.list",
+    "ng.build": {
+        "id": "season.route.list",
+        "name": "SeasonRouteListComponent",
+        "path": "./season.route.list/season.route.list.component"
+    },
+    "title": "Route List",
+    "category": "app",
+    "ng": {
+        "selector": "wiz-season-route-list",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-season-route-list()"
+}

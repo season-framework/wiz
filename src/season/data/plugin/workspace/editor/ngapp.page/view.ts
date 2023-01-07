@@ -12,11 +12,17 @@ export class Component implements OnInit {
     constructor(public service: Service) { }
 
     public async ngOnInit() {
-        let res = await wiz.app("workspace.app.explore").call("layout");
-        this.layout = res.data;
+        if (this.editor.layout) {
+            this.layout = this.editor.layout;
+        } else {
+            let res = await wiz.app("workspace.app.explore").call("layout");
+            this.layout = res.data;
+        }
+
         this.data = await this.editor.tab().data();
         this.loading = false;
-        this.ctrls = await this.loadControllers();
+        if (this.editor.ctrls) this.ctrls = this.editor.ctrls;
+        else this.ctrls = await this.loadControllers();
         await this.service.render();
     }
 
@@ -26,7 +32,7 @@ export class Component implements OnInit {
     }
 
     public async download() {
-        let target = wiz.url("download/" + this.data.id);
+        let target = wiz.url("download/" + this.editor.path);
         window.open(target, '_blank');
     }
 }

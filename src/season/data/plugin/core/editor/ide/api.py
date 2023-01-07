@@ -13,7 +13,7 @@ def download(segment):
     path = fs.abspath(app_id)
 
     if fs.isdir(path):
-        filename = os.path.basename(path) + ".wizide"
+        filename = os.path.basename(path) + ".wizplugapp"
         zippath = os.path.join(tempfile.gettempdir(), 'wiz', datetime.datetime.now().strftime("%Y%m%d"), str(int(time.time())), filename)
         if len(zippath) < 10: 
             wiz.response.abort(404)

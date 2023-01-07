@@ -16,7 +16,8 @@ export class Component implements OnInit {
     }
 
     public async download() {
-        let target = wiz.url("download/" + this.data.id);
+        let namespace = this.data.mod_id + "." + this.data.mod_type + "." + this.data.id;
+        let target = wiz.url("download/" + namespace);
         window.open(target, '_blank');
     }
 }

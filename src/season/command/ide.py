@@ -16,7 +16,6 @@ app = season.app(path=os.getcwd())
 workspace = app.wiz().workspace("ide")
 
 class Command:
-
     def install(self):
         if idefs.exists():
             print("WIZ IDE Already Installed")
@@ -46,6 +45,14 @@ class Command:
         idefs.remove()
         fs.copy(frameworkfs.abspath(os.path.join("data", "ide")), "ide")
         workspace.build.clean()
+        workspace.build()
+
+        plugin = season.plugin(os.getcwd())
+        plugin.upgrade("core")
+        plugin.upgrade("workspace")
+        plugin.upgrade("git")
+        plugin.upgrade("utility")
+        
         workspace.build()
         print("WIZ IDE upgraded")
 

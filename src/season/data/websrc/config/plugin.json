@@ -81,5 +81,13 @@
             "icon": "fa-solid fa-heart-pulse",
             "width": 280
         }
+    ],
+    "overlay": [
+        {
+            "name": "Command Palette",
+            "id": "workspace.app.command",
+            "icon": "fa-brands fa-command",
+            "width": 0
+        }
     ]
 }

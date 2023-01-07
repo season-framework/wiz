@@ -24,7 +24,7 @@ export class Component implements OnInit {
     }
 
     public async download() {
-        let target = wiz.url("download/" + this.data.id);
+        let target = wiz.url("download/" + this.editor.path);
         window.open(target, '_blank');
     }
 }

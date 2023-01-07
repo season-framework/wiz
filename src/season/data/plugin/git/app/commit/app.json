@@ -13,5 +13,5 @@
         "inputs": [],
         "outputs": []
     },
-    "template": "wiz-core-git-commit()"
+    "template": "wiz-git-app-commit()"
 }

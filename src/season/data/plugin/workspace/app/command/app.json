@@ -1,0 +1,9 @@
+{
+    "id": "command",
+    "title": "Command Palette",
+    "category": "",
+    "description": "easy search",
+    "template": "wiz-workspace-app-command()",
+    "mod_id": "workspace",
+    "mod_type": "app"
+}

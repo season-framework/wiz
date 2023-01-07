@@ -135,9 +135,11 @@ export class Component implements OnInit {
                     path: node.path + "/app.json"
                 }).bind('data', async (tab) => {
                     let { code, data } = await wiz.call('read', { path: tab.path });
-                    if (code != 200) return {};
+                    if (code != 200) return { mod_id, mod_type };
                     data = JSON.parse(data);
                     data.id = app_id;
+                    data.mod_id = mod_id;
+                    data.mod_type = mod_type;
                     return data;
                 }).bind('update', async (tab) => {
                     let data = await tab.data();

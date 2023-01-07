@@ -44,6 +44,11 @@ export class Component implements OnInit {
             configpath = name + ".json";
             language = "json";
         }
+        if (name == "shortcut") {
+            configpath = name + ".ts";
+            language = "typescript";
+        }
+        
         let editor = this.service.editor.create({
             component_id: this.APP_ID,
             path: "/config/" + configpath,
