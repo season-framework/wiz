@@ -214,7 +214,7 @@ export class FileEditor {
             else toastr.error("Error on build");
 
             let previewBinding = this.service.event.load("workspace.app.preview");
-            await previewBinding.move();
+            if (previewBinding) await previewBinding.move();
         });
 
         return editor;

@@ -52,6 +52,7 @@ class Command:
         plugin.upgrade("workspace")
         plugin.upgrade("git")
         plugin.upgrade("utility")
+        plugin.upgrade("portal")
         
         workspace.build()
         print("WIZ IDE upgraded")

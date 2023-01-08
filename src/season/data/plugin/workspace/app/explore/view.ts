@@ -8,7 +8,6 @@ import { FlatTreeControl } from '@angular/cdk/tree';
 import { FileNode, FileDataSource, Workspace } from './service';
 
 import MonacoEditor from "@wiz/app/core.editor.monaco";
-import RouteInfoEditor from "@wiz/app/workspace.editor.route";
 
 toastr.options = {
     "closeButton": false,
@@ -94,7 +93,7 @@ export class Component implements OnInit {
 
     private async update(path: string, data: string, node: any = null, viewuri: string | null = null) {
         let res = await wiz.call('update', { path: path, code: data });
-        if (node) await this.refresh(node, false);
+        if (node) await this.refresh(node.parent);
         if (["route", "controller", "model", "config"].includes(path.split("/")[1])) {
             if (res.code == 200) toastr.info("Updated");
             return
@@ -222,7 +221,7 @@ export class Component implements OnInit {
             await fn('upload', fd);
         }
 
-        await this.refresh(node, false);
+        await this.refresh(node);
         await this.loader(false);
     }
 
@@ -256,7 +255,7 @@ export class Component implements OnInit {
         }
 
         await this.dataSource.delete(node);
-        await this.refresh(node);
+        await this.refresh(node.parent);
         return true;
     }
 
@@ -287,7 +286,7 @@ export class Component implements OnInit {
             }
 
             await this.dataSource.delete(node);
-            await this.refresh(node);
+            await this.refresh(node.parent);
         } else if (type == "mod.app") {
             let mode = node.type.split(".")[1];
             let app = { mode: mode, id: '', title: '', namespace: '', viewuri: '', category: '' };

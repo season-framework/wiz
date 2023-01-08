@@ -79,6 +79,11 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ## Release Note
 
+### 2.2.1
+
+- [plugin/portal] add portal framework plugin
+- [plugin/workspace] refresh list bug fixed
+
 ### 2.2.0
 
 - ide overlay menu

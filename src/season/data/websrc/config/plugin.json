@@ -13,6 +13,12 @@
             "width": 240
         },
         {
+            "name": "Portal Framework",
+            "id": "portal.app.modules",
+            "icon": "fa-solid fa-layer-group",
+            "width": 240
+        },
+        {
             "name": "NPM Package",
             "id": "workspace.app.npm",
             "icon": "fa-solid fa-boxes-packing",
