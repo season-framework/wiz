@@ -1,0 +1,52 @@
+:root {
+    --wiz-size-sidebar: 240px;
+    --wiz-color-background: #fff;
+    --wiz-color-background-lt: rgba(116, 108, 112, .05);
+    --wiz-color-scroll-background: #F5F5F5;
+    --wiz-color-scroll-thumb: #ababab;
+    --wiz-color-text: #1e293b;
+    --wiz-color-border: #d9d9d9;
+    --wiz-color-blue: #3843D0;
+    --wiz-color-blue-lt: rgba(32, 107, 196, .05);
+    --wiz-color-blue-hover: rgba(2, 2, 2, 0.9);
+    --wiz-color-red: #EB5267;
+    --wiz-color-red-lt: rgba(235, 82, 103, .05);
+    --wiz-color-red-hover: rgba(235, 82, 103, .9);
+    --wiz-color-gray: #A1A2B7;
+    --wiz-color-skyblue: #4da6ff;
+    --wiz-color-light: rgba(116, 108, 112, .1);
+}
+
+html,
+body {
+    font-family: 'wiz-r';
+    background-color: var(--wiz-color-background);
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+}
+
+.fa-solid {
+    font-weight: 900;
+}
+
+.cdk-overlay-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.cdk-overlay-connected-position-bounding-box,
+.cdk-overlay-pane {
+    position: absolute;
+}
+
+.xterm, .xterm-screen {
+    height: 100% !important;
+}
+
+@import "components/base";
+@import "components/btn";
+@import "components/form";
+@import "components/text";

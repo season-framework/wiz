@@ -1,0 +1,17 @@
+{
+    "assets": [
+        {
+            "glob": "**/*",
+            "input": "node_modules/monaco-editor/min/vs",
+            "output": "/lib/vs"
+        }
+    ],
+    "styles": [
+        "node_modules/@tabler/core/dist/css/tabler.min.css",
+        "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+        "node_modules/toastr/build/toastr.min.css",
+        "node_modules/xterm/css/xterm.css",
+        "src/styles.scss"
+    ],
+    "scripts": []
+}

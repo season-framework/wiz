@@ -1,0 +1,90 @@
+.btn {
+    font-family: 'wiz-eb';
+    cursor: pointer;
+    height: 32px;
+    line-height: 1;
+
+    &.btn-primary, &.btn-blue {
+        background: var(--wiz-color-blue);
+        border: 0;
+        &:hover {
+            background: var(--wiz-color-blue-hover);
+        }
+    }
+
+    &.btn-primary-lt, &.btn-blue-lt {
+        border: 1px solid var(--wiz-color-blue);
+        background: var(--wiz-color-blue-lt);
+        color: var(--wiz-color-blue);
+        
+        &:hover {
+            background: var(--wiz-color-blue);
+            color: #fff;
+        }
+    }
+    
+    &.btn-outline-primary, &.btn-outline-blue {
+        border-color: var(--wiz-color-blue);
+        color: var(--wiz-color-blue);
+
+        &:hover {
+            background-color: var(--wiz-color-blue);
+            color: #fff;
+        }
+    }
+
+    &.btn-highlight, &.btn-red {
+        background: var(--wiz-color-red);
+        border: 0;
+        &:hover {
+            background: var(--wiz-color-red-hover);
+        }
+    }
+    
+    &.btn-outline-highlight, &.btn-outline-red {
+        border-color: var(--wiz-color-red);
+        color: var(--wiz-color-red);
+
+        &:hover {
+            background-color: var(--wiz-color-red);
+            color: #fff;
+        }
+    }
+
+    &.btn-lg {
+        height: 42px;
+        font-size: 20px;
+    }
+
+    &.btn-sm {
+        height: 24px;
+    }
+
+    &.btn-circle, &.btn-round {
+        border-radius: 16px;
+        &.btn-sm {
+            border-radius: 12px;
+        }
+        &.btn-lg {
+            border-radius: 21px;
+        }
+    }
+
+    &.btn-block {
+        width: 100%;
+        display: block;
+    }
+}
+
+// btn style container
+.area-circle, .area-round {
+    .btn {
+        border-radius: 16px;
+        &.btn-sm {
+            border-radius: 12px;
+        }
+        &.btn-lg {
+            border-radius: 21px;
+        }
+    }
+}

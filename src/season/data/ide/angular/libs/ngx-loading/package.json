@@ -1,0 +1,55 @@
+{
+    "name": "ngx-loading",
+    "version": "14.0.0",
+    "description": "A customisable loading spinner for Angular applications.",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Zak-C/ngx-loading.git"
+    },
+    "keywords": [
+        "Angular",
+        "ng",
+        "ngx",
+        "load",
+        "loading",
+        "spinner",
+        "busy",
+        "wait",
+        "loading",
+        "loading-animations",
+        "loading-indicator",
+        "loading-screen",
+        "loadingview",
+        "loading-page",
+        "ngx",
+        "ng14",
+        "loadingscreen",
+        "progress",
+        "progress-loader",
+        "progress-indicators",
+        "progress-circle",
+        "loaders",
+        "ivy",
+        "ngx-loading",
+        "Angular loading",
+        "Angular 14 loading",
+        "Angular spinner",
+        "Angular 14 spinner",
+        "Angular loading spinner",
+        "Angular 14 loading spinner"
+    ],
+    "author": "Zak Cox",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Zak-C/ngx-loading/issues"
+    },
+    "homepage": "https://github.com/Zak-C/ngx-loading#readme",
+    "peerDependencies": {
+        "@angular/common": ">=14.0.0",
+        "@angular/core": ">=14.0.0"
+    },
+    "dependencies": {
+        "tslib": ">=2.3.0"
+    },
+    "main": "src/public-api.ts"
+}

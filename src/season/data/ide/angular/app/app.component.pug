@@ -1,0 +1,83 @@
+.workspace
+    .workspace-body
+        .workspace-leftmenu
+            .p-2.bg-blue
+                img.wiz-logo(src="@wiz.baseuri/assets/icon.png")
+            .d-block(*ngFor="let item of service.leftmenu.top")
+                .btn((click)="service.leftmenu.toggle(item)", [ngClass]="service.leftmenu.isActive(item.id)")
+                    i(class="{{ item.icon }}")
+                    .hover-area
+                        .sidemenu-icon
+                            i(class="{{ item.icon }}")
+                        span {{ item.name }}
+            .mt-auto
+            .d-block(*ngFor="let item of service.leftmenu.bottom")
+                .btn((click)="service.leftmenu.toggle(item)", [ngClass]="service.leftmenu.isActive(item.id)")
+                    i(class="{{ item.icon }}")
+                    .hover-area
+                        .sidemenu-icon
+                            i(class="{{ item.icon }}")
+                        span {{ item.name }}
+
+        .workspace-leftapp.area-round(*ngIf="service.leftmenu.mode", style="width: {{ service.leftmenu.width ? service.leftmenu.width : 240 }}px;")
+            wiz-core-system-config-leftmenu([menu]="service.leftmenu")
+
+        .workspace-editor
+            .editor-list([sortablejs]="service.editor.editable", [sortablejsOptions]="{ animation: 150, handle: '.editor-header' }")
+                .editor-body(*ngFor="let item of service.editor.editable", [ngClass]="service.editor.activated && item.id == service.editor.activated.id ? 'active' : ''", (click)="item.activate()")
+                    .editor-header 
+                        .header-text
+                            span {{item.title}}
+                            small.ml-1(*ngIf="item.subtitle") ({{item.subtitle}})
+                        .actions
+                            .btn.btn-square.btn-sm.btn-primary.p-2((click)="item.minify()")
+                                i.fa-solid.fa-minus
+                            .btn.btn-square.btn-sm.btn-primary.p-2((click)="item.close()")
+                                i.fa-solid.fa-xmark
+
+                    .editor-selector(*ngIf="item.tabs.length > 1")
+                        a.btn.btn-square.btn-sm.p-2(*ngFor="let tab of item.tabs; index as idx", (click)="item.select(idx)", [ngClass]="idx == item.current ? 'btn-white' : 'btn-primary'") {{tab.name}}
+                        
+                    .editor-container(*ngIf="item.tab()")
+                        .editor-overlay
+                        wiz-core-system-editor([editor]="item")
+
+            .editor-minified(*ngIf="service.editor.minified.length > 0")
+                .minified-padding
+                .minified-item(*ngFor="let item of service.editor.minified", (click)="item.activate()") 
+                    span {{item.title}}
+
+        .workspace-rightapp(*ngIf="service.rightmenu.mode", style="width: {{ service.rightmenu.width ? service.rightmenu.width : 280 }}px;")
+            wiz-core-system-config-rightmenu([menu]="service.rightmenu")
+
+        .workspace-rightmenu
+            .d-block(*ngFor="let item of service.rightmenu.top")
+                .btn((click)="service.rightmenu.toggle(item)", [ngClass]="service.rightmenu.isActive(item.id)")
+                    i(class="{{ item.icon }}")
+                    .hover-area
+                        span {{ item.name }}
+                        .sidemenu-icon
+                            i(class="{{ item.icon }}")
+            .mt-auto
+            .d-block(*ngFor="let item of service.rightmenu.bottom")
+                .btn((click)="service.rightmenu.toggle(item)", [ngClass]="service.rightmenu.isActive(item.id)")
+                    i(class="{{ item.icon }}")
+                    .hover-area
+                        span {{ item.name }}
+                        .sidemenu-icon
+                            i(class="{{ item.icon }}")
+            
+            .d-block
+                .btn((click)="service.editor.update()")
+                    i.fa-solid.fa-floppy-disk
+                    .hover-area
+                        span Save
+                        .sidemenu-icon
+                            i.fa-solid.fa-floppy-disk
+
+.menu-overlay(*ngIf="service.overlay.mode")
+    wiz-core-system-overlay([menu]="service.overlay")
+
+ngx-loading([show]="service.loading.isshow")
+wiz-core-system-alert([model]="service.alert")
+ng-keyboard-shortcuts([shortcuts]="service.shortcut.data")

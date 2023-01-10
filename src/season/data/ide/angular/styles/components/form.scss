@@ -1,0 +1,54 @@
+.form-control,
+.form-select {
+    height: 32px;
+    line-height: 1;
+
+    &.form-control-circle,
+    &.form-control-round,
+    &.form-select-circle,
+    &.form-select-round {
+        border-radius: 16px;
+        text-align: center;
+    }
+}
+
+.area-circle,
+.area-round {
+
+    .form-control,
+    .form-select,
+    .form-selectgroup-label {
+        border-radius: 16px;
+        text-align: center;
+    }
+}
+
+// form group
+.form-group {
+    text-align: left;
+
+    .form-label {
+        font-family: 'wiz-b';
+        line-height: 1;
+    }
+}
+
+.form-selectgroup {
+    display: block;
+    flex: auto;
+    margin: 0;
+
+    .form-selectgroup-item {
+        margin: 2px;
+        display: inline-block;
+
+        .form-selectgroup-label {
+            display: inline-block;
+            padding: 5px 16px;
+        }
+    }
+}
+
+textarea.form-control {
+    height: auto;
+}

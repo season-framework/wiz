@@ -1,0 +1,97 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        title @wiz.title
+        base(href="@wiz.baseuri/")
+        meta(name="viewport" content="width=device-width, initial-scale=1")
+        link(rel="shortcut icon", href="@wiz.baseuri/assets/symbol.png")
+
+        style.
+            @font-face {
+                font-family: 'wiz-eb';
+                font-weight: 700;
+                src: local('Spoqa Han Sans Neo Bold'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Bold.woff2') format('woff2'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Bold.woff') format('woff'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Bold.ttf') format('truetype');
+            }
+
+            @font-face {
+                font-family: 'wiz-b';
+                font-weight: 500;
+                src: local('Spoqa Han Sans Neo Medium'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Medium.woff2') format('woff2'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Medium.woff') format('woff'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Medium.ttf') format('truetype');
+            }
+
+            @font-face {
+                font-family: 'wiz-r';
+                font-weight: 400;
+                src: local('Spoqa Han Sans Neo Regular'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Regular.woff2') format('woff2'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Regular.woff') format('woff'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Regular.ttf') format('truetype');
+            }
+
+            @font-face {
+                font-family: 'wiz-sub';
+                font-weight: 300;
+                src: local('Spoqa Han Sans Neo Light'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Light.woff2') format('woff2'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Light.woff') format('woff'),
+                url('assets/font/spoqa/SpoqaHanSansNeo-Light.ttf') format('truetype');
+            }
+
+        script.
+            Array.prototype.remove = function () {
+                var what, a = arguments,
+                    L = a.length,
+                    ax;
+                while (L && this.length) {
+                    what = a[--L];
+                    while ((ax = this.indexOf(what)) !== -1) {
+                        this.splice(ax, 1);
+                    }
+                }
+                return this;
+            };
+
+            Array.prototype.up = function (item) {
+                let i = this.indexOf(item);
+                if (i < 1) return;
+                tmp = this[i];
+                this.splice(i, 1);
+                this.splice(i - 1, 0, tmp);
+            }
+
+            Array.prototype.down = function (item) {
+                let i = this.indexOf(item);
+                tmp = this[i];
+                this.splice(i, 1);
+                this.splice(i + 1, 0, tmp);
+            }
+
+            Array.prototype.isfirst = function (item) {
+                let i = this.indexOf(item);
+                return i <= 0;
+            }
+
+            Array.prototype.islast = function (item) {
+                let i = this.indexOf(item);
+                return this.length - 1 == i;
+            }
+
+            Array.prototype.next = function (item) {
+                let i = this.indexOf(item);
+                return this[i + 1];
+            }
+
+            Array.prototype.prev = function (item) {
+                let i = this.indexOf(item);
+                return this[i - 1];
+            }
+
+    body
+        app-root

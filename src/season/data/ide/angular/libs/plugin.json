@@ -1,0 +1,105 @@
+{
+    "main": [
+        {
+            "name": "Workspace",
+            "id": "workspace.app.list",
+            "icon": "fa-solid fa-diagram-project",
+            "width": 240
+        },
+        {
+            "name": "Explorer",
+            "id": "workspace.app.explore",
+            "icon": "fa-solid fa-folder-tree",
+            "width": 240
+        },
+        {
+            "name": "Portal Framework",
+            "id": "portal.app.modules",
+            "icon": "fa-solid fa-layer-group",
+            "width": 240
+        },
+        {
+            "name": "NPM Package",
+            "id": "workspace.app.npm",
+            "icon": "fa-solid fa-boxes-packing",
+            "width": 360
+        },
+        {
+            "name": "PIP Pacakge",
+            "id": "workspace.app.pip",
+            "icon": "fa-brands fa-python",
+            "width": 360
+        },
+        {
+            "name": "Commit",
+            "id": "git.app.commit",
+            "icon": "fa-solid fa-code-commit",
+            "width": 360
+        },
+        {
+            "name": "Commit History",
+            "id": "git.app.history",
+            "icon": "fa-solid fa-code-branch",
+            "width": 360
+        }
+    ],
+    "sub": [
+        {
+            "name": "Angular",
+            "id": "workspace.app.angular",
+            "icon": "fa-brands fa-angular",
+            "width": 240
+        }
+    ],
+    "app": [
+        {
+            "name": "Preview",
+            "id": "workspace.app.preview",
+            "icon": "fa-solid fa-eye",
+            "width": 360,
+            "event": {
+                "binding": "service.event.bind($event.id, $event.data)"
+            }
+        },
+        {
+            "name": "Terminal",
+            "id": "xterm.app.term",
+            "icon": "fa-solid fa-terminal",
+            "width": 721
+        },
+        {
+            "name": "HTML2PUG",
+            "id": "utility.app.html2pug",
+            "icon": "fa-brands fa-html5",
+            "width": 360
+        }
+    ],
+    "setting": [
+        {
+            "name": "Plugin",
+            "id": "core.app.ide",
+            "icon": "fa-solid fa-plug",
+            "width": 280
+        },
+        {
+            "name": "System Setting",
+            "id": "core.app.setting",
+            "icon": "fa-solid fa-wrench",
+            "width": 280
+        },
+        {
+            "name": "System Status",
+            "id": "core.app.status",
+            "icon": "fa-solid fa-heart-pulse",
+            "width": 280
+        }
+    ],
+    "overlay": [
+        {
+            "name": "Command Palette",
+            "id": "workspace.app.command",
+            "icon": "fa-brands fa-command",
+            "width": 0
+        }
+    ]
+}
