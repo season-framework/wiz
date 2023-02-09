@@ -79,6 +79,10 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ## Release Note
 
+### 2.2.2
+
+- [core] ide monaco editor bug fixed
+
 ### 2.2.1
 
 - [plugin/portal] add portal framework plugin
