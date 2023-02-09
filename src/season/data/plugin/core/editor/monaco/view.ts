@@ -27,18 +27,18 @@ export class Component implements OnInit {
         const createTypescriptRecommend = (range) => {
             return [
                 {
-                    label: 'import.wiz.libs',
+                    label: 'imlib',
                     kind: monaco.languages.CompletionItemKind.Function,
                     documentation: 'import wiz libs',
-                    insertText: '${1} from "\@wiz/libs/${2}";',
+                    insertText: 'import ${1} from "\@wiz/libs/${2}";',
                     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                     range,
                 },
                 {
-                    label: 'import.wiz.libs.service',
+                    label: 'imsvc',
                     kind: monaco.languages.CompletionItemKind.Function,
                     documentation: 'import wiz\/libs\/season\/service',
-                    insertText: `{ Service } from "\@wiz/libs/season/service";`,
+                    insertText: `import { Service } from "\@wiz/libs/portal/season/service";`,
                     range,
                 },
                 {
@@ -57,10 +57,10 @@ export class Component implements OnInit {
                     range,
                 },
                 {
-                    label: 'import.toastr',
+                    label: 'imto',
                     kind: monaco.languages.CompletionItemKind.Function,
                     documentation: 'import toastr from "toastr";',
-                    insertText: 'toastr from "toastr";',
+                    insertText: 'import toastr from "toastr";',
                     range,
                 },
                 {
@@ -78,18 +78,18 @@ export class Component implements OnInit {
                     range,
                 },
                 {
-                    label: 'import.destructure',
+                    label: 'imds',
                     kind: monaco.languages.CompletionItemKind.Function,
                     documentation: 'import destructured package',
-                    insertText: '\{ ${1} \} from "${2}";',
+                    insertText: 'import \{ ${1} \} from "${2}";',
                     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                     range,
                 },
                 {
-                    label: 'import.default',
+                    label: 'imdf',
                     kind: monaco.languages.CompletionItemKind.Function,
                     documentation: 'import default package',
-                    insertText: '${1} from "${2}";',
+                    insertText: 'import ${1} from "${2}";',
                     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                     range,
                 },
@@ -183,7 +183,7 @@ export class Component implements OnInit {
                 });
                 const t = textUntilPosition.split("\n").slice(-1)[0];
                 const wizmatch = t.match(/wiz/);
-                const importmatch = t.match(/^import/);
+                const importmatch = t.match(/^im/);
                 const publicmatch = t.match(/public/);
                 if (!wizmatch && !importmatch && !publicmatch) {
                     return { suggestions: [] };

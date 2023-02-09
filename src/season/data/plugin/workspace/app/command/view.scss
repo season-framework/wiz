@@ -13,7 +13,7 @@
     width: 500px;
     background-color: var(--wiz-color-blue);
     border-radius: 12px;
-    overflow: hidden;
+    overflow: auto;
     color: white;
 
     .input-wrap {
@@ -48,7 +48,7 @@
 
     .search-result {
         $line-height: 24px;
-        max-height: $line-height * 10 + 15px;
+        // max-height: $line-height * 10 * 2 + 15px;
         list-style: none;
         padding: 10px 5px 5px;
         text-align: left;
@@ -62,6 +62,15 @@
             &.active {
                 font-family: 'wiz-eb';
                 background-color: darkblue;
+            }
+
+            &:hover {
+                cursor: pointer;
+                background-color: rgba(darkblue, 0.6);
+            }
+
+            strong {
+                color: red;
             }
         }
     }

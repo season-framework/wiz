@@ -79,6 +79,11 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ## Release Note
 
+### 2.2.3
+
+- [plugin/workspace] Usability improvements
+- [plugin/core] Auto Complete keyword
+
 ### 2.2.2
 
 - [core] ide monaco editor bug fixed

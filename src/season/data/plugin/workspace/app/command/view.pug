@@ -3,6 +3,8 @@
         .input-wrap.d-flex
             .pr-2.pl-2
                 i.fa-solid.fa-search
+            .pr-2.pl-2(*ngIf="showRoot")
+                label.text-sm(style="line-height: 32px;") {{root}}/
             input.form-control(
                 '#searchInput'='',
                 type="text",
@@ -12,6 +14,8 @@
             )
         ul.search-result.m-0(*ngIf="list.length > 0")
             li.list-item(
-                *ngFor="let item of list;let i = index",
+                *ngFor="let item of display;let i = index",
                 [class.active]="i === idx",
-            ) {{item}}
+                [innerHTML]="item",
+                (click)="open(i)",
+            )
