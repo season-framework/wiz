@@ -98,6 +98,14 @@ then
             cd ..
             cd ..
             ;;
+
+        build)
+            VERSION=$1
+            rm -rf dist
+            rm -rf build
+            python setup.py bdist_wheel
+            twine upload dist/season-$VERSION-py3-none-any.whl 
+
         *)
             echo "wiz-build [ init | patch | dump | git ]"
             ;;
@@ -105,12 +113,3 @@ then
 else
     echo "Not wiz project"
 fi
-
-# VERSION=$1
-# rm -rf dist
-# rm -rf build
-# python setup.py bdist_wheel
-# twine upload dist/season-$VERSION-py3-none-any.whl 
-# rm $PYTHON_PKG_PATH
-# echo $WIZ_CORE_PATH
-# echo $PYTHON_PKG_PATH
