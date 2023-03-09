@@ -105,7 +105,8 @@ then
             rm -rf build
             python setup.py bdist_wheel
             twine upload dist/season-$VERSION-py3-none-any.whl 
-
+            ;;
+            
         *)
             echo "wiz-build [ init | patch | dump | git ]"
             ;;
