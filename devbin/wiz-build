@@ -54,7 +54,7 @@ then
             ;;
 
         git)
-            VERSION=$1
+            VERSION=$2
             cd dev
             
             cd ide
@@ -100,13 +100,13 @@ then
             ;;
 
         build)
-            VERSION=$1
+            VERSION=$2
             rm -rf dist
             rm -rf build
             python setup.py bdist_wheel
             twine upload dist/season-$VERSION-py3-none-any.whl 
             ;;
-            
+
         *)
             echo "wiz-build [ init | patch | dump | git ]"
             ;;
