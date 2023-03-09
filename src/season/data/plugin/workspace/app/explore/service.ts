@@ -492,7 +492,6 @@ export class AppEditor {
                 return false;
             }
 
-            toastr.info("Builded");
             await eventHanlder('builded', appinfo);
 
             let previewBinding = this.service.event.load("workspace.app.preview");

@@ -6,7 +6,26 @@ import Editor from './editor';
 import Menu from './menu';
 import Event from './event';
 import Shortcut from './shortcut';
-import toastr from 'toastr';
+
+import toastr from "toastr";
+
+toastr.options = {
+    "closeButton": false,
+    "debug": false,
+    "newestOnTop": true,
+    "progressBar": false,
+    "positionClass": "toast-top-center",
+    "preventDuplicates": true,
+    "onclick": null,
+    "showDuration": 300,
+    "hideDuration": 500,
+    "timeOut": 1500,
+    "extendedTimeOut": 1000,
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+};
 
 @Injectable({ providedIn: 'root' })
 export class Service {
@@ -64,8 +83,7 @@ export class Service {
             style += Style.server.join(';');
             if (value.includes(`[build][error]`)) {
                 toastr.error(`Build failed`);
-            }
-            else if(value.includes(`EsBuild complete in`)) {
+            } else if (value.includes(`EsBuild complete in`)) {
                 toastr.info(`Builded`);
             }
             console.log(`%cwiz.was%c ` + value, style, null);

@@ -17,6 +17,25 @@
             "id": "portal.app.modules",
             "icon": "fa-solid fa-layer-group",
             "width": 240
+        }
+    ],
+    "sub": [
+        {
+            "name": "Angular",
+            "id": "workspace.app.angular",
+            "icon": "fa-brands fa-angular",
+            "width": 240
+        }
+    ],
+    "app": [
+        {
+            "name": "Preview",
+            "id": "workspace.app.preview",
+            "icon": "fa-solid fa-eye",
+            "width": 360,
+            "event": {
+                "binding": "service.event.bind($event.id, $event.data)"
+            }
         },
         {
             "name": "NPM Package",
@@ -41,31 +60,6 @@
             "id": "git.app.history",
             "icon": "fa-solid fa-code-branch",
             "width": 360
-        }
-    ],
-    "sub": [
-        {
-            "name": "Angular",
-            "id": "workspace.app.angular",
-            "icon": "fa-brands fa-angular",
-            "width": 240
-        }
-    ],
-    "app": [
-        {
-            "name": "Preview",
-            "id": "workspace.app.preview",
-            "icon": "fa-solid fa-eye",
-            "width": 360,
-            "event": {
-                "binding": "service.event.bind($event.id, $event.data)"
-            }
-        },
-        {
-            "name": "Terminal",
-            "id": "xterm.app.term",
-            "icon": "fa-solid fa-terminal",
-            "width": 721
         },
         {
             "name": "HTML2PUG",

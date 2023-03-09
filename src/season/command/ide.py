@@ -40,21 +40,28 @@ class Command:
         print("WIZ IDE removed")
         return True
 
-    def upgrade(self):
-        print("Upgrading WIZ IDE...")
-        idefs.remove()
-        fs.copy(frameworkfs.abspath(os.path.join("data", "ide")), "ide")
-        workspace.build.clean()
-        workspace.build()
-
-        plugin = season.plugin(os.getcwd())
-        plugin.upgrade("core")
-        plugin.upgrade("workspace")
-        plugin.upgrade("git")
-        plugin.upgrade("utility")
-        plugin.upgrade("portal")
+    def upgrade(self, *args):
+        mode = 'all'
+        if len(args) > 1:
+            mode = args[0]
         
-        workspace.build()
+        if mode in ['all', 'main']:
+            print("Upgrading WIZ IDE...")
+            idefs.remove()
+            fs.copy(frameworkfs.abspath(os.path.join("data", "ide")), "ide")
+            workspace.build.clean()
+            workspace.build()
+
+        if mode in ['all', 'plugin']:
+            print("Upgrading WIZ IDE Plugins...")
+            plugin = season.plugin(os.getcwd())
+            plugin.upgrade("core")
+            plugin.upgrade("workspace")
+            plugin.upgrade("git")
+            plugin.upgrade("utility")
+            plugin.upgrade("portal")
+            workspace.build()
+
         print("WIZ IDE upgraded")
 
     def build(self):

@@ -1,0 +1,116 @@
+#!/bin/bash
+ACTION=$1
+
+PYTHON_PKG_PATH="$(python -c 'import sys; print(sys.path[-1])')/season"
+WIZ_GIT_PATH=$(pwd)
+WIZ_LIB_PATH="$WIZ_GIT_PATH/src/season"
+
+if grep -Fq "github.com/season-framework/wiz" .git/config
+then
+    case $ACTION in
+        init)
+            # install git source as python package
+            rm $PYTHON_PKG_PATH
+            ln -s $WIZ_LIB_PATH $PYTHON_PKG_PATH 
+
+            # create dev project
+            rm -rf "$WIZ_GIT_PATH/dev"
+            wiz create dev
+
+            cd dev
+            wiz plugin remove core
+            wiz plugin remove git
+            wiz plugin remove portal
+            wiz plugin remove utility
+            wiz plugin remove workspace
+            wiz plugin add https://github.com/season-framework/wiz-plugin-core
+            wiz plugin add https://github.com/season-framework/wiz-plugin-git
+            wiz plugin add https://github.com/season-framework/wiz-plugin-portal-framework
+            wiz plugin add https://github.com/season-framework/wiz-plugin-utility
+            wiz plugin add https://github.com/season-framework/wiz-plugin-workspace
+            cd ..
+            ;;
+
+        patch)
+            cd dev
+            wiz plugin remove core workspace utility portal git
+            wiz plugin add https://github.com/season-framework/wiz-plugin-core  https://github.com/season-framework/wiz-plugin-workspace https://github.com/season-framework/wiz-plugin-git https://github.com/season-framework/wiz-plugin-portal-framework https://github.com/season-framework/wiz-plugin-utility
+            cd ..
+            ;;
+
+        dump)
+            # ide dump
+            rm -rf src/season/data/ide/*
+            cp -r dev/ide/angular src/season/data/ide/angular
+            cp -r dev/ide/assets src/season/data/ide/assets
+            cp -r dev/ide/package.json src/season/data/ide/package.json
+
+            # plugin dump
+            rm -rf src/season/data/plugin/*
+            cp -r dev/plugin/* src/season/data/plugin/
+            find src/season/data -name ".git" -type d -exec rm -rf "{}" \; 2> /dev/null
+            find src/season/data -name "shortcut.custom.ts" -type f -delete
+            find src/season/data -name "shortcut.plugin.ts" -type f -delete
+            ;;
+
+        git)
+            VERSION=$1
+            cd dev
+            
+            cd ide
+            git add -A .
+            git commit -m "$VERSION"
+            git push
+            cd ..
+
+            cd plugin
+            
+            cd core
+            git add -A .
+            git commit -m "$VERSION"
+            git push
+            cd ..
+
+            cd git
+            git add -A .
+            git commit -m "$VERSION"
+            git push
+            cd ..
+
+            cd portal
+            git add -A .
+            git commit -m "$VERSION"
+            git push
+            cd ..
+
+            cd utility
+            git add -A .
+            git commit -m "$VERSION"
+            git push
+            cd ..
+
+            cd workspace
+            git add -A .
+            git commit -m "$VERSION"
+            git push
+            cd ..
+
+            cd ..
+            cd ..
+            ;;
+        *)
+            echo "wiz-build [ init | patch | dump | git ]"
+            ;;
+    esac
+else
+    echo "Not wiz project"
+fi
+
+# VERSION=$1
+# rm -rf dist
+# rm -rf build
+# python setup.py bdist_wheel
+# twine upload dist/season-$VERSION-py3-none-any.whl 
+# rm $PYTHON_PKG_PATH
+# echo $WIZ_CORE_PATH
+# echo $PYTHON_PKG_PATH

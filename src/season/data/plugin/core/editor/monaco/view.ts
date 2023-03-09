@@ -1,5 +1,6 @@
 import { OnInit, Input } from '@angular/core';
 import { Service } from '@wiz/service/service';
+import { defaultComponent } from './service';
 import { Workspace } from 'src/app/workspace.app.explore/service';
 
 export class Component implements OnInit {
@@ -54,6 +55,13 @@ export class Component implements OnInit {
                     kind: monaco.languages.CompletionItemKind.Function,
                     documentation: 'wiz\.socket function',
                     insertText: 'const socketio \= wiz\.socket();',
+                    range,
+                },
+                {
+                    label: 'wizcomp',
+                    kind: monaco.languages.CompletionItemKind.Function,
+                    documentation: 'wiz default component',
+                    insertText: defaultComponent,
                     range,
                 },
                 {
@@ -119,6 +127,14 @@ export class Component implements OnInit {
                     kind: monaco.languages.CompletionItemKind.Function,
                     documentation: 'ngModel custom snippet',
                     insertText: '[(ngModel)]="${1}"',
+                    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                    range,
+                },
+                {
+                    label: '(ngModelChange)',
+                    kind: monaco.languages.CompletionItemKind.Function,
+                    documentation: 'ngModelChange custom snippet',
+                    insertText: '(ngModelChange)="${1}"',
                     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                     range,
                 },
