@@ -6,6 +6,7 @@ import Editor from './editor';
 import Menu from './menu';
 import Event from './event';
 import Shortcut from './shortcut';
+import toastr from 'toastr';
 
 @Injectable({ providedIn: 'root' })
 export class Service {
