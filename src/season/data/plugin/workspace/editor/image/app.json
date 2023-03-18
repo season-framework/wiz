@@ -1,0 +1,7 @@
+{
+    "id": "image",
+    "title": "Image Viewer",
+    "category": "",
+    "description": "Image viewer",
+    "template": "wiz-workspace-editor-image([editor]=\"\")"
+}

@@ -68,7 +68,8 @@ def list(segment):
             fpath = os.path.join(path, name)
             if fs.isfile(os.path.join(fpath, 'app.json')):
                 appinfo = fs.read.json(os.path.join(fpath, 'app.json'))
-                res.append(dict(name=appinfo['route'], path=fpath, type='route', meta=appinfo))
+                if appinfo['id'].split(".")[0] != 'portal':
+                    res.append(dict(name=appinfo['route'], path=fpath, type='route', meta=appinfo))
         wiz.response.status(200, res)
     
     if fs.isdir(path): 

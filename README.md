@@ -82,6 +82,8 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 ### 2.2.4
 
 - [core] toastr on build error 
+- [plugin/workspace] hidden portal framework on route
+- [plugin/workspace] image viewer
 
 ### 2.2.3
 

@@ -60,7 +60,12 @@ export class Component implements OnInit, AfterViewInit {
             editor = this.workspace.AppEditor(_data);
         }
         else if (_type === "file") {
-            editor = this.workspace.FileEditor(_data);
+            let force = false;
+            try {
+                const ext = this.list[this.idx].split(".").slice(-1)[0];
+                if (['txt', 'nsh', 'sql', 'sh'].includes(ext.toLowerCase())) force = true;
+            } catch { }
+            editor = this.workspace.FileEditor(_data, {}, force);
         }
         else if (_type === "route") {
             editor = this.workspace.RouteEditor(_data);
@@ -94,20 +99,29 @@ export class Component implements OnInit, AfterViewInit {
     }
 
     private rootMap(root) {
-        const src = ['s', 'src'];
-        const portal = ['p', 'portal'];
-        const config = ['c', 'config', 'conf'];
+        const src = ['#s'];
+        const portal = ['#p'];
+        const config = ['#c'];
+        const egg = ['##'];
+        const chk = [].concat(src, portal, config, egg);
+        if (!chk.includes(root)) return;
 
-        if (src.includes(root)) return "src";
-        if (portal.includes(root)) return "portal";
-        if (config.includes(root)) return "config";
-        if (root === "#root") {
-            this.showRoot = !this.showRoot;
-            this.clear();
-            this.text = "";
-            this.idx = -1;
-            this.render();
+        if (src.includes(root)) {
+            this.root = "src";
         }
+        if (portal.includes(root)) {
+            this.root = "portal";
+        }
+        if (config.includes(root)) {
+            this.root = "config";
+        }
+        if (egg.includes(root)) {
+            this.showRoot = !this.showRoot;
+        }
+        this.clear();
+        this.text = "";
+        this.idx = -1;
+        this.render();
     }
 
     private highlight(list, text) {
@@ -147,7 +161,7 @@ export class Component implements OnInit, AfterViewInit {
         try {
             this.text = this.text.toLowerCase();
             this.render();
-        }catch {}
+        } catch { }
         const text = this.text;
         if (text.length === 0) {
             this.clear();
@@ -155,13 +169,7 @@ export class Component implements OnInit, AfterViewInit {
         }
 
         const arr = text.split(" ");
-        const root = this.rootMap(arr[0]);
-        if (root && arr.length >= 2 && root !== this.root) {
-            this.root = root;
-            this.text = arr.slice(1).join(" ");
-            this.clear();
-        }
-
+        this.rootMap(arr[0]);
         if (text.length === 0) return;
         try {
             clearTimeout(timeoutId);

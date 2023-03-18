@@ -1,0 +1,16 @@
+.editor-info([class]="bgcolor")
+    .btn-group.area-round
+        .btn.btn-primary(
+            *ngFor="let item of ['gray', 'white', 'black'];let i = index",
+            [class.active]="item === bgcolor",
+            (click)="change(item)",
+        ) {{item}}
+
+    .img-wrap(
+        [style.maxWidth]="width+'px'",
+        [style.maxHeight]="height+'px'",
+    )
+        img(
+            [src]="src",
+            (load)="load($event)",
+        )

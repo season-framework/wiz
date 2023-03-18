@@ -124,6 +124,7 @@ import MonacoEditor from "src/app/core.editor.monaco/core.editor.monaco.componen
 import PageInfoEditor from "src/app/workspace.editor.ngapp.page/workspace.editor.ngapp.page.component";
 import AppInfoEditor from "src/app/workspace.editor.ngapp.info/workspace.editor.ngapp.info.component";
 import RouteInfoEditor from "src/app/workspace.editor.route/workspace.editor.route.component";
+import ImageViewer from "src/app/workspace.editor.image/workspace.editor.image.component";
 const DEFAULT_COMPONENT = `import { OnInit, Input } from '@angular/core';
 
 export class Replacement implements OnInit {
@@ -159,7 +160,7 @@ export class FileEditor {
         if (!this.event) this.event = {};
     }
 
-    public create(path: string) {
+    public create(path: string, force = false) {
         let wiz = this.wiz.app(this.APP_ID);
         let eventHanlder = async (name, appinfo) => {
             if (this.event[name]) await this.event[name](appinfo);
@@ -172,10 +173,20 @@ export class FileEditor {
             'scss': { viewref: MonacoEditor, config: { monaco: { language: 'scss' } } },
             'json': { viewref: MonacoEditor, config: { monaco: { language: 'json' } } },
             'pug': { viewref: MonacoEditor, config: { monaco: { language: 'pug' } } },
-            'py': { viewref: MonacoEditor, config: { monaco: { language: 'python' } } }
+            'py': { viewref: MonacoEditor, config: { monaco: { language: 'python' } } },
         };
 
         let extension = path.substring(path.lastIndexOf(".") + 1).toLowerCase();
+        const imgExt = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg', 'ico'];
+        const IS_IMG = imgExt.includes(extension);
+        if (IS_IMG) {
+            viewtypes[extension] = { viewref: ImageViewer, config: {} };
+        }
+
+        if (!viewtypes[extension] && force) {
+            viewtypes.__text__ = { viewref: MonacoEditor, config: { monaco: { language: 'plaintext' } } };
+            extension = "__text__";
+        }
         if (!viewtypes[extension]) {
             return;
         }
@@ -195,6 +206,7 @@ export class FileEditor {
             path: path,
             config: config
         }).bind('data', async (tab) => {
+            if (IS_IMG) return { data: path };
             let { code, data } = await wiz.call('read', { path: path });
             if (code != 200) return {};
             return { data };
@@ -492,6 +504,7 @@ export class AppEditor {
                 return false;
             }
 
+            toastr.info("Builded");
             await eventHanlder('builded', appinfo);
 
             let previewBinding = this.service.event.load("workspace.app.preview");
@@ -652,8 +665,8 @@ export class Workspace {
         return new RouteEditor(this.service, this.wiz, event).create(app);
     }
 
-    public FileEditor(path: string, event: any = {}) {
-        return new FileEditor(this.service, this.wiz, event).create(path);
+    public FileEditor(path: string, event: any = {}, force: Boolean = false) {
+        return new FileEditor(this.service, this.wiz, event).create(path, force);
     }
 }
 

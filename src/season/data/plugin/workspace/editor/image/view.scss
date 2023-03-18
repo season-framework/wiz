@@ -1,0 +1,49 @@
+.editor-info {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+
+    &.white {
+        background-color: #fff;
+    }
+
+    &.gray {
+        background-color: var(--wiz-color-light);
+    }
+
+    &.black {
+        background-color: #020715;
+    }
+
+    .btn-group {
+
+        .btn {
+            max-width: 85px;
+            color: var(--wiz-color-blue);
+            background-color: white;
+
+            &:hover {
+                background-color: var(--wiz-color-blue-hover);
+                color: white;
+            }
+
+            &.active {
+                background-color: var(--wiz-color-blue);
+                color: white;
+            }
+        }
+    }
+
+    .img-wrap {
+        margin-top: 14px;
+        flex: 1;
+
+        img {
+            width: 100%;
+            height: 100%;
+        }
+    }
+}

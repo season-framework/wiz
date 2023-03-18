@@ -101,8 +101,6 @@ export class Component implements OnInit {
 
         if (res.code == 200) toastr.success("Updated");
         res = await wiz.call('build', { path: path });
-        if (res.code == 200) toastr.info("Builded");
-        else toastr.error("Error on build");
 
         let binding = this.service.event.load("workspace.app.preview");
         if (binding && viewuri) await binding.move(viewuri);
