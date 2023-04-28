@@ -3,7 +3,7 @@
     "mode": "layout",
     "namespace": "navbar",
     "category": "theme",
-    "id": "layout.header1",
+    "id": "layout.navbar",
     "ng.build": {
         "id": "layout.navbar",
         "name": "LayoutNavbarComponent",
