@@ -79,6 +79,10 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ## Release Note
 
+### 2.2.6
+
+- [core] typescript dependencies bug fixed
+
 ### 2.2.5
 
 - [core] angular version upgrade
