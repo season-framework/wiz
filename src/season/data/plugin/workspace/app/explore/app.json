@@ -1,6 +1,6 @@
 {
-    "id": "core.browser",
-    "title": "Workspace Browser",
+    "id": "explore",
+    "title": "Explore",
     "viewuri": "",
     "category": "app",
     "ng.build": {
@@ -15,5 +15,7 @@
         ],
         "outputs": []
     },
-    "template": "wiz-workspace-app-explore()"
+    "template": "wiz-workspace-app-explore()",
+    "mod_id": "workspace",
+    "mod_type": "app"
 }

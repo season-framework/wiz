@@ -19,14 +19,7 @@
             "width": 240
         }
     ],
-    "sub": [
-        {
-            "name": "Angular",
-            "id": "workspace.app.angular",
-            "icon": "fa-brands fa-angular",
-            "width": 240
-        }
-    ],
+    "sub": [],
     "app": [
         {
             "name": "Preview",

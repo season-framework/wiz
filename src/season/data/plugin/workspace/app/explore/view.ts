@@ -114,11 +114,14 @@ export class Component implements OnInit {
         let openEditor = {
             angular: async () => {
                 let files = [
-                    { name: 'index', path: 'index.pug', lang: 'pug' },
+                    { name: 'root', path: 'index.pug', lang: 'pug' },
                     { name: 'web resources', path: 'angular.build.options.json', lang: 'json' },
                     { name: 'module', path: 'app/app.module.ts', lang: 'typescript' },
                     { name: 'routing', path: 'app/app-routing.module.ts', lang: 'typescript' },
-                    { name: 'wiz', path: 'wiz.ts', lang: 'typescript' }
+                    { name: 'wiz', path: 'wiz.ts', lang: 'typescript' },
+                    { name: 'app', path: 'app/app.component.pug', lang: 'pug' },
+                    { name: 'component', path: 'app/app.component.ts', lang: 'typescript' },
+                    { name: 'scss', path: 'app/app.component.scss', lang: 'scss' }
                 ];
 
                 let editor = this.service.editor.create({

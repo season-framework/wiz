@@ -4,6 +4,11 @@
             "glob": "**/*",
             "input": "node_modules/monaco-editor/min/vs",
             "output": "/lib/vs"
+        },
+        {
+            "glob": "**/*",
+            "input": "node_modules/monaco-editor/min-maps/vs",
+            "output": "/min-maps/vs"
         }
     ],
     "styles": [

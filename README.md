@@ -79,6 +79,10 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ## Release Note
 
+### 2.2.5
+
+- [core] angular version upgrade
+
 ### 2.2.4
 
 - [core] toastr on build error 
