@@ -119,7 +119,6 @@ export class FileDataSource implements DataSource<FileNode> {
     }
 }
 
-
 import MonacoEditor from "src/app/core.editor.monaco/core.editor.monaco.component";
 import PageInfoEditor from "src/app/workspace.editor.ngapp.page/workspace.editor.ngapp.page.component";
 import AppInfoEditor from "src/app/workspace.editor.ngapp.info/workspace.editor.ngapp.info.component";
@@ -218,8 +217,6 @@ export class FileEditor {
 
             await eventHanlder('updated', path);
             toastr.success("Updated");
-            if (["route", "controller", "model", "config"].includes(path.split("/")[1]))
-                return;
 
             res = await wiz.call('build', { path: path });
             if (res.code == 200) toastr.info("Builded");
@@ -276,6 +273,21 @@ export class RouteEditor {
             return true;
         }
 
+        let build = async (path: any) => {
+            let appinfo = await editor.tab(0).data();
+            let res = await wiz.call('build', { path });
+            if (res.code != 200) {
+                toastr.error("Error on build");
+                return false;
+            }
+
+            toastr.info("Builded");
+            await eventHanlder('builded', appinfo);
+
+            let previewBinding = this.service.event.load("workspace.app.preview");
+            if (previewBinding) await previewBinding.move(appinfo.preview);
+        }
+
         let update = async (path: string, code: string, event: boolean = true) => {
             let appinfo = await editor.tab(0).data();
             let res = await wiz.call("update", { path, code });
@@ -309,6 +321,8 @@ export class RouteEditor {
                 }
                 await eventHanlder('updated', appinfo);
             }
+
+            await build(path);
 
             let previewBinding = this.service.event.load("workspace.app.preview");
             if (previewBinding) await previewBinding.move(appinfo.viewuri);

@@ -28,6 +28,7 @@
         "jquery": "^3.6.1",
         "ngc-esbuild": "^0.0.75",
         "pug": "^3.0.2",
+        "urlpattern-polyfill": "^6.0.1",
         "socket.io-client": "^4.5.2",
         "toastr": "^2.1.4"
     },

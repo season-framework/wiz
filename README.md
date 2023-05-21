@@ -79,38 +79,31 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 ## Release Note
 
-### 2.2.6
+### 2.3.0
 
-- [core] typescript dependencies bug fixed
+- [core] move build logic to ide plugin
+- [core] add bundle structure
+- [plugin] define `model` at plugin
+- [plugin/workspace] angular build logic changed
+- [plugin/workspace] integrated portal framework plugin at workspace
+- [plugin/workspace] build portal framework on builder model
 
-### 2.2.5
+### 2.2.x
 
-- [core] angular version upgrade
-
-### 2.2.4
-
-- [core] toastr on build error 
-- [plugin/workspace] hidden portal framework on route
-- [plugin/workspace] image viewer
-
-### 2.2.3
-
-- [plugin/workspace] Usability improvements
-- [plugin/core] Auto Complete keyword
-
-### 2.2.2
-
-- [core] ide monaco editor bug fixed
-
-### 2.2.1
+- major issues
+    - ide overlay menu
+    - shortcut config (plugin & user customized)
 
 - [plugin/portal] add portal framework plugin
 - [plugin/workspace] refresh list bug fixed
-
-### 2.2.0
-
-- ide overlay menu
-- shortcut config (plugin & user customized)
+- [core] ide monaco editor bug fixed
+- [plugin/workspace] Usability improvements
+- [plugin/core] Auto Complete keyword
+- [core] toastr on build error 
+- [plugin/workspace] hidden portal framework on route
+- [plugin/workspace] image viewer
+- [core] angular version upgrade
+- [core] typescript dependencies bug fixed
 
 ### 2.1.x
 

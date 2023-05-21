@@ -3,6 +3,7 @@ import subprocess
 import os
 import json
 import re
+import time
 
 ESBUILD_SCRIPT = """const fs = require('fs');
 const pug = require('pug');
@@ -98,6 +99,18 @@ class Builder:
         execute = self.execute
         fs = self.fs()
         compiler = Compiler(self)
+
+        timestamp = int(time.time() * 1000)
+        try:
+            if fs.exists("build/working"):
+                timestampLog = int(fs.read("build/working"))
+                if timestamp - timestampLog < 5000:
+                    fs.write("build/working", str(timestamp))
+                    return
+        except:
+            return
+        
+        fs.write("build/working", str(timestamp))
 
         # clear build src files
         fs.delete("build/src/app")
@@ -327,5 +340,11 @@ class Builder:
             bundlefolder = os.path.dirname(bundlefile)
             fs.makedirs(bundlefolder)
             fs.copy(appfile, bundlefile)
+
+        if fs.exists("build/working"):
+            timestampLog = int(fs.read("build/working"))
+            fs.remove("build/working")
+            if timestamp < timestampLog:
+                self.build()
 
 Model = Builder()
