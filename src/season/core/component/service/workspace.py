@@ -1,6 +1,5 @@
 from season.core.component.base.workspace import Workspace as Base, App as AppBase
 from season.core.component.base.workspace import localized
-from season.core.builder.service import Build
 
 import season
 import os
@@ -14,7 +13,7 @@ class Route:
         self.id  = None
     
     def list(self):
-        fs = self.workspace.fs("src", "route")
+        fs = self.workspace.fs("cache", "src", "route")
         routes = fs.files()
         res = []
         for id in routes:
@@ -117,7 +116,7 @@ class Route:
 
     @localized
     def fs(self, *args):
-        return self.workspace.fs('src', 'route', self.id, *args)
+        return self.workspace.fs('cache', 'src', 'route', self.id, *args)
 
     @localized
     def dic(self, lang=None):
@@ -244,7 +243,7 @@ class App(AppBase):
         return app
 
     def list(self):
-        fs = self.workspace.fs('src', 'app')
+        fs = self.workspace.fs('cache', 'src', 'app')
         apps = fs.files()
         res = []
         for app_id in apps:
@@ -257,7 +256,7 @@ class App(AppBase):
 
     @localized
     def fs(self, *args):
-        return self.workspace.fs('src', 'app', self.id, *args)
+        return self.workspace.fs('cache', 'src', 'app', self.id, *args)
 
     @localized
     def data(self, code=True):
@@ -339,11 +338,6 @@ class App(AppBase):
 class Workspace(Base):
     def __init__(self, wiz):
         super().__init__(wiz)
-        buildClass = Build
-        if wiz.server.config.build.Build is not None:
-            buildClass = wiz.server.config.build.Build
-
-        self.build = Build(self)
         self.app = App(self)
         self.route = Route(self)
 
@@ -354,7 +348,9 @@ class Workspace(Base):
     
     def controller(self, namespace):
         wiz = self.wiz
-        fs = self.fs("src", "controller")
+        fs = self.fs("cache", "src", "controller")
+        if self.wiz.server.is_bundle:
+            fs = self.fs("src", "controller")
         code = fs.read(f"{namespace}.py")
         logger = wiz.logger(f"[ctrl/{namespace}]")
         ctrl = season.util.os.compiler(code, name=fs.abspath(namespace + ".py"), logger=logger, wiz=wiz)
@@ -362,7 +358,9 @@ class Workspace(Base):
     
     def model(self, namespace):
         wiz = self.wiz
-        fs = self.fs("src", "model")
+        fs = self.fs("cache", "src", "model")
+        if self.wiz.server.is_bundle:
+            fs = self.fs("src", "model")
         code = fs.read(f"{namespace}.py")
         logger = wiz.logger(f"[model/{namespace}]")
         model = season.util.os.compiler(code, name=fs.abspath(namespace + ".py"), logger=logger, wiz=wiz)

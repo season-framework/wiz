@@ -14,7 +14,7 @@
         },
         {
             "name": "Portal Framework",
-            "id": "portal.app.modules",
+            "id": "workspace.app.portal",
             "icon": "fa-solid fa-layer-group",
             "width": 240
         }

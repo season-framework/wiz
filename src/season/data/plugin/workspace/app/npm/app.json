@@ -12,5 +12,5 @@
         "inputs": [],
         "outputs": []
     },
-    "template": "wiz-ng-npm()"
+    "template": "wiz-workspace-app-npm()"
 }

@@ -15,5 +15,5 @@
         ],
         "outputs": []
     },
-    "template": "wiz-core-workspace-info([editor]=\"\")"
+    "template": "wiz-workspace-editor-wsinfo([editor]=\"\")"
 }

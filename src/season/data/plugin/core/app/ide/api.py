@@ -53,6 +53,7 @@ def list(segment):
         elif len(segment) == 2:
             res.append(dict(name='app', path=os.path.join(path, 'app'), type='mod.app'))
             res.append(dict(name='editor', path=os.path.join(path, 'editor'), type='mod.app'))
+            res.append(dict(name='model', path=os.path.join(path, 'model'), type='mod.folder'))
             res.append(dict(name='Plugin Info', path=os.path.join(path, 'plugin.json'), type='file', meta=dict(icon="fa-solid fa-info", editor="info")))
             res.append(dict(name='Shortcut', path=os.path.join(path, 'shortcut.ts'), type='file', meta=dict(icon="fa-solid fa-keyboard")))
             res.append(dict(name='README', path=os.path.join(path, 'README.md'), type='file', meta=dict(icon="fa-solid fa-book")))
@@ -60,13 +61,15 @@ def list(segment):
         
         elif len(segment) == 3:
             mod = segment[2]
-            files = fs.files(path)
-            for name in files:
-                fpath = os.path.join(path, name)
-                if fs.isfile(os.path.join(fpath, 'app.json')):
-                    appinfo = fs.read.json(os.path.join(fpath, 'app.json'))
-                    res.append(dict(name=appinfo['title'], path=fpath, type='app', meta=appinfo))
-            wiz.response.status(200, res)
+
+            if mod in ['app', 'editor']:
+                files = fs.files(path)
+                for name in files:
+                    fpath = os.path.join(path, name)
+                    if fs.isfile(os.path.join(fpath, 'app.json')):
+                        appinfo = fs.read.json(os.path.join(fpath, 'app.json'))
+                        res.append(dict(name=appinfo['title'], path=fpath, type='app', meta=appinfo))
+                wiz.response.status(200, res)
  
         files = fs.files(path)
         for name in files:

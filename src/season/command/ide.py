@@ -45,7 +45,7 @@ class Command:
         if len(args) > 1:
             mode = args[0]
         
-        if mode in ['all', 'main']:
+        if mode in ['all', 'core']:
             print("Upgrading WIZ IDE...")
             idefs.remove()
             fs.copy(frameworkfs.abspath(os.path.join("data", "ide")), "ide")
@@ -59,7 +59,6 @@ class Command:
             plugin.upgrade("workspace")
             plugin.upgrade("git")
             plugin.upgrade("utility")
-            plugin.upgrade("portal")
             workspace.build()
 
         print("WIZ IDE upgraded")

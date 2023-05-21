@@ -1,0 +1,8 @@
+{
+    "id": "auth",
+    "title": "/auth/<path:path>",
+    "route": "/auth/<path:path>",
+    "viewuri": "",
+    "category": "auth",
+    "controller": "base"
+}

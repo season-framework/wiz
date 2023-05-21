@@ -1,0 +1,21 @@
+{
+    "title": "Portal",
+    "viewuri": "",
+    "category": "app",
+    "ng.build": {
+        "id": "season.portal.list",
+        "name": "SeasonPortalListComponent",
+        "path": "./season.portal.list/season.portal.list.component"
+    },
+    "ng": {
+        "selector": "wiz-season-portal-list",
+        "inputs": [
+            "title"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-workspace-app-portal()",
+    "id": "portal",
+    "mod_id": "workspace",
+    "mod_type": "app"
+}

@@ -1,0 +1,97 @@
+.editor-info
+    .editor-info-container.area-round
+        h3 Module Info
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Package
+            .col
+                input.form-control.form-control-sm(type="text", placeholder="utility", [(ngModel)]="data.package", disabled)
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Title
+            .col
+                input.form-control.form-control-sm(type="text", placeholder="Title", [(ngModel)]="data.title")
+        
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Version
+            .col
+                input.form-control.form-control-sm(type="text", placeholder="1.0.0", [(ngModel)]="data.version")
+        
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Repo
+            .col
+                input.form-control.form-control-sm(type="text", placeholder="https://github.com/repo", [(ngModel)]="data.repo")
+        
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Description
+            .col
+                textarea.form-control.form-control-sm(rows=10, placeholder="Description", [(ngModel)]="data.description")
+        
+    .editor-info-container.area-round.mt-4
+        h3 Structure
+        
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Sample
+            .col
+                label.form-check.form-switch.mb-0
+                    input.form-check-input([(ngModel)]="data.use_sample", type='checkbox')
+        
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label App
+            .col
+                label.form-check.form-switch.mb-0
+                    input.form-check-input([(ngModel)]="data.use_app", type='checkbox')
+        
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label API
+            .col
+                label.form-check.form-switch.mb-0
+                    input.form-check-input([(ngModel)]="data.use_route", type='checkbox')
+        
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Libs
+            .col
+                label.form-check.form-switch.mb-0
+                    input.form-check-input([(ngModel)]="data.use_libs", type='checkbox')
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Styles
+            .col
+                label.form-check.form-switch.mb-0
+                    input.form-check-input([(ngModel)]="data.use_styles", type='checkbox')
+        
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Assets
+            .col
+                label.form-check.form-switch.mb-0
+                    input.form-check-input([(ngModel)]="data.use_assets", type='checkbox')
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Controller
+            .col
+                label.form-check.form-switch.mb-0
+                    input.form-check-input([(ngModel)]="data.use_controller", type='checkbox')
+
+        .form-group.row
+            .col-3
+                label.form-label.col-form-label Model
+            .col
+                label.form-check.form-switch.mb-0
+                    input.form-check-input([(ngModel)]="data.use_model", type='checkbox')
+
+    .editor-info-container.area-round.mt-4
+        button.btn.btn-outline-blue.btn-block((click)="editor.update()") Update
+
+ngx-loading([show]="loading")

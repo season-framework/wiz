@@ -16,7 +16,7 @@ import { NgxLoadingModule, ngxLoadingAnimationTypes } from "@wiz/libs/ngx-loadin
     imports: [
         BrowserModule,
         FormsModule,
-        NuMonacoEditorModule.forRoot({ baseUrl: `lib` }),
+        NuMonacoEditorModule.forRoot({ baseUrl: 'lib' }),
         NgxLoadingModule.forRoot({
             animationType: ngxLoadingAnimationTypes.cubeGrid,
             backdropBackgroundColour: "rgba(0,0,0,0.1)",

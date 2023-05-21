@@ -272,8 +272,11 @@ export class Component implements OnInit {
     public async init(e) {
         let editor = this.editor;
         for (let i = 0; i < this.service.shortcut.data.length; i++) {
-            let shortcut = this.service.shortcut.data[i];
-            e.editor.addCommand(shortcut.monaco, shortcut.command);
+            try {
+                let shortcut = this.service.shortcut.data[i];
+                e.editor.addCommand(shortcut.monaco, shortcut.command);
+            } catch (e) {
+            }
         }
         if (!window.monacoWIZRecommend) {
             this.monacoRecommend();

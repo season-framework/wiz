@@ -1,0 +1,10 @@
+.wiz-page
+    wiz-component-aside
+    .wiz-content
+        .wiz-view
+            router-outlet
+
+wiz-portal-season-alert
+
+.block-page(*ngIf="service.auth.status === null || service.loading.isshow")
+    wiz-portal-season-loading-hexa

@@ -1,0 +1,35 @@
+.wiz-content-layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    .wiz-content-heading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 12px;
+        background-color: #fff;
+
+        * {
+            margin: 0;
+        }
+    }
+
+    .wiz-content-body {
+        flex: 1;
+        overflow: auto;
+    }
+
+    .wiz-content-footer {
+        display: flex;
+        overflow: hidden;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 12px;
+        background-color: #fff;
+    }
+}

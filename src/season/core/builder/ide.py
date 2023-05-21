@@ -97,7 +97,7 @@ class Build(BaseBuild):
 
         if srcfs.isfile(os.path.join("angular", "package.json")):
             buildfs.copy(srcfs.abspath(os.path.join("angular", "package.json")), "package.json")
-            execute(f"cd {build_dir} && npm install")
+            execute(f"cd {build_dir} && npm install --force")
         else:
             execute(f"cd {build_dir} && npm install ngc-esbuild pug jquery socket.io-client --save")
 

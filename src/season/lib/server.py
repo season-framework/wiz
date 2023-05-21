@@ -1,6 +1,4 @@
-import sys
 import os
-import traceback
 import time
 import logging
 
@@ -57,10 +55,10 @@ class Server:
         season.util.fn.call(config.boot.bootstrap, app=self.app, config=config)
         
         # bind events http / socketio
-        http = season.core.http(self)
+        http = season.lib.http(self)
         http.bind()
 
-        self.socket = socket = season.core.socket(self)
+        self.socket = socket = season.lib.socket(self)
         socket.bind()
 
     def flask(self):

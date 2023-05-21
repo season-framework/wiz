@@ -6,6 +6,7 @@ import shutil
 import datetime
 import json
 
+builder = wiz.model("workspace/builder")
 workspace = wiz.workspace("service")
 fs = workspace.fs()
 
@@ -241,6 +242,5 @@ def upload_app(segment):
     wiz.response.status(200, notuploaded)
 
 def build(segment):
-    workspace.build()
-    workspace.route.build()
+    builder.build()
     wiz.response.status(200)

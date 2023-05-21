@@ -127,9 +127,27 @@ class Workspace(Base):
         return ctrl['Controller']
     
     def model(self, namespace):
-        wiz = self.wiz
-        fs = self.fs("model")
-        code = fs.read(f"{namespace}.py")
-        logger = wiz.logger(f"[model/{namespace}]")
-        model = season.util.os.compiler(code, name=fs.abspath(namespace + ".py"), logger=logger, wiz=wiz)
-        return model['Model']
+        try:
+            wiz = self.wiz
+
+            segment = namespace.split("/")
+            _segment = []
+            for seg in segment:
+                if len(seg) > 0:
+                    _segment.append(seg)
+            segment = _segment
+
+            if len(segment) <= 1:
+                return None
+
+            plugin = segment[0]
+            modelfile = "/".join(segment[1:])
+
+            fs = wiz.workspace().fs("..", "plugin", plugin, "model")
+            
+            code = fs.read(f"{modelfile}.py")
+            logger = wiz.logger(f"[ide/model/{modelfile}]")
+            model = season.util.os.compiler(code, name=fs.abspath(namespace + ".py"), logger=logger, wiz=wiz)
+            return model['Model']
+        except:
+            return None

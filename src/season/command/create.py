@@ -50,17 +50,12 @@ def create(projectname, uri=None):
         git.Repo.clone_from(uri, fs.abspath(os.path.join('branch', 'main')))
     else:
         print("create initial project...")
+        fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "sample"), os.path.join(PATH_PROJECT, "branch", "main"))
         fs.makedirs(os.path.join(PATH_PROJECT, "branch", "main"))
         fs.makedirs(os.path.join(PATH_PROJECT, "branch", "main", "config"))
-        fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "sample"), os.path.join(PATH_PROJECT, "branch", "main", "src"))
 
     print("build ide...")
     app = season.app(path=PATH_PROJECT)
     work = app.wiz().workspace("ide")
-    work.build.clean()
-    work.build()
-
-    print("build project...")
-    work = app.wiz().workspace("service")
     work.build.clean()
     work.build()

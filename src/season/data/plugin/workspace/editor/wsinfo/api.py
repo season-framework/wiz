@@ -7,6 +7,7 @@ import shutil
 import datetime
 import json
 
+builder = wiz.model("workspace/builder")
 workspace = wiz.workspace("service")
 working_dir = wiz.server.path.branch
 fs = workspace.fs(os.path.join(working_dir))
@@ -47,9 +48,8 @@ def rebuild():
     path = wiz.request.query("path", True)
     current_branch = wiz.branch()
     wiz.branch(path)
-    wp = wiz.workspace("service")
-    wp.build.clean()
-    wp.build()
+    builder.clean()
+    builder.build()
     wiz.branch(current_branch)
     wiz.response.status(200)
 
