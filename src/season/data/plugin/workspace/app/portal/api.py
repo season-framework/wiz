@@ -7,9 +7,10 @@ import datetime
 import json
 import season
 import git
-from season.core.builder.base import Converter
 
 builder = wiz.model("workspace/builder")
+Namespace = wiz.model("workspace/build/namespace")
+Definition = wiz.model("workspace/build/annotation/definition")
 workspace = wiz.workspace("service")
 fs = workspace.fs()
 
@@ -226,17 +227,18 @@ def update(segment):
     if len(psegment) > 3 and psegment[2] == 'app':
         modname = psegment[1]
         appid = psegment[3]
+
         appjsonpath = os.path.join("portal", modname, "app", appid, "app.json")
         tspath = os.path.join("portal", modname, "app", appid, "view.ts")
 
         if fs.isfile(appjsonpath):
             tscode = fs.read(tspath, "")
             appjson = fs.read.json(appjsonpath)
+            appjson['id'] = appid
 
             app_id = f"portal.{modname}.{appid}"
-            converter = Converter()
-            selector = converter.component_selector(app_id)
-            cinfo = converter.angular_component_info(tscode)
+            selector = Namespace.selector(app_id)
+            cinfo = Definition.ngComponentDesc(tscode)
 
             injector = [f'[{x}]=""' for x in cinfo['inputs']] + [f'({x})=""' for x in cinfo['outputs']]
             injector = ", ".join(injector)
@@ -325,83 +327,6 @@ def upload_app(segment):
     wiz.response.status(200, notuploaded)
 
 def build():
-    portalfs = workspace.fs("portal")
-    modules = portalfs.ls()
-
-    def buildApp(module):
-        appfs = workspace.fs(os.path.join("src", "app"))
-        apps = portalfs.ls(os.path.join(module, "app"))
-        for app in apps:
-            targetpath = portalfs.abspath(os.path.join(module, "app", app))
-            namespace = f"portal.{module}.{app}"
-            appfs.copy(targetpath, namespace)
-            appjson = appfs.read.json(os.path.join(namespace, "app.json"), dict())
-            appjson['namespace'] = f"{module}.{app}"
-            appjson['id'] = namespace
-            appjson['mode'] = 'portal'
-            if 'controller' in appjson and len(appjson['controller']) > 0:
-                appjson['controller'] = "portal/" + module + "/" + appjson['controller']
-            appfs.write.json(os.path.join(namespace, "app.json"), appjson)
-
-    def buildApi(module):
-        appfs = workspace.fs(os.path.join("src", "route"))
-        apps = portalfs.ls(os.path.join(module, "route"))
-        for app in apps:
-            targetpath = portalfs.abspath(os.path.join(module, "route", app))
-            namespace = f"portal.{module}.{app}"
-            appfs.copy(targetpath, namespace)
-            appjson = appfs.read.json(os.path.join(namespace, "app.json"), dict())
-            appjson['id'] = namespace
-            if 'controller' in appjson and len(appjson['controller']) > 0:
-                appjson['controller'] = "portal/" + module + "/" + appjson['controller']
-            appfs.write.json(os.path.join(namespace, "app.json"), appjson)
-
-    def buildFiles(module, target, src):
-        appfs = workspace.fs(os.path.join("src", target))
-        appfs.makedirs(os.path.join("portal", module))
-        
-        files = portalfs.ls(os.path.join(module, src))
-        for f in files:
-            appfs.copy(portalfs.abspath(os.path.join(module, src, f)), os.path.join("portal", module, f))
-
-    # remove portal app
-    appfs = workspace.fs(os.path.join("src", "app"))
-    apps = appfs.ls()
-    for app in apps:
-        if app.split(".")[0] == "portal":
-            appfs.remove(app)
-
-    # remove portal route
-    appfs = workspace.fs(os.path.join("src", "route"))
-    apps = appfs.ls()
-    for app in apps:
-        if app.split(".")[0] == "portal":
-            appfs.remove(app)
-
-    # remove portal
-    workspace.fs(os.path.join("src", "controller")).remove("portal")
-    workspace.fs(os.path.join("src", "model")).remove("portal")
-    workspace.fs(os.path.join("src", "assets")).remove("portal")
-    workspace.fs(os.path.join("src", "angular", "libs")).remove("portal")
-    workspace.fs(os.path.join("src", "angular", "styles")).remove("portal")
-
-    for module in modules:
-        # load module info
-        info = fs.read.json(os.path.join("portal", module, "portal.json"), dict())
-        def checker(name):
-            if f"use_{name}" in info:
-                return info[f"use_{name}"]
-            return False
-
-        # build module
-        if checker("app"): buildApp(module)
-        if checker("route"): buildApi(module)
-        if checker("controller"): buildFiles(module, "controller", "controller")
-        if checker("model"): buildFiles(module, "model", "model")
-        if checker("assets"): buildFiles(module, "assets", "assets")
-        if checker("libs"): buildFiles(module, "angular/libs", "libs")
-        if checker("styles"): buildFiles(module, "angular/styles", "styles")
-
     builder.build()
     wiz.response.status(200)
 

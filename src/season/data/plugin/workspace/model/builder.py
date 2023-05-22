@@ -154,7 +154,6 @@ class Builder:
                 fs.copy(srcpath, targetpath)
                 appjson = fs.read.json(os.path.join(targetpath, "app.json"), dict())
                 appjson['id'] = namespace
-                appjson['namespace'] = f"{module}.{app}"
                 appjson['mode'] = 'portal'
                 appjson['path'] = os.path.join(srcpath, "app.json")
                 if 'controller' in appjson and len(appjson['controller']) > 0:

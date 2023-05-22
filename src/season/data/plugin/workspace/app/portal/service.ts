@@ -484,6 +484,7 @@ export class AppEditor {
 
         let update = async (path: string, code: string, event: boolean = true) => {
             let appinfo = await editor.tab(0).data();
+
             let res = await wiz.call("update", { path, code });
             if (res.code == 200) toastr.success("Updated");
             else return false;
@@ -491,6 +492,7 @@ export class AppEditor {
             let upath = BASEPATH + "/" + appinfo.id;
             component_id = "portal." + mod_id + "." + appinfo.id;
             if (app.mode == 'sample') component_id = app_id;
+
             editor.modify({ path: upath, title: appinfo.title ? appinfo.title : appinfo.namespace, subtitle: component_id });
 
             for (let i = 0; i < editor.tabs.length; i++) {
