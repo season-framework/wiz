@@ -52,6 +52,7 @@ class Model:
                 # update app.json to source
                 appjsonpath = os.path.dirname(fileinfo.filepath)
                 appjsonpath = os.path.join(appjsonpath, "app.json")
+                appjsonpath = "/".join(appjsonpath.split("/")[1:])
                 appjson = fs.read.json(appjsonpath, dict())
 
                 componentInfo = Annotation.definition.ngComponentDesc(fileinfo.code)
@@ -61,18 +62,19 @@ class Model:
                 injector = ", ".join(injector)
                 appjson['template'] = ngtemplate['selector'] + "(" + injector + ")"
 
-                appjsonpath = "/".join(appjsonpath.split("/")[1:])
                 if 'path' in appjson:
                     appjsonpath = appjson['path']
                     del appjson['path']
                 
                 if appjsonpath.split("/")[0] == 'portal':
                     appjson['id'] = appjson['namespace']
-
+                
                 fs.write(appjsonpath, json.dumps(appjson, indent=4))
                 return True
 
             elif fileinfo.basename in ['view.html', 'view.scss', 'api.py', 'socket.py']:
+                if fs.exists(os.path.join("build/src/app", fileinfo.app_id)) == False:
+                    fs.makedirs(os.path.join("build/src/app", fileinfo.app_id))
                 fs.copy(fileinfo.filepath, os.path.join("build/src/app", fileinfo.app_id, fileinfo.basename))
                 return True
 

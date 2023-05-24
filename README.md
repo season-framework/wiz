@@ -166,6 +166,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.1
+
+- [plugin/workspace] portal framework controller bug fixed
+
 ### 2.3.0
 
 - [core] move build logic to ide plugin
