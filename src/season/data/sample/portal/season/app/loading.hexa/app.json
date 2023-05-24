@@ -6,15 +6,5 @@
     "viewuri": "",
     "category": "season",
     "controller": "",
-    "ng.build": {
-        "id": "component.loading.hexa",
-        "name": "ComponentLoadingHexaComponent",
-        "path": "./component.loading.hexa/component.loading.hexa.component"
-    },
-    "ng": {
-        "selector": "wiz-component-loading-hexa",
-        "inputs": [],
-        "outputs": []
-    },
     "template": "wiz-portal-season-loading-hexa()"
 }

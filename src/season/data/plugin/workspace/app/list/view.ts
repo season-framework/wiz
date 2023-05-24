@@ -1,149 +1,7 @@
-const DEFAULT_GITIGNORE = `cache/
-config/
-.vscode/
-test/
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-
-# Translations
-*.mo
-*.pot
-
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-`;
-
 import { OnInit } from '@angular/core';
 import { Service } from '@wiz/service/service';
+
+import { DEFAULT_GITIGNORE } from "./service";
 
 import toastr from "toastr";
 import $ from 'jquery';
@@ -174,11 +32,12 @@ export class Component implements OnInit {
     public current: string = wiz.branch();
     public keyword: string = "";
     public loading: boolean = false;
+    public isCreate: boolean = false;
     public data: any = [];
+    public info: any = { id: "" };
     public isdev = wiz.dev();
 
-    constructor(private service: Service) {
-    }
+    constructor(private service: Service) { }
 
     public async ngOnInit() {
         await this.load();
@@ -204,74 +63,101 @@ export class Component implements OnInit {
         return false;
     }
 
-    public check_validation(name: string) {
+    public validate(info: any) {
+        let list = [];
+        for (let i = 0; i < this.data.length; i++)
+            list.push(this.data[i].id);
+
+        if (!info.id || !this.validateId(info.id))
+            return "Only lowercase alphabetic characters are allowed for the project name.";
+
+        if (info.type == 'copy') {
+            if (!info.target) return "Select target";
+            if (!list.includes(info.target)) return "Select target";
+        }
+
+        if (info.type == 'git') {
+            if (!info.git) return "git repo is empty";
+        }
+
+        return true;
+    }
+
+    public validateId(name: string) {
         for (let i = 0; i < this.data.length; i++)
             if (name == this.data[i].id)
                 return false;
         if (name.length < 3)
             return false;
-        if (/^[a-z]+$/.test(name))
+        if (/^[a-z0-9]+$/.test(name))
             return true;
         return false;
     }
 
-    public async upload_file() {
-        let project_id = this.keyword + '';
-        if (!this.check_validation(project_id)) {
-            toastr.error("invalidate namespace");
-            return
+    public async onCreate() {
+        this.info = { id: "", type: "sample", target: "" };
+        if (this.keyword)
+            this.info.id = this.keyword;
+
+        if (this.data.length == 0) {
+            this.info.id = "main";
+            this.info.idDisabled = true;
         }
 
-        await this.loader(true);
-
-        let fn = (fd) => new Promise((resolve) => {
-            let url = wiz.url('upload');
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: fd,
-                cache: false,
-                contentType: false,
-                processData: false
-            }).always(function (res) {
-                resolve(res);
-            });
-        });
-
-        let fd = new FormData($('#file-form')[0]);
-        fd.append("path", project_id);
-        await fn(fd);
-        await this.load();
+        this.isCreate = true;
+        await this.service.render();
     }
 
-    public async upload() {
-        let project_id = this.keyword + '';
-        if (!this.check_validation(project_id)) {
-            toastr.error("invalidate namespace");
-            return
-        }
-        $('#file-upload').click();
+    public async onCancelCreate() {
+        this.isCreate = false;
+        await this.service.render();
     }
 
     public async create() {
-        let project_id = this.keyword + '';
-        if (!this.check_validation(project_id)) {
-            toastr.error("invalidate namespace");
-            return
+        let check = this.validate(this.info);
+        if (check !== true)
+            return await this.service.alert.error(check);
+
+        if (this.info.type == 'upload') {
+            let files = await this.service.file.select({ accept: ".wizproject", multiple: false });
+            await this.service.loading.show();
+
+            try {
+                let fd = new FormData();
+                for (let i = 0; i < files.length; i++) {
+                    if (!files[i].filepath) files[i].filepath = files[i].name;
+                    fd.append('file[]', files[i]);
+                }
+                fd.append("path", this.info.id);
+                fd.append("type", "upload");
+
+                let url = wiz.url('create');
+                let { code } = await this.service.file.upload(url, fd);
+                if (code !== 200) {
+                    await this.service.alert.error("Already exists project");
+                    await this.service.loading.hide();
+                    return;
+                }
+            } catch (e) {
+            }
+        } else {
+            await this.service.loading.show();
+
+            try {
+                let { code } = await wiz.call("create", { path: this.info.id, ...this.info });
+                if (code !== 200) {
+                    await this.service.alert.error("Already exists project");
+                    await this.service.loading.hide();
+                    return;
+                }
+            } catch (e) {
+            }
         }
-        await this.loader(true);
-        let { code } = await wiz.call("create", { path: project_id });
+
+        this.keyword = "";
+        this.isCreate = false;
+        await this.service.loading.hide();
         await this.load();
-    }
-
-    public async download(item: any) {
-        let target = wiz.url("download/" + item.id);
-        window.open(target, '_blank');
-    }
-
-    public async ng_download(item: any) {
-        let target = wiz.url("ng_download/" + item.id);
-        window.open(target, '_blank');
     }
 
     public async open(item: any) {
@@ -320,7 +206,8 @@ export class Component implements OnInit {
             });
         }
 
-        createTab(path + '/.gitignore', 'conf', 'gitignore', DEFAULT_GITIGNORE);
+        createTab(path + '/.git/config', 'conf', 'git/config', "");
+        createTab(path + '/.gitignore', 'conf', 'git/ignore', DEFAULT_GITIGNORE);
 
         await editor.open();
     }

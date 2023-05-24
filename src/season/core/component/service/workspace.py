@@ -57,6 +57,8 @@ class Route:
             url_map.append(Rule(route, endpoint=endpoint))
 
         fs = self.workspace.fs("cache")
+        if self.wiz.server.is_bundle:
+            fs = self.workspace.fs()
         fs.write.pickle("urlmap", url_map)
         return url_map
 

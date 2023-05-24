@@ -77,7 +77,7 @@ export class Component implements OnInit {
                 let targetpath = this.service.editor.activated.tab().path;
                 let splited = targetpath.split("/");
                 if (splited.length > 2)
-                    if (splited[2] == 'app' || splited[2] == 'route')
+                    if (['app', 'route', 'widget'].includes(splited[2]))
                         if (targetpath.split("/")[2] == node.path.split("/")[2] && targetpath.split("/")[3] == node.path.split("/")[3])
                             return 'active';
                 if (targetpath == node.path) {
@@ -161,6 +161,16 @@ export class Component implements OnInit {
                 await editor.open(location);
             },
             app: async () => {
+                let path = node.path.split("/");
+                let mod_id = path[1];
+                let app_id = path[path.length - 1];
+                let app = node.meta;
+                app.id = app_id;
+                app.namespace = app_id;
+                let editor = await this.workspace.AppEditor(mod_id, app);
+                await editor.open(location);
+            },
+            widget: async () => {
                 let path = node.path.split("/");
                 let mod_id = path[1];
                 let app_id = path[path.length - 1];
@@ -398,6 +408,12 @@ export class Component implements OnInit {
     public async download(node: FileNode | null) {
         if (!node) node = this.rootNode;
         let target = wiz.url("download/" + node.path);
+        window.open(target, '_blank');
+    }
+
+    public async downloadApp(node: FileNode | null) {
+        let app = wiz.app("workspace.editor.ngapp.info")
+        let target = app.url("download/" + node.path)
         window.open(target, '_blank');
     }
 

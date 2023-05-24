@@ -26,6 +26,9 @@ class Branch:
         
         if self._branch is None and self.exists('master'):
             self._branch = 'master'
+    
+        if self._branch is None:
+            self._branch = "main"
 
     def exists(self, branch):
         wiz = self._wiz

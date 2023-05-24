@@ -1,10 +1,8 @@
-import git
-import os
-
-gitignore = """cache/
-config/
+export const DEFAULT_GITIGNORE = `cache/
 .vscode/
-test/
+/config/
+/test/
+/bundle/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -143,63 +141,4 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-"""
-
-workspace = wiz.workspace("service")
-cwd = workspace.fs().abspath()
-repo = git.Repo.init(cwd)
-
-def reset():
-    gitfile = wiz.request.query("file", None)
-    try:
-        if gitfile is None or len(gitfile) == 0:
-            repo.git.reset()
-        else:
-            repo.git.reset(gitfile)
-    except:
-        pass
-    wiz.response.status(200)
-
-def add():
-    gitfile = wiz.request.query("file", None)
-    try:
-        if gitfile is None or len(gitfile) == 0:
-            repo.git.add('--all')
-        else:
-            repo.git.add(gitfile, update=True)
-    except:
-        pass
-    wiz.response.status(200)
-
-def changes():
-    res = dict(staged=[], unstaged=[])
-
-    try:
-        tags = repo.commit('HEAD').diff(None)
-        fmap = dict()
-        for diff in tags:
-            fmap[diff.b_path] = diff.change_type
-
-        staged = repo.index.diff("HEAD")
-        for diff in staged:
-            obj = {"change_type": fmap[diff.b_path], "path": diff.b_path}   
-            path = obj['path']
-            res['staged'].append(obj)
-
-        unstaged = repo.index.diff(None)
-        for diff in unstaged:
-            obj = {"change_type": fmap[diff.b_path], "path": diff.b_path}        
-            path = obj['path']
-            res['unstaged'].append(obj)
-    except Exception as e:
-        wiz.response.status(500, e)
-
-    wiz.response.status(200, res)
-
-def commit():
-    try:
-        message = wiz.request.query("message", "commit")
-        repo.index.commit(message)
-    except Exception as e:
-        wiz.response.status(500, str(e))
-    wiz.response.status(200)
+`;

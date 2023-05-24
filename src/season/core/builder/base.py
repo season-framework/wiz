@@ -385,8 +385,15 @@ class Build(metaclass=ABCMeta):
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = p.communicate()
         logger = workspace.wiz.logger('[build]')
-        if out is not None and len(out) > 0: workspace.wiz.logger('[build][log]')(out.decode('utf-8').strip())
-        if err is not None and len(err) > 0: workspace.wiz.logger('[build][error]')(err.decode('utf-8').strip(), level=season.LOG_CRITICAL)
+        if out is not None and len(out) > 0:
+            out = out.decode('utf-8').strip()
+            workspace.wiz.logger('[build][log]')(out)
+        if err is not None and len(err) > 0: 
+            err = err.decode('utf-8').strip()
+            if "npm WARN" in err or "- Installing packages (npm)" in err:
+                workspace.wiz.logger('[build][log]')(err, level=season.LOG_WARNING)
+            else:
+                workspace.wiz.logger('[build][error]')(err, level=season.LOG_CRITICAL)
 
     @abstractmethod
     def event_init(self):

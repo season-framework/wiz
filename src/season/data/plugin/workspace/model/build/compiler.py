@@ -131,6 +131,9 @@ class Model:
                 fs.copy(fileinfo.filepath, "build/environments/environment.ts")
                 return True
 
+            if fileinfo.target in 'main.ts':
+                fs.copy(fileinfo.filepath, "build/src/main.ts")
+
         return None
 
     def typescript(self, filepath, **kwargs):

@@ -53,9 +53,6 @@ class Plugin:
 
     def remove(self, plugin_id):
         pluginfs = self.fs.plugin
-        plugininfo = pluginfs.read.json(os.path.join(plugin_id, "plugin.json"))
-        if plugininfo is None:
-            raise Exception(f"plugin '{plugin_id}' not found")
         pluginfs.delete(plugin_id)
 
     def uninstall(self, plugin_id):

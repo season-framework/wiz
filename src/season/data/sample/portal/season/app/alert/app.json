@@ -6,17 +6,5 @@
     "viewuri": "",
     "category": "season",
     "controller": "",
-    "ng.build": {
-        "id": "component.modal.alert",
-        "name": "ComponentModalAlertComponent",
-        "path": "./component.modal.alert/component.modal.alert.component"
-    },
-    "ng": {
-        "selector": "wiz-component-modal-alert",
-        "inputs": [
-            "model"
-        ],
-        "outputs": []
-    },
     "template": "wiz-portal-season-alert([model]=\"\")"
 }

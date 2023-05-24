@@ -48,5 +48,20 @@ export default class Alert {
             alert.default_opts[key] = mopts[key];
         return alert;
     }
-    
+
+    public async error(message) {
+        await this.show({ title: '[Error]', message: message, action: "Close", actionBtn: "error", cancel: false });
+    }
+
+    public async warning(message) {
+        await this.show({ title: '[Warning]', message: message, action: "Close", actionBtn: "warning", cancel: false });
+    }
+
+    public async info(message) {
+        await this.show({ title: '[Info]', message: message, action: "Close", actionBtn: "success", cancel: false });
+    }
+
+    public async success(message) {
+        await this.show({ title: '[Success]', message: message, action: "Close", actionBtn: "success", cancel: false });
+    }
 }

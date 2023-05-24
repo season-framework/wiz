@@ -178,7 +178,10 @@ class Socket:
             wiz = server.wiz()()
             wiz.branch(branch)
             workspace = wiz.workspace("service")
-            fs = workspace.fs("src", "app")
+
+            fs = workspace.fs("cache", "src", "app")
+            if server.is_bundle:
+                fs = workspace.fs("src", "app")
 
             logger = wiz.logger("[SOCKET]")
             apps = fs.list()

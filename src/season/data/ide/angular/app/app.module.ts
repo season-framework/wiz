@@ -2,7 +2,7 @@ import { AppComponent } from './app.component';
 
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, COMPOSITION_BUFFER_MODE } from '@angular/forms';
 import { NuMonacoEditorModule } from '@ng-util/monaco-editor';
 import { KeyboardShortcutsModule } from 'ng-keyboard-shortcuts';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -29,7 +29,12 @@ import { NgxLoadingModule, ngxLoadingAnimationTypes } from "@wiz/libs/ngx-loadin
         NgbModule,
         '@wiz.imports'
     ],
-    providers: [],
+    providers: [
+        {
+            provide: COMPOSITION_BUFFER_MODE,
+            useValue: false
+        }
+    ],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

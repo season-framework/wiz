@@ -51,6 +51,13 @@
         
         .form-group.row
             .col-3
+                label.form-label.col-form-label Widget
+            .col
+                label.form-check.form-switch.mb-0
+                    input.form-check-input([(ngModel)]="data.use_widget", type='checkbox')
+        
+        .form-group.row
+            .col-3
                 label.form-label.col-form-label API
             .col
                 label.form-check.form-switch.mb-0

@@ -45,14 +45,15 @@ def create(projectname, uri=None):
     fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "plugin"), "plugin")
 
     fs.makedirs(os.path.join(PATH_PROJECT, "branch"))
-    if uri is not None:
-        print("import project...")
-        git.Repo.clone_from(uri, fs.abspath(os.path.join('branch', 'main')))
-    else:
-        print("create initial project...")
-        fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "sample"), os.path.join(PATH_PROJECT, "branch", "main"))
-        fs.makedirs(os.path.join(PATH_PROJECT, "branch", "main"))
-        fs.makedirs(os.path.join(PATH_PROJECT, "branch", "main", "config"))
+    
+    # if uri is not None:
+    #     print("import project...")
+    #     git.Repo.clone_from(uri, fs.abspath(os.path.join('branch', 'main')))
+    # else:
+    #     print("create initial project...")
+    #     fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "sample"), os.path.join(PATH_PROJECT, "branch", "main"))
+    #     fs.makedirs(os.path.join(PATH_PROJECT, "branch", "main"))
+    #     fs.makedirs(os.path.join(PATH_PROJECT, "branch", "main", "config"))
 
     print("build ide...")
     app = season.app(path=PATH_PROJECT)

@@ -1,4 +1,4 @@
-import git
+import git as Git
 import os
 import zipfile
 import tempfile
@@ -21,101 +21,62 @@ def controllers():
 
     wiz.response.status(200, res)
 
-builder = wiz.model("workspace/builder")
-workspace = wiz.workspace("service")
-working_dir = wiz.server.path.branch
-fs = workspace.fs(os.path.join(working_dir))
-
 def list():
-    projects = wiz.branch.list()
     res = []
-    for project in projects:
-        info = fs.read.json(os.path.join(project, "wiz.project"), dict())
-        info['id'] = project
-        res.append(info)
+    try:
+        workspace = wiz.workspace("service")
+        working_dir = wiz.server.path.branch
+        fs = workspace.fs(os.path.join(working_dir))
+
+        projects = wiz.branch.list()
+        for project in projects:
+            info = fs.read.json(os.path.join(project, "wiz.project"), dict())
+            info['id'] = project
+            res.append(info)
+    except:
+        pass
     wiz.response.status(200, res)
 
-def download(segment):
-    path = segment.path
-    path = fs.abspath(path)
-    
-    filename = os.path.splitext(os.path.basename(path))[0] + ".zip"
-    zippath = os.path.join(tempfile.gettempdir(), 'wiz', datetime.datetime.now().strftime("%Y%m%d"), str(int(time.time())), filename)
-    if len(zippath) < 10: 
-        wiz.response.abort(404)
-    try:
-        shutil.remove(zippath)
-    except Exception as e:
-        pass
-    os.makedirs(os.path.dirname(zippath))
-    zipdata = zipfile.ZipFile(zippath, 'w')
-
-    src = os.path.join(path, "src")
-    config = os.path.join(path, "config")
-
-    for folder, subfolders, files in os.walk(path):
-        if folder.startswith(src) == False and folder.startswith(config) == False: 
-            continue
-        for file in files:
-            zipdata.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file), path), compress_type=zipfile.ZIP_DEFLATED)
-
-    zipdata.close()
-    wiz.response.download(zippath, as_attachment=True, filename=filename)
-
-def ng_download(segment):
-    path = segment.path
-    path = fs.abspath(os.path.join(path, "build"))
-    
-    filename = os.path.splitext(os.path.basename(path))[0] + ".zip"
-    zippath = os.path.join(tempfile.gettempdir(), 'wiz', datetime.datetime.now().strftime("%Y%m%d"), str(int(time.time())), filename)
-    if len(zippath) < 10: 
-        wiz.response.abort(404)
-    try:
-        shutil.remove(zippath)
-    except Exception as e:
-        pass
-    os.makedirs(os.path.dirname(zippath))
-    zipdata = zipfile.ZipFile(zippath, 'w')
-
-    ignores = ["dist", "node_modules", ".vscode"]
-    for folder, subfolders, files in os.walk(path):
-        isignore = False
-        for ign in ignores:
-            if folder.startswith(os.path.join(path, ign)):
-                isignore = True
-        if isignore: continue
-        for file in files:
-            zipdata.write(os.path.join(folder, file), os.path.relpath(os.path.join(folder,file), path), compress_type=zipfile.ZIP_DEFLATED)
-
-    zipdata.close()
-    wiz.response.download(zippath, as_attachment=True, filename=filename)
-
-def upload(segment):
-    path = wiz.request.query("path", True)
-    files = wiz.request.files()
-    for i in range(len(files)):
-        f = files[i]
-        name = f.filename
-        name = name.split("/")
-        name = "/".join(name[1:])
-        name = os.path.join(path, name)
-        fs.write.file(name, f)
-
-    current_branch = wiz.branch()
-    wiz.branch(path)
-    builder.clean()
-    builder.build()
-    wiz.branch(current_branch)
-
-    wiz.response.status(200)
-
 def create():
+    fs = season.util.os.FileSystem(wiz.server.path.branch)
     path = wiz.request.query("path", True)
-    target_path = fs.abspath(os.path.join(path, "src"))
-    copyfs = wiz.workspace("ide").fs(os.path.join(season.PATH_LIB, "data"))
-    copyfs.copy("sample", target_path)
+    ptype = wiz.request.query("type", True)
+
+    if fs.exists(path):
+        wiz.response.status(400)
+
+    target_path = fs.abspath(path)
+
+    if ptype == 'copy':
+        target = wiz.request.query("target", True)
+        fs.copy(target, path)
+        wiz.response.status(200)
+    elif ptype == 'upload':
+        files = wiz.request.files()
+        if len(files) == 0:
+            wiz.response.status(404)
+        files = files[0]
+        zippath = os.path.join(tempfile.gettempdir(), 'wizproject', datetime.datetime.now().strftime("%Y%m%d"), str(int(time.time())), files.filename)
+        unzippath = fs.abspath(path)
+        fs.write.file(zippath, files)
+        zipfile.ZipFile(zippath).extractall(unzippath)
+    elif ptype == 'git':
+        giturl = wiz.request.query("git", True)
+        Git.Repo.clone_from(giturl, fs.abspath(path))
+    else:
+        copyfs = wiz.workspace("ide").fs(os.path.join(season.PATH_LIB, "data"))
+        copyfs.copy("sample", target_path)
+
+    if fs.exists(path) == False:
+        wiz.response.status(404)
+
+    if fs.exists(os.path.join(path, "config")) == False:
+        fs.makedirs(os.path.join(path, "config"))
+
     current_branch = wiz.branch()
     wiz.branch(path)
+
+    builder = wiz.model("workspace/builder")
     builder.clean()
     builder.build()
     wiz.branch(current_branch)
@@ -123,21 +84,33 @@ def create():
     wiz.response.status(200)
 
 def git():
+    workspace = wiz.workspace("service")
+    working_dir = wiz.server.path.branch
+    fs = workspace.fs(os.path.join(working_dir))
+
     path = wiz.request.query("path", True)
     target_path = fs.abspath(os.path.join(path))
     try:
-        git.Repo.init(target_path)
+        Git.Repo.init(target_path)
     except:
         pass
 
     wiz.response.status(200)
 
 def data():
+    workspace = wiz.workspace("service")
+    working_dir = wiz.server.path.branch
+    fs = workspace.fs(os.path.join(working_dir))
+
     path = wiz.request.query("path", True)
     text = fs.read(path, "")
     wiz.response.status(200, text)
 
 def update():
+    workspace = wiz.workspace("service")
+    working_dir = wiz.server.path.branch
+    fs = workspace.fs(os.path.join(working_dir))
+    
     path = wiz.request.query("path", True)
     data = wiz.request.query("data", True)
     fs.write(path, data)

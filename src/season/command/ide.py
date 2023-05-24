@@ -55,6 +55,7 @@ class Command:
         if mode in ['all', 'plugin']:
             print("Upgrading WIZ IDE Plugins...")
             plugin = season.plugin(os.getcwd())
+            plugin.uninstall("portal")
             plugin.upgrade("core")
             plugin.upgrade("workspace")
             plugin.upgrade("git")

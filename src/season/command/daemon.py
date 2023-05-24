@@ -15,29 +15,29 @@ PATH_PUBLIC = os.path.join(PATH_WEBSRC, 'public')
 PATH_APP = os.path.join(PATH_PUBLIC, 'app.py')
 PATH_PID = os.path.join(PATH_WEBSRC, "wiz.pid")
 
+@arg('--bundle', help='run as bundle')
 @arg('--host', help='0.0.0.0')
 @arg('--port', help='3000')
 @arg('--log', help='log filename')
-def run(host='0.0.0.0', port=None, log=None):
+def run(host='0.0.0.0', port=None, log=None, bundle=False):
     if os.path.isfile(PATH_APP) == False:
         print("Invalid Project path: wiz structure not found in this folder.")
         return
-
-    repo = git.Repo.init(os.path.join(PATH_WEBSRC, "branch", "main"))
 
     if os.path.exists(os.path.join(PATH_WEBSRC, "branch")) == False:
         os.mkdir(os.path.join(PATH_WEBSRC, "branch"))
 
     if port is not None: 
         port = int(port)
+    
+    if bundle is None or bundle is False: bundle = False
+    else: bundle = True
 
     runconfig = dict(host=host, port=port, log=log)
 
     def run_ctrl():
         season = importlib.import_module("season")
-        app = season.app(path=PATH_WEBSRC)
-        workspace = app.wiz().workspace("ide")
-        workspace.build()
+        app = season.app(path=PATH_WEBSRC, bundle=bundle)
         os.environ['WERKZEUG_RUN_MAIN'] = 'false'
         app.run(**runconfig)
         
@@ -53,6 +53,7 @@ def run(host='0.0.0.0', port=None, log=None):
                     child.kill()
                 return
             except:
+                time.sleep(1)
                 pass
     else:
         run_ctrl()

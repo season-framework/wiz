@@ -43,6 +43,19 @@
     td {
         vertical-align: middle;
     }
+
+    .card {
+        border: none;
+
+        .card-body {
+            border: none;
+        }
+    }
+
+    .btn {
+        height: auto;
+        padding: 6px 12px;
+    }
 }
 
 .side-search {
@@ -50,4 +63,47 @@
         height: 24px;
         font-size: 12px;
     }
+}
+
+.editor-info {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    overflow: auto;
+
+    .editor-info-container {
+        width: 100%;
+        max-width: 640px;
+        border-radius: 16px;
+        padding: 0;
+        height: fit-content;
+        background-color: white;
+
+        .form-group {
+            margin-top: 16px;
+        }
+
+        .card {
+            border: none;
+        }
+    }
+
+    .input-group-text {
+        padding: 0 16px;
+        border-top-left-radius: 16px;
+        border-bottom-left-radius: 16px;
+    }
+
+    .form-control {
+        text-align: left;
+        padding: 0 16px;
+    }
+}
+
+.form-selectgroup-label {
+    padding: 2px 6px !important;
+    border-radius: 4px;
+    font-size: 12px;
 }

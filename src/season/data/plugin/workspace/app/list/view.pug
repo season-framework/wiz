@@ -5,33 +5,87 @@
         .ml-auto
         a.btn.btn-primary.btn-sm.pr-2.pl-2(href="?dev={{!isdev}}") {{isdev ? 'develop' : 'product'}}
 
-    .side-search.area-round
-        input.form-control(type="text" placeholder="project", [(ngModel)]="keyword")
-        button.btn.btn-primary.ms-1((click)="create()")
-            i.fa-solid.fa-plus
-        button.btn.btn-primary.ms-1((click)="upload()")
-            i.fa-solid.fa-upload
+    .editor-info(*ngIf="isCreate")
+        .area-round.editor-info-container
+            .card
+                .card-header
+                    h3.card-title Create Project
+                .card-body
+                    .mb-3
+                        label.form-label Project Name
+                        input.form-control(type='text', placeholder='Project Name', [(ngModel)]="info.id", [disabled]="info.idDisabled")
 
-    .side-body.area-round
-        table.table.table-hover
-            tbody
-                tr(*ngFor="let item of data")
-                    ng-container(*ngIf="match(item)")
-                        th
-                            h4.m-0 {{item.title ? item.title : item.id}}
-                            span.mt-1(*ngIf="item.description") {{ item.description }}
-                        td.w-1.nowrap.text-right
-                            a.btn.btn-sm.me-1([ngClass]="current == item.id ? 'btn-primary' : 'btn-white'", href="?branch={{item.id}}")
-                                i.fa-solid.fa-check
-                            a.btn.btn-sm.btn-white.me-1((click)="download(item)")
-                                i.fa-solid.fa-download
-                            a.btn.btn-sm.btn-white.me-1((click)="ng_download(item)")
-                                i.fa-brands.fa-angular
-                            a.btn.btn-sm.btn-white((click)="open(item)")
-                                i.fa-solid.fa-cog
+                    .mb-3
+                        label.form-label Source From
+                        .form-selectgroup
+                            label.form-selectgroup-item
+                                input.form-selectgroup-input(type="radio", name="projecttype", value="sample", [(ngModel)]="info.type", (change)="service.render()")
+                                span.form-selectgroup-label
+                                    span Demo
+                            label.form-selectgroup-item
+                                input.form-selectgroup-input(type="radio", name="projecttype", value="copy", [(ngModel)]="info.type", (change)="service.render()")
+                                span.form-selectgroup-label
+                                    span Copy
+                            label.form-selectgroup-item
+                                input.form-selectgroup-input(type="radio", name="projecttype", value="upload", [(ngModel)]="info.type", (change)="service.render()")
+                                span.form-selectgroup-label
+                                    span File
+                            label.form-selectgroup-item
+                                input.form-selectgroup-input(type="radio", name="projecttype", value="git", [(ngModel)]="info.type", (change)="service.render()")
+                                span.form-selectgroup-label
+                                    span Git
+                    
+                    ng-container(*ngIf="info.type == 'copy'")
+                        .mb-3
+                            label.form-label Target
+                            select.form-select([(ngModel)]="info.target", (change)="service.render()")
+                                option(value="") Select Target
+                                ng-container(*ngFor="let item of data")
+                                    option([value]="item.id") {{item.title ? item.title : item.id}}
+                    
+                    ng-container(*ngIf="info.type == 'git'")
+                        .mb-3
+                            label.form-label Git URL
+                            input.form-control(type='text', placeholder='https://<user>:<pass>@github.com/repo', [(ngModel)]="info.git")
 
-div(style="display: none;")
-    form#file-form
-        input#file-upload.form-control(type='file', name='file[]', (change)="upload_file()", webkitdirectory, mozdirectory, msdirectory, odirectory, directory, multiple)
+                .card-footer.d-flex.pr-2.pl-2
+                    .btn((click)="onCancelCreate()") Cancel
+                    .ml-auto
+                    .btn([class]="validate(info) === true ? 'btn-primary' : 'btn-secondary'", (click)="create()")
+                        span(*ngIf="info.type != 'upload'") Create
+                        span(*ngIf="info.type == 'upload'") Upload
+
+    ng-container(*ngIf="!isCreate")
+        .side-search.area-round(*ngIf="data.length > 0")
+            input.form-control(type="text" placeholder="project", [(ngModel)]="keyword")
+            button.btn.btn-primary.ms-1((click)="onCreate()")
+                i.fa-solid.fa-plus
+
+        .side-body.area-round
+            .card(*ngIf="data.length == 0")
+                .card-body
+                    .row
+                        .col-auto
+                            .avatar.avatar-rounded.placeholder
+                        .col
+                            .placeholder.placeholder-xs.col-9
+                            .placeholder.placeholder-xs.col-7
+                    .text-center.mt-4
+                        .btn.btn-sm.btn-block.btn-primary((click)="onCreate()")
+                            i.fa-solid.fa-plus.mr-2
+                            span Create Project
+
+            table.table.table-hover(*ngIf="data.length > 0")
+                tbody
+                    tr(*ngFor="let item of data")
+                        ng-container(*ngIf="match(item)")
+                            th
+                                h4.m-0 {{item.title ? item.title : item.id}}
+                                span.mt-1(*ngIf="item.description") {{ item.description }}
+                            td.w-1.nowrap.text-right
+                                a.btn.btn-sm.me-1([ngClass]="current == item.id ? 'btn-primary' : 'btn-white'", href="?branch={{item.id}}")
+                                    i.fa-solid.fa-check
+                                a.btn.btn-sm.btn-white((click)="open(item)")
+                                    i.fa-solid.fa-cog
 
 ngx-loading([show]="loading")

@@ -1,0 +1,7 @@
+{
+    "id": "readme",
+    "title": "Readme.md",
+    "category": "",
+    "description": "Markdown Viewer",
+    "template": "wiz-workspace-editor-readme([editor]=\"\")"
+}

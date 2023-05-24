@@ -1,4 +1,4 @@
-# WIZ Framework
+# WIZ IDE
 
 - WIZ is IDE for web development
 - Using angular more easy
@@ -24,28 +24,29 @@ pip install season --upgrade   # upgrade lastest
 
 ## Usage
 
-- create project
+- create project and start web server
 
 ```bash
 cd <workspace>
 wiz create myapp
 cd myapp
 wiz run --port 3000
+# `http://127.0.0.1:3000/wiz` on your web browser
 ```
 
-> `http://127.0.0.1:3000/wiz` on your web browser
-
-- create from git repo
-
-```bash
-wiz create myapp --uri=https://your-custom/git/project
-```
-
-- daemon server
+- start server as daemon
 
 ```bash
 wiz server start # start daemon server
 wiz server stop  # stop daemon server
+```
+
+- regist system service for linux
+
+```bash
+# run on wiz project root directory
+wiz service regist myapp
+wiz service start myapp
 ```
 
 - upgrade ide from command line
@@ -53,17 +54,103 @@ wiz server stop  # stop daemon server
 ```bash
 pip install season --upgrade # upgrade core
 wiz ide upgrade # ide upgrade
-wiz server stop
-wiz server start --log wiz.log
 ```
 
-- install ide plugin
+## WIZ CLI
 
-```bash
-wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
-```
+### Create Project
+- `wiz create [Project Name]`
+    - Example
+        ```bash
+        wiz create myapp
+        ```
 
-## Version Info
+### Daemon API
+- `wiz run --host=<host> --port=<port> --log=<log file path>`
+    - Flag
+        | Flag | Syntax | Description |
+        |---|---|---|
+        | --port | wiz run [action] --port=PORT | Web server port, Default 3000 |
+        | --host | wiz run [action] --host=HOST | Web server host, Default 0.0.0.0 |
+        | --log | wiz run [action] --log=PATH | Log file path, Default None |
+    - Example
+        ```bash
+        wiz run --port=3000
+        wiz run --port=3000 --host=0.0.0.0
+        wiz run --port 3000 --log wiz.log
+        ```
+
+- `wiz server [action] --log=<log file path> --force`
+    - Action
+        | Action | Syntax | Description |
+        |---|---|---|
+        | start | wiz server start [flags] | Start wiz server as daemon |
+        | stop | wiz server stop [flags] | Stop wiz server daemon |
+        | restart | wiz server restart [flags] | Restart wiz server daemon |
+    - Flag
+        | Flag | Syntax | Description |
+        |---|---|---|
+        | --log | wiz server [action] --log=PATH | Log file path, Default None |
+        | --force | wiz server start --force | Force start daemon |
+    - Example
+        ```bash
+        wiz server start --force
+        wiz server stop
+        wiz server restart
+        ```
+
+### Service API
+- `wiz service list`
+    - Example
+        ```bash
+        wiz service list
+        ```
+
+- `wiz service regist [name]`
+    - Same AS
+        - `install`
+    - Example
+        ```bash
+        wiz service regist myapp
+        # or
+        wiz service install myapp
+        ```
+
+- `wiz service unregist [name]`
+    - Same AS
+        - `uninstall`, `remove`, `delete`, `rm`
+    - Example
+        ```bash
+        wiz service unregist myapp
+        # or
+        wiz service remove myapp
+        ```
+
+- `wiz service status [name]`
+    - Example
+        ```bash
+        wiz service status myapp
+        ```
+
+- `wiz service start [name]`
+    - Example
+        ```bash
+        wiz service start myapp
+        ```
+
+- `wiz service stop [name]`
+    - Example
+        ```bash
+        wiz service stop myapp
+        ```
+
+- `wiz service restart [name]`
+    - Example
+        ```bash
+        wiz service restart myapp
+        ```
+
+## Version Policy
 
 > x.y.z
 
@@ -83,6 +170,8 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 
 - [core] move build logic to ide plugin
 - [core] add bundle structure
+- [core] localize angular cli
+- [core] add linux service cli
 - [plugin] define `model` at plugin
 - [plugin/workspace] angular build logic changed
 - [plugin/workspace] integrated portal framework plugin at workspace
@@ -93,7 +182,6 @@ wiz plugin add https://github.com/season-framework/wiz-plugin-xterm
 - major issues
     - ide overlay menu
     - shortcut config (plugin & user customized)
-
 - [plugin/portal] add portal framework plugin
 - [plugin/workspace] refresh list bug fixed
 - [core] ide monaco editor bug fixed

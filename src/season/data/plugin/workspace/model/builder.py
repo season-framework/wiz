@@ -47,10 +47,18 @@ class Builder:
     def execute(self, cmd):
         p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = p.communicate()
+        
         logger = wiz.logger('[build]')
-        if out is not None and len(out) > 0: wiz.logger('[build][log]')(out.decode('utf-8').strip())
-        if err is not None and len(err) > 0: wiz.logger('[build][error]')(err.decode('utf-8').strip(), level=season.LOG_CRITICAL)
-
+        if out is not None and len(out) > 0: 
+            out = out.decode('utf-8').strip()
+            wiz.logger('[build][log]')(out)
+        if err is not None and len(err) > 0: 
+            err = err.decode('utf-8').strip()
+            if "npm WARN" in err or "- Installing packages (npm)" in err:
+                wiz.logger('[build][log]')(err, level=season.LOG_WARNING)
+            else: 
+                wiz.logger('[build][error]')(err, level=season.LOG_CRITICAL)
+        
     def use(self, path=None):
         return Builder(path)
 
@@ -87,8 +95,6 @@ class Builder:
         else:
             execute(f"cd {build_dir} && npm install ngc-esbuild pug jquery socket.io-client --save")
 
-        self.build()
-
     def clean(self):
         fs = self.fs()
         if fs.exists("build"):
@@ -99,6 +105,9 @@ class Builder:
         execute = self.execute
         fs = self.fs()
         compiler = Compiler(self)
+
+        if fs.exists("config") == False:
+            fs.makedirs("config")
 
         timestamp = int(time.time() * 1000)
         try:
@@ -145,11 +154,11 @@ class Builder:
         # build portal framework to cache folder
         modules = fs.ls("portal")
 
-        def buildApp(module):
-            apps = fs.ls(os.path.join("portal", module, "app"))
+        def buildApp(module, mode="app"):
+            apps = fs.ls(os.path.join("portal", module, mode))
             for app in apps:
                 namespace = f"portal.{module}.{app}"
-                srcpath = os.path.join("portal", module, "app", app)
+                srcpath = os.path.join("portal", module, mode, app)
                 targetpath = os.path.join("cache/src/app", namespace)
                 fs.copy(srcpath, targetpath)
                 appjson = fs.read.json(os.path.join(targetpath, "app.json"), dict())
@@ -187,6 +196,7 @@ class Builder:
                 return False
             
             if checker("app"): buildApp(module)
+            if checker("widget"): buildApp(module, mode="widget")
             if checker("route"): buildApi(module)
             if checker("controller"): buildFiles(module, "controller", "controller")
             if checker("model"): buildFiles(module, "model", "model")

@@ -77,6 +77,8 @@ class ServiceHandler:
 
         segment = wiz.request.match(wiz.uri.wiz("<path:path>"))
         if segment is not None:
+            if wiz.server.is_bundle:
+                wiz.response.redirect("/")
             wiz.response.redirect(wiz.uri.ide())
         
         # if route

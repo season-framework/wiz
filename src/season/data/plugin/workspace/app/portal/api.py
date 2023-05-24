@@ -87,6 +87,7 @@ def list(segment):
         
         if checker('sample'): res.append(dict(name='sample', path=os.path.join(path, 'sample'), type='mod.sample'))
         if checker('app'): res.append(dict(name='app', path=os.path.join(path, 'app'), type='mod.app', meta=dict(icon="fa-solid fa-layer-group")))
+        if checker('widget'): res.append(dict(name='widget', path=os.path.join(path, 'widget'), type='mod.app', meta=dict(icon="fa-solid fa-layer-group")))
         if checker('route'): res.append(dict(name='api', path=os.path.join(path, 'route'), type='mod.route', meta=dict(icon="fa-solid fa-link")))
         if checker('libs'): res.append(dict(name='libs', path=os.path.join(path, 'libs'), type='mod.libs', meta=dict(icon="fa-solid fa-book")))
         if checker('styles'): res.append(dict(name='styles', path=os.path.join(path, 'styles'), type='mod.styles', meta=dict(icon="fa-brands fa-css")))
@@ -105,7 +106,7 @@ def list(segment):
             res.append(dict(name='layout', path=os.path.join(path, 'layout'), type='mod.sample.app'))
             wiz.response.status(200, res)
         
-        if mod == 'app' or mod == 'route' or mod == 'page':
+        if mod in ['app', 'route', 'widget']:
             files = fs.files(path)
             for name in files:
                 fpath = os.path.join(path, name)
@@ -114,13 +115,14 @@ def list(segment):
                     if mod == 'route':
                         res.append(dict(name=appinfo['route'], path=fpath, type=mod, meta=appinfo))
                     else:
+                        appinfo['type'] = mod
                         res.append(dict(name=appinfo['title'], path=fpath, type=mod, meta=appinfo))
 
             wiz.response.status(200, res)
 
     elif len(segment) > 3:
         mod = segment[2]
-        if mod == 'app' or mod == 'route':
+        if mod in ['app', 'widget', 'route']:
             wiz.response.status(200, res)
         
         if mod == 'sample':
@@ -224,7 +226,7 @@ def update(segment):
     code = wiz.request.query("code", "")
 
     psegment = path.split("/")
-    if len(psegment) > 3 and psegment[2] == 'app':
+    if len(psegment) > 3 and psegment[2] in ['app', 'widget']:
         modname = psegment[1]
         appid = psegment[3]
 
@@ -235,6 +237,7 @@ def update(segment):
             tscode = fs.read(tspath, "")
             appjson = fs.read.json(appjsonpath)
             appjson['id'] = appid
+            appjson['type'] = psegment[2]
 
             app_id = f"portal.{modname}.{appid}"
             selector = Namespace.selector(app_id)

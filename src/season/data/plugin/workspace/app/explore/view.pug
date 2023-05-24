@@ -9,12 +9,6 @@
                             span {{node.name}}
                         i.icon-action.fa-solid.fa-trash-can((click)="delete(node); $event.stopPropagation();")
                 
-                ng-container(*ngIf="node.type == 'angular'")
-                    i.tree-icon.fa-brands.fa-angular.mr-2
-                    .file-title(style="flex: auto; overflow: hidden;") 
-                        span {{node.name}}
-                    i.icon-action.fa-solid.fa-circle-arrow-right
-
                 ng-container(*ngIf="node.type == 'file'")
                     i.tree-icon.fa-regular.fa-file-lines.mr-2((click)="node.editable = !node.editable; $event.stopPropagation(); service.render()")
                 
@@ -34,7 +28,8 @@
                 i.icon-action-always.fa-solid.fa-check((click)="create(node); $event.stopPropagation();")
 
             mat-tree-node(*matTreeNodeDef="let node; when: isFolder", matTreeNodePadding="", matTreeNodeToggle="", matTreeNodePaddingIndent="16px", [ngClass]="active(node) ? 'active' : ''")
-                i.tree-icon.mr-2([ngClass]="node.extended ? 'fa-regular fa-folder-open' : 'fa-solid fa-folder'", (click)="node.editable = !node.editable; $event.stopPropagation(); service.render()")
+                i.tree-icon.fa-brands.fa-angular.mr-2(*ngIf="node.name == 'angular'")
+                i.tree-icon.mr-2(*ngIf="node.name != 'angular'", [ngClass]="node.extended ? 'fa-regular fa-folder-open' : 'fa-solid fa-folder'", (click)="node.editable = !node.editable; $event.stopPropagation(); service.render()")
                 
                 .file-title(style="flex: auto; overflow: hidden;")
                     span(*ngIf="!node.editable") {{node.name}}
@@ -56,7 +51,10 @@
                 i.tree-icon.fa-solid.fa-link.mr-2(*ngIf="'mod.route'.split(',').includes(node.type)")
                 i.tree-icon.fa-brands.fa-css3-alt.mr-2(*ngIf="'mod.styles'.split(',').includes(node.type)")
                 i.tree-icon.fa-solid.fa-book.mr-2(*ngIf="'mod.libs'.split(',').includes(node.type)")
-                i.tree-icon.mr-2([ngClass]="node.extended ? 'fa-regular fa-folder-open' : 'fa-solid fa-folder'", *ngIf="'mod.folder'.split(',').includes(node.type)")
+                ng-container(*ngIf="'mod.folder'.split(',').includes(node.type)")
+                    i.tree-icon.fa-brands.fa-angular.mr-2(*ngIf="node.name == 'angular'")
+                    i.tree-icon.mr-2([ngClass]="node.extended ? 'fa-regular fa-folder-open' : 'fa-solid fa-folder'", *ngIf="node.name != 'angular'")
+
                 .file-title(style="flex: auto; overflow: hidden;")
                     span {{node.name}}
                 

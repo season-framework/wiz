@@ -21,6 +21,11 @@ export class Component implements OnInit {
         await this.loader(false);
     }
 
+    public async download() {
+        let target = wiz.url("download/" + this.data.project);
+        window.open(target, '_blank');
+    }
+
     public async git() {
         let path = this.data.project;
         let { code, data } = await wiz.call("git", { path })
@@ -36,19 +41,20 @@ export class Component implements OnInit {
     }
 
     public async rebuild() {
-        await this.loader(true);
+        await this.service.loading.show();
         let path = this.data.project;
         await wiz.call("rebuild", { path });
-        await this.loader(false);
+        await this.service.loading.hide();
     }
 
     public async delete() {
         let res = await this.service.alert.show({ title: 'Delete', message: `Are you sure to delete '${this.data.project}' project?`, action_text: "Delete", action_class: "btn-danger" });
         if (!res) return;
 
-        await this.loader(true);
+        await this.service.loading.show();
         let path = this.data.project;
         await wiz.call("delete", { path });
+        await this.service.loading.hide();
         this.editor.close();
     }
 }

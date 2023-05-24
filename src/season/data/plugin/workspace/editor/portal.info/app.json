@@ -3,7 +3,7 @@
     "title": "Portal Info",
     "category": "",
     "description": "portal framework info",
-    "template": "wiz-portal-editor-module-info([editor]=\"\")",
+    "template": "wiz-workspace-editor-portal-info([editor]=\"\")",
     "mod_id": "workspace",
     "mod_type": "editor"
 }

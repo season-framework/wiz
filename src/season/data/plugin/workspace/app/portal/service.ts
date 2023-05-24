@@ -124,6 +124,8 @@ import MonacoEditor from "src/app/core.editor.monaco/core.editor.monaco.componen
 import PageInfoEditor from "src/app/workspace.editor.ngapp.page/workspace.editor.ngapp.page.component";
 import AppInfoEditor from "src/app/workspace.editor.ngapp.info/workspace.editor.ngapp.info.component";
 import RouteInfoEditor from "src/app/workspace.editor.route/workspace.editor.route.component";
+import ImageViewer from "src/app/workspace.editor.image/workspace.editor.image.component";
+import ReadmeViewer from "src/app/workspace.editor.readme/workspace.editor.readme.component";
 const DEFAULT_COMPONENT = `import { OnInit, Input } from '@angular/core';
 
 export class Replacement implements OnInit {
@@ -154,7 +156,7 @@ toastr.options = {
 };
 
 export class FileEditor {
-    public APP_ID: string = "workspace.app.package";
+    public APP_ID: string = "workspace.app.portal";
     constructor(private service: any, private wiz: any, private event: any) {
         if (!this.event) this.event = {};
     }
@@ -166,7 +168,7 @@ export class FileEditor {
         }
 
         let viewtypes: any = {
-            'md': { viewref: MonacoEditor, config: { monaco: { language: 'markdown' } } },
+            'md': { viewref: ReadmeViewer, config: { monaco: { language: 'markdown' } } },
             'ts': { viewref: MonacoEditor, config: { monaco: { language: 'typescript', renderValidationDecorations: 'off' } } },
             'js': { viewref: MonacoEditor, config: { monaco: { language: 'javascript' } } },
             'css': { viewref: MonacoEditor, config: { monaco: { language: 'css' } } },
@@ -439,6 +441,7 @@ export class AppEditor {
         }
 
         let BASEPATH = "portal/" + mod_id + "/app";
+        if (app.type) BASEPATH = "portal/" + mod_id + "/" + app.type;
         if (app.mode == 'sample') BASEPATH = "portal/" + mod_id + "/sample";
 
         let app_id = app.id;
@@ -694,7 +697,8 @@ export class AppEditor {
 
             editor.bind("clone", async (location: number = -1) => {
                 let appinfo = await editor.tab(0).data();
-                let clone = await this.create(appinfo);
+                appinfo.type = app.type;
+                let clone = await this.create(mod_id, appinfo, ieditor);
                 await clone.open(location);
             });
         }
