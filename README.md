@@ -166,6 +166,11 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.2
+
+- [plugin/workspace] app.json bug fixed
+
+
 ### 2.3.1
 
 - [plugin/workspace] portal framework controller bug fixed
