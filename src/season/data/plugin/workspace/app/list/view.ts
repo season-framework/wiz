@@ -3,29 +3,8 @@ import { Service } from '@wiz/service/service';
 
 import { DEFAULT_GITIGNORE } from "./service";
 
-import toastr from "toastr";
-import $ from 'jquery';
-
 import MonacoEditor from "@wiz/app/core.editor.monaco";
 import WorkspaceInfo from "@wiz/app/workspace.editor.wsinfo";
-
-toastr.options = {
-    "closeButton": false,
-    "debug": false,
-    "newestOnTop": true,
-    "progressBar": false,
-    "positionClass": "toast-top-center",
-    "preventDuplicates": true,
-    "onclick": null,
-    "showDuration": 300,
-    "hideDuration": 500,
-    "timeOut": 1500,
-    "extendedTimeOut": 1000,
-    "showEasing": "swing",
-    "hideEasing": "linear",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
-};
 
 export class Component implements OnInit {
     public APP_ID: string = wiz.namespace;
@@ -202,7 +181,7 @@ export class Component implements OnInit {
             }).bind('update', async (tab) => {
                 let data = await tab.data();
                 let { code } = await wiz.call('update', { path: tab.path, data: data.data });
-                if (code == 200) toastr.success("Updated");
+                await this.service.statusbar.info("updated", 5000);
             });
         }
 

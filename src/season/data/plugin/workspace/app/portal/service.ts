@@ -148,7 +148,7 @@ export class FileEditor {
         }
 
         let viewtypes: any = {
-            'md': { viewref: ReadmeViewer, config: { monaco: { language: 'markdown' } } },
+            'md': { viewref: MonacoEditor, config: { monaco: { language: 'markdown' } } },
             'ts': { viewref: MonacoEditor, config: { monaco: { language: 'typescript', renderValidationDecorations: 'off' } } },
             'js': { viewref: MonacoEditor, config: { monaco: { language: 'javascript' } } },
             'css': { viewref: MonacoEditor, config: { monaco: { language: 'css' } } },
@@ -159,6 +159,10 @@ export class FileEditor {
         };
 
         let extension = path.substring(path.lastIndexOf(".") + 1).toLowerCase();
+        const imgExt = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg', 'ico'];
+        const IS_IMG = imgExt.includes(extension);
+        if (IS_IMG) viewtypes[extension] = { viewref: ImageViewer, config: {} };
+        
         if (!viewtypes[extension]) {
             return;
         }
@@ -172,12 +176,25 @@ export class FileEditor {
             current: 0
         });
 
+        if (extension == 'md') {
+            editor.create({
+                name: 'viewer',
+                viewref: ReadmeViewer,
+                path: path
+            }).bind('data', async (tab) => {
+                let { code, data } = await wiz.call('read', { path: path });
+                if (code != 200) return {};
+                return { data };
+            });
+        }
+
         editor.create({
-            name: 'file',
+            name: 'editor',
             viewref: viewref,
             path: path,
             config: config
         }).bind('data', async (tab) => {
+            if (IS_IMG) return { data: path };
             let { code, data } = await wiz.call('read', { path: path });
             if (code != 200) return {};
             return { data };

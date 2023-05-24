@@ -124,6 +124,7 @@ import PageInfoEditor from "src/app/workspace.editor.ngapp.page/workspace.editor
 import AppInfoEditor from "src/app/workspace.editor.ngapp.info/workspace.editor.ngapp.info.component";
 import RouteInfoEditor from "src/app/workspace.editor.route/workspace.editor.route.component";
 import ImageViewer from "src/app/workspace.editor.image/workspace.editor.image.component";
+import ReadmeViewer from "src/app/workspace.editor.readme/workspace.editor.readme.component";
 const DEFAULT_COMPONENT = `import { OnInit, Input } from '@angular/core';
 
 export class Replacement implements OnInit {
@@ -146,6 +147,7 @@ export class FileEditor {
         }
 
         let viewtypes: any = {
+            'md': { viewref: MonacoEditor, config: { monaco: { language: 'markdown' } } },
             'ts': { viewref: MonacoEditor, config: { monaco: { language: 'typescript', renderValidationDecorations: 'off' } } },
             'js': { viewref: MonacoEditor, config: { monaco: { language: 'javascript' } } },
             'css': { viewref: MonacoEditor, config: { monaco: { language: 'css' } } },
@@ -158,9 +160,8 @@ export class FileEditor {
         let extension = path.substring(path.lastIndexOf(".") + 1).toLowerCase();
         const imgExt = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg', 'ico'];
         const IS_IMG = imgExt.includes(extension);
-        if (IS_IMG) {
+        if (IS_IMG)
             viewtypes[extension] = { viewref: ImageViewer, config: {} };
-        }
 
         if (!viewtypes[extension] && force) {
             viewtypes.__text__ = { viewref: MonacoEditor, config: { monaco: { language: 'plaintext' } } };
@@ -179,8 +180,20 @@ export class FileEditor {
             current: 0
         });
 
+        if (extension == 'md') {
+            editor.create({
+                name: 'viewer',
+                viewref: ReadmeViewer,
+                path: path
+            }).bind('data', async (tab) => {
+                let { code, data } = await wiz.call('read', { path: path });
+                if (code != 200) return {};
+                return { data };
+            });
+        }
+
         editor.create({
-            name: 'file',
+            name: 'editor',
             viewref: viewref,
             path: path,
             config: config

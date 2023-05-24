@@ -1,12 +1,3 @@
 .editor-info
-    .editor-monaco(*ngIf="!isViewer")
-        nu-monaco-editor([(ngModel)]="data.data", [options]="editor.tab().config.monaco", [height]="'100%'", (event)="init($event)")
-    .readme(*ngIf="isViewer")
+    .readme
         .viewer.pb-0.pt-3.pr-3.pl-3([innerHtml]="showdown(data.data)")
-
-    .toggle.area-round
-        .btn-group
-            .btn([class.btn-primary]="isViewer", (click)="mode(true)") View
-            .btn([class.btn-primary]="!isViewer", (click)="mode(false)")  Edit
-
-ngx-loading([show]="loading")

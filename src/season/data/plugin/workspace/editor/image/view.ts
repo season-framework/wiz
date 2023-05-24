@@ -4,7 +4,7 @@ import { Service } from '@wiz/service/service';
 export class Component implements OnInit {
     @Input() editor;
     private id = '';
-    public src: string = "";
+    public src: any = null;
     public width = 0;
     public height = 0;
     private bgcolor: "white" | "gray" | "black" = "gray";
@@ -19,19 +19,20 @@ export class Component implements OnInit {
         this.id = Math.random().toString(36).slice(2);
         const { data } = await this.editor.tab().data();
         if (!data) return;
-        this.src = `${wiz.url("read")}?path=${encodeURIComponent(data)}`;
+        this.src = wiz.url(`read/${data}`);
         this.loading = false;
         await this.service.render();
     }
 
-    private load(e) {
+    public async load(e: any) {
         const { naturalWidth, naturalHeight } = e.target;
         this.width = naturalWidth;
         this.height = naturalHeight;
+        await this.service.render();
     }
 
-    private change(bg) {
+    public async change(bg: any) {
         this.bgcolor = bg;
-        this.ref.detectChanges();
+        await this.service.render();
     }
 }

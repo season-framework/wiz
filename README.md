@@ -172,6 +172,7 @@ wiz ide upgrade # ide upgrade
 - [core] add bundle structure
 - [core] localize angular cli
 - [core] add linux service cli
+- [core] add statusbar at bottom of ide
 - [plugin] define `model` at plugin
 - [plugin/workspace] angular build logic changed
 - [plugin/workspace] integrated portal framework plugin at workspace

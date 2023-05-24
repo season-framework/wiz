@@ -1,25 +1,6 @@
 import { OnInit, Output, EventEmitter } from '@angular/core';
 import { Service } from '@wiz/service/service';
 import { DomSanitizer } from '@angular/platform-browser';
-import toastr from "toastr";
-
-toastr.options = {
-    "closeButton": false,
-    "debug": false,
-    "newestOnTop": true,
-    "progressBar": false,
-    "positionClass": "toast-top-center",
-    "preventDuplicates": true,
-    "onclick": null,
-    "showDuration": 300,
-    "hideDuration": 500,
-    "timeOut": 1500,
-    "extendedTimeOut": 1000,
-    "showEasing": "swing",
-    "hideEasing": "linear",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
-};
 
 export class Component implements OnInit {
     @Output() binding = new EventEmitter<any>();

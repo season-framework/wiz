@@ -3,14 +3,8 @@
         .btn.btn-primary(
             *ngFor="let item of ['gray', 'white', 'black'];let i = index",
             [class.active]="item === bgcolor",
-            (click)="change(item)",
+            (click)="change(item)"
         ) {{item}}
 
-    .img-wrap(
-        [style.maxWidth]="width+'px'",
-        [style.maxHeight]="height+'px'",
-    )
-        img(
-            [src]="src",
-            (load)="load($event)",
-        )
+    .img-wrap(*ngIf="src", [style.maxWidth]="width+'px'", [style.maxHeight]="height+'px'")
+        img([src]="src", (load)="load($event)")

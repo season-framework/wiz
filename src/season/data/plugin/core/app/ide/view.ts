@@ -9,6 +9,8 @@ import { FileNode, FileDataSource } from './service';
 import MonacoEditor from "@wiz/app/core.editor.monaco";
 import InfoEditor from "@wiz/app/core.editor.ide";
 import PluginInfoEditor from "@wiz/app/core.editor.plugin.info";
+import ImageViewer from "src/app/workspace.editor.image/workspace.editor.image.component";
+import ReadmeViewer from "src/app/workspace.editor.readme/workspace.editor.readme.component";
 
 const DEFAULT_COMPONENT = `import { OnInit, Input } from '@angular/core';
 
@@ -283,6 +285,10 @@ export class Component implements OnInit {
                 };
 
                 let extension = node.path.substring(node.path.lastIndexOf(".") + 1).toLowerCase();
+                const imgExt = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg', 'ico'];
+                const IS_IMG = imgExt.includes(extension);
+                if (IS_IMG)
+                    viewtypes[extension] = { viewref: ImageViewer, config: {} };
 
                 if (!viewtypes[extension]) {
                     await this.download(node);
@@ -299,12 +305,25 @@ export class Component implements OnInit {
                     current: 0
                 });
 
+                if (extension == 'md') {
+                    editor.create({
+                        name: 'viewer',
+                        viewref: ReadmeViewer,
+                        path: node.path
+                    }).bind('data', async (tab) => {
+                        let { code, data } = await wiz.call('read', { path: node.path });
+                        if (code != 200) return {};
+                        return { data };
+                    });
+                }
+
                 editor.create({
-                    name: 'config',
+                    name: 'editor',
                     viewref: viewref,
                     path: node.path,
                     config: config
                 }).bind('data', async (tab) => {
+                    if (IS_IMG) return { data: node.path };
                     let { code, data } = await wiz.call('read', { path: node.path });
                     if (code != 200) return {};
                     return { data };

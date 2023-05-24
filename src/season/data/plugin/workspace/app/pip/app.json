@@ -12,5 +12,5 @@
         "inputs": [],
         "outputs": []
     },
-    "template": "wiz-season-pip()"
+    "template": "wiz-workspace-app-pip()"
 }
