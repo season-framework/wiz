@@ -52,21 +52,22 @@ class Model:
                 # update app.json to source
                 appjsonpath = os.path.dirname(fileinfo.filepath)
                 appjsonpath = os.path.join(appjsonpath, "app.json")
-                appjsonpath = "/".join(appjsonpath.split("/")[1:])
                 appjson = fs.read.json(appjsonpath, dict())
+                appjsonpath = "/".join(appjsonpath.split("/")[1:])
+                if 'path' in appjson:
+                    appjsonpath = appjson['path']
+                    del appjson['path']
 
+                appjson = fs.read.json(appjsonpath, dict())
                 componentInfo = Annotation.definition.ngComponentDesc(fileinfo.code)
                 appjson["ng.build"] = dict(id=fileinfo.app_id, name=componentName + "Component", path="./" + fileinfo.app_id + "/" + fileinfo.app_id + ".component")
                 ngtemplate = appjson["ng"] = dict(selector=Namespace.selector(fileinfo.app_id), **componentInfo)
                 injector = [f'[{x}]=""' for x in ngtemplate['inputs']] + [f'({x})=""' for x in ngtemplate['outputs']]
                 injector = ", ".join(injector)
                 appjson['template'] = ngtemplate['selector'] + "(" + injector + ")"
-
-                if 'path' in appjson:
-                    appjsonpath = appjson['path']
-                    del appjson['path']
                 
                 if appjsonpath.split("/")[0] == 'portal':
+                    appjson['mode'] = 'portal'
                     appjson['id'] = appjson['namespace']
                 
                 fs.write(appjsonpath, json.dumps(appjson, indent=4))
