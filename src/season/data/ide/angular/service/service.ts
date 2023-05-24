@@ -64,12 +64,12 @@ export class Service {
         if (tag == 'server') {
             let style = Style.base.join(';') + ';';
             style += Style.server.join(';');
+            console.log(`%cwiz.was%c ` + value, style, null);
             if (value.includes(`[build][error]`)) {
                 await this.statusbar.error("error on build");
             } else if (value.includes(`EsBuild complete in`)) {
                 await this.statusbar.info("build finish", 5000);
             }
-            console.log(`%cwiz.was%c ` + value, style, null);
         } else {
             let style = Style.base.join(';') + ';';
             style += Style.ide.join(';');
