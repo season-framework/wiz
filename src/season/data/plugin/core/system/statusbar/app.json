@@ -1,0 +1,8 @@
+{
+    "id": "statusbar",
+    "category": "core",
+    "title": "StatusBar",
+    "template": "wiz-core-system-statusbar()",
+    "mod_id": "core",
+    "mod_type": "system"
+}

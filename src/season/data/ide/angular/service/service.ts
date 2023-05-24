@@ -1,36 +1,18 @@
 import { Injectable } from '@angular/core';
 import File from './file';
 import Alert from './alert';
+import Statusbar from './statusbar';
 import Loading from './loading';
 import Editor from './editor';
 import Menu from './menu';
 import Event from './event';
 import Shortcut from './shortcut';
 
-import toastr from "toastr";
-
-toastr.options = {
-    "closeButton": false,
-    "debug": false,
-    "newestOnTop": true,
-    "progressBar": false,
-    "positionClass": "toast-top-center",
-    "preventDuplicates": true,
-    "onclick": null,
-    "showDuration": 300,
-    "hideDuration": 500,
-    "timeOut": 1500,
-    "extendedTimeOut": 1000,
-    "showEasing": "swing",
-    "hideEasing": "linear",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
-};
-
 @Injectable({ providedIn: 'root' })
 export class Service {
     public file: File;
     public alert: Alert;
+    public statusbar: Statusbar;
     public loading: Loading;
     public editor: Editor;
     public event: Event;
@@ -49,6 +31,7 @@ export class Service {
             this.app = app;
             this.file = new File(this);
             this.alert = new Alert(this);
+            this.statusbar = new Statusbar(this);
             this.loading = new Loading(this);
             this.editor = new Editor(this);
             this.event = new Event(this);
@@ -82,9 +65,9 @@ export class Service {
             let style = Style.base.join(';') + ';';
             style += Style.server.join(';');
             if (value.includes(`[build][error]`)) {
-                toastr.error(`Build failed`);
+                await this.statusbar.error("error on build");
             } else if (value.includes(`EsBuild complete in`)) {
-                toastr.info(`Builded`);
+                await this.statusbar.info("build finish", 5000);
             }
             console.log(`%cwiz.was%c ` + value, style, null);
         } else {

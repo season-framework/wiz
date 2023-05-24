@@ -35,6 +35,16 @@
         }
     }
 
+    .workspace-footer {
+        display: flex;
+        align-items: center;
+        padding: 4px 8px;
+        font-size: 12px;
+        color: #fff;
+        background: var(--wiz-color-blue);
+        line-height: 1;
+    }
+
     .workspace-body {
         width: 100%;
         display: flex;

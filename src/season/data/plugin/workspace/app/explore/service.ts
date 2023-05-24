@@ -133,26 +133,6 @@ export class Replacement implements OnInit {
     }
 }`.replace('Replacement', 'Component');
 
-
-import toastr from "toastr";
-toastr.options = {
-    "closeButton": false,
-    "debug": false,
-    "newestOnTop": true,
-    "progressBar": false,
-    "positionClass": "toast-top-center",
-    "preventDuplicates": true,
-    "onclick": null,
-    "showDuration": 300,
-    "hideDuration": 500,
-    "timeOut": 1500,
-    "extendedTimeOut": 1000,
-    "showEasing": "swing",
-    "hideEasing": "linear",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
-};
-
 export class FileEditor {
     public APP_ID: string = "workspace.app.explore";
     constructor(private service: any, private wiz: any, private event: any) {
@@ -216,11 +196,11 @@ export class FileEditor {
             if (res.code != 200) return;
 
             await eventHanlder('updated', path);
-            toastr.success("Updated");
+            await this.service.statusbar.warning("build project...");
 
             res = await wiz.call('build', { path: path });
-            if (res.code == 200) toastr.info("Builded");
-            else toastr.error("Error on build");
+            if (res.code == 200) await this.service.statusbar.info("build finish", 5000);
+            else await this.service.statusbar.error("error on build");
 
             let previewBinding = this.service.event.load("workspace.app.preview");
             if (previewBinding) await previewBinding.move();
@@ -266,7 +246,7 @@ export class RouteEditor {
 
             let { code } = await wiz.call("move", { path, to });
             if (code !== 200) {
-                toastr.error("Error: rename api");
+                await this.service.alert.error("Error: rename api");
                 return false;
             }
 
@@ -275,13 +255,13 @@ export class RouteEditor {
 
         let build = async (path: any) => {
             let appinfo = await editor.tab(0).data();
+            await this.service.statusbar.warning("build project...");
             let res = await wiz.call('build', { path });
             if (res.code != 200) {
-                toastr.error("Error on build");
+                await this.service.statusbar.error("error on build");
                 return false;
             }
-
-            toastr.info("Builded");
+            await this.service.statusbar.info("build finish", 5000);
             await eventHanlder('builded', appinfo);
 
             let previewBinding = this.service.event.load("workspace.app.preview");
@@ -291,7 +271,7 @@ export class RouteEditor {
         let update = async (path: string, code: string, event: boolean = true) => {
             let appinfo = await editor.tab(0).data();
             let res = await wiz.call("update", { path, code });
-            if (res.code == 200) toastr.success("Updated");
+            if (res.code == 200) await this.service.statusbar.warning("build project...");
             else return false;
 
             let upath = "src/route/" + appinfo.id;
@@ -332,7 +312,7 @@ export class RouteEditor {
         let createApp = async (appinfo: any) => {
             let id = appinfo.id;
             let res = await wiz.call("exists", { path: 'src/route/' + id });
-            if (res.data) return toastr.error("id already exists");
+            if (res.data) return await this.service.alert.error("id already exists");
             let path = "src/route/" + id + "/app.json";
             let code = JSON.stringify(appinfo, null, 4);
             await update(path, code);
@@ -347,7 +327,7 @@ export class RouteEditor {
             if (name != rename) {
                 let res = await move(name, rename);
                 if (!res) {
-                    toastr.error("invalidate namespace");
+                    await this.service.alert.error("invalidate namespace");
                     return false;
                 }
             }
@@ -376,8 +356,8 @@ export class RouteEditor {
             let appinfo = await tab.data();
 
             let check = /^[a-z0-9.]+$/.test(appinfo.id);
-            if (!check) return toastr.error("invalidate id");
-            if (appinfo.id.length < 3) return toastr.error("id at least 3 alphabets");
+            if (!check) return await this.service.alert.error("invalidate id");
+            if (appinfo.id.length < 3) return await this.service.alert.error("id at least 3 alphabets");
 
             if (app.id)
                 await updateApp(appinfo);
@@ -467,7 +447,7 @@ export class AppEditor {
 
             let { code } = await wiz.call("move", { path, to });
             if (code !== 200) {
-                toastr.error("Error: rename app");
+                await this.service.alert.error("Error: rename app");
                 return false;
             }
 
@@ -477,7 +457,7 @@ export class AppEditor {
         let update = async (path: string, code: string, event: boolean = true) => {
             let appinfo = await editor.tab(0).data();
             let res = await wiz.call("update", { path, code });
-            if (res.code == 200) toastr.success("Updated");
+            if (res.code == 200) await this.service.statusbar.info("updated");
             else return false;
 
             let upath = "src/app/" + appinfo.id;
@@ -511,14 +491,13 @@ export class AppEditor {
         }
 
         let build = async (path: any) => {
+            await this.service.statusbar.warning("build project...");
             let appinfo = await editor.tab(0).data();
             let res = await wiz.call('build', { path });
             if (res.code != 200) {
-                toastr.error("Error on build");
+                await this.service.statusbar.error("Error on build");
                 return false;
             }
-
-            toastr.info("Builded");
             await eventHanlder('builded', appinfo);
 
             let previewBinding = this.service.event.load("workspace.app.preview");
@@ -528,7 +507,7 @@ export class AppEditor {
         let createApp = async (appinfo: any) => {
             let id = appinfo.mode + "." + appinfo.namespace;
             let res = await wiz.call("exists", { path: 'src/app/' + id });
-            if (res.data) return toastr.error("namespace already exists");
+            if (res.data) return await this.service.alert.error("namespace already exists");
             appinfo.id = id;
             let path = "src/app/" + id + "/app.json";
             let code = JSON.stringify(appinfo, null, 4);
@@ -549,7 +528,7 @@ export class AppEditor {
             if (name != rename) {
                 let res = await move(name, rename);
                 if (!res) {
-                    toastr.error("invalidate namespace");
+                    await this.service.alert.error("invalidate namespace");
                     return false;
                 }
             }
@@ -583,8 +562,8 @@ export class AppEditor {
         }).bind('update', async (tab) => {
             let appinfo = await tab.data();
             let check = /^[a-z0-9.]+$/.test(appinfo.namespace);
-            if (!check) return toastr.error("invalidate namespace");
-            if (appinfo.namespace.length < 3) return toastr.error("namespace at least 3 alphabets");
+            if (!check) return await this.service.alert.error("invalidate namespace");
+            if (appinfo.namespace.length < 3) return await this.service.alert.error("namespace at least 3 alphabets");
 
             if (app.id)
                 await updateApp(appinfo);

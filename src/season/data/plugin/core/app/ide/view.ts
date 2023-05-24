@@ -2,7 +2,6 @@ import { OnInit } from '@angular/core';
 import { Service } from '@wiz/service/service';
 
 import $ from 'jquery';
-import toastr from "toastr";
 
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { FileNode, FileDataSource } from './service';
@@ -21,24 +20,6 @@ export class Replacement implements OnInit {
 }`.replace('Replacement', 'Component');
 
 const DEFAULT_API = ``;
-
-toastr.options = {
-    "closeButton": false,
-    "debug": false,
-    "newestOnTop": true,
-    "progressBar": false,
-    "positionClass": "toast-top-center",
-    "preventDuplicates": true,
-    "onclick": null,
-    "showDuration": 300,
-    "hideDuration": 500,
-    "timeOut": 1500,
-    "extendedTimeOut": 1000,
-    "showEasing": "swing",
-    "hideEasing": "linear",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
-};
 
 @dependencies({
     MatTreeModule: '@angular/material/tree'
@@ -100,10 +81,10 @@ export class Component implements OnInit {
 
     private async update(path: string, data: string) {
         let res = await wiz.call('update', { path: path, code: data });
-        if (res.code == 200) toastr.success("Updated");
-
+        await this.service.statusbar.warning("build project...");
         res = await wiz.call('build');
-        if (res.code == 200) toastr.info("Builded");
+        if (res.code == 200) await this.service.statusbar.info("build finish", 5000);
+        else await this.service.statusbar.error("error on build");
     }
 
     public async open(node: FileNode, location: number = -1) {
@@ -144,8 +125,8 @@ export class Component implements OnInit {
                 }).bind('update', async (tab) => {
                     let data = await tab.data();
                     let check = /^[a-z0-9.]+$/.test(data.id);
-                    if (!check) return toastr.error("invalidate namespace");
-                    if (data.id.length < 3) return toastr.error("namespace at least 3 alphabets");
+                    if (!check) return await this.service.alert.error("invalidate namespace");
+                    if (data.id.length < 3) return await this.service.alert.error("namespace at least 3 alphabets");
 
                     let from = app_id;
                     let to = data.id;
@@ -154,7 +135,7 @@ export class Component implements OnInit {
                         node.rename = to;
                         let res = await this.move(node);
                         if (!res) {
-                            toastr.error("invalidate namespace");
+                            await this.service.alert.error("invalidate namespace");
                             return;
                         }
                     }
@@ -282,8 +263,8 @@ export class Component implements OnInit {
                 }).bind('update', async (tab) => {
                     let data = await tab.data();
                     let check = /^[a-z0-9.]+$/.test(data.package);
-                    if (!check) return toastr.error("invalidate package name");
-                    if (data.package.length < 3) return toastr.error("package name at least 3 alphabets");
+                    if (!check) return await this.service.alert.error("invalidate package name");
+                    if (data.package.length < 3) return await this.service.alert.error("package name at least 3 alphabets");
                     await this.update(node.path, JSON.stringify(data, null, 4));
                 });
 
@@ -386,8 +367,10 @@ export class Component implements OnInit {
             await fn('upload_root', fd);
 
             let build = async () => {
+                await this.service.statusbar.warning("build project...");
                 let res = await wiz.call('build');
-                if (res.code == 200) toastr.info("Builded");
+                if (res.code == 200) await this.service.statusbar.info("build finish", 5000);
+                else await this.service.statusbar.error("error on build");
             }
             build();
         } else {
@@ -415,7 +398,7 @@ export class Component implements OnInit {
         let { code } = await wiz.call("move", { path, to });
 
         if (code !== 200) {
-            toastr.error("Error on change path");
+            await this.service.alert.error("Error on change path");
             return false;
         }
 
@@ -456,7 +439,7 @@ export class Component implements OnInit {
             let { code } = await wiz.call("create", { type, path });
 
             if (code != 200) {
-                toastr.error("invalid filename");
+                await this.service.alert.error("invalid filename");
                 return;
             }
 
@@ -471,12 +454,12 @@ export class Component implements OnInit {
                 }).bind('update', async (tab) => {
                     let data = await tab.data();
                     let check = /^[a-z0-9.]+$/.test(data.id);
-                    if (!check) return toastr.error("invalidate namespace");
-                    if (data.id.length < 3) return toastr.error("namespace at least 3 alphabets");
+                    if (!check) return await this.service.alert.error("invalidate namespace");
+                    if (data.id.length < 3) return await this.service.alert.error("namespace at least 3 alphabets");
 
                     let id = data.id;
                     let res = await wiz.call("exists", { path: node.path + "/" + id });
-                    if (res.data) return toastr.error("namespace already exists");
+                    if (res.data) return await this.service.alert.error("namespace already exists");
 
                     let appid = id;
                     data.id = id;

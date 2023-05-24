@@ -53,6 +53,8 @@ def list(segment):
         elif len(segment) == 2:
             res.append(dict(name='app', path=os.path.join(path, 'app'), type='mod.app'))
             res.append(dict(name='editor', path=os.path.join(path, 'editor'), type='mod.app'))
+            if segment[1] == 'core':
+                res.append(dict(name='system', path=os.path.join(path, 'system'), type='mod.app'))
             res.append(dict(name='model', path=os.path.join(path, 'model'), type='mod.folder'))
             res.append(dict(name='Plugin Info', path=os.path.join(path, 'plugin.json'), type='file', meta=dict(icon="fa-solid fa-info", editor="info")))
             res.append(dict(name='Shortcut', path=os.path.join(path, 'shortcut.ts'), type='file', meta=dict(icon="fa-solid fa-keyboard")))
@@ -62,7 +64,7 @@ def list(segment):
         elif len(segment) == 3:
             mod = segment[2]
 
-            if mod in ['app', 'editor']:
+            if mod in ['app', 'editor', 'system']:
                 files = fs.files(path)
                 for name in files:
                     fpath = os.path.join(path, name)

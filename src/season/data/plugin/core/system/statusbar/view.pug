@@ -1,0 +1,20 @@
+.statusbar-container
+    .hostname
+        i.fa-solid.fa-globe.mr-1
+        span {{status.hostname}}
+    .info
+        i.fa-solid.fa-code-branch.mr-1
+        span {{status.branch}}
+    .info
+        i.fa-brands.fa-python.mr-1
+        span {{status.python}}
+    .info
+        i.fa-solid.fa-rocket.mr-1
+        span wiz-{{status.wiz}}
+
+    .ml-auto 
+    .statusbar-message(*ngIf="service.statusbar.data", [class]="'statusbar-' + service.statusbar.data.mode")
+        i.fa-solid.fa-info-circle.mr-2(*ngIf="service.statusbar.data.mode == 'info'")
+        i.fa-solid.fa-rotate.mr-2(*ngIf="service.statusbar.data.mode == 'warning'")
+        i.fa-solid.fa-triangle-exclamation.mr-2(*ngIf="service.statusbar.data.mode == 'error'")
+        span {{service.statusbar.data.message}}

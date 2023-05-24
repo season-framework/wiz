@@ -2,30 +2,11 @@ import { OnInit } from '@angular/core';
 import { Service } from '@wiz/service/service';
 
 import $ from 'jquery';
-import toastr from "toastr";
 
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { FileNode, FileDataSource, Workspace } from './service';
 
 import MonacoEditor from "@wiz/app/core.editor.monaco";
-
-toastr.options = {
-    "closeButton": false,
-    "debug": false,
-    "newestOnTop": true,
-    "progressBar": false,
-    "positionClass": "toast-top-center",
-    "preventDuplicates": true,
-    "onclick": null,
-    "showDuration": 300,
-    "hideDuration": 500,
-    "timeOut": 1500,
-    "extendedTimeOut": 1000,
-    "showEasing": "swing",
-    "hideEasing": "linear",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
-};
 
 @dependencies({
     MatTreeModule: '@angular/material/tree'
@@ -94,16 +75,14 @@ export class Component implements OnInit {
     private async update(path: string, data: string, node: any = null, viewuri: string | null = null) {
         let res = await wiz.call('update', { path: path, code: data });
         if (node) await this.refresh(node.parent);
-        if (["route", "controller", "model", "config"].includes(path.split("/")[1])) {
-            if (res.code == 200) toastr.info("Updated");
-            return
+        if (res.code == 200) {
+            await this.service.statusbar.warning("build project...");
+            res = await wiz.call('build', { path: path });
+            if (res.code == 200) await this.service.statusbar.info("build finish", 5000);
+            else await this.service.statusbar.error("error on build");
+            let binding = this.service.event.load("workspace.app.preview");
+            if (binding && viewuri) await binding.move(viewuri);
         }
-
-        if (res.code == 200) toastr.success("Updated");
-        res = await wiz.call('build', { path: path });
-
-        let binding = this.service.event.load("workspace.app.preview");
-        if (binding && viewuri) await binding.move(viewuri);
     }
 
     public async open(node: FileNode, location: number = -1) {
@@ -243,7 +222,7 @@ export class Component implements OnInit {
         let { code } = await wiz.call("move", { path, to });
 
         if (code !== 200) {
-            toastr.error("Error on change path");
+            await this.service.alert.error("Error on change path");
             return false;
         }
 
@@ -282,7 +261,7 @@ export class Component implements OnInit {
             let { code } = await wiz.call("create", { type, path });
 
             if (code != 200) {
-                toastr.error("invalid filename");
+                await this.service.alert.error("invalid filename");
                 return;
             }
 

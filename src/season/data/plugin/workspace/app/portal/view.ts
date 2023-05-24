@@ -2,30 +2,11 @@ import { OnInit } from '@angular/core';
 import { Service } from '@wiz/service/service';
 
 import $ from 'jquery';
-import toastr from "toastr";
 
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { FileNode, FileDataSource, Workspace } from './service';
 
 import ModuleInfoEditor from "@wiz/app/workspace.editor.portal.info";
-
-toastr.options = {
-    "closeButton": false,
-    "debug": false,
-    "newestOnTop": true,
-    "progressBar": false,
-    "positionClass": "toast-top-center",
-    "preventDuplicates": true,
-    "onclick": null,
-    "showDuration": 300,
-    "hideDuration": 500,
-    "timeOut": 1500,
-    "extendedTimeOut": 1000,
-    "showEasing": "swing",
-    "hideEasing": "linear",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
-};
 
 @dependencies({
     MatTreeModule: '@angular/material/tree'
@@ -103,16 +84,17 @@ export class Component implements OnInit {
 
     private async update(path: string, data: string) {
         let res = await wiz.call('update', { path: path, code: data });
-        if (res.code == 200) toastr.success("Updated");
+        await this.service.statusbar.warning("build project...");
         res = await wiz.call('build', { path: path });
-        if (res.code == 200) toastr.info("Builded");
-        else toastr.error("Error on build");
+        if (res.code == 200) await this.service.statusbar.info("build finish", 5000);
+        else await this.service.statusbar.error("error on build");
     }
 
     public async build() {
+        await this.service.statusbar.warning("build project...");
         let res = await wiz.call('build', {});
-        if (res.code == 200) toastr.info("Builded");
-        else toastr.error("Error on build");
+        if (res.code == 200) await this.service.statusbar.info("build finish", 5000);
+        else await this.service.statusbar.error("error on build");
     }
 
     public async open(node: FileNode, location: number = -1) {
@@ -214,8 +196,8 @@ export class Component implements OnInit {
                 }).bind('update', async (tab) => {
                     let data = await tab.data();
                     let check = /^[a-z0-9.]+$/.test(data.package);
-                    if (!check) return toastr.error("invalidate package name");
-                    if (data.package.length < 3) return toastr.error("package name at least 3 alphabets");
+                    if (!check) return this.service.alert.error("invalidate package name");
+                    if (data.package.length < 3) return this.service.alert.error("package name at least 3 alphabets");
                     await this.update(node.path, JSON.stringify(data, null, 4));
                 });
 
@@ -308,7 +290,7 @@ export class Component implements OnInit {
         let { code } = await wiz.call("move", { path, to });
 
         if (code !== 200) {
-            toastr.error("Error on change path");
+            this.service.alert.error("Error on change path");
             return false;
         }
 
@@ -350,7 +332,7 @@ export class Component implements OnInit {
             let { code } = await wiz.call("create", { type, path });
 
             if (code != 200) {
-                toastr.error("invalid filename");
+                this.service.alert.error("invalid filename");
                 return;
             }
 
@@ -435,8 +417,8 @@ export class Component implements OnInit {
         let res = await this.service.alert.show({ title: 'Install', message: 'Are you sure to install `' + node.name + '`?', action: "Install", actionBtn: "success", status: 'success' });
         if (!res) return;
         let { code } = await wiz.call("install_sample", { path: node.path });
-        if (code == 200) toastr.success("Installed");
-        else toastr.error("Already Installed");
+        if (code == 200) this.service.statusbar.info("Installed", 5000);
+        else this.service.alert.error("Already Installed");
     }
 
     public async ngOnInit() {
