@@ -76,9 +76,12 @@ def list(segment):
     if fs.isdir(path): 
         files = fs.files(path)
         for name in files:
-            if segment[1] == 'angular':
-                if name in ['styles', 'libs']:
-                    continue
+            try:
+                if segment[1] == 'angular':
+                    if name in ['styles', 'libs']:
+                        continue
+            except:
+                pass
             fpath = os.path.join(path, name)
             ftype = 'file' if fs.isfile(fpath) else 'folder'
             res.append(dict(name=name, path=fpath, type=ftype))
