@@ -166,6 +166,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.4
+
+- [core] bundle path bug fixed
+
 ### 2.3.3
 
 - [plugin/workspace] config list bug fixed

@@ -14,6 +14,8 @@ class Route:
     
     def list(self):
         fs = self.workspace.fs("cache", "src", "route")
+        if self.wiz.server.is_bundle:
+            fs = self.workspace.fs("src", "route")
         routes = fs.files()
         res = []
         for id in routes:
@@ -66,6 +68,8 @@ class Route:
         if len(uri) > 1 and uri[-1] == "/": uri = uri[:-1]
 
         fs = self.workspace.fs("cache")
+        if self.wiz.server.is_bundle:
+            fs = self.workspace.fs()
         urlmap = fs.read.pickle("urlmap", None)
         if urlmap is None:
             urlmap = self.build()
@@ -118,7 +122,10 @@ class Route:
 
     @localized
     def fs(self, *args):
-        return self.workspace.fs('cache', 'src', 'route', self.id, *args)
+        fs = self.workspace.fs('cache', 'src', 'route', self.id, *args)
+        if self.wiz.server.is_bundle:
+            fs = self.workspace.fs('src', 'route', self.id, *args)
+        return fs
 
     @localized
     def dic(self, lang=None):
@@ -246,6 +253,9 @@ class App(AppBase):
 
     def list(self):
         fs = self.workspace.fs('cache', 'src', 'app')
+        if self.wiz.server.is_bundle:
+            fs = self.workspace.fs('src', 'app')
+
         apps = fs.files()
         res = []
         for app_id in apps:
@@ -258,7 +268,10 @@ class App(AppBase):
 
     @localized
     def fs(self, *args):
-        return self.workspace.fs('cache', 'src', 'app', self.id, *args)
+        fs = self.workspace.fs('cache', 'src', 'app', self.id, *args)
+        if self.wiz.server.is_bundle:
+            fs = self.workspace.fs('src', 'app', self.id, *args)
+        return fs
 
     @localized
     def data(self, code=True):

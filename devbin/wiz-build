@@ -77,12 +77,6 @@ then
             git push
             cd ..
 
-            cd portal
-            git add -A .
-            git commit -m "$VERSION"
-            git push
-            cd ..
-
             cd utility
             git add -A .
             git commit -m "$VERSION"
