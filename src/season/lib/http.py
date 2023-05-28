@@ -19,7 +19,7 @@ class ServiceHandler:
         # use dist on production mode
         fs = workspace.fs("www")
         if fs.exists():
-            if wiz.dev() == False or wiz.server.is_bundle:
+            if wiz.server.is_bundle:
                 if fs.isfile(path):
                     wiz.response.download(fs.abspath(path), as_attachment=False)
                 if fs.exists("index.html"):
@@ -39,7 +39,7 @@ class ServiceHandler:
 
         # code binding
         fs = workspace.fs("cache", "src", "assets")
-        if wiz.dev() == False or wiz.server.is_bundle:
+        if wiz.server.is_bundle:
             fs = workspace.fs("src", "assets")
 
         if fs.exists(path):
