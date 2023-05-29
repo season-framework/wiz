@@ -166,6 +166,11 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.6
+
+- [plugin/workspace] npm plugin bug fixed
+- [core] default plugin config bug fixed (portal framework)
+
 ### 2.3.5
 
 - [core] assets path bug fixed

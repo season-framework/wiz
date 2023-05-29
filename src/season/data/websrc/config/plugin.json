@@ -14,19 +14,12 @@
         },
         {
             "name": "Portal Framework",
-            "id": "portal.app.modules",
+            "id": "workspace.app.portal",
             "icon": "fa-solid fa-layer-group",
             "width": 240
         }
     ],
-    "sub": [
-        {
-            "name": "Angular",
-            "id": "workspace.app.angular",
-            "icon": "fa-brands fa-angular",
-            "width": 240
-        }
-    ],
+    "sub": [],
     "app": [
         {
             "name": "Preview",

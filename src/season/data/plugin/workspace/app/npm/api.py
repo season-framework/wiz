@@ -5,7 +5,7 @@ builder = wiz.model("workspace/builder")
 
 def install():
     package = wiz.request.query("package", True)
-    fs = builder.buildfs()
+    fs = builder.fs("build")
     cmd = f"cd {fs.abspath()} && npm install --save {package}"
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
@@ -17,7 +17,7 @@ def install():
 
 def uninstall():
     package = wiz.request.query("package", True)
-    fs = builder.buildfs()
+    fs = builder.fs("build")
     cmd = f"cd {fs.abspath()} && npm uninstall --save {package}"
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
