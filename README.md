@@ -166,6 +166,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.7
+
+- [plugin/workspace] statusbar bug fixed
+
 ### 2.3.6
 
 - [plugin/workspace] npm plugin bug fixed

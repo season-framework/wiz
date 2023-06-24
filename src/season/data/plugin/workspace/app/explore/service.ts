@@ -209,11 +209,11 @@ export class FileEditor {
             if (res.code != 200) return;
 
             await eventHanlder('updated', path);
-            await this.service.statusbar.warning("build project...");
+            this.service.statusbar.warning("build project...");
 
             res = await wiz.call('build', { path: path });
-            if (res.code == 200) await this.service.statusbar.info("build finish", 5000);
-            else await this.service.statusbar.error("error on build");
+            if (res.code == 200) this.service.statusbar.info("build finish", 5000);
+            else this.service.statusbar.error("error on build");
 
             let previewBinding = this.service.event.load("workspace.app.preview");
             if (previewBinding) await previewBinding.move();
@@ -268,13 +268,13 @@ export class RouteEditor {
 
         let build = async (path: any) => {
             let appinfo = await editor.tab(0).data();
-            await this.service.statusbar.warning("build project...");
+            this.service.statusbar.warning("build project...");
             let res = await wiz.call('build', { path });
             if (res.code != 200) {
-                await this.service.statusbar.error("error on build");
+                this.service.statusbar.error("error on build");
                 return false;
             }
-            await this.service.statusbar.info("build finish", 5000);
+            this.service.statusbar.info("build finish", 5000);
             await eventHanlder('builded', appinfo);
 
             let previewBinding = this.service.event.load("workspace.app.preview");
@@ -284,7 +284,7 @@ export class RouteEditor {
         let update = async (path: string, code: string, event: boolean = true) => {
             let appinfo = await editor.tab(0).data();
             let res = await wiz.call("update", { path, code });
-            if (res.code == 200) await this.service.statusbar.warning("build project...");
+            if (res.code == 200) this.service.statusbar.warning("build project...");
             else return false;
 
             let upath = "src/route/" + appinfo.id;
@@ -470,7 +470,7 @@ export class AppEditor {
         let update = async (path: string, code: string, event: boolean = true) => {
             let appinfo = await editor.tab(0).data();
             let res = await wiz.call("update", { path, code });
-            if (res.code == 200) await this.service.statusbar.info("updated");
+            if (res.code == 200) this.service.statusbar.info("updated");
             else return false;
 
             let upath = "src/app/" + appinfo.id;
@@ -504,11 +504,11 @@ export class AppEditor {
         }
 
         let build = async (path: any) => {
-            await this.service.statusbar.warning("build project...");
+            this.service.statusbar.warning("build project...");
             let appinfo = await editor.tab(0).data();
             let res = await wiz.call('build', { path });
             if (res.code != 200) {
-                await this.service.statusbar.error("Error on build");
+                this.service.statusbar.error("Error on build");
                 return false;
             }
             await eventHanlder('builded', appinfo);

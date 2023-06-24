@@ -181,7 +181,7 @@ export class Component implements OnInit {
             }).bind('update', async (tab) => {
                 let data = await tab.data();
                 let { code } = await wiz.call('update', { path: tab.path, data: data.data });
-                await this.service.statusbar.info("updated", 5000);
+                this.service.statusbar.info("updated", 5000);
             });
         }
 

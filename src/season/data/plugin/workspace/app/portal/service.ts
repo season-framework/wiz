@@ -162,7 +162,7 @@ export class FileEditor {
         const imgExt = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg', 'ico'];
         const IS_IMG = imgExt.includes(extension);
         if (IS_IMG) viewtypes[extension] = { viewref: ImageViewer, config: {} };
-        
+
         if (!viewtypes[extension]) {
             return;
         }
@@ -204,10 +204,10 @@ export class FileEditor {
             let res = await wiz.call("update", { path, code });
             if (res.code != 200) return;
             await eventHanlder('updated', path);
-            await this.service.statusbar.warning("build project...");
+            this.service.statusbar.warning("build project...");
             res = await wiz.call('build', { path: path });
-            if (res.code == 200) await this.service.statusbar.info("build finish", 5000);
-            else await this.service.statusbar.error("error on build");
+            if (res.code == 200) this.service.statusbar.info("build finish", 5000);
+            else this.service.statusbar.error("error on build");
             let previewBinding = this.service.event.load("workspace.app.preview");
             if (previewBinding) await previewBinding.move();
         });
@@ -273,7 +273,7 @@ export class RouteEditor {
         let update = async (path: string, code: string, event: boolean = true) => {
             let appinfo = await editor.tab(0).data();
             let res = await wiz.call("update", { path, code });
-            if (res.code == 200) await this.service.statusbar.info("updated", 5000);
+            if (res.code == 200) this.service.statusbar.info("updated", 5000);
             else return false;
 
             let upath = BASEPATH + "/" + appinfo.id;
@@ -310,13 +310,13 @@ export class RouteEditor {
 
         let build = async (path: any) => {
             let appinfo = await editor.tab(0).data();
-            await this.service.statusbar.warning("build project...");
+            this.service.statusbar.warning("build project...");
             let res = await wiz.call('build', { path });
             if (res.code != 200) {
-                await this.service.statusbar.error("error on build");
+                this.service.statusbar.error("error on build");
                 return false;
             }
-            await this.service.statusbar.info("build finish", 5000);
+            this.service.statusbar.info("build finish", 5000);
             await eventHanlder('builded', appinfo);
 
             let previewBinding = this.service.event.load("workspace.app.preview");
@@ -486,7 +486,7 @@ export class AppEditor {
             let appinfo = await editor.tab(0).data();
 
             let res = await wiz.call("update", { path, code });
-            if (res.code == 200) await this.service.statusbar.info("updated", 5000);
+            if (res.code == 200) this.service.statusbar.info("updated", 5000);
             else return false;
 
             let upath = BASEPATH + "/" + appinfo.id;
@@ -527,13 +527,13 @@ export class AppEditor {
 
         let build = async (path: any) => {
             let appinfo = await editor.tab(0).data();
-            await this.service.statusbar.warning("build project...");
+            this.service.statusbar.warning("build project...");
             let res = await wiz.call('build', { path });
             if (res.code != 200) {
-                await this.service.statusbar.error("error on build");
+                this.service.statusbar.error("error on build");
                 return false;
             }
-            await this.service.statusbar.info("build finish", 5000);
+            this.service.statusbar.info("build finish", 5000);
             await eventHanlder('builded', appinfo);
 
             let previewBinding = this.service.event.load("workspace.app.preview");

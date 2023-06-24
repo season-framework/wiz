@@ -76,10 +76,10 @@ export class Component implements OnInit {
         let res = await wiz.call('update', { path: path, code: data });
         if (node) await this.refresh(node.parent);
         if (res.code == 200) {
-            await this.service.statusbar.warning("build project...");
+            this.service.statusbar.warning("build project...");
             res = await wiz.call('build', { path: path });
-            if (res.code == 200) await this.service.statusbar.info("build finish", 5000);
-            else await this.service.statusbar.error("error on build");
+            if (res.code == 200) this.service.statusbar.info("build finish", 5000);
+            else this.service.statusbar.error("error on build");
             let binding = this.service.event.load("workspace.app.preview");
             if (binding && viewuri) await binding.move(viewuri);
         }
