@@ -166,6 +166,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.8
+
+- [plugin/workspace] portal framework widget create bug fixed
+
 ### 2.3.7
 
 - [plugin/workspace] statusbar bug fixed

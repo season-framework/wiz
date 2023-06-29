@@ -362,7 +362,7 @@ export class Component implements OnInit {
         } else if (node.type == "mod.app") {
             let path = node.path.split("/");
             let mod_id = path[1];
-            let editor = await this.workspace.AppEditor(mod_id, { mode: 'portal', id: '', title: '', namespace: '', viewuri: '', category: '' });
+            let editor = await this.workspace.AppEditor(mod_id, { mode: 'portal', type: node.name, id: '', title: '', namespace: '', viewuri: '', category: '' });
             await editor.open();
         } else if (node.type == "mod.route") {
             let path = node.path.split("/");
