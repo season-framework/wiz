@@ -14,12 +14,12 @@ PATH_ROOT = fs.abspath()
 EXEC_SCRIPT = f"""#!/bin/bash
 source /root/.bashrc
 cd {PATH_ROOT}
-{PATH_EXEC_WIZ} run $PORT
+{PATH_EXEC_WIZ} run $params
 """
 
 class ServiceCommand:
      
-    def regist(self, serviceName=None, port=None):
+    def regist(self, serviceName=None, isbundle=None, port=None):
         if fs.exists(os.path.join("public", "app.py")) == False:
             print("Invalid Project path: wiz structure not found in this folder.")
             return
@@ -32,7 +32,14 @@ class ServiceCommand:
         commandPath = f"/usr/local/bin/{serviceName}"
         servicePath = f"/etc/systemd/system/{serviceName}.service"
         
-        _script = EXEC_SCRIPT.replace("$PORT", f"--port {str(port)}")
+        _params = []
+        if port is not None:
+            _params.append(f"--port {str(port)}")
+        if isbundle == 'bundle':
+            _params.append(f"--bundle")
+        _params = " ".join(_params)
+
+        _script = EXEC_SCRIPT.replace("$params", _params)
 
         fs.write(commandPath, _script)
         os.system(f"chmod +x {commandPath}")

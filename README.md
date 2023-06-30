@@ -166,9 +166,13 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.12
+
+- [core] service command upgraded (add bundle option)
+
 ### 2.3.11
 
-- [core] service command upgraded
+- [core] service command upgraded (add port option)
 
 ### 2.3.10
 
