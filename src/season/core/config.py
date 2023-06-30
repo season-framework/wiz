@@ -31,11 +31,8 @@ class base(stdClass):
 class bootConfig(base):
     class socketioConfig(base):
         DEFAULT_VALUES = {
-            'async_mode': (str, 'threading'),
-            'cors_allowed_origins': (str, '*'),
-            'async_handlers': (bool, True),
-            'always_connect': (bool, False),
-            'manage_session': (bool, True)
+            'async_mode': (str, 'eventlet'),
+            'cors_allowed_origins': (str, '*')
         }
 
     class flaskConfig(base):
@@ -45,9 +42,7 @@ class bootConfig(base):
         DEFAULT_VALUES = {
             'host': (str, '0.0.0.0'),
             'port': (int, 3000),
-            'debug': (None, False),
-            'use_reloader': (bool, False),
-            'allow_unsafe_werkzeug': (None, True)
+            'debug': (None, False)
         }
 
     DEFAULT_VALUES = {

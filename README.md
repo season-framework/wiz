@@ -166,6 +166,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.9
+
+- [core] boot config changed
+
 ### 2.3.8
 
 - [plugin/workspace] portal framework widget create bug fixed
