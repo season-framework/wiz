@@ -30,10 +30,7 @@ class base(stdClass):
 
 class bootConfig(base):
     class socketioConfig(base):
-        DEFAULT_VALUES = {
-            'async_mode': (str, 'eventlet'),
-            'cors_allowed_origins': (str, '*')
-        }
+        DEFAULT_VALUES = {}
 
     class flaskConfig(base):
         pass
