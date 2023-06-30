@@ -14,12 +14,12 @@ PATH_ROOT = fs.abspath()
 EXEC_SCRIPT = f"""#!/bin/bash
 source /root/.bashrc
 cd {PATH_ROOT}
-{PATH_EXEC_WIZ} run
+{PATH_EXEC_WIZ} run $PORT
 """
 
 class ServiceCommand:
      
-    def regist(self, serviceName=None):
+    def regist(self, serviceName=None, port=None):
         if fs.exists(os.path.join("public", "app.py")) == False:
             print("Invalid Project path: wiz structure not found in this folder.")
             return
@@ -32,7 +32,9 @@ class ServiceCommand:
         commandPath = f"/usr/local/bin/{serviceName}"
         servicePath = f"/etc/systemd/system/{serviceName}.service"
         
-        fs.write(commandPath, EXEC_SCRIPT)
+        _script = EXEC_SCRIPT.replace("$PORT", f"--port {str(port)}")
+
+        fs.write(commandPath, _script)
         os.system(f"chmod +x {commandPath}")
         print(f"`{commandPath}` created")
 
@@ -91,15 +93,42 @@ WantedBy=multi-user.target
         serviceName = "wiz." + serviceName.lower()
         os.system(f"systemctl status {serviceName}")
     
+    def _list(self):
+        files = fs.files("/etc/systemd/system")
+        services = []
+        for target in files:
+            if target.startswith("wiz."):
+                name = ".".join(target[4:].split(".")[:-1])
+                services.append(name)
+        return services
+
     def start(self, serviceName=None):
+        if serviceName is None:
+            services = self._list()
+            for service in services:
+                self.start(service)
+            return
+
         serviceName = "wiz." + serviceName.lower()
         os.system(f"systemctl start {serviceName}")
     
     def stop(self, serviceName=None):
+        if serviceName is None:
+            services = self._list()
+            for service in services:
+                self.stop(service)
+            return
+
         serviceName = "wiz." + serviceName.lower()
         os.system(f"systemctl stop {serviceName}")
 
     def restart(self, serviceName=None):
+        if serviceName is None:
+            services = self._list()
+            for service in services:
+                self.restart(service)
+            return
+            
         serviceName = "wiz." + serviceName.lower()
         os.system(f"systemctl restart {serviceName}")
 

@@ -106,14 +106,14 @@ wiz ide upgrade # ide upgrade
         wiz service list
         ```
 
-- `wiz service regist [name]`
+- `wiz service regist [name] [port]`
     - Same AS
         - `install`
     - Example
         ```bash
         wiz service regist myapp
         # or
-        wiz service install myapp
+        wiz service install myapp 3001
         ```
 
 - `wiz service unregist [name]`
@@ -165,6 +165,10 @@ wiz ide upgrade # ide upgrade
     - not required server restart
 
 ## Release Note
+
+### 2.3.11
+
+- [core] service command upgraded
 
 ### 2.3.10
 
