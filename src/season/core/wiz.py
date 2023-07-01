@@ -309,7 +309,15 @@ class Config(season.util.std.stdClass):
         if fs.isfile(config_path) == False:
             return build_config()
 
-        _code = fs.read(config_path, "")
+        cachens = 'config.code'
+        namespace = config_path
+        if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
+        if namespace in wiz.server._cache[cachens]:
+            _code = wiz.server._cache[cachens][namespace]
+        else:
+            _code = fs.read(config_path, "")
+            _code = compile(_code, config_path, 'exec')
+            wiz.server._cache[cachens][namespace] = _code
 
         env = dict()
         env['__name__'] = config_path
@@ -322,7 +330,7 @@ class Config(season.util.std.stdClass):
         env['workspace'] = workspace
 
         try:
-            exec(compile(_code, config_path, 'exec'), env)
+            exec(_code, env)
         except Exception as e:
             if logger is not None:
                 errormsg = f"error: config/{name}.py\n" + traceback.format_exc()
