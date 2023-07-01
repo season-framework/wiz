@@ -113,7 +113,9 @@ wiz ide upgrade # ide upgrade
         ```bash
         wiz service regist myapp
         # or
-        wiz service install myapp 3001
+        wiz service install myapp src 3001
+        # or
+        wiz service install myapp bundle 3001
         ```
 
 - `wiz service unregist [name]`
@@ -136,19 +138,34 @@ wiz ide upgrade # ide upgrade
     - Example
         ```bash
         wiz service start myapp
+        wiz service start # start all services
         ```
 
 - `wiz service stop [name]`
     - Example
         ```bash
         wiz service stop myapp
+        wiz service stop  # stop all services
         ```
 
 - `wiz service restart [name]`
     - Example
         ```bash
         wiz service restart myapp
+        wiz service restart  # restart all services
         ```
+
+### Bundle Project
+- `wiz bundle --project=<Project Name>`
+    - Example
+        ```bash
+        wiz bundle # bundle main project
+        wiz bundle --project=main
+        ```
+    - Output
+        - `<workspace>/bundle` file created after run bundle api
+        - run using command `wiz run --bundle`
+        - or adding services using `wiz service install <myservice> bundle`
 
 ## Version Policy
 
@@ -165,6 +182,10 @@ wiz ide upgrade # ide upgrade
     - not required server restart
 
 ## Release Note
+
+### 2.3.13
+
+- [core] bundle command added
 
 ### 2.3.12
 
