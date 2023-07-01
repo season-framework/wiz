@@ -183,6 +183,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.14
+
+- [core] cache added for wiz components (model, controller, api)
+
 ### 2.3.13
 
 - [core] bundle command added

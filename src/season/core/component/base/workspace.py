@@ -138,6 +138,17 @@ class App:
             ctrl = wiz.controller(ctrl)()
 
         name = self.fs().abspath("api.py")
+
+        if wiz.mode() != 'ide':
+            cachens = 'app.api.code'
+            namespace = name
+            if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
+            if namespace in wiz.server._cache[cachens]:
+                code = wiz.server._cache[cachens][namespace]
+            else:
+                code = compile(code, name, 'exec')
+                wiz.server._cache[cachens][namespace] = code
+
         apifn = season.util.os.compiler(code, name=name, logger=logger, controller=ctrl, dic=dic, wiz=wiz)
         
         return apifn

@@ -118,7 +118,18 @@ class Route:
         dic = self.dic()
 
         name = self.fs().abspath('controller.py')
-        season.util.os.compiler(data['controller'], name=name, logger=logger, controller=ctrl, dic=dic, wiz=wiz)
+
+        cachens = 'route.code'
+        namespace = name
+        if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
+        if namespace in wiz.server._cache[cachens]:
+            code = wiz.server._cache[cachens][namespace]
+        else:
+            code = data['controller']
+            code = compile(code, name, 'exec')
+            wiz.server._cache[cachens][namespace] = code
+            
+        season.util.os.compiler(code, name=name, logger=logger, controller=ctrl, dic=dic, wiz=wiz)
 
     @localized
     def fs(self, *args):
@@ -166,6 +177,13 @@ class Route:
         wiz = self.wiz
         fs = self.fs()
 
+        namespace = APP_ID
+        cachens = 'route.data'
+        if code:
+            if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
+            if namespace in wiz.server._cache[cachens]:
+                return wiz.server._cache[cachens][namespace]
+
         pkg = dict()
         pkg['package'] = fs.read.json('app.json', None)
         if pkg['package'] is None:
@@ -192,6 +210,8 @@ class Route:
                         pkg['dic'][lang] = fs.read(os.path.join("dic", dic), '{}')
                     except:
                         pass
+
+            wiz.server._cache[cachens][namespace] = pkg
 
         return pkg
 
@@ -278,7 +298,14 @@ class App(AppBase):
         APP_ID = self.id
         wiz = self.wiz
         fs = self.fs()
-
+        
+        namespace = APP_ID
+        cachens = 'app.data'
+        if code:
+            if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
+            if namespace in wiz.server._cache[cachens]:
+                return wiz.server._cache[cachens][namespace]
+            
         pkg = dict()
         pkg['package'] = fs.read.json('app.json', None)
         if pkg['package'] is None:
@@ -316,6 +343,8 @@ class App(AppBase):
                         pkg['dic'][lang] = fs.read(os.path.join("dic", dic), '{}')
                     except:
                         pass
+            
+            wiz.server._cache[cachens][namespace] = pkg
 
         return pkg
 
@@ -366,7 +395,16 @@ class Workspace(Base):
         fs = self.fs("cache", "src", "controller")
         if self.wiz.server.is_bundle:
             fs = self.fs("src", "controller")
-        code = fs.read(f"{namespace}.py")
+
+        cachens = 'controller.code'
+        if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
+        if namespace in wiz.server._cache[cachens]:
+            code = wiz.server._cache[cachens][namespace]
+        else:
+            code = fs.read(f"{namespace}.py")
+            code = compile(code, fs.abspath(namespace + ".py"), 'exec')
+            wiz.server._cache[cachens][namespace] = code
+
         logger = wiz.logger(f"[ctrl/{namespace}]")
         ctrl = season.util.os.compiler(code, name=fs.abspath(namespace + ".py"), logger=logger, wiz=wiz)
         return ctrl['Controller']
@@ -376,7 +414,16 @@ class Workspace(Base):
         fs = self.fs("cache", "src", "model")
         if self.wiz.server.is_bundle:
             fs = self.fs("src", "model")
-        code = fs.read(f"{namespace}.py")
+        
+        cachens = 'model.code'
+        if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
+        if namespace in wiz.server._cache[cachens]:
+            code = wiz.server._cache[cachens][namespace]
+        else:
+            code = fs.read(f"{namespace}.py")
+            code = compile(code, fs.abspath(namespace + ".py"), 'exec')
+            wiz.server._cache[cachens][namespace] = code
+
         logger = wiz.logger(f"[model/{namespace}]")
         model = season.util.os.compiler(code, name=fs.abspath(namespace + ".py"), logger=logger, wiz=wiz)
         return model['Model']

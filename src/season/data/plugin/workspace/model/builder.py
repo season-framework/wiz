@@ -356,4 +356,6 @@ class Builder:
             if timestamp < timestampLog:
                 self.build()
 
+        wiz.server.clear()
+
 Model = Builder()

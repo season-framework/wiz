@@ -13,6 +13,7 @@ class Server:
         self._wiz = None
 
         self.is_bundle = bundle
+        self._cache = dict()
 
         # set server libs
         self.package = season.util.std.stdClass()
@@ -95,3 +96,6 @@ class Server:
 
     def wsgi(self):
         return self.app.flask
+
+    def clear(self):
+        self._cache = dict()
