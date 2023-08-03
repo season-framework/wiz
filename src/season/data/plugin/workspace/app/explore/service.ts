@@ -526,6 +526,9 @@ export class AppEditor {
             let code = JSON.stringify(appinfo, null, 4);
             await update(path, code, false);
 
+            path = "src/app/" + id + "/view.pug";
+            await update(path, "");
+
             path = "src/app/" + id + "/view.ts";
             await update(path, DEFAULT_COMPONENT);
 
