@@ -183,6 +183,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.16
+
+- [plugin/workspace] bug at app create fixed
+
 ### 2.3.15
 
 - [core] cache added for wiz config
