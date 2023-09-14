@@ -183,6 +183,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.17
+
+- [core] wiz.response stream api
+
 ### 2.3.16
 
 - [plugin/workspace] bug at app create fixed

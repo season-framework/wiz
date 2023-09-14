@@ -2,7 +2,7 @@ import season
 import io
 import json
 import os
-import traceback
+import re
 from abc import *
 
 # internal classes
@@ -117,13 +117,50 @@ class Response(metaclass=ABCMeta):
     def download(self, filepath, as_attachment=True, filename=None):
         if os.path.isfile(filepath):
             resp = None
-            try: resp = self._flask.send_file(img_io, mimetype=mimetype, as_attachment=as_attachment, attachment_filename=filename)
+            try: resp = self._flask.send_file(filepath, as_attachment=as_attachment, attachment_filename=filename)
             except: resp = None
             if resp is None:
                 try: resp = self._flask.send_file(filepath, as_attachment=as_attachment, download_name=filename)
                 except: pass
             return self._build(resp)
         self._flask.abort(404)
+    
+    def stream(self, filepath, rangeHeader=None, mimetype='video/mp4', content_type=None, direct_passthrough=True):
+        if content_type is None: content_type = mimetype
+        self.headers.set(**{'Accept-Ranges': 'bytes'})
+
+        def get_chunk(byte1=None, byte2=None):
+            file_size = os.stat(filepath).st_size
+            start = 0
+            
+            if byte1 < file_size:
+                start = byte1
+            if byte2:
+                length = byte2 + 1 - byte1
+            else:
+                length = file_size - start
+
+            with open(filepath, 'rb') as f:
+                f.seek(start)
+                chunk = f.read(length)
+            return chunk, start, length, file_size
+
+        byte1, byte2 = 0, None
+        if rangeHeader:
+            match = re.search(r'(\d+)-(\d*)', rangeHeader)
+            groups = match.groups()
+
+            if groups[0]:
+                byte1 = int(groups[0])
+            if groups[1]:
+                byte2 = int(groups[1])
+
+        chunk, start, length, file_size = get_chunk(byte1, byte2)
+        
+        resp = self._flask.Response(chunk, 206, mimetype=mimetype, content_type=content_type, direct_passthrough=direct_passthrough)
+        self.headers.set(**{'Content-Range': 'bytes {0}-{1}/{2}'.format(start, start + length - 1, file_size)})
+        self.set_status(206)
+        return self._build(resp)
     
     def send(self, message, content_type=None):
         resp = self._flask.Response(str(message))
