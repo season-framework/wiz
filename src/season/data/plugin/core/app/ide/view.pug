@@ -86,4 +86,4 @@
                 ng-container(*ngIf="node.type == 'mod.route'")
                     i.icon-action.fa-solid.fa-plus((click)="create(node, 'mod.route'); $event.stopPropagation();")
 
-ngx-loading([show]="loading")
+wiz-core-app-widget-loading(*ngIf="loading")

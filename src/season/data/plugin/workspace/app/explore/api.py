@@ -1,10 +1,11 @@
 import os
+import math
+import json
+import time
+import datetime
+import shutil
 import zipfile
 import tempfile
-import time
-import shutil
-import datetime
-import json
 
 builder = wiz.model("workspace/builder")
 workspace = wiz.workspace("service")
@@ -32,63 +33,107 @@ def controller():
 
     wiz.response.status(200, res)
 
-def list(segment):
-    path = wiz.request.query("path", True)
-    segment = path.split("/")
-    res = []
+def tree():
+    def driveItem(path, root=None):
+        def convert_size():
+            size_bytes = os.path.getsize(fs.abspath(path)) 
+            if size_bytes == 0:
+                return "0B"
+            size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+            i = int(math.floor(math.log(size_bytes, 1024)))
+            p = math.pow(1024, i)
+            s = round(size_bytes / p, 2)
+            return "%s %s" % (s, size_name[i])
 
-    if len(segment) == 1 and segment[0] == "src":
-        res.append(dict(name='angular', path=os.path.join(path, 'angular'), type='mod.folder'))
-        res.append(dict(name='app/page', path=os.path.join(path, 'app', 'page'), type='mod.page'))
-        res.append(dict(name='app/component', path=os.path.join(path, 'app', 'component'), type='mod.component'))
-        res.append(dict(name='app/layout', path=os.path.join(path, 'app', 'layout'), type='mod.layout'))
-        res.append(dict(name='libs', path=os.path.join(path, 'angular', 'libs'), type='mod.libs'))
-        res.append(dict(name='styles', path=os.path.join(path, 'angular', 'styles'), type='mod.styles'))
-        res.append(dict(name='assets', path=os.path.join(path, 'assets'), type='mod.folder'))
-        res.append(dict(name='server/api', path=os.path.join(path, 'route'), type='mod.route'))
-        res.append(dict(name='server/controller', path=os.path.join(path, 'controller'), type='mod.folder'))
-        res.append(dict(name='server/model', path=os.path.join(path, 'model'), type='mod.folder'))
-        res.append(dict(name='server/config', path=os.path.join('config'), type='mod.folder'))
-        wiz.response.status(200, res)
+        item = dict()
+        item['id'] = path
+        item['type'] = 'folder' if fs.isdir(path) else 'file'
+        item['title'] = os.path.basename(path)
+        if root is None: item['root_id'] = os.path.dirname(path)
+        else: item['root_id'] = root
+        item['created'] = datetime.datetime.fromtimestamp(os.stat(fs.abspath(path)).st_ctime).strftime('%Y-%m-%d %H:%M:%S')
+        item['modified'] = datetime.datetime.fromtimestamp(os.stat(fs.abspath(path)).st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+        item['size'] = convert_size()
+        item['sizebyte'] = os.path.getsize(fs.abspath(path)) 
+        return item
+
+    path = wiz.request.query("path", True)
+
+    if path == '' or path == 'src':
+        root = dict(id='src', title='src', type='folder')
+        children = []
+        children.append(dict(title='angular', id='src/angular', type='folder', root_id='src'))
+        children.append(dict(title='app/page', id='src/app/page', type='folder', root_id='src'))
+        children.append(dict(title='app/component', id='src/app/component', type='folder', root_id='src'))
+        children.append(dict(title='app/layout', id='src/app/layout', type='folder', root_id='src'))
+        children.append(dict(title='libs', id='src/angular/libs', type='folder', root_id='src'))
+        children.append(dict(title='styles', id='src/angular/styles', type='folder', root_id='src'))
+        children.append(dict(title='assets', id='src/assets', type='folder', root_id='src'))
+        children.append(dict(title='server/api', id='src/route', type='folder', root_id='src'))
+        children.append(dict(title='server/controller', id='src/controller', type='folder', root_id='src'))
+        children.append(dict(title='server/model', id='src/model', type='folder', root_id='src'))
+        children.append(dict(title='server/config', id='config', type='folder', root_id='src'))
+        wiz.response.status(200, dict(root=root, children=children))
     
+    segment = path.split("/")
+
     if len(segment) == 3 and segment[1] == 'app':
         mode = segment[2]
+        orgpath = path
         path = "/".join(segment[:2])
-        files = fs.files(path)
-        for name in files:
-            fpath = os.path.join(path, name)
-            if fs.isfile(os.path.join(fpath, 'app.json')):
-                appinfo = fs.read.json(os.path.join(fpath, 'app.json'))
-                if appinfo['mode'] == mode:
-                    res.append(dict(name=appinfo['title'], path=fpath, type='app', meta=appinfo))
-        wiz.response.status(200, res)
-    
+        root = driveItem(path)
+        root['id'] = orgpath
+        if mode == 'page': root['title'] = 'app/page'
+        if mode == 'component': root['title'] = 'app/component'
+        if mode == 'layout': root['title'] = 'app/layout'
+
+        children = []
+        if fs.isdir(path):
+            for item in fs.ls(path):
+                childpath = os.path.join(path, item)
+                if fs.isfile(os.path.join(childpath, 'app.json')):
+                    appinfo = fs.read.json(os.path.join(childpath, 'app.json'))
+                    if appinfo['mode'] == mode:
+                        children.append(dict(title=appinfo['title'], id=childpath, type='app', meta=appinfo, root_id=f"src/app/{mode}"))
+        wiz.response.status(200, dict(root=root, children=children))
+
     if len(segment) == 2 and segment[1] == 'route':
-        files = fs.files(path)
-        for name in files:
-            fpath = os.path.join(path, name)
-            if fs.isfile(os.path.join(fpath, 'app.json')):
-                appinfo = fs.read.json(os.path.join(fpath, 'app.json'))
-                if appinfo['id'].split(".")[0] != 'portal':
-                    res.append(dict(name=appinfo['route'], path=fpath, type='route', meta=appinfo))
-        wiz.response.status(200, res)
-    
-    if fs.isdir(path): 
-        files = fs.files(path)
-        for name in files:
+        root = driveItem(path)
+        root['title'] = 'server/api'
+
+        children = []
+        if fs.isdir(path):
+            for item in fs.ls(path):
+                childpath = os.path.join(path, item)
+                if fs.isfile(os.path.join(childpath, 'app.json')):
+                    appinfo = fs.read.json(os.path.join(childpath, 'app.json'))
+                    if appinfo['id'].split(".")[0] != 'portal':
+                        children.append(dict(title=appinfo['route'], id=childpath, type='route', meta=appinfo, root_id="src/route"))
+        wiz.response.status(200, dict(root=root, children=children))
+
+    root = driveItem(path)
+    root_dirs = [
+        'src/angular', 'src/app/page', 'src/app/component', 'src/app/layout', 
+        'src/angular/libs', 'src/angular/styles', 'src/assets', 'src/route', 'src/controller', 'src/model', 'config']
+    if path in root_dirs: root['root_id'] = 'src'
+    if path == 'src/controller': root['title'] = 'server/controller'
+    if path == 'src/model': root['title'] = 'server/model'
+    if path == 'config': root['title'] = 'server/config'
+
+    children = []
+    if fs.isdir(path):
+        for item in fs.ls(path):
             try:
                 if segment[1] == 'angular':
-                    if name in ['styles', 'libs']:
+                    if item in ['styles', 'libs']:
                         continue
             except:
                 pass
-            fpath = os.path.join(path, name)
-            ftype = 'file' if fs.isfile(fpath) else 'folder'
-            res.append(dict(name=name, path=fpath, type=ftype))
-        
-        wiz.response.status(200, res)
+            childpath = os.path.join(path, item)
+            children.append(driveItem(childpath, root=root['id']))
+        files = fs.files(path)
 
-    wiz.response.status(404, [])
+    wiz.response.status(200, dict(root=root, children=children))
 
 def exists(segment):
     path = wiz.request.query("path", True)
@@ -113,7 +158,7 @@ def create():
 
 def delete():
     path = wiz.request.query("path", True)
-    if len(path) == 0:
+    if len(path) == 0 or path == 'src':
         wiz.response.status(401, False)
     if fs.exists(path):
         fs.delete(path)
@@ -139,11 +184,14 @@ def read():
 
 def download(segment):
     path = segment.path
-    extension = '.wizportal' if len(path.split("/")) == 2 else '.zip'
+    extension = '.zip'
+    if path.split("/")[1] == 'app':
+        extension = '.wizapp'
+
     path = fs.abspath(path)
 
     if fs.isdir(path):
-        filename = os.path.splitext(os.path.basename(path))[0] + extension
+        filename = os.path.basename(path) + extension
         zippath = os.path.join(tempfile.gettempdir(), 'wiz', datetime.datetime.now().strftime("%Y%m%d"), str(int(time.time())), filename)
         if len(zippath) < 10: 
             wiz.response.abort(404)

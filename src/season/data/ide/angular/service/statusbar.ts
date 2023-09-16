@@ -50,6 +50,14 @@ export default class Statusbar {
             await this.data.hide(timeout);
     }
 
+    public async process(message: any, timeout: number = 0) {
+        this.data = this.generate(message);
+        this.data.mode = 'process';
+        await this.service.render();
+        if (timeout > 0)
+            await this.data.hide(timeout);
+    }
+
     public async hide(timeout: number = 0) {
         await this.service.render(timeout);
         this.data = null;

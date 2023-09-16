@@ -57,20 +57,30 @@ def changes():
         fmap = dict()
         for diff in tags:
             fmap[diff.b_path] = diff.change_type
-
+    except:
+        pass
+    
+    try:    
         staged = repo.index.diff("HEAD")
         for diff in staged:
-            obj = {"change_type": fmap[diff.b_path], "path": diff.b_path}   
+            ctype = 'D'
+            if diff.b_path in fmap: ctype = fmap[diff.b_path]
+            obj = {"change_type": ctype, "path": diff.b_path}   
             path = obj['path']
             res['staged'].append(obj)
+    except:
+        pass
 
+    try:
         unstaged = repo.index.diff(None)
         for diff in unstaged:
-            obj = {"change_type": fmap[diff.b_path], "path": diff.b_path}        
+            ctype = 'D'
+            if diff.b_path in fmap: ctype = fmap[diff.b_path]
+            obj = {"change_type": ctype, "path": diff.b_path}
             path = obj['path']
             res['unstaged'].append(obj)
-    except Exception as e:
-        wiz.response.status(500, e)
+    except:
+        pass
 
     wiz.response.status(200, res)
 

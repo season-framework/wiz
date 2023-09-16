@@ -6,10 +6,10 @@
     --wiz-color-scroll-thumb: #ababab;
     --wiz-color-text: #1e293b;
     --wiz-color-border: #d9d9d9;
-    --wiz-color-blue: #3843D0;
-    --wiz-color-blue-lt: rgba(32, 107, 196, .05);
-    --wiz-color-blue-hover: rgba(2, 2, 2, 0.9);
-    --wiz-color-red: #EB5267;
+    --wiz-color-blue: rgba(108, 141, 246, 1);
+    --wiz-color-blue-lt: rgba(108, 141, 246, .05);
+    --wiz-color-blue-hover: rgba(108, 141, 246, .9);
+    --wiz-color-red: rgba(235, 82, 103, 1);
     --wiz-color-red-lt: rgba(235, 82, 103, .05);
     --wiz-color-red-hover: rgba(235, 82, 103, .9);
     --wiz-color-gray: #A1A2B7;
@@ -42,7 +42,8 @@ body {
     position: absolute;
 }
 
-.xterm, .xterm-screen {
+.xterm,
+.xterm-screen {
     height: 100% !important;
 }
 

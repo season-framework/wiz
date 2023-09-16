@@ -46,7 +46,8 @@ export class Component implements OnInit {
 
     public async changes() {
         await this.loader(true);
-        let { data } = await wiz.call("changes");
+        let { code, data } = await wiz.call("changes");
+        if (code == 500) return;
 
         let parser = (data) => {
             for (let i = 0; i < data.length; i++) {

@@ -65,6 +65,19 @@ wiz ide upgrade # ide upgrade
         wiz create myapp
         ```
 
+### build Project
+- `wiz build --project=[Project Name] --clean`
+    - Flag
+        | Flag | Syntax | Description |
+        |---|---|---|
+        | --project | wiz build --project=NAME | build project, Default main |
+        | --clean | wiz build --clean | Clean build, Default False |
+    - Example
+        ```bash
+        wiz build --project main
+        wiz build --project dev --clean
+        ```
+
 ### Daemon API
 - `wiz run --host=<host> --port=<port> --log=<log file path>`
     - Flag
@@ -182,6 +195,14 @@ wiz ide upgrade # ide upgrade
     - not required server restart
 
 ## Release Note
+
+### 2.3.18
+
+- [core] upgrade to angular 16
+- [core] color changed
+- [core] add build command
+- [plugin/workspace] tree view component changed
+- [plugin/git] commit bug fixed
 
 ### 2.3.17
 

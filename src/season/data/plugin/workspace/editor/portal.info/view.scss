@@ -1,6 +1,7 @@
 .editor-info {
+    position: absolute;
     width: 100%;
-    height: calc(100vh - 28px);
+    height: 100%;
     display: block;
     padding: 24px;
     background-color: var(--wiz-color-light);

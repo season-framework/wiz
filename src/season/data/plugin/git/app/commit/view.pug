@@ -49,4 +49,4 @@
                             span.badge.badge-sm.mr-1(class="{{item.color}}") {{item.change_type}}
                             a.link((click)="add(item.path)") {{item.path}}
 
-ngx-loading([show]="loading")
+wiz-core-app-widget-loading(*ngIf="loading")

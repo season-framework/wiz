@@ -1,10 +1,11 @@
 import os
+import math
+import json
+import time
+import datetime
+import shutil
 import zipfile
 import tempfile
-import time
-import shutil
-import datetime
-import json
 import season
 import git
 
@@ -58,12 +59,35 @@ def upgrade():
     build()
     wiz.response.status(200, True)
 
-def list(segment):
+def tree():
     path = wiz.request.query("path", True)
-    segment = path.split("/")
-    res = []
 
-    if len(segment) == 1:
+    children = []
+
+    def addChild(topath, title, _path=None, _type=None, _meta=None):
+        _item = dict(title=title, id=os.path.join(path, title), type='folder', root_id=topath)
+        if _path is not None: _item['id'] = _path
+        if _type is not None: _item['type'] = _type
+        if _meta is not None: _item['meta'] = _meta
+        children.append(_item)
+
+    def driveItem(path, root=None):
+        item = dict()
+        item['id'] = path
+        item['type'] = 'folder' if fs.isdir(path) else 'file'
+        item['title'] = os.path.basename(path)
+        if len(path.split('/')) == 2:
+            plugin = fs.read.json(os.path.join(path, "portal.json"), dict())
+            if 'title' in plugin and len(plugin['title']) > 0: item['title'] = plugin['title']
+            item['meta'] = plugin
+        if root is None: item['root_id'] = os.path.dirname(path)
+        else: item['root_id'] = root
+        return item
+
+    if path == '' or path == 'portal':
+        path = 'portal'
+        root = dict(id='portal', title='portal', type='folder')
+
         files = fs.files(path)
         for name in files:
             fpath = os.path.join(path, name)
@@ -73,80 +97,88 @@ def list(segment):
             title = name
             if 'title' in plugin and len(plugin['title']) > 0:
                 title = plugin['title']
-            res.append(dict(name=title, path=fpath, type='folder', meta=plugin))
+            
+            addChild('portal', title, _path=fpath, _type='folder', _meta=plugin)
         
-        res = sorted(res, key=lambda k: k['name'])
-        wiz.response.status(200, res)
+        wiz.response.status(200, dict(root=root, children=children))
+    
+    segment = path.split("/")
 
-    elif len(segment) == 2:
+    if len(segment) == 3 and segment[2] == 'sample':
+        if fs.isdir(path) == False: fs.makedirs(path)
+        root = driveItem(path)
+
+        addChild(path, 'page')
+        addChild(path, 'component')
+        addChild(path, 'layout')
+        
+        wiz.response.status(200, root=root, children=children)
+
+    if len(segment) > 3 and segment[2] == 'sample':
+        mod = segment[3]
+        if mod in ['layout', 'component', 'page']:
+            spath = os.path.join(*segment[:3])
+            root = driveItem(spath)
+            root['id'] = path
+            root['title'] = mod
+            files = fs.files(spath)
+
+            for name in files:
+                if name.split(".")[0] != mod:
+                    continue
+                fpath = os.path.join(spath, name)
+                if fs.isfile(os.path.join(fpath, 'app.json')):
+                    appinfo = fs.read.json(os.path.join(fpath, 'app.json'))
+                    addChild(path, appinfo['title'], _path=fpath, _type=mod, _meta=appinfo)
+
+            wiz.response.status(200, root=root, children=children)
+
+    if fs.isdir(path) == False:
+        wiz.response.status(404)
+
+    if len(segment) == 2:
         plugin = fs.read.json(os.path.join(path, "portal.json"), dict())
+        
         def checker(name):
             if f"use_{name}" in plugin:
                 return plugin[f"use_{name}"]
             return False
+
+        root = driveItem(path)
         
-        if checker('sample'): res.append(dict(name='sample', path=os.path.join(path, 'sample'), type='mod.sample'))
-        if checker('app'): res.append(dict(name='app', path=os.path.join(path, 'app'), type='mod.app', meta=dict(icon="fa-solid fa-layer-group")))
-        if checker('widget'): res.append(dict(name='widget', path=os.path.join(path, 'widget'), type='mod.app', meta=dict(icon="fa-solid fa-layer-group")))
-        if checker('route'): res.append(dict(name='api', path=os.path.join(path, 'route'), type='mod.route', meta=dict(icon="fa-solid fa-link")))
-        if checker('libs'): res.append(dict(name='libs', path=os.path.join(path, 'libs'), type='mod.libs', meta=dict(icon="fa-solid fa-book")))
-        if checker('styles'): res.append(dict(name='styles', path=os.path.join(path, 'styles'), type='mod.styles', meta=dict(icon="fa-brands fa-css")))
-        if checker('assets'): res.append(dict(name='assets', path=os.path.join(path, 'assets'), type='mod.assets', meta=dict(icon="fa-solid fa-images")))
-        if checker('controller'): res.append(dict(name='controller', path=os.path.join(path, 'controller'), type='mod.controller'))
-        if checker('model'): res.append(dict(name='model', path=os.path.join(path, 'model'), type='mod.model'))
-        res.append(dict(name='Package Info', path=os.path.join(path, 'portal.json'), type='file', meta=dict(icon="fa-solid fa-info", editor="info")))
-        res.append(dict(name='README', path=os.path.join(path, 'README.md'), type='file'))
-        wiz.response.status(200, res)
-    
-    elif len(segment) == 3:
+        addChild(path, 'Module Info', _path=os.path.join(path, 'portal.json'), _type='file', _meta=dict(editor='info'))
+        structures = ['sample', 'app', 'widget', 'route', 'libs', 'styles', 'assets', 'controller', 'model']
+        for st in structures:
+            if checker(st): addChild(path, st)
+        addChild(path, 'README', _path=os.path.join(path, 'README.md'), _type='file')
+        
+        wiz.response.status(200, root=root, children=children)
+
+    if len(segment) == 3 and segment[2] in ['app', 'route', 'widget']:
         mod = segment[2]
-        if mod == 'sample':
-            res.append(dict(name='page', path=os.path.join(path, 'page'), type='mod.sample.page'))
-            res.append(dict(name='component', path=os.path.join(path, 'component'), type='mod.sample.app'))
-            res.append(dict(name='layout', path=os.path.join(path, 'layout'), type='mod.sample.app'))
-            wiz.response.status(200, res)
-        
-        if mod in ['app', 'route', 'widget']:
-            files = fs.files(path)
-            for name in files:
-                fpath = os.path.join(path, name)
-                if fs.isfile(os.path.join(fpath, 'app.json')):
-                    appinfo = fs.read.json(os.path.join(fpath, 'app.json'))
-                    if mod == 'route':
-                        res.append(dict(name=appinfo['route'], path=fpath, type=mod, meta=appinfo))
-                    else:
-                        appinfo['type'] = mod
-                        res.append(dict(name=appinfo['title'], path=fpath, type=mod, meta=appinfo))
+        root = driveItem(path)
 
-            wiz.response.status(200, res)
+        files = fs.files(path)
+        for name in files:
+            fpath = os.path.join(path, name)
+            if fs.isfile(os.path.join(fpath, 'app.json')):
+                appinfo = fs.read.json(os.path.join(fpath, 'app.json'))
+                if mod == 'route':
+                    addChild(path, appinfo['route'], _path=fpath, _type='route', _meta=appinfo)
+                else:
+                    appinfo['type'] = mod
+                    addChild(path, appinfo['title'], _path=fpath, _type='app', _meta=appinfo)
 
-    elif len(segment) > 3:
-        mod = segment[2]
-        if mod in ['app', 'widget', 'route']:
-            wiz.response.status(200, res)
-        
-        if mod == 'sample':
-            mod = segment[3]
-            if mod == 'layout' or mod == 'component' or mod == 'page':
-                spath = os.path.join(*segment[:3])
-                files = fs.files(spath)
-                for name in files:
-                    if name.split(".")[0] != mod:
-                        continue
-                    fpath = os.path.join(spath, name)
-                    if fs.isfile(os.path.join(fpath, 'app.json')):
-                        appinfo = fs.read.json(os.path.join(fpath, 'app.json'))
-                        res.append(dict(name=appinfo['title'], path=fpath, type=mod, meta=appinfo))
+        wiz.response.status(200, root=root, children=children)
 
-                wiz.response.status(200, res)
-
+    root = driveItem(path)
     files = fs.files(path)
     for name in files:
         fpath = os.path.join(path, name)
         ftype = 'file' if fs.isfile(fpath) else 'folder'
-        res.append(dict(name=name, path=fpath, type=ftype))
-    
-    wiz.response.status(200, res)
+        addChild(path, name, _path=fpath, _type=ftype)
+              
+    wiz.response.status(200, root=root, children=children)
 
 def exists(segment):
     path = wiz.request.query("path", True)
@@ -197,7 +229,13 @@ def read():
 
 def download(segment):
     path = segment.path
-    extension = '.wizportal' if len(path.split("/")) == 2 else '.zip'
+
+    extension = ".zip"
+    if len(path.split("/")) == 2:
+        extension = ".wizportal"
+    if fs.exists(os.path.join(path, "app.json")):
+        extension = ".wizapp"
+
     path = fs.abspath(path)
 
     if fs.isdir(path):

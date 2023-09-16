@@ -38,7 +38,6 @@
         word-break: break-all;
         white-space: nowrap;
     }
-
 }
 
 .link {
@@ -47,4 +46,8 @@
     &:hover {
         color: var(--wiz-color-blue);
     }
+}
+
+.badge {
+    color: #fff !important;
 }

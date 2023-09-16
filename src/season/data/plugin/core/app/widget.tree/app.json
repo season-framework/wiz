@@ -1,0 +1,6 @@
+{
+    "id": "widget.tree",
+    "title": "Widget/Tree",
+    "category": "",
+    "template": "wiz-core-app-widget-tree([config]=\"\")"
+}

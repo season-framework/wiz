@@ -1,0 +1,6 @@
+{
+    "id": "widget.loading",
+    "title": "Widget/Loading",
+    "category": "",
+    "template": "wiz-core-app-widget-loading([height]=\"\")"
+}

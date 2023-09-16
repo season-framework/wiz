@@ -45,7 +45,7 @@ setup(
         'jinja2>=3.1',
         'texttable==1.6.7',
         'flask>=2.2',
-        'flask_socketio>=5.3',
+        'python-socketio==5.7.2',
         'watchdog==2.2.1',
         'argh>=0.27',
         'psutil>=5.9',

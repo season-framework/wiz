@@ -1,14 +1,14 @@
 import os
 import sys
-from argh import arg, expects_obj
+from argh import arg
 import time
 import psutil
 import platform
 import signal
 import atexit
 import multiprocessing as mp
-import git
 import importlib
+import season
 
 PATH_WEBSRC = os.getcwd()
 PATH_PUBLIC = os.path.join(PATH_WEBSRC, 'public')
@@ -57,6 +57,22 @@ def run(host='0.0.0.0', port=None, log=None, bundle=False):
                 pass
     else:
         run_ctrl()
+
+@arg('--project', help='project name')
+@arg('--clean', help='project name')
+def build(project="main", clean=False):
+    fs = season.util.os.FileSystem(os.getcwd())
+    PROJECT_PATH = os.path.join("branch", project)
+    if fs.isdir(PROJECT_PATH) == False:
+        print("project '{}' not exists".format(project))
+        return
+    app = season.app(path=os.getcwd())
+    wiz = app.wiz()("ide")
+    wiz.branch.checkout(project)
+    builder = wiz.model("workspace/builder")
+    if clean:
+        builder.clean()    
+    builder.build()
 
 class Daemon:
     def __init__(self, pidfile, target=None, stdout='/dev/null', stderr='/dev/null'):

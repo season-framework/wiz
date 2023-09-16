@@ -83,7 +83,7 @@ export class Component implements OnInit {
 
     private async update(path: string, data: string) {
         let res = await wiz.call('update', { path: path, code: data });
-        await this.service.statusbar.warning("build project...");
+        await this.service.statusbar.process("build project...");
         res = await wiz.call('build');
         if (res.code == 200) await this.service.statusbar.info("build finish", 5000);
         else await this.service.statusbar.error("error on build");
@@ -386,7 +386,7 @@ export class Component implements OnInit {
             await fn('upload_root', fd);
 
             let build = async () => {
-                await this.service.statusbar.warning("build project...");
+                await this.service.statusbar.process("build project...");
                 let res = await wiz.call('build');
                 if (res.code == 200) await this.service.statusbar.info("build finish", 5000);
                 else await this.service.statusbar.error("error on build");

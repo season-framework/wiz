@@ -80,6 +80,6 @@
 .menu-overlay(*ngIf="service.overlay.mode")
     wiz-core-system-overlay([menu]="service.overlay")
 
-ngx-loading([show]="service.loading.isshow")
+wiz-core-app-widget-loading(*ngIf="service.loading.isshow", [height]="48")
 wiz-core-system-alert([model]="service.alert")
 ng-keyboard-shortcuts([shortcuts]="service.shortcut.data")
