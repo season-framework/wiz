@@ -196,6 +196,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.19
+
+- [core] add dependency (flask-socketio)
+
 ### 2.3.18
 
 - [core] upgrade to angular 16

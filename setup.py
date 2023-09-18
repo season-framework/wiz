@@ -46,6 +46,7 @@ setup(
         'texttable==1.6.7',
         'flask>=2.2',
         'python-socketio==5.7.2',
+        'flask-socketio',
         'watchdog==2.2.1',
         'argh>=0.27',
         'psutil>=5.9',
