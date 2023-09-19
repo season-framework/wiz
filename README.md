@@ -196,6 +196,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.20
+
+- [plugin/workspace] create widget bug at portal module fixed
+
 ### 2.3.19
 
 - [core] add dependency (flask-socketio)

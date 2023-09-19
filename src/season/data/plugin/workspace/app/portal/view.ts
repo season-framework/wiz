@@ -413,9 +413,9 @@ export class Component implements OnInit {
     public async createFile(node: any) {
         let mod: any = this.getMod(node.id);
 
-        if (mod == 'app') {
+        if (mod == 'app' || mod == 'widget') {
             let mod_id = this.getModName(node.id);
-            let editor = await this.workspace.AppEditor(mod_id, { mode: 'portal', title: '', id: '', namespace: '', viewuri: '', category: '' });
+            let editor = await this.workspace.AppEditor(mod_id, { mode: 'portal', title: '', id: '', namespace: mod == 'app' ? '' : 'widget.', viewuri: '', category: '' });
             await editor.open();
         } else if (mod == 'route') {
             let mod_id = this.getModName(node.id);
