@@ -196,6 +196,9 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.21 ~ 2.3.23
+- [core] change requirement for python old version support
+
 ### 2.3.20
 
 - [plugin/workspace] create widget bug at portal module fixed
