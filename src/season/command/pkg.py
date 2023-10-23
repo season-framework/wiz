@@ -3,7 +3,7 @@ import os
 from argh import arg
 
 @arg('--project', default='main', help='project name')
-def bundle(project="main"):
+def pkg(project="main"):
     fs = season.util.os.FileSystem(os.getcwd())
     BUNDLE_PATH = os.path.join("branch", project, "bundle")
     if fs.isdir(BUNDLE_PATH) == False:

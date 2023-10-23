@@ -169,11 +169,11 @@ wiz ide upgrade # ide upgrade
         ```
 
 ### Bundle Project
-- `wiz bundle --project=<Project Name>`
+- `wiz pkg --project=<Project Name>`
     - Example
         ```bash
-        wiz bundle # bundle main project
-        wiz bundle --project=main
+        wiz pkg # bundle main project
+        wiz pkg --project=main
         ```
     - Output
         - `<workspace>/bundle` file created after run bundle api
@@ -195,6 +195,10 @@ wiz ide upgrade # ide upgrade
     - not required server restart
 
 ## Release Note
+
+### 2.3.24
+
+- [core] command change (bundle -> pkg)
 
 ### 2.3.21 ~ 2.3.23
 - [core] change requirement for python old version support
