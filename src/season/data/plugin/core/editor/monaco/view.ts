@@ -58,6 +58,13 @@ export class Component implements OnInit {
                     range,
                 },
                 {
+                    label: 'wizrender',
+                    kind: monaco.languages.CompletionItemKind.Function,
+                    documentation: 'await this.service.render();',
+                    insertText: `await this.service.render();`,
+                    range,
+                },
+                {
                     label: 'wizcomp',
                     kind: monaco.languages.CompletionItemKind.Function,
                     documentation: 'wiz default component',
@@ -189,6 +196,25 @@ export class Component implements OnInit {
             ];
         }
 
+        const createApiRecommend = (range) => [
+            {
+                label: 'wizreq',
+                kind: monaco.languages.CompletionItemKind.Function,
+                documentation: 'insert text `wiz.request.query("")`',
+                insertText: '${1} = wiz.request.query("${2}", ${3})',
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                range,
+            },
+            {
+                label: 'wizres',
+                kind: monaco.languages.CompletionItemKind.Function,
+                documentation: 'insert text `wiz.response.status()`',
+                insertText: 'wiz.response.status(${1:200, rows})',
+                insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                range,
+            },
+        ];
+
         monaco.languages.registerCompletionItemProvider('typescript', {
             provideCompletionItems: function (model, position) {
                 const textUntilPosition = model.getValueInRange({
@@ -239,6 +265,31 @@ export class Component implements OnInit {
                 };
                 return {
                     suggestions: createPugRecommend(range),
+                };
+            }
+        });
+        monaco.languages.registerCompletionItemProvider('python', {
+            provideCompletionItems: function (model, position) {
+                const textUntilPosition = model.getValueInRange({
+                    startLineNumber: 1,
+                    startColumn: 1,
+                    endLineNumber: position.lineNumber,
+                    endColumn: position.column,
+                });
+                const t = textUntilPosition.split("\n").slice(-1)[0];
+                const wizmatch = t.match(/wiz/);
+                if (!wizmatch) {
+                    return { suggestions: [] };
+                }
+                const word = model.getWordUntilPosition(position);
+                const range = {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: word.startColumn,
+                    endColumn: word.endColumn,
+                };
+                return {
+                    suggestions: createApiRecommend(range),
                 };
             }
         });

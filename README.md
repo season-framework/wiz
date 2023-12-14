@@ -196,6 +196,11 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.26
+
+- [plugin/workspace] portal framework editore in command
+- [plugin/core] update auto complete in monaco editor
+
 ### 2.3.25
 
 - [core] upgrade to `angular 17`

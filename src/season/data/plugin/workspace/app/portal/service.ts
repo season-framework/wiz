@@ -26,6 +26,7 @@ export class FileEditor {
         }
 
         let viewtypes: any = {
+            'html': { viewref: MonacoEditor, config: { monaco: { language: 'html' } } },
             'md': { viewref: MonacoEditor, config: { monaco: { language: 'markdown' } } },
             'ts': { viewref: MonacoEditor, config: { monaco: { language: 'typescript', renderValidationDecorations: 'off' } } },
             'js': { viewref: MonacoEditor, config: { monaco: { language: 'javascript' } } },

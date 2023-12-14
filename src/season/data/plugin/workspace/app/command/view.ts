@@ -1,6 +1,7 @@
 import { OnInit, AfterViewInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { Service } from "@wiz/service/service";
 import { Workspace } from 'src/app/workspace.app.explore/service';
+import PortalWorkspace from 'src/app/workspace.app.portal/service';
 
 let timeoutId = null;
 
@@ -19,6 +20,7 @@ export class Component implements OnInit, AfterViewInit {
         public service: Service
     ) {
         this.workspace = new Workspace(service, wiz);
+        this.portalWorkspace = new PortalWorkspace(service, wiz);
     }
 
     public ngOnInit() {
@@ -57,7 +59,11 @@ export class Component implements OnInit, AfterViewInit {
         const _data = data.data;
         let editor = null;
         if (_type === "app") {
-            editor = this.workspace.AppEditor(_data);
+            if (_data.mode === "portal") {
+                const mod_id = _data["ng.build"].id.split(".")[1];
+                editor = await this.portalWorkspace.AppEditor(mod_id, _data);
+            }
+            else editor = this.workspace.AppEditor(_data);
         }
         else if (_type === "file") {
             let force = false;
@@ -65,10 +71,18 @@ export class Component implements OnInit, AfterViewInit {
                 const ext = this.list[this.idx].split(".").slice(-1)[0];
                 if (['txt', 'nsh', 'sql', 'sh'].includes(ext.toLowerCase())) force = true;
             } catch { }
-            editor = this.workspace.FileEditor(_data, {}, force);
+            if (_data.mode === "portal") {
+                const mod_id = _data["ng.build"].id.split(".")[1];
+                editor = await this.portalWorkspace.FileEditor(mod_id, _data);
+            }
+            else editor = this.workspace.FileEditor(_data, {}, force);
         }
         else if (_type === "route") {
-            editor = this.workspace.RouteEditor(_data);
+            if (_data.mode === "portal") {
+                const mod_id = _data["ng.build"].id.split(".")[1];
+                editor = await this.portalWorkspace.RouteEditor(mod_id, _data);
+            }
+            else editor = this.workspace.RouteEditor(_data);
         }
         if (!editor) return;
         await editor.open(0);
