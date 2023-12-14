@@ -1,7 +1,7 @@
 {
     "title": "Xyz Page",
     "mode": "page",
-    "namespace": "xyz",
+    "namespace": "page.xyz",
     "category": "general",
     "id": "page.xyz",
     "ng.build": {

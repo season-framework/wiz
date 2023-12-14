@@ -1,0 +1,12 @@
+.view-container
+    ng-container(*ngIf="tabs.length > 0")
+        .view-header([sortablejs]="tabs", [sortablejsOptions]="sortableOption")
+            ng-container(*ngFor="let tab of tabs")
+                .view-tab(
+                    [class.relative]="config.selected.id == tab.id",
+                    [class.active]="config.selected.id == tab.id && config.selected.view == tab.view", (click)="tab.open(); $event.stopPropagation();")
+                    span {{tab.title}}
+                    .view-tab-close((click)="tab.close(); $event.stopPropagation();")
+                        i.fa-solid.fa-xmark
+
+        .view-body('#editor'='')

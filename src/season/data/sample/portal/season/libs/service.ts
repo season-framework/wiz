@@ -8,6 +8,9 @@ import Alert from './alert';
 import Loading from './loading';
 import Request from './request';
 import Toast from './toast';
+import Navbar from './navbar';
+import Lang from './lang';
+import Trigger from './trigger';
 
 @Injectable({ providedIn: 'root' })
 export class Service {
@@ -17,6 +20,9 @@ export class Service {
     public loading: Loading;
     public request: Request;
     public toast: Toast;
+    public navbar: Navbar;
+    public lang: Lang;
+    public trigger: Trigger;
     public app: ChangeDetectorRef;
 
     constructor() { }
@@ -29,14 +35,27 @@ export class Service {
             this.file = new File(this);
             this.alert = new Alert(this);
             this.loading = new Loading(this);
+            this.navbar = new Navbar(this);
             this.request = new Request();
             this.toast = new Toast();
+            this.trigger = new Trigger();
+            this.lang = new Lang(this);
+            let lang: string = (navigator.language || navigator.userLanguage).substring(0, 2).toLowerCase();
+            if (!['ko', 'en'].includes(lang)) lang = 'en';
+            this.lang.set(lang);
             await this.loading.show();
             await this.auth.init();
         }
 
         await this.auth.check();
         return this;
+    }
+
+    public async sleep(time: number = 0) {
+        let timeout = () => new Promise((resolve) => {
+            setTimeout(resolve, time);
+        });
+        await timeout();
     }
 
     public async render(time: number = 0) {

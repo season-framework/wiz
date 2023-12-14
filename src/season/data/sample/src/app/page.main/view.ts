@@ -1,6 +1,7 @@
 import { OnInit } from "@angular/core";
 import toastr from 'toastr';
 
+
 // use directives and dependencies
 @directives({
     HighlightDirective: '@wiz/libs/directives/highlight.directive'
@@ -12,7 +13,7 @@ import toastr from 'toastr';
 })
 export class Component implements OnInit {
 
-    constructor() {}
+    constructor() { }
 
     public async ngOnInit() {
         toastr.success(`Hello, World!`);

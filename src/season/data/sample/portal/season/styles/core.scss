@@ -2,6 +2,7 @@
 @import "content/text";
 @import "content/color";
 @import "content/layout";
+@import "content/ckeditor";
 
 @import "layout/margin";
 @import "layout/padding";
@@ -13,6 +14,7 @@
 
 @import "component/card";
 @import "component/button";
+
 
 html,
 body,
@@ -39,8 +41,8 @@ iframe {
 }
 
 *::-webkit-scrollbar {
-    height: 10px;
-    width: 10px;
+    height: 10px !important;
+    width: 10px !important;
     background-color: var(--wc-scroll-background);
 }
 
@@ -67,4 +69,8 @@ iframe {
 
 .alert {
     line-height: 1;
+}
+
+.sortable-ghost {
+    background-color: var(--wc-border);
 }

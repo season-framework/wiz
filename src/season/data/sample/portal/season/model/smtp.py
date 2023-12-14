@@ -6,11 +6,11 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-config = wiz.config('season')
-SMTP_SENDER = config.get("smtp_sender")
-SMTP_HOST = config.get("smtp_host")
-SMTP_PORT = config.get("smtp_port")
-SMTP_PASSWORD = config.get("smtp_password")
+config = wiz.model("portal/season/config")
+SMTP_SENDER = config.smtp_sender
+SMTP_HOST = config.smtp_host
+SMTP_PORT = config.smtp_port
+SMTP_PASSWORD = config.smtp_password
 fs = wiz.workspace("service").fs(os.path.join("config", "smtp"))
 
 class Model:

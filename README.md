@@ -196,6 +196,11 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.3.25
+
+- [core] upgrade to `angular 17`
+- [core] cache bug fixed (conflict branch)
+
 ### 2.3.24
 
 - [core] command change (bundle -> pkg)

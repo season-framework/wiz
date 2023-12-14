@@ -1,4 +1,4 @@
-class Model:
+class Session:
     def __init__(self):
         self.flask = wiz.server.package.flask
     
@@ -27,6 +27,17 @@ class Model:
     def to_dict(self):
         return season.util.std.stdClass(dict(self.flask.session))
 
+    def user_id(self):
+        config = wiz.model("portal/season/config")
+        session_user_id = config.session_user_id
+        return session_user_id()
+    
+    def create(self, key):
+        config = wiz.model("portal/season/config")
+        config.session_create(wiz, key)
+
     @classmethod
     def use(cls):
         return cls()
+
+Model = Session()

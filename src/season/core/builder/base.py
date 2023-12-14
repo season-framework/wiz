@@ -33,6 +33,40 @@ ENV_SCRIPT = """export const environment = {
   production: true
 };"""
 
+TSCONFIG_SCRIPT = """{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "lib": [
+      "ES2022",
+      "dom"
+    ]
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}
+"""
+
 class Converter:
     def __init__(self, **kwargs):
         self.kwargs = dict(app_id=None, declarations=None, baseuri=None, imports=None)
@@ -275,7 +309,7 @@ class Compiler:
             if ngtarget == 'app' and ngfilepath == 'app/app.component.ts':
                 return season.util.fn.call(self.ng_app_component, buildfile=buildfile, **self.params)
 
-            if ngtarget in ['app', 'libs', 'wiz.ts']:
+            if ngtarget in ['app', 'libs', 'wiz.ts', 'main.ts']:
                 return season.util.fn.call(self.ng_files, buildfile=buildfile, **self.params)
 
         return None, None

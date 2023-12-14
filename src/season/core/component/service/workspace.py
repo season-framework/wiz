@@ -119,7 +119,7 @@ class Route:
 
         name = self.fs().abspath('controller.py')
 
-        cachens = 'route.code'
+        cachens = 'route.code#' + wiz.branch()
         namespace = name
         if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
         if namespace in wiz.server._cache[cachens]:
@@ -178,7 +178,7 @@ class Route:
         fs = self.fs()
 
         namespace = APP_ID
-        cachens = 'route.data'
+        cachens = 'route.data#' + wiz.branch()
         if code:
             if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
             if namespace in wiz.server._cache[cachens]:
@@ -300,7 +300,7 @@ class App(AppBase):
         fs = self.fs()
         
         namespace = APP_ID
-        cachens = 'app.data'
+        cachens = 'app.data#' + wiz.branch()
         if code:
             if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
             if namespace in wiz.server._cache[cachens]:
@@ -396,7 +396,7 @@ class Workspace(Base):
         if self.wiz.server.is_bundle:
             fs = self.fs("src", "controller")
 
-        cachens = 'controller.code'
+        cachens = 'controller.code#' + wiz.branch()
         if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
         if namespace in wiz.server._cache[cachens]:
             code = wiz.server._cache[cachens][namespace]
@@ -415,7 +415,7 @@ class Workspace(Base):
         if self.wiz.server.is_bundle:
             fs = self.fs("src", "model")
         
-        cachens = 'model.code'
+        cachens = 'model.code#' + wiz.branch()
         if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
         if namespace in wiz.server._cache[cachens]:
             code = wiz.server._cache[cachens][namespace]

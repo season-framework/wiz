@@ -63,6 +63,16 @@
         }
     }
 
+    &.btn-gray {
+        background: var(--wc-gray);
+        border: 0;
+        color: #fff;
+
+        &:hover {
+            background: var(--wc-gray-hover);
+        }
+    }
+
     // button shape
     &.btn-lg {
         height: 42px;
@@ -88,6 +98,12 @@
     &.btn-block {
         width: 100%;
         display: block;
+    }
+
+    &.btn-white {
+        &:hover {
+            color: var(--wc-text);
+        }
     }
 }
 

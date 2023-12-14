@@ -33,6 +33,40 @@ ENV_SCRIPT = """export const environment = {
   production: true
 };"""
 
+TSCONFIG_SCRIPT = """{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "lib": [
+      "ES2022",
+      "dom"
+    ]
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}
+"""
+
 Compiler = wiz.model("workspace/build/compiler")
 Annotation = wiz.model("workspace/build/annotation")
 Namespace = wiz.model("workspace/build/namespace")
@@ -87,6 +121,7 @@ class Builder:
 
         fs.write('build/wizbuild.js', ESBUILD_SCRIPT)
         fs.write('build/src/environments/environment.ts', ENV_SCRIPT)
+        fs.write('build/tsconfig.json', TSCONFIG_SCRIPT)
         
         if fs.isfile("src/angular/package.json"):
             packageJson = fs.read.json("src/angular/package.json")

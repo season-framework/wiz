@@ -270,6 +270,7 @@ class Config(season.util.std.stdClass):
         return self.__getattr__(name)
 
     def __getattr__(self, name):
+        name = name + "#" + self.wiz.branch()
         if name in self.__cache__:
             return self.__cache__[name]
 
@@ -309,7 +310,7 @@ class Config(season.util.std.stdClass):
         if fs.isfile(config_path) == False:
             return build_config()
 
-        cachens = 'config.code'
+        cachens = 'config.code#' + self.wiz.branch()
         namespace = config_path
         if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
         if namespace in wiz.server._cache[cachens]:

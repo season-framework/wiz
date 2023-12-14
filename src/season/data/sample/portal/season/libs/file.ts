@@ -166,7 +166,7 @@ export default class File {
         for (let key in uopts) {
             opts[key] = uopts[key];
         }
-        
+
         let filenode = this.filenode = $(`<input type='file' ${opts.accept ? `accept='${opts.accept}'` : ''} ${opts.multiple ? 'multiple' : ''} />`);
         if (opts.type == 'folder') {
             filenode = this.filenode = $(`<input type='file' webkitdirectory mozdirectory msdirectory odirectory directory multiple/>`);
@@ -205,21 +205,53 @@ export default class File {
         let result = {};
 
         result.text = () => new Promise((resolve) => {
-            let fr = new FileReader();
-            fr.onload = () => {
-                resolve(fr.result);
-            };
-            fr.readAsText(filenode.prop('files')[0]);
+            let targetLoader = (target) => new Promise((_resolve) => {
+                let fr = new FileReader();
+                fr.onload = async () => {
+                    _resolve(fr.result);
+                };
+                fr.readAsText(target);
+            });
+
+            let loader = async () => {
+                if (opts.multiple) {
+                    let result = [];
+                    let files = filenode.prop('files');
+                    for (let i = 0; i < files.length; i++)
+                        result.push(await targetLoader(files[i]));
+                    return resolve(result);
+                }
+
+                resolve(await targetLoader(filenode.prop('files')[0]));
+            }
+
+            loader();
         });
 
         result.json = () => new Promise((resolve) => {
-            let fr = new FileReader();
-            fr.onload = async () => {
-                let data = fr.result;
-                data = JSON.parse(data);
-                resolve(data);
-            };
-            fr.readAsText(filenode.prop('files')[0]);
+            let targetLoader = (target) => new Promise((_resolve) => {
+                let fr = new FileReader();
+                fr.onload = async () => {
+                    let data = fr.result;
+                    data = JSON.parse(data);
+                    _resolve(data);
+                };
+                fr.readAsText(target);
+            });
+
+            let loader = async () => {
+                if (opts.multiple) {
+                    let result = [];
+                    let files = filenode.prop('files');
+                    for (let i = 0; i < files.length; i++)
+                        result.push(await targetLoader(files[i]));
+                    return resolve(result);
+                }
+
+                resolve(await targetLoader(filenode.prop('files')[0]));
+            }
+
+            loader();
         });
 
         result.image = async () => {

@@ -1,9 +1,10 @@
-## Installation
+# Installation
 
 - python dependencies
 
 ```sh
-pip install peewee pymysql bcrypt
+apt install pkg-config libxml2-dev libxmlsec1-dev libxmlsec1-openssl
+pip install peewee pymysql bcrypt python3-saml
 ```
 
 - npm dependencies
@@ -12,7 +13,36 @@ pip install peewee pymysql bcrypt
     - `moment`
     - `sortablejs`
 
-## Apply to Project
+# Release
+
+### 1.2.4
+
+- 언어 패칭 기능 추가 (service.lang)
+- event trigger 기능 추가 (service.trigger)
+
+### 1.2.3
+
+- auth api 업데이트
+
+### 1.2.2
+
+- pagenation 페이지 크기 설정 기능 추가
+- service.init 관련 오류 수정 (auth.init 관련)
+
+### 1.2.1
+
+- app 이름 영문으로 변경
+- Statusbar 기능 추가
+- Tab 기능 추가
+
+### 1.2.0
+
+- Tree Viewer 추가
+- 드롭다운 메뉴 추가
+
+# 프로젝트에 적용하기
+
+## 프로젝트 설정
 
 ### sample 설치하기
 
@@ -22,8 +52,8 @@ pip install peewee pymysql bcrypt
     - `component`: Navbar
     - `layout`: Empty, Topnav
 
-### angular/Web Config/web resources
-- 좌측 맨 아래 버튼 - Web Config - web resources 탭 클릭해서 아래 내용으로 변경
+### angular/angular.build.options.json
+- `angular/angular.build.options.json` 파일을 아래 내용으로 변경
 
 ```
 {
@@ -44,8 +74,9 @@ pip install peewee pymysql bcrypt
 }
 ```
 
-### angular/Advanced/routing
-- 좌측 맨 아래 버튼 - Advanced - routing 탭 클릭해서 아래 내용으로 변경
+### angular/app/app-routing.module.ts
+- `angular/app/app-routing.module.ts` 파일에서 아래 내용 변경
+- `INDEX_PAGE` 는 만드는 페이지의 메인 페이지 경로로 변경
 
 ```ts
 const INDEX_PAGE = "main";
@@ -57,12 +88,12 @@ import { RouterModule, Routes } from '@angular/router';
 ...
 ```
 
-### angular/Advanced/component
+### angular/app/app.component.ts
 
-- 좌측 맨 아래 버튼 - Advanced - component 탭 클릭해서 아래 내용으로 변경
+- `angular/app/app.component.ts` 파일을 아래 내용으로 변경
 
 ```ts
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, enableProdMode } from '@angular/core';
 import { Router } from '@angular/router';
 import { Service } from '@wiz/libs/portal/season/service';
 
@@ -79,6 +110,7 @@ export class AppComponent implements OnInit {
     ) { }
 
     public async ngOnInit() {
+        enableProdMode();
         await this.service.init(this);
     }
 }
@@ -91,6 +123,8 @@ export class AppComponent implements OnInit {
 ```scss
 @import "portal/season/core"
 ```
+
+## Config 지정
 
 ### config/season.py
 
@@ -145,7 +179,7 @@ def saml_acs(userinfo):
 # default_logout = "/auth/saml/logout"
 ```
 
-### (optional) config/smtp/<template>.html
+### (optional) config/smtp/`<template>`.html
 
 - SMTP 발송 템플릿 설정
 - config/smtp 폴더를 생성한 후 html 파일 생성 (ex. default.html)

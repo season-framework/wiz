@@ -5,7 +5,7 @@ import os
 
 class Controller:
     def __init__(self):
-        wiz.session = wiz.model("portal/season/session").use()
+        wiz.session = wiz.model("portal/season/session")
         sessiondata = wiz.session.get()
         wiz.response.data.set(session=sessiondata)
 

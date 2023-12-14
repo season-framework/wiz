@@ -7,7 +7,6 @@ export default class Auth {
     public timestamp: number = 0;
     public status: any = null;
     public loading: any = null;
-
     public session: any = {};
 
     constructor(public service: Service) {
@@ -15,18 +14,19 @@ export default class Auth {
     }
 
     public async init() {
-        let { code, data } = await this.request.post('/auth/check');
-        let { status, session } = data;
-
-        this.verified = session.verified;
-
-        if (code != 200)
-            return this;
-
-        this.timestamp = new Date().getTime();
-        this.session = session;
-        this.status = status;
-        this.loading = true;
+        try {
+            let { code, data } = await this.request.post('/auth/check');
+            let { status, session } = data;
+            this.verified = session.verified;
+            this.loading = true;
+            if (code != 200)
+                return this;
+            this.timestamp = new Date().getTime();
+            this.session = session;
+            this.status = status;
+        } catch (e) {
+            this.loading = true;
+        }
         return this;
     }
 

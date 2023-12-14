@@ -1,0 +1,12 @@
+ng-container(*ngIf="loaded")
+    .tree([class.tree-dropzone]="dragToItem && !dragToItem.id")
+        ng-container(*ngFor="let node of getChildren()")
+            ng-container([ngTemplateOutlet]="treeNode", [ngTemplateOutletContext]="{ $implicit: node }")
+
+ng-template('#treeNode'='', let-data='')
+    .tree([class.tree-dropzone]="dragToItem && data.id == dragToItem.id", *ngIf="config.isShow(data)")
+        div(draggable="true", (drop)="data.drop($event)", (dragend)="data.dragend($event)", (dragover)="data.dragover($event)")
+            ng-container([ngTemplateOutlet]="template", [ngTemplateOutletContext]="{ $implicit: data }")
+        ng-container(*ngIf="data.getChildren().length > 0")
+            .tree-root
+                ng-container(*ngFor="let child of data.getChildren()", [ngTemplateOutlet]="treeNode", [ngTemplateOutletContext]="{ $implicit: child }")

@@ -5,7 +5,7 @@ import re
 from season.core.builder.base import Build as BaseBuild
 from season.core.builder.base import Compiler as BaseCompiler
 from season.core.builder.base import Converter as BaseConverter
-from season.core.builder.base import ESBUILD_SCRIPT, ENV_SCRIPT
+from season.core.builder.base import ESBUILD_SCRIPT, ENV_SCRIPT, TSCONFIG_SCRIPT
 
 def shortcutCodeBuilder(name, shortcutcode):
     PS = "{"
@@ -93,6 +93,7 @@ class Build(BaseBuild):
         execute(f'cd {working_dir} && {command_ng} new {build_name} --routing true --style scss --interactive false  --skip-tests true --skip-git true')
         
         buildfs.write('wizbuild.js', ESBUILD_SCRIPT)
+        buildfs.write('tsconfig.json', TSCONFIG_SCRIPT)
         buildfs.write(os.path.join('src', 'environments', 'environment.ts'), ENV_SCRIPT)
 
         if srcfs.isfile(os.path.join("angular", "package.json")):

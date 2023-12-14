@@ -4,23 +4,21 @@ import datetime
 from urllib.parse import urlparse
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 
-SAML_ENTITY = wiz.config("season").get("saml_entity", "season")
-SAML_BASE_PATH = wiz.config("season").get("saml_base_path", "config/auth/saml")
-SAML_ACS = wiz.config("season").get("saml_acs", None)
-SAML_ERROR = wiz.config("season").get("saml_error", "/")
+config = wiz.model("portal/season/config")
+session = wiz.model("portal/season/session")
 
-session = wiz.model("portal/season/session").use()
+BASEURI = config.auth_baseuri
+SAML_ENTITY = config.auth_saml_entity
+SAML_BASE_PATH = config.auth_saml_base_path
+SAML_ACS = config.auth_saml_acs
+SAML_ERROR = config.auth_saml_error_uri
 
-class Model:
+class SAML:
     def __init__(self):
-        self.basepath = '/auth'
-
-    @classmethod
-    def baseuri(cls, basepath='/auth'):
-        return cls()()
+        self.basepath = BASEURI
 
     def __call__(self):
-        def build_auth(entity=SAML_ENTITY):
+        def build_auth(entity):
             request = wiz.request.request()
             url_data = urlparse(request.url)
             req = {
@@ -36,12 +34,21 @@ class Model:
             basepath = wiz.branch.path(os.path.join(SAML_BASE_PATH, entity))
             return OneLogin_Saml2_Auth(req, custom_base_path=basepath)
 
-        self.__auth__ = build_auth()
-        pattern = self.basepath + "/saml/<action>/<path:path>"
+        pattern = self.basepath + "/saml/<action>/<entity>/<path:path>"
         segment = wiz.request.match(pattern)
 
         if segment is None:
             return
+        
+        entity = SAML_ENTITY
+        if wiz.session.get("ENTITY", None) is not None:
+            entity = wiz.session.get("ENTITY", None)
+        if 'entity' in segment and segment.entity is not None:
+            entity = segment.entity
+
+        self.__auth__ = build_auth(entity)
+        self.__ENTITY__ = entity
+
         action = segment.action
         if action is None:
             return
@@ -51,13 +58,16 @@ class Model:
         if fn is None:
             return
         fn()
+    
+    def proceed(self):
+        self.__call__()
 
     def login(self):
         auth = self.__auth__
-        if session.has("id"):
+        if session.user_id() is not None:
             wiz.response.redirect("/")
         redirect = wiz.request.query('redirect', '/')
-        session.set(AuthNRequestID=auth.get_last_request_id(), SAML_REDIRECT=redirect)
+        session.set(AuthNRequestID=auth.get_last_request_id(), SAML_REDIRECT=redirect, ENTITY=self.__ENTITY__)
         url = auth.login()
         wiz.response.redirect(url)
 
@@ -75,24 +85,23 @@ class Model:
             userinfo = auth.get_attributes()
             sessiondata = dict()
             if SAML_ACS is not None:
-                sessiondata = SAML_ACS(userinfo)
-    
-            redirect = wiz.request.query('RelayState', None)
+                sessiondata = season.util.fn.call(SAML_ACS, wiz=wiz, userinfo=userinfo)
+            
+            redirect = session.get('SAML_REDIRECT', None)
+            try:
+                session.delete('SAML_REDIRECT')
+            except:
+                pass
             if redirect is None:
-                redirect = session.get('SAML_REDIRECT', '/')
-            session.delete('SAML_REDIRECT')
+                redirect = wiz.request.query('RelayState', "/")
 
             sessiondata['samlNameId'] = auth.get_nameid()
             sessiondata['samlNameIdFormat'] = auth.get_nameid_format()
             sessiondata['samlNameIdNameQualifier'] = auth.get_nameid_nq()
             sessiondata['samlNameIdSPNameQualifier'] = auth.get_nameid_spnq()
             sessiondata['samlSessionIndex'] = auth.get_session_index()
+            sessiondata['authType'] = 'saml'
 
-            istoken = session.get("istoken", None)
-            if istoken == True:
-                token = wiz.model("model/token").generate(sessiondata['id'])
-                sessiondata['token'] = token
-                session.delete("istoken")
             session.set(**sessiondata)
             wiz.response.redirect(redirect)
         
@@ -110,6 +119,7 @@ class Model:
     def sls(self):
         auth = self.__auth__
         request_id = session.get('LogoutRequestID', None)
+        returnTo = session.get('returnTo', "/")
 
         session.clear()
         url = auth.process_slo(request_id=request_id)
@@ -120,7 +130,8 @@ class Model:
                 wiz.response.redirect(url)
         elif auth.get_settings().is_debug_active():
             auth.get_last_error_reason()
-        wiz.response.redirect('/')
+
+        wiz.response.redirect(returnTo)
     
     def metadata(self):
         auth = self.__auth__
@@ -133,3 +144,5 @@ class Model:
             wiz.response.send(metadata, content_type='text/xml')
         else:
             wiz.response.send(', '.join(errors))
+
+Model = SAML()
