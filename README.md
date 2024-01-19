@@ -13,6 +13,7 @@
 apt install nodejs npm
 npm i -g n
 n stable
+apt purge nodejs npm
 ```
 
 - install wiz python package
