@@ -270,6 +270,7 @@ class Config(season.util.std.stdClass):
         return self.__getattr__(name)
 
     def __getattr__(self, name):
+        origin_name = name
         name = name + "#" + self.wiz.branch()
         if name in self.__cache__:
             return self.__cache__[name]
@@ -306,7 +307,7 @@ class Config(season.util.std.stdClass):
         wiz = self.wiz
         workspace = wiz.workspace()
         fs = workspace.fs("config")
-        config_path = name + '.py'
+        config_path = origin_name + '.py'
         if fs.isfile(config_path) == False:
             return build_config()
 
