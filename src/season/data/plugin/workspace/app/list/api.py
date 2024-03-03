@@ -9,7 +9,7 @@ import json
 import season
 
 def controllers():
-    fs = wiz.workspace("service").fs("src", "controller")
+    fs = wiz.project.fs("src", "controller")
     res = []
     try:
         ctrls = fs.list()
@@ -24,11 +24,10 @@ def controllers():
 def list():
     res = []
     try:
-        workspace = wiz.workspace("service")
-        working_dir = wiz.server.path.branch
-        fs = workspace.fs(os.path.join(working_dir))
+        working_dir = wiz.server.path.project
+        fs = wiz.project.fs(os.path.join(working_dir))
 
-        projects = wiz.branch.list()
+        projects = wiz.project.list()
         for project in projects:
             info = fs.read.json(os.path.join(project, "wiz.project"), dict())
             info['id'] = project
@@ -38,7 +37,7 @@ def list():
     wiz.response.status(200, res)
 
 def create():
-    fs = season.util.os.FileSystem(wiz.server.path.branch)
+    fs = season.util.filesystem(wiz.server.path.project)
     path = wiz.request.query("path", True)
     ptype = wiz.request.query("type", True)
 
@@ -64,7 +63,7 @@ def create():
         giturl = wiz.request.query("git", True)
         Git.Repo.clone_from(giturl, fs.abspath(path))
     else:
-        copyfs = wiz.workspace("ide").fs(os.path.join(season.PATH_LIB, "data"))
+        copyfs = wiz.ide.fs(os.path.join(season.PATH_LIB, "data"))
         copyfs.copy("sample", target_path)
 
     if fs.exists(path) == False:
@@ -73,20 +72,19 @@ def create():
     if fs.exists(os.path.join(path, "config")) == False:
         fs.makedirs(os.path.join(path, "config"))
 
-    current_branch = wiz.branch()
-    wiz.branch(path)
+    current_project = wiz.project()
+    wiz.project(path)
 
-    builder = wiz.model("workspace/builder")
+    builder = wiz.ide.plugin.model("builder")
     builder.clean()
     builder.build()
-    wiz.branch(current_branch)
+    wiz.project(current_project)
 
     wiz.response.status(200)
 
 def git():
-    workspace = wiz.workspace("service")
-    working_dir = wiz.server.path.branch
-    fs = workspace.fs(os.path.join(working_dir))
+    working_dir = wiz.server.path.project
+    fs = wiz.project.fs(os.path.join(working_dir))
 
     path = wiz.request.query("path", True)
     target_path = fs.abspath(os.path.join(path))
@@ -98,18 +96,16 @@ def git():
     wiz.response.status(200)
 
 def data():
-    workspace = wiz.workspace("service")
-    working_dir = wiz.server.path.branch
-    fs = workspace.fs(os.path.join(working_dir))
+    working_dir = wiz.server.path.project
+    fs = wiz.project.fs(os.path.join(working_dir))
 
     path = wiz.request.query("path", True)
     text = fs.read(path, "")
     wiz.response.status(200, text)
 
 def update():
-    workspace = wiz.workspace("service")
-    working_dir = wiz.server.path.branch
-    fs = workspace.fs(os.path.join(working_dir))
+    working_dir = wiz.server.path.project
+    fs = wiz.project.fs(os.path.join(working_dir))
     
     path = wiz.request.query("path", True)
     data = wiz.request.query("data", True)

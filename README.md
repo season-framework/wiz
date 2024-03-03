@@ -65,17 +65,11 @@ wiz ide upgrade # ide upgrade
         wiz create myapp
         ```
 
-### build Project
-- `wiz build --project=[Project Name] --clean`
-    - Flag
-        | Flag | Syntax | Description |
-        |---|---|---|
-        | --project | wiz build --project=NAME | build project, Default main |
-        | --clean | wiz build --clean | Clean build, Default False |
+### plugin commands
+- `wiz command <plugin name> args`
     - Example
         ```bash
-        wiz build --project main
-        wiz build --project dev --clean
+        wiz command workspace build main
         ```
 
 ### Daemon API
@@ -169,11 +163,11 @@ wiz ide upgrade # ide upgrade
         ```
 
 ### Bundle Project
-- `wiz pkg --project=<Project Name>`
+- `wiz bundle --project=<Project Name>`
     - Example
         ```bash
-        wiz pkg # bundle main project
-        wiz pkg --project=main
+        wiz bundle # bundle main project
+        wiz bundle --project=main
         ```
     - Output
         - `<workspace>/bundle` file created after run bundle api
@@ -196,110 +190,26 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
-### 2.3.26
+### 2.4.0
 
-- [plugin/workspace] portal framework editore in command
-- [plugin/core] update auto complete in monaco editor
+- [core] upgrade to flask 3
+- [core] enhanced 3rd-party plugin concept
+- [core] `branch` renamed as `project` 
+- [core] util function structure changed (eg. `season.util.os.FileSystem` to `season.util.fs`)
+- [core] support plugin command (3rd-party command)
+- [core] support plugin filter (customized route)
+- [core] project and ide structure changed
+- [core] remove `workspace` object (changed to `wiz.project` or `wiz.ide`)
+- [plugins] update wiz api changes
 
-### 2.3.25
+### 2.3.x
 
-- [core] upgrade to `angular 17`
-- [core] cache bug fixed (conflict branch)
-
-### 2.3.24
-
-- [core] command change (bundle -> pkg)
-
-### 2.3.21 ~ 2.3.23
-- [core] change requirement for python old version support
-
-### 2.3.20
-
-- [plugin/workspace] create widget bug at portal module fixed
-
-### 2.3.19
-
-- [core] add dependency (flask-socketio)
-
-### 2.3.18
-
-- [core] upgrade to angular 16
-- [core] color changed
-- [core] add build command
-- [plugin/workspace] tree view component changed
-- [plugin/git] commit bug fixed
-
-### 2.3.17
-
-- [core] wiz.response stream api
-
-### 2.3.16
-
-- [plugin/workspace] bug at app create fixed
-
-### 2.3.15
-
-- [core] cache added for wiz config
-
-### 2.3.14
-
-- [core] cache added for wiz components (model, controller, api)
-
-### 2.3.13
-
-- [core] bundle command added
-
-### 2.3.12
-
-- [core] service command upgraded (add bundle option)
-
-### 2.3.11
-
-- [core] service command upgraded (add port option)
-
-### 2.3.10
-
-- [core] boot config changed
-
-### 2.3.9
-
-- [core] boot config changed
-
-### 2.3.8
-
-- [plugin/workspace] portal framework widget create bug fixed
-
-### 2.3.7
-
-- [plugin/workspace] statusbar bug fixed
-
-### 2.3.6
-
-- [plugin/workspace] npm plugin bug fixed
-- [core] default plugin config bug fixed (portal framework)
-
-### 2.3.5
-
-- [core] assets path bug fixed
-
-### 2.3.4
-
-- [core] bundle path bug fixed
-
-### 2.3.3
-
-- [plugin/workspace] config list bug fixed
-
-### 2.3.2
-
-- [plugin/workspace] app.json bug fixed
-
-
-### 2.3.1
-
-- [plugin/workspace] portal framework controller bug fixed
-
-### 2.3.0
+- major issues
+    - move build logic to ide plugin
+    - add bundle structure
+    - localize angular cli
+    - add linux service cli
+    - add statusbar at bottom of ide
 
 - [core] move build logic to ide plugin
 - [core] add bundle structure
@@ -310,6 +220,37 @@ wiz ide upgrade # ide upgrade
 - [plugin/workspace] angular build logic changed
 - [plugin/workspace] integrated portal framework plugin at workspace
 - [plugin/workspace] build portal framework on builder model
+- [plugin/workspace] portal framework controller bug fixed
+- [plugin/workspace] portal framework editore in command
+- [plugin/core] update auto complete in monaco editor
+- [core] upgrade to `angular 17`
+- [core] cache bug fixed (conflict branch)
+- [core] command change (bundle -> pkg)
+- [core] change requirement for python old version support
+- [plugin/workspace] create widget bug at portal module fixed
+- [core] add dependency (flask-socketio)
+- [core] upgrade to `angular 16`
+- [core] color changed
+- [core] add build command
+- [plugin/workspace] tree view component changed
+- [plugin/git] commit bug fixed
+- [core] wiz.response stream api
+- [plugin/workspace] bug at app create fixed
+- [core] cache added for wiz config
+- [core] cache added for wiz components (model, controller, api)
+- [core] bundle command added
+- [core] service command upgraded (add bundle option)
+- [core] service command upgraded (add port option)
+- [core] boot config changed
+- [core] boot config changed
+- [plugin/workspace] portal framework widget create bug fixed
+- [plugin/workspace] statusbar bug fixed
+- [plugin/workspace] npm plugin bug fixed
+- [core] default plugin config bug fixed (portal framework)
+- [core] assets path bug fixed
+- [core] bundle path bug fixed
+- [plugin/workspace] config list bug fixed
+- [plugin/workspace] app.json bug fixed
 
 ### 2.2.x
 

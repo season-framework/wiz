@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-builder = wiz.model("workspace/builder")
+builder = wiz.ide.plugin.model("builder")
 
 def install():
     package = wiz.request.query("package", True)
@@ -28,8 +28,7 @@ def uninstall():
     wiz.response.status(200, res)
     
 def list(segment):
-    workspace = wiz.workspace('service')
-    fs = workspace.fs("src", "angular")
+    fs = wiz.project.fs("src", "angular")
     packagejson = fs.read.json("package.json")
     deps = packagejson['dependencies']
     res = []

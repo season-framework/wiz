@@ -139,6 +139,7 @@ export class Component implements OnInit, AfterViewInit {
     }
 
     private highlight(list, text) {
+        if (text.startsWith("> ")) return list;
         const targets = text.split(" ");
         const _s1 = `<strong class="text-bg-youtube">`;
         const _s2 = `</strong>`;

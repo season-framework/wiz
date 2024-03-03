@@ -1,8 +1,8 @@
 {
     "mode": "portal",
-    "id": "loading.default",
+    "id": "loading",
     "title": "\ub85c\ub529/\uae30\ubcf8",
-    "namespace": "loading.default",
+    "namespace": "loading",
     "viewuri": "",
     "category": "loading",
     "controller": "",

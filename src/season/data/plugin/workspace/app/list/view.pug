@@ -83,7 +83,7 @@
                                 h4.m-0 {{item.title ? item.title : item.id}}
                                 span.mt-1(*ngIf="item.description") {{ item.description }}
                             td.w-1.nowrap.text-right
-                                a.btn.btn-sm.me-1([ngClass]="current == item.id ? 'btn-primary' : 'btn-white'", href="?branch={{item.id}}")
+                                a.btn.btn-sm.me-1([ngClass]="current == item.id ? 'btn-primary' : 'btn-white'", href="?project={{item.id}}")
                                     i.fa-solid.fa-check
                                 a.btn.btn-sm.btn-white((click)="open(item)")
                                     i.fa-solid.fa-cog

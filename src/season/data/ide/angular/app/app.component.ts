@@ -45,7 +45,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         let socket = wiz.socket();
 
         socket.on("connect", async () => {
-            socket.emit("join", { id: wiz.branch() });
+            socket.emit("join", { id: wiz.project() });
         });
 
         socket.on("log", async (data) => {

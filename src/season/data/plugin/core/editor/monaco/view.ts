@@ -2,6 +2,7 @@ import { OnInit, Input } from '@angular/core';
 import { Service } from '@wiz/service/service';
 import { defaultComponent } from './service';
 import { Workspace } from 'src/app/workspace.app.explore/service';
+import PortalWorkspace from 'src/app/workspace.app.portal/service';
 
 export class Component implements OnInit {
     @Input() editor;
@@ -11,6 +12,7 @@ export class Component implements OnInit {
 
     constructor(public service: Service) {
         this.workspace = new Workspace(service, wiz);
+        this.portalWorkspace = new PortalWorkspace(service, wiz);
     }
 
     public async ngOnInit() {
@@ -307,12 +309,21 @@ export class Component implements OnInit {
             const mode = r[0].split("-")[1];
             const appId = r[0].split("-").slice(1).join(".");
 
+
             const { code, data } = await wiz.call("load", { id: appId });
             if (code !== 200) return;
 
             if (['component', 'page', 'layout'].includes(mode)) {
                 let location = this.service.editor.indexOf(this.editor);
                 let neweditor = this.workspace.AppEditor(data);
+                await neweditor.open(location + 1);
+                await this.service.render(100);
+                await neweditor.activate();
+            }
+            else if (['portal'].includes(mode)) {
+                const portal = r[0].split("-")[2];
+                let location = this.service.editor.indexOf(this.editor);
+                let neweditor = await this.portalWorkspace.AppEditor(portal, data);
                 await neweditor.open(location + 1);
                 await this.service.render(100);
                 await neweditor.activate();

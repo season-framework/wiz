@@ -1,8 +1,7 @@
 import os
 
 def read(segment):
-    workspace = wiz.workspace("service")
-    fs = workspace.fs()
+    fs = wiz.project.fs()
     path = segment.path
     ext = os.path.splitext(path)[-1]
 

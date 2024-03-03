@@ -7,9 +7,8 @@ import shutil
 import datetime
 import json
 
-workspace = wiz.workspace("service")
-working_dir = wiz.server.path.branch
-fs = workspace.fs(os.path.join(working_dir))
+working_dir = wiz.server.path.project
+fs = wiz.project.fs(os.path.join(working_dir))
 
 def download(segment):
     path = segment.path
@@ -77,12 +76,12 @@ def git_update():
 
 def rebuild():
     path = wiz.request.query("path", True)
-    current_branch = wiz.branch()
-    wiz.branch(path)
-    builder = wiz.model("workspace/builder")
+    current = wiz.project()
+    wiz.project(path)
+    builder = wiz.ide.plugin.model("builder")
     builder.clean()
     builder.build()
-    wiz.branch(current_branch)
+    wiz.project(current)
     wiz.response.status(200)
 
 def delete():

@@ -1,7 +1,6 @@
 import os
 
-workspace = wiz.workspace()
-fs = workspace.fs("..", "config")
+fs = wiz.fs("config")
 
 def load():
     path = wiz.request.query("path", True)
@@ -15,5 +14,5 @@ def update(segment):
     wiz.response.status(200)
 
 def build():
-    workspace.build()
+    wiz.ide.build()
     wiz.response.status(200)

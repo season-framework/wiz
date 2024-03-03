@@ -39,10 +39,14 @@ export class Service {
             this.request = new Request();
             this.toast = new Toast();
             this.trigger = new Trigger();
-            this.lang = new Lang(this);
-            let lang: string = (navigator.language || navigator.userLanguage).substring(0, 2).toLowerCase();
-            if (!['ko', 'en'].includes(lang)) lang = 'en';
-            this.lang.set(lang);
+
+            if (this.app.translate) {
+                this.lang = new Lang(this);
+                let lang: string = (navigator.language || navigator.userLanguage).substring(0, 2).toLowerCase();
+                if (!['ko', 'en'].includes(lang)) lang = 'en';
+                this.lang.set(lang);
+            }
+            
             await this.loading.show();
             await this.auth.init();
         }

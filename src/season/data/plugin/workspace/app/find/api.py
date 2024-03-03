@@ -5,17 +5,11 @@ import re
 def search():
     root = wiz.request.query("root", True)
     text = wiz.request.query("text", True)
-    mode = "filename"
-    pattern = None
-    if text.startswith("> "):
-        mode = "text"
-        text = text[2:]
-        pattern = re.compile(text, re.IGNORECASE)
+    pattern = re.compile(text, re.IGNORECASE)
     fs = wiz.project.fs()
     abspath = fs.abspath()
     root_dir = os.path.join(abspath, root)
     iterator = glob.iglob(f'{root_dir}/**/*', recursive=True)
-    cnt = 0
     res = []
     target = text.split(" ")
     excludes = []
@@ -23,44 +17,36 @@ def search():
         # exclude
         if '__pycache__' in f: continue
         if f.split("/")[-1].startswith("."): continue
+        if f.endswith("/portal.json"): continue
+        if f.endswith("/app.json"): continue
         _continue = False
         for ex in excludes:
             if f.startswith(ex):
                 _continue = True
                 break
         if _continue: continue
-        
-        if mode == "text":
-            ext = f.split(".")[-1]
-            if ext not in ["js", "ts", "css", "scss", "md", "sql", "html", "pug", "py", "json"]:
-                continue
-
-        # filename search
-        istarget = True
-        if mode == "filename":
-            if os.path.isfile(f'{f}/app.json'):
-                excludes.append(f)
-            for t in target:
-                if t.lower() not in f.lower():
-                    istarget = False
-        # text search
-        else:
-            code = fs.read.text(f)
-            result = re.search(pattern, code)
-            if result is None: istarget = False
-            else:
-                tmpf = "/".join(f.split("/")[:-1])
-                if os.path.isfile(f'{tmpf}/app.json'):
-                    excludes.append(f)
-                    f = tmpf
-        
-        # is target?
-        if istarget is False:
+        ext = f.split(".")[-1]
+        if ext not in ["js", "ts", "css", "scss", "md", "sql", "html", "pug", "py", "json"]:
             continue
-        f = f[len(root_dir)+1:]
-        res.append(f)
-        cnt = cnt + 1
-        if cnt >= 10: break
+
+        code = fs.read.text(f)
+        result = re.search(pattern, code)
+        if result is None: continue
+
+        data = dict(root=root, filepath=f[len(root_dir)+1:], component=None, result=[])
+        for i in re.finditer(pattern, code):
+            start = i.start()
+            end = i.end()
+            data["result"].append(dict(
+                fulltext=code[start-10:end+10],
+                line=len(code[:start].split("\n")),
+            ))
+
+        tmpf = "/".join(f.split("/")[:-1])
+        if os.path.isfile(f'{tmpf}/app.json'):
+            data["component"] = tmpf[len(root_dir)+1:]
+
+        res.append(data)
     wiz.response.status(200, res)
 
 def load():

@@ -270,6 +270,30 @@ export class Component implements OnInit {
                     await this.update(node.path, JSON.stringify(data, null, 4));
                 });
 
+                let createTab = (path: string, lang: string, name: string = "code", dvalue: string = "") => {
+                    let monaco: any = { language: lang };
+                    if (lang == 'typescript') monaco.renderValidationDecorations = 'off';
+
+                    editor.create({
+                        name: name,
+                        viewref: MonacoEditor,
+                        path: path,
+                        config: { monaco }
+                    }).bind('data', async (tab) => {
+                        let { code, data } = await wiz.call('read', { path: tab.path });
+                        if (code != 200) return {};
+                        if (!data) data = dvalue;
+                        return { data };
+                    }).bind('update', async (tab) => {
+                        let data = await tab.data();
+                        await this.update(path, data.data);
+                    });
+                }
+
+                createTab('plugin/workspace/filter.py', 'python', 'Filter', "");
+                createTab('plugin/workspace/command.py', 'python', 'Command', "");
+                createTab('plugin/workspace/shortcut.ts', 'typescript', 'Shortcut', "");
+
                 await editor.open(location);
             },
             default: async () => {

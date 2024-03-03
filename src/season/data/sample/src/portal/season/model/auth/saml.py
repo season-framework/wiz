@@ -31,7 +31,7 @@ class SAML:
                 'query_string': request.query_string
             }
 
-            basepath = wiz.branch.path(os.path.join(SAML_BASE_PATH, entity))
+            basepath = wiz.project.path(os.path.join(SAML_BASE_PATH, entity))
             return OneLogin_Saml2_Auth(req, custom_base_path=basepath)
 
         pattern = self.basepath + "/saml/<action>/<entity>/<path:path>"

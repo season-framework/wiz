@@ -1,10 +1,8 @@
 import git
 import os
 
-workspace = wiz.workspace("service")
-
 def history():
-    cwd = workspace.fs().abspath()
+    cwd = wiz.project.fs().abspath()
     repo = git.Repo.init(cwd)
     branch = repo.active_branch.name
     

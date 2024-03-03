@@ -13,7 +13,7 @@ def plugin(action, *args):
     class Command:
         def __call__(self, name, args):
             app = season.app(path=os.getcwd())
-            workspace = app.wiz().workspace("ide")
+            wiz = app.wiz()
             
             for arg in args:
                 try:
@@ -24,7 +24,7 @@ def plugin(action, *args):
                     print(f"{name} `{arg}` finished")
                 except Exception as e:
                     print(e)
-            workspace.build()
+            wiz.ide.build()
 
     cmd = Command()
     cmd(action, args)

@@ -9,11 +9,10 @@ import tempfile
 import season
 import git
 
-builder = wiz.model("workspace/builder")
-Namespace = wiz.model("workspace/build/namespace")
-Definition = wiz.model("workspace/build/annotation/definition")
-workspace = wiz.workspace("service")
-fs = workspace.fs()
+builder = wiz.ide.plugin.model("builder")
+Namespace = wiz.ide.plugin.model("src/build/namespace")
+Annotator = wiz.ide.plugin.model("src/build/annotator")
+fs = wiz.project.fs("src")
 
 def install_sample():
     path = wiz.request.query("path", True)
@@ -39,7 +38,7 @@ def upgrade():
     if 'repo' not in info:
         wiz.response.status(404, True)
     
-    cachefs = season.util.os.FileSystem(fs.abspath(".cache"))
+    cachefs = season.util.fs(fs.abspath(".cache"))
     cachefs.remove()
     
     try:
@@ -279,7 +278,7 @@ def update(segment):
 
             app_id = f"portal.{modname}.{appid}"
             selector = Namespace.selector(app_id)
-            cinfo = Definition.ngComponentDesc(tscode)
+            cinfo = Annotator.definition.ngComponentDesc(tscode)
 
             injector = [f'[{x}]=""' for x in cinfo['inputs']] + [f'({x})=""' for x in cinfo['outputs']]
             injector = ", ".join(injector)
@@ -305,7 +304,7 @@ def upload(segment):
 
 def upload_root(segment):
     path = wiz.request.query("path", True)
-    fs = workspace.fs(path)
+    fs = wiz.project.fs("src", path)
     files = wiz.request.files()
     notuploaded = []
     
@@ -334,7 +333,7 @@ def upload_root(segment):
 
 def upload_app(segment):
     path = wiz.request.query("path", True)
-    fs = workspace.fs(path)
+    fs = wiz.project.fs("src", path)
 
     files = wiz.request.files()
     notuploaded = []

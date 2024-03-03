@@ -1,8 +1,6 @@
-import season
-import re
-
 class Namespace:
-    def componentName(self, namespace):
+    @staticmethod
+    def componentName(namespace):
         app_id_split = namespace.split(".")
         componentname = []
         for wsappname in app_id_split:
@@ -10,7 +8,8 @@ class Namespace:
         componentname = "".join(componentname)
         return componentname
     
-    def selector(self, namespace):
+    @staticmethod
+    def selector(namespace):
         return "wiz-" + "-".join(namespace.split("."))
 
-Model = Namespace()
+Model = Namespace

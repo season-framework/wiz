@@ -1,6 +1,6 @@
 import season
 
-class BaseConfig(season.util.std.stdClass):
+class BaseConfig(season.util.stdClass):
     DEFAULT_VALUES = dict()
 
     def __init__(self, values=dict()):

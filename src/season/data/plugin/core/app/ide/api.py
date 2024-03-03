@@ -6,21 +6,17 @@ import shutil
 import datetime
 import json
 import season
-from season.core.builder.base import Converter
 import subprocess
 import sys
 
 python_executable = str(sys.executable)
-if wiz.server.config.boot.python_executable is not None:
-    python_executable = wiz.server.config.boot.python_executable
 
 def coreupgrade():
     package = 'season'
     output = subprocess.run([python_executable, "-m", "pip", "install", str(package), "--upgrade"], capture_output=True)
     wiz.response.status(200, str(output.stdout.decode("utf-8")))
     
-workspace = wiz.workspace("ide")
-fs = workspace.fs("..")
+fs = wiz.fs()
 
 def upgrade():
     plugin_id = wiz.request.query("plugin", True)
@@ -51,14 +47,13 @@ def list(segment):
             wiz.response.status(200, res)
             
         elif len(segment) == 2:
+            res.append(dict(name='Plugin Info', path=os.path.join(path, 'plugin.json'), type='file', meta=dict(icon="fa-solid fa-info", editor="info")))
+            res.append(dict(name='README', path=os.path.join(path, 'README.md'), type='file', meta=dict(icon="fa-solid fa-book")))
             res.append(dict(name='app', path=os.path.join(path, 'app'), type='mod.app'))
             res.append(dict(name='editor', path=os.path.join(path, 'editor'), type='mod.app'))
             if segment[1] == 'core':
                 res.append(dict(name='system', path=os.path.join(path, 'system'), type='mod.app'))
             res.append(dict(name='model', path=os.path.join(path, 'model'), type='mod.folder'))
-            res.append(dict(name='Plugin Info', path=os.path.join(path, 'plugin.json'), type='file', meta=dict(icon="fa-solid fa-info", editor="info")))
-            res.append(dict(name='Shortcut', path=os.path.join(path, 'shortcut.ts'), type='file', meta=dict(icon="fa-solid fa-keyboard")))
-            res.append(dict(name='README', path=os.path.join(path, 'README.md'), type='file', meta=dict(icon="fa-solid fa-book")))
             wiz.response.status(200, res)
         
         elif len(segment) == 3:
@@ -172,9 +167,8 @@ def update(segment):
             appjson = fs.read.json(appjsonpath)
 
             app_id = f"{modname}.{apptype}.{appid}"
-            converter = Converter()
-            selector = converter.component_selector(app_id)
-            cinfo = converter.angular_component_info(tscode)
+            selector = wiz.ide.build.namespace.selector(app_id)
+            cinfo = wiz.ide.build.annotator.definition.ngComponentDesc(tscode)
 
             injector = [f'[{x}]=""' for x in cinfo['inputs']] + [f'({x})=""' for x in cinfo['outputs']]
             injector = ", ".join(injector)
@@ -200,7 +194,7 @@ def upload(segment):
 
 def upload_root(segment):
     path = wiz.request.query("path", True)
-    fs = workspace.fs("..", path)
+    fs = wiz.fs(path)
     files = wiz.request.files()
     notuploaded = []
     
@@ -229,7 +223,7 @@ def upload_root(segment):
 
 def upload_app(segment):
     path = wiz.request.query("path", True)
-    fs = workspace.fs("..", path)
+    fs = wiz.fs(path)
 
     files = wiz.request.files()
     notuploaded = []
@@ -263,6 +257,6 @@ def upload_app(segment):
     wiz.response.status(200, notuploaded)
 
 def build(segment):
-    work = wiz.workspace("ide")
-    work.build()
+    wiz.ide.build()
+    wiz.server.cache.clear()
     wiz.response.status(200)

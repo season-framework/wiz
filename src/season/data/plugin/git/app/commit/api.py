@@ -1,8 +1,7 @@
 import git
 import os
 
-workspace = wiz.workspace("service")
-cwd = workspace.fs().abspath()
+cwd = wiz.project.fs().abspath()
 repo = git.Repo.init(cwd)
 
 def _history():

@@ -10,7 +10,7 @@ def status():
     process = psutil.Process(os.getpid())
     hdd = psutil.disk_usage('/')
 
-    stat = season.util.std.stdClass()
+    stat = season.util.stdClass()
     stat.system_pid = os.getpid()
     stat.system_uptime = int(time.time() - psutil.boot_time())
 

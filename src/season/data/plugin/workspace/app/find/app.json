@@ -1,0 +1,6 @@
+{
+    "id": "find",
+    "title": "Find",
+    "category": "",
+    "template": "wiz-workspace-app-find()"
+}

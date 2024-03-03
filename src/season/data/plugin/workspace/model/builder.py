@@ -1,200 +1,181 @@
 import season
-import subprocess
 import os
 import json
 import re
 import time
 
-ESBUILD_SCRIPT = """const fs = require('fs');
-const pug = require('pug');
+Code = wiz.ide.plugin.model("src/code")
+Util = wiz.ide.plugin.model("src/util")
 
-if (process.argv.length > 2) {
-    for (let i = 2 ; i < process.argv.length ; i++) {
-        const target = process.argv[i];
-        const targetpath = target + '.pug';
-        const savepath = target + '.html';
-        const compiledFunction = pug.compileFile(targetpath);
-        fs.writeFileSync(savepath, compiledFunction(), "utf8")
-    }
-} else {
-    const NgcEsbuild = require('ngc-esbuild');
-    new NgcEsbuild({
-        minify: true,
-        open: false,
-        serve: false,
-        watch: false
-    }).resolve.then((result) => {
-        process.exit(1);
-    });
-}
-"""
+Annotator = wiz.ide.plugin.model("src/build/annotator")
+Namespace = wiz.ide.plugin.model("src/build/namespace")
 
-ENV_SCRIPT = """export const environment = {
-  production: true
-};"""
-
-TSCONFIG_SCRIPT = """{
-  "compileOnSave": false,
-  "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "./dist/out-tsc",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "sourceMap": true,
-    "declaration": false,
-    "downlevelIteration": true,
-    "experimentalDecorators": true,
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "target": "ES2022",
-    "module": "ES2022",
-    "useDefineForClassFields": false,
-    "lib": [
-      "ES2022",
-      "dom"
-    ]
-  },
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
-  }
-}
-"""
-
-Compiler = wiz.model("workspace/build/compiler")
-Annotation = wiz.model("workspace/build/annotation")
-Namespace = wiz.model("workspace/build/namespace")
-
-class Builder:
+class Model:
     def __init__(self, path=None):
         if path is None:
-            path = wiz.workspace("service").fs().abspath()
-        
+            path = wiz.project.fs().abspath()
         self.PATH_ROOT = path
 
-    def execute(self, cmd):
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = p.communicate()
-        
-        logger = wiz.logger('[build]')
-        if out is not None and len(out) > 0: 
-            out = out.decode('utf-8').strip()
-            wiz.logger('[build][log]')(out)
-        if err is not None and len(err) > 0: 
-            err = err.decode('utf-8').strip()
-            if "npm WARN" in err or "- Installing packages (npm)" in err:
-                wiz.logger('[build][log]')(err, level=season.LOG_WARNING)
-            else: 
-                wiz.logger('[build][error]')(err, level=season.LOG_CRITICAL)
-        
-    def use(self, path=None):
-        return Builder(path)
-
-    def path(self, *args):
-        return os.path.join(self.PATH_ROOT, *args)
-
     def fs(self, *args):
-        return season.util.os.FileSystem(self.path(*args))
+        return season.util.filesystem(os.path.join(self.PATH_ROOT, *args))
 
-    def baseuri(self):
-        return wiz.uri.wiz()
-
-    def init(self):
-        execute = self.execute
+    def install(self):
         fs = self.fs()
-        working_dir = self.path()
-        build_dir = self.path("build")
-
         if fs.exists("build"):
             return
+        working_dir = fs.abspath()
+        build_dir = fs.abspath("build")
 
-        execute(f'cd {working_dir} && npm i')
+        Util.execute(f'cd {working_dir} && npm i')
         command_ng = f"{working_dir}/node_modules/@angular/cli/bin/ng.js"
+        Util.execute(f'cd {working_dir} && {command_ng} new build --routing true --style scss --interactive false --skip-tests true --skip-git true')
 
-        execute(f'cd {working_dir} && {command_ng} new build --routing true --style scss --interactive false  --skip-tests true --skip-git true')
-
-        fs.write('build/wizbuild.js', ESBUILD_SCRIPT)
-        fs.write('build/src/environments/environment.ts', ENV_SCRIPT)
-        fs.write('build/tsconfig.json', TSCONFIG_SCRIPT)
-        
         if fs.isfile("src/angular/package.json"):
             packageJson = fs.read.json("src/angular/package.json")
             fs.write.json("build/package.json", packageJson)
-            execute(f"cd {build_dir} && npm install --force")
+            Util.execute(f"cd {build_dir} && npm install --force")
         else:
-            execute(f"cd {build_dir} && npm install ngc-esbuild pug jquery socket.io-client --save")
+            Util.execute(f"cd {build_dir} && npm install ngc-esbuild pug jquery socket.io-client --save")
+
+    def __call__(self):
+        self.build()
 
     def clean(self):
         fs = self.fs()
         if fs.exists("build"):
             fs.delete("build")
-        self.init()
-    
-    def build(self):
-        execute = self.execute
-        fs = self.fs()
-        compiler = Compiler(self)
 
+    def build(self):
+        fs = self.fs()
+        timestamp = int(time.time() * 1000)
+        wiz.server.cache.clear()
+
+        if fs.exists("build"):
+            if Util.is_working(fs, timestamp):
+                return
+        else:
+            self.install()
+            if Util.is_working(fs, timestamp):
+                return
+
+        self._reconstruct()
+        self._build()
+        self._angular()
+        self.bundle()
+
+        wiz.server.cache.clear()
+        Route = wiz.ide.plugin.model("route")()
+        Route.build()
+
+        if Util.is_work_finish(fs, timestamp) is False:
+            self.build()
+            return
+    
+    def bundle(self):
+        fs = self.fs()
+        fs.remove("bundle")
+        fs.makedirs("bundle")
+
+        fs.copy("build/dist/build", "bundle/www")
+        fs.copy("build/src/assets", "bundle/src/assets")
+        fs.copy("build/src/controller", "bundle/src/controller")
+        fs.copy("build/src/model", "bundle/src/model")
+        fs.copy("build/src/route", "bundle/src/route")
+        fs.copy("config", "bundle/config")
+
+        appfiles = self._search("build/src/app", result=[])
+
+        for appfile in appfiles:
+            if os.path.splitext(appfile)[-1] not in ['.py', '.json']:
+                continue
+            bundlefile = os.path.join("bundle", *appfile.split("/")[1:])
+            bundlefolder = os.path.dirname(bundlefile)
+            fs.makedirs(bundlefolder)
+            fs.copy(appfile, bundlefile)
+
+    def typescript(self, code, app_id=None, baseuri=None, declarations=None, imports=None, prefix=None):
+        if prefix is not None:
+            code = prefix + "\n\n" + code
+        code = Annotator.injection.declarations(code, declarations)
+        code = Annotator.injection.imports(code, imports)
+        code = Annotator.injection.app(code)
+        code = Annotator.injection.libs(code)
+        code = Annotator.injection.namespace(code, app_id)
+        code = Annotator.injection.cwd(code, app_id)
+        code = Annotator.injection.baseuri(code, baseuri)
+        code = Annotator.injection.dependencies(code)
+        code = Annotator.injection.directives(code)
+        return code
+    
+    def pug(self, code, app_id=None, baseuri=None):
+        code = Annotator.injection.cwd(code, app_id=app_id)
+        code = Annotator.injection.baseuri(code, baseuri=baseuri)
+        return code
+
+    def _search(self, target_file, result=[], extension=None):
+        fs = self.fs()
+
+        if fs.isdir(target_file):
+            files = fs.files(target_file)
+            for f in files:
+                self._search(os.path.join(target_file, f), result=result, extension=extension)
+            return result
+        
+        if extension is None:
+            result.append(target_file)
+            return result
+
+        if os.path.splitext(target_file)[-1] == extension:
+            result.append(os.path.join(*os.path.splitext(target_file)[:-1]))
+            return result
+        
+        return result
+
+    def _reconstruct(self):
+        fs = self.fs()
         if fs.exists("config") == False:
             fs.makedirs("config")
 
-        timestamp = int(time.time() * 1000)
-        try:
-            if fs.exists("build/working"):
-                timestampLog = int(fs.read("build/working"))
-                if timestamp - timestampLog < 5000:
-                    fs.write("build/working", str(timestamp))
-                    return
-        except:
-            return
-        
-        fs.write("build/working", str(timestamp))
+        fs.write('build/wizbuild.js', Code.ESBUILD)
+        fs.write('build/tsconfig.json', Code.TSCONFIG)
+
+        if fs.exists('build/src/environments') == False:
+            fs.makedirs('build/src/environments')
+
+        if fs.exists("src/angular/environment.ts"): fs.copy("src/angular/environment.ts", "build/src/environments/environment.ts")
+        else: fs.write('build/src/environments/environment.ts', Code.ENV)
+        fs.write('build/src/styles.scss', Code.STYLES)
 
         # clear build src files
         fs.delete("build/src/app")
-        fs.delete("build/src/service")
-        fs.delete("build/src/styles")
+        fs.delete("build/src/assets")
+        fs.delete("build/src/controller")
         fs.delete("build/src/libs")
-        fs.delete("build/src/portal")
+        fs.delete("build/src/model")
+        fs.delete("build/src/route")
+        fs.delete("build/src/styles")
 
-        # remove portal app
-        apps = fs.ls("src/app")
-        for app in apps:
-            if app.split(".")[0] == "portal":
-                fs.remove(os.path.join("src/app", app))
+        # copy src
+        fs.copy("src/angular/main.ts", "build/src/main.ts")
+        fs.copy("src/angular/wiz.ts", "build/src/wiz.ts")
+        fs.copy("src/angular/index.pug", "build/src/index.pug")
 
-        # remove portal route
-        apps = fs.ls("src/route")
-        for app in apps:
-            if app.split(".")[0] == "portal":
-                fs.remove(os.path.join("src/route", app))
-        
-        fs.remove("src/controller/portal")
-        fs.remove("src/model/portal")
-        fs.remove("src/assets/portal")
-        fs.remove("src/angular/libs/portal")
-        fs.remove("src/angular/styles/portal")
+        fs.copy("src/angular/app", "build/src/app")
+        fs.copy("src/app", "build/src/app")
+        fs.copy("src/assets", "build/src/assets")
+        fs.copy("src/controller", "build/src/controller")
+        fs.copy("src/model", "build/src/model")
+        fs.copy("src/route", "build/src/route")
+        fs.copy("src/angular/libs", "build/src/libs")
+        fs.copy("src/angular/styles", "build/src/styles")
 
-        # create cache folder
-        if fs.exists("cache/src"):
-            fs.delete("cache/src")
-        fs.copy("src", "cache/src")
-
-        # build portal framework to cache folder
-        modules = fs.ls("portal")
-
+        # build portal
         def buildApp(module, mode="app"):
-            apps = fs.ls(os.path.join("portal", module, mode))
+            apps = fs.ls(os.path.join("src/portal", module, mode))
             for app in apps:
                 namespace = f"portal.{module}.{app}"
-                srcpath = os.path.join("portal", module, mode, app)
-                targetpath = os.path.join("cache/src/app", namespace)
+                srcpath = os.path.join("src/portal", module, mode, app)
+                targetpath = os.path.join("build/src/app", namespace)
                 fs.copy(srcpath, targetpath)
                 appjson = fs.read.json(os.path.join(targetpath, "app.json"), dict())
                 appjson['id'] = namespace
@@ -205,11 +186,11 @@ class Builder:
                 fs.write.json(os.path.join(targetpath, "app.json"), appjson)
 
         def buildApi(module):
-            apps = fs.ls(os.path.join("portal", module, "route"))
+            apps = fs.ls(os.path.join("src/portal", module, "route"))
             for app in apps:
                 namespace = f"portal.{module}.{app}"
-                srcpath = fs.abspath(os.path.join("portal", module, "route", app))
-                targetpath = os.path.join("cache/src/route", namespace)
+                srcpath = fs.abspath(os.path.join("src/portal", module, "route", app))
+                targetpath = os.path.join("build/src/route", namespace)
                 fs.copy(srcpath, targetpath)
                 appjson = fs.read.json(os.path.join(targetpath, "app.json"), dict())
                 appjson['id'] = namespace
@@ -218,13 +199,14 @@ class Builder:
                 fs.write.json(os.path.join(targetpath, "app.json"), appjson)
 
         def buildFiles(module, target, src):
-            fs.makedirs(os.path.join("cache", "src", src, "portal", module))
-            files = fs.ls(os.path.join("portal", module, target))
+            fs.makedirs(os.path.join("build", "src", src, "portal", module))
+            files = fs.ls(os.path.join("src/portal", module, target))
             for f in files:
-                fs.copy(fs.abspath(os.path.join("portal", module, target, f)), os.path.join("cache", "src", src, "portal", module, f))
+                fs.copy(fs.abspath(os.path.join("src/portal", module, target, f)), os.path.join("build", "src", src, "portal", module, f))
 
+        modules = fs.ls("src/portal")
         for module in modules:
-            info = fs.read.json(os.path.join("portal", module, "portal.json"), dict())
+            info = fs.read.json(os.path.join("src/portal", module, "portal.json"), dict())
             def checker(name):
                 if f"use_{name}" in info:
                     return info[f"use_{name}"]
@@ -236,111 +218,55 @@ class Builder:
             if checker("controller"): buildFiles(module, "controller", "controller")
             if checker("model"): buildFiles(module, "model", "model")
             if checker("assets"): buildFiles(module, "assets", "assets")
-            if checker("libs"): buildFiles(module, "libs", "angular/libs")
-            if checker("styles"): buildFiles(module, "styles", "angular/styles")
+            if checker("libs"): buildFiles(module, "libs", "libs")
+            if checker("styles"): buildFiles(module, "styles", "styles")
 
-        # file search function
-        def searchFiles(target_file, result=[], extension=None):
-            if fs.isdir(target_file):
-                files = fs.files(target_file)
-                for f in files:
-                    searchFiles(os.path.join(target_file, f), result=result, extension=extension)
-                return result
-            
-            if extension is None:
-                result.append(target_file)
-                return result
+    def _build(self):
+        fs = self.fs()
+        baseuri = wiz.uri.ide()
 
-            if os.path.splitext(target_file)[-1] == extension:
-                result.append(os.path.join(*os.path.splitext(target_file)[:-1]))
-                return result
-            
-            return result
+        # build apps
+        apps = []
 
-        # build pug files
-        pugs = searchFiles("cache/src", result=[], extension=".pug")
-        if len(pugs) > 0:
-            pugs = " ".join(pugs)
-            build_base_path = fs.abspath()
-            execute(f"cd {build_base_path} && node build/wizbuild {pugs}")
+        for app in fs.ls("build/src/app"):
+            if fs.exists(os.path.join("build/src/app", app, "app.json")):
+                app_id = app
+                app = fs.read.json(os.path.join("build/src/app", app, "app.json"))
+                viewts = fs.read(os.path.join("build/src/app", app_id, "view.ts"))
 
-        # copy src files to build
-        targetfiles = searchFiles("cache/src", result=[])
-        for targetfile in targetfiles:
-            compiler.source(targetfile)
-        
-        # angular build automation: app.module.ts, app-routing.module.ts
-        apps = fs.ls("cache/src/app")
-        _appsmap = dict()
-        _apps = []
+                # update app.json
+                componentName = Namespace.componentName(app_id) + "Component"
+
+                app['id'] = app_id
+                app['path'] = f"./{app_id}/{app_id}.component"
+                app['name'] = componentName
+
+                componentInfo = Annotator.definition.ngComponentDesc(viewts)
+                app["ng.build"] = dict(id=app_id, name=componentName, path="./" + app_id + "/" + app_id + ".component")
+                ngtemplate = app["ng"] = dict(selector=Namespace.selector(app_id), **componentInfo)
+                injector = [f'[{x}]=""' for x in ngtemplate['inputs']] + [f'({x})=""' for x in ngtemplate['outputs']]
+                injector = ", ".join(injector)
+                app['template'] = ngtemplate['selector'] + "(" + injector + ")"
+                
+                fs.write(os.path.join("build/src/app", app_id, "app.json"), json.dumps(app, indent=4))
+
+                app['view.ts'] = viewts
+                apps.append(app)
+
+        # routing
         apps_routing = dict()
         for app in apps:
-            appinfo = fs.read.json(os.path.join("cache/src/app", app, "app.json"))    
             try:
-                _apps.append(appinfo['ng.build'])
-                _appsmap[appinfo['id']] = appinfo['ng.build']
-            except Exception as e:
-                pass
-            try:
-                if appinfo['mode'] == 'page':
-                    if appinfo['layout'] not in apps_routing:
-                        apps_routing[appinfo['layout']] = []
-                    if len(appinfo['viewuri']) > 0:
-                        routing_uri = appinfo['viewuri']
+                if app['mode'] == 'page':
+                    if app['layout'] not in apps_routing:
+                        apps_routing[app['layout']] = []
+                    if len(app['viewuri']) > 0:
+                        routing_uri = app['viewuri']
                         if routing_uri[0] == "/":
                             routing_uri = routing_uri[1:]
-                        apps_routing[appinfo['layout']].append(dict(path=routing_uri, component=appinfo['id'], app_id=appinfo['id']))
+                        apps_routing[app['layout']].append(dict(path=routing_uri, component=app['id'], app_id=app['id']))
             except Exception as e:
                 pass
-        apps = _apps
-
-        prefix = [dict(name=x['name'], path=x['path']) for x in apps]
-        ngmodule_imports = []
-        ngmodule_declarations = [x['name'] for x in apps]
-
-        apps = fs.ls("cache/src/app")
-        for app in apps:
-            if fs.exists(os.path.join("cache/src/app", app, "view.ts")):
-                text = fs.read(os.path.join("cache/src/app", app, "view.ts"))
-
-                deps = Annotation.definition.dependencies(text)
-                for dep in deps:
-                    pkg = deps[dep]
-                    tmp = dict(name=dep, path=pkg)
-                    if tmp not in prefix:
-                        prefix.append(tmp)
-                    if dep not in ngmodule_imports:
-                        ngmodule_imports.append(dep)
-
-                deps = Annotation.definition.directives(text)
-                for dep in deps:
-                    pkg = deps[dep]
-                    tmp = dict(name=dep, path=pkg)
-                    if tmp not in prefix:
-                        prefix.append(tmp)
-                    if dep not in ngmodule_declarations:
-                        ngmodule_declarations.append(dep)
-                    
-        prefix = "\n".join(["import { " + x['name'] + " } from '" + x['path'] + "';" for x in prefix])
-        ngmodule_imports = ",\n".join(["        " + x for x in ngmodule_imports])
-        ngmodule_declarations = "AppComponent,\n" + ",\n".join(["        " + x for x in ngmodule_declarations])
-        
-        # auto build: app.module.ts
-        filepath = "build/src/app/app.module.ts"
-        compiler.typescript(filepath, declarations=ngmodule_declarations, imports=ngmodule_imports, prefix=prefix)
-
-        # auto build: app-routing.modules.ts        
-        def syntax_route(code):
-            def convert(match_obj):
-                val = match_obj.group(1)
-                return 'component: ' + Namespace.componentName(val) + "Component"
-            pattern = r"component.*:.*'(.*)'"
-            code = re.sub(pattern, convert, code)
-            pattern = r'component.*:.*"(.*)"'
-            code = re.sub(pattern, convert, code)
-            code = code.replace("'component", "component")
-            code = code.replace('"component', "component")
-            return code
 
         app_routing_auto = [] 
         for layout in apps_routing:
@@ -348,49 +274,108 @@ class Builder:
             for child in apps_routing[layout]:
                 children.append(child)
             app_routing_auto.append(dict(component=layout, children=children))
-
+        
         app_routing_auto = json.dumps(app_routing_auto, indent=4)
-        app_routing_auto = syntax_route(app_routing_auto)
+        app_routing_auto = Annotator.injection.route(app_routing_auto)
+        
+        # prefix and imports
+        prefix = [dict(name=x['name'], path=x['path']) for x in apps]        
+        imports = []
+        declarations = [x['name'] for x in apps]
 
-        filepath = "build/src/app/app-routing.module.ts"
-        compiler.typescript(filepath, declarations=ngmodule_declarations, imports=ngmodule_imports, prefix=prefix, fnWizRoutes=app_routing_auto)
+        for app in apps:
+            app_id = app['id']
+            code = app['view.ts']
+            deps = Annotator.definition.dependencies(code)
 
-        fs.copy(fs.abspath("build/package.json"), "src/angular/package.json")
-        fs.copy(fs.abspath("build/angular.json"), "src/angular/angular.json")
+            for dep in deps:
+                pkg = deps[dep]
+                tmp = dict(name=dep, path=pkg)
+                if tmp not in prefix:
+                    prefix.append(tmp)
+                if dep not in imports:
+                    imports.append(dep)
+            
+            deps = Annotator.definition.directives(code)
+            for dep in deps:
+                pkg = deps[dep]
+                tmp = dict(name=dep, path=pkg)
+                if tmp not in prefix:
+                    prefix.append(tmp)
+                if dep not in declarations:
+                    declarations.append(dep)
+        
+        prefix = "\n".join(["import { " + x['name'] + " } from '" + x['path'] + "';" for x in prefix])
+        imports = ",\n".join(["        " + x for x in imports])
+        declarations = "AppComponent,\n" + ",\n".join(["        " + x for x in declarations])
 
-        # run esbuild
+        # build pug
+        targets = self._search("build/src", result=[], extension=".pug")
+        for target in targets:
+            code = fs.read(target + ".pug")
+            filename = target.split("/")[-1]
+            if filename == 'view':
+                app_id = target.split("/")[-2]
+                code = self.pug(code, baseuri=baseuri, app_id=app_id)
+            else:
+                code = self.pug(code, baseuri=baseuri)
+            fs.write(target + ".pug", code)
+        
+        # build typescript
+        targets = self._search("build/src/app", result=[], extension=".ts")
+        for target in targets:
+            code = fs.read(target + ".ts")
+            filename = target.split("/")[-1]
+            
+            if filename == 'view':
+                app_id = target.split("/")[-2]
+
+                # if view.ts
+                importString = "import { Component } from '@angular/core';\n"
+                componentName = Namespace.componentName(app_id)
+                componentOpts = "{\n    selector: '" + Namespace.selector(app_id) + "',\n    templateUrl: './view.html',\n    styleUrls: ['./view.scss']\n}"
+
+                code = f"import Wiz from 'src/wiz';\nlet wiz = new Wiz('{baseuri}').app('{app_id}');\n" + code
+                code = code.replace('export class Component', f"@Component({componentOpts})\n" + f'export class {componentName}Component')
+                code = f"{importString}\n" + code.strip()
+                code = code + f"\n\nexport default {componentName}Component;"
+
+                fs.delete(target + ".ts")
+                target = os.path.join(os.path.dirname(target), app_id + ".component")
+
+                code = self.typescript(code, baseuri=baseuri, app_id=app_id, declarations=declarations, imports=imports)
+            elif filename == 'app-routing.module':
+                code = code.replace("wiz.routes()", app_routing_auto)
+                code = self.typescript(code, baseuri=baseuri, declarations=declarations, imports=imports, prefix=prefix)
+            elif filename == 'app.component':
+                code = f"import Wiz from 'src/wiz';\nlet wiz = new Wiz('{baseuri}');\n" + code
+                code = self.typescript(code, baseuri=baseuri)
+            elif filename == 'app.module':
+                code = self.typescript(code, baseuri=baseuri, declarations=declarations, imports=imports, prefix=prefix)
+            else:
+                code = self.typescript(code, baseuri=baseuri)
+            fs.write(target + ".ts", code)
+
+        # build pug files
+        targets = self._search("build/src", result=[], extension=".pug")
+        if len(targets) > 0:
+            targets = " ".join(targets)
+            build_base_path = fs.abspath()
+            Util.execute(f"cd {build_base_path} && node build/wizbuild {targets}")
+        
+        # build angular json
+        angularJson = fs.read.json("src/angular/angular.json", dict())
+        angularBuildOptionsJson = "src/angular/angular.build.options.json"
+        if fs.exists(angularBuildOptionsJson):
+            angularBuildOptionsJson = fs.read.json(angularBuildOptionsJson, dict())
+            for key in angularBuildOptionsJson:
+                if key in ["outputPath", "index", "main", "polyfills", "tsConfig", "inlineStyleLanguage"]: continue
+                angularJson["projects"]["build"]["architect"]["build"]["options"][key] = angularBuildOptionsJson[key]
+        fs.write("build/angular.json", json.dumps(angularJson, indent=4))
+
+    def _angular(self):
+        fs = self.fs()
         esbuildpath = fs.abspath('build')
-        execute(f"cd {esbuildpath} && node wizbuild")
+        Util.execute(f"cd {esbuildpath} && node wizbuild")
 
-        wiz.workspace("service").route.build()
-
-        # create bundle
-        fs.remove("bundle")
-        fs.makedirs("bundle")
-        fs.copy("build/dist/build", "bundle/www")
-        fs.copy("cache/src/assets", "bundle/src/assets")
-        fs.copy("cache/src/controller", "bundle/src/controller")
-        fs.copy("cache/src/model", "bundle/src/model")
-        fs.copy("cache/src/route", "bundle/src/route")
-        fs.copy("cache/urlmap", "bundle/urlmap")
-        fs.copy("config", "bundle/config")
-
-        appfiles = searchFiles("cache/src/app", result=[])
-
-        for appfile in appfiles:
-            if os.path.splitext(appfile)[-1] not in ['.py', '.json']:
-                continue
-            bundlefile = os.path.join("bundle", "/".join(appfile.split("/")[1:]))
-            bundlefolder = os.path.dirname(bundlefile)
-            fs.makedirs(bundlefolder)
-            fs.copy(appfile, bundlefile)
-
-        if fs.exists("build/working"):
-            timestampLog = int(fs.read("build/working"))
-            fs.remove("build/working")
-            if timestamp < timestampLog:
-                self.build()
-
-        wiz.server.clear()
-
-Model = Builder()
+Model = Model()

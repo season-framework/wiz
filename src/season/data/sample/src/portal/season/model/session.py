@@ -25,7 +25,7 @@ class Session:
         self.flask.session.clear()
 
     def to_dict(self):
-        return season.util.std.stdClass(dict(self.flask.session))
+        return season.util.stdClass(dict(self.flask.session))
 
     def user_id(self):
         config = wiz.model("portal/season/config")

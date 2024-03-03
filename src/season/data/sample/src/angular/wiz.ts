@@ -36,7 +36,7 @@ export default class Wiz {
         return false;
     }
 
-    public branch() {
+    public project() {
         let findcookie = (name) => {
             let ca: Array<string> = document.cookie.split(';');
             let caLen: number = ca.length;
@@ -52,13 +52,13 @@ export default class Wiz {
             return '';
         }
 
-        let branch = findcookie("season-wiz-branch");
-        if (branch) return branch;
+        let project = findcookie("season-wiz-project");
+        if (project) return project;
         return "main";
     }
 
     public socket() {
-        let socketns = this.baseuri + "/app/" + this.branch();
+        let socketns = this.baseuri + "/app/" + this.project();
         if (this.namespace)
             socketns = socketns + "/" + this.namespace;
         return io(socketns);

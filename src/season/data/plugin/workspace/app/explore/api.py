@@ -7,21 +7,21 @@ import shutil
 import zipfile
 import tempfile
 
-builder = wiz.model("workspace/builder")
-workspace = wiz.workspace("service")
-fs = workspace.fs()
+builder = wiz.ide.plugin.model("builder")
+fs = wiz.project.fs()
 
 def layout():
     mode = "layout"
-    apps = workspace.app.list()
+    apps = fs.ls("src/app")
     res = []
     for app in apps:
+        app = fs.read.json(f"src/app/{app}/app.json", dict(mode='none'))
         if app['mode'] == mode:
             res.append(app)
     wiz.response.status(200, res)
 
 def controller():
-    fs = wiz.workspace("service").fs("src", "controller")
+    fs = wiz.project.fs("src", "controller")
     res = []
     try:
         ctrls = fs.list()
@@ -232,7 +232,7 @@ def upload(segment):
 
 def upload_root(segment):
     path = wiz.request.query("path", True)
-    fs = workspace.fs(path)
+    fs = wiz.project.fs(path)
     files = wiz.request.files()
     notuploaded = []
     
@@ -262,7 +262,7 @@ def upload_root(segment):
 def upload_app(segment):
     path = wiz.request.query("path", True)
     path = "/".join(path.split("/")[:-1])
-    fs = workspace.fs(path)
+    fs = wiz.project.fs(path)
 
     files = wiz.request.files()
     notuploaded = []

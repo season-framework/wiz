@@ -1,0 +1,28 @@
+.side-container
+    .side-heading
+        h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
+            span Find Text
+    
+    .side-search.area-round
+        input.form-control(type="text" placeholder="search keyword", [(ngModel)]="text", (keyup.enter)="search()")
+        button.btn.btn-primary.ms-2((click)="search()") Search
+
+    .side-body
+        table.table.table-sm.mb-0
+            tbody(*ngIf="list.length === 0")
+                tr
+                    td.text-center No result
+            tbody(*ngFor="let file of list")
+                tr.cursor-pointer((click)="load(file)")
+                    td.bg-lt
+                        i.fa-solid.mr-2([ngClass]="iconMap(file.root)")
+                        span {{file.component?file.component:file.filepath}}
+                    td.text-right.bg-lt
+                        i.fa-solid.fa-pen-to-square.text-muted.mr-2
+                        span.text-muted.mr-1 {{file.result.length}}
+                tr.cursor-pointer(*ngFor="let item of file.result;let i = index", (click)="load(file)")
+                    td.p-3(colspan=2)
+                        span Line:{{item.line}}
+                        span.ml-2 ...{{item.fulltext}}...
+
+    wiz-core-app-widget-loading(*ngIf="loading")

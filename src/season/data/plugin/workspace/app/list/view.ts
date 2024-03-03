@@ -8,7 +8,7 @@ import WorkspaceInfo from "@wiz/app/workspace.editor.wsinfo";
 
 export class Component implements OnInit {
     public APP_ID: string = wiz.namespace;
-    public current: string = wiz.branch();
+    public current: string = wiz.project();
     public keyword: string = "";
     public loading: boolean = false;
     public isCreate: boolean = false;
