@@ -210,7 +210,6 @@ wiz ide upgrade # ide upgrade
     - localize angular cli
     - add linux service cli
     - add statusbar at bottom of ide
-
 - [core] move build logic to ide plugin
 - [core] add bundle structure
 - [core] localize angular cli
