@@ -1,12 +1,10 @@
 import season
-import git
 import os
-from argh import arg, expects_obj
+from argh import arg
 import socket
-import datetime
 
 PATH_FRAMEWORK = os.path.dirname(os.path.dirname(__file__))
-frameworkfs = season.util.os.FileSystem(PATH_FRAMEWORK)
+frameworkfs = season.util.fs(PATH_FRAMEWORK)
 
 def portchecker(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,14 +17,13 @@ def portchecker(port):
     return False
 
 @arg('projectname', default='sample-project', help='project name')
-@arg('--uri', help='git project url')
-def create(projectname, uri=None):
+def create(projectname):
     PATH_PROJECT = os.path.join(os.getcwd(), projectname)
     if os.path.isdir(PATH_PROJECT):
         print("Already exists project path '{}'".format(PATH_PROJECT))
         return
     
-    fs = season.util.os.FileSystem(PATH_PROJECT)
+    fs = season.util.fs(PATH_PROJECT)
 
     print("create project...")
     PATH_PUBLIC_SRC = os.path.join(PATH_FRAMEWORK, 'data', "websrc")
@@ -44,19 +41,12 @@ def create(projectname, uri=None):
     fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "ide"), "ide")
     fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "plugin"), "plugin")
 
-    fs.makedirs(os.path.join(PATH_PROJECT, "branch"))
+    fs.makedirs(os.path.join(PATH_PROJECT, "project"))
     
-    # if uri is not None:
-    #     print("import project...")
-    #     git.Repo.clone_from(uri, fs.abspath(os.path.join('branch', 'main')))
-    # else:
-    #     print("create initial project...")
-    #     fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "sample"), os.path.join(PATH_PROJECT, "branch", "main"))
-    #     fs.makedirs(os.path.join(PATH_PROJECT, "branch", "main"))
-    #     fs.makedirs(os.path.join(PATH_PROJECT, "branch", "main", "config"))
-
     print("build ide...")
-    app = season.app(path=PATH_PROJECT)
-    work = app.wiz().workspace("ide")
-    work.build.clean()
-    work.build()
+    app = season.server(PATH_PROJECT)
+    wiz = app.wiz()
+    wiz.ide.build.clean()
+    wiz.ide.build()
+
+    

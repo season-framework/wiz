@@ -5,7 +5,7 @@ import socket
 def status():
     res = dict()
     res['hostname'] = socket.gethostname()
-    res['branch'] = wiz.branch()
+    res['project'] = wiz.project()
     res['wiz'] = season.version
     res['python'] = platform.python_version()
     wiz.response.status(200, res)

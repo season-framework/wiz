@@ -5,7 +5,7 @@ import season
 from texttable import Texttable
 from argh import arg
 
-fs = season.util.os.FileSystem(os.getcwd())
+fs = season.util.fs(os.getcwd())
 
 PATH_EXEC = sys.executable
 PATH_EXEC_WIZ = os.path.join(os.path.dirname(PATH_EXEC), "wiz")
@@ -28,6 +28,7 @@ class ServiceCommand:
             print("wiz service regist [Service Name]")
             return
         
+        logName = serviceName.lower()
         serviceName = "wiz." + serviceName.lower()
         commandPath = f"/usr/local/bin/{serviceName}"
         servicePath = f"/etc/systemd/system/{serviceName}.service"
@@ -37,7 +38,11 @@ class ServiceCommand:
             _params.append(f"--port {str(port)}")
         if isbundle == 'bundle':
             _params.append(f"--bundle")
+        _params.append(f"--log /var/log/wiz/{logName}")
         _params = " ".join(_params)
+
+        if fs.exists("/var/log/wiz") == False:
+            fs.makedirs("/var/log/wiz")
 
         _script = EXEC_SCRIPT.replace("$params", _params)
 
@@ -141,13 +146,14 @@ WantedBy=multi-user.target
 
     def list(self):
         files = fs.files("/etc/systemd/system")
-        services = [['service', 'systemd', 'binary']]
+        services = [['name', 'systemd', 'binary', 'log']]
         for target in files:
             if target.startswith("wiz."):
                 name = ".".join(target[4:].split(".")[:-1])
                 path = f"/etc/systemd/{target}"
                 binary = f"/usr/local/bin/wiz.{name}"
-                services.append([name, path, binary])
+                log = f"/var/log/wiz/{name}"
+                services.append([name, path, binary, log])
         
         t = Texttable()
         t.add_rows(services)

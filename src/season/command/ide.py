@@ -5,18 +5,18 @@ from argh import arg
 @arg('action', default=None, help="install | remove | upgrade | build")
 def ide(action, *args):
     PATH_FRAMEWORK = os.path.dirname(os.path.dirname(__file__))
-    frameworkfs = season.util.os.FileSystem(PATH_FRAMEWORK)
-    fs = season.util.os.FileSystem(os.getcwd())
-    idefs = season.util.os.FileSystem(os.path.join(os.getcwd(), "ide"))
-    pluginfs = season.util.os.FileSystem(os.path.join(os.getcwd(), "plugin"))
-    cachefs = season.util.os.FileSystem(os.path.join(os.getcwd(), ".wiz.cache"))
+    frameworkfs = season.util.fs(PATH_FRAMEWORK)
+    fs = season.util.fs(os.getcwd())
+    idefs = season.util.fs(os.path.join(os.getcwd(), "ide"))
+    pluginfs = season.util.fs(os.path.join(os.getcwd(), "plugin"))
+    cachefs = season.util.fs(os.path.join(os.getcwd(), ".wiz.cache"))
 
     if fs.exists(os.path.join("public", "app.py")) == False:
         print("Invalid Project path: wiz structure not found in this folder.")
         return
 
-    app = season.app(path=os.getcwd())
-    workspace = app.wiz().workspace("ide")
+    app = season.server(os.getcwd())
+    wiz = app.wiz()
 
     class Command:
         def install(self):
@@ -30,8 +30,8 @@ def ide(action, *args):
             if pluginfs.exists() == False:
                 fs.copy(frameworkfs.abspath(os.path.join("data", "plugin")), "plugin")
 
-            workspace.build.clean()
-            workspace.build()
+            wiz.ide.build.clean()
+            wiz.ide.build()
             print("WIZ IDE installed")
             return True
 
@@ -44,26 +44,15 @@ def ide(action, *args):
             return True
 
         def upgrade(self, *args):
-            mode = 'all'
-            if len(args) > 1:
-                mode = args[0]
-            
-            if mode in ['all', 'core']:
-                print("Upgrading WIZ IDE...")
-                idefs.remove()
-                fs.copy(frameworkfs.abspath(os.path.join("data", "ide")), "ide")
-                workspace.build.clean()
-                workspace.build()
+            print("Upgrading WIZ IDE...")
+            idefs.remove()
+            pluginfs.remove()
 
-            if mode in ['all', 'plugin']:
-                print("Upgrading WIZ IDE Plugins...")
-                plugin = season.plugin(os.getcwd())
-                plugin.uninstall("portal")
-                plugin.upgrade("core")
-                plugin.upgrade("workspace")
-                plugin.upgrade("git")
-                plugin.upgrade("utility")
-                workspace.build()
+            fs.copy(frameworkfs.abspath(os.path.join("data", "ide")), "ide")
+            fs.copy(frameworkfs.abspath(os.path.join("data", "plugin")), "plugin")
+                
+            wiz.ide.build.clean()
+            wiz.ide.build()
 
             print("WIZ IDE upgraded")
 
@@ -71,7 +60,7 @@ def ide(action, *args):
             if idefs.exists() == False:
                 print("WIZ IDE is not installed")
                 return False
-            workspace.build()
+            wiz.ide.build()
             
         def __call__(self, name, args):
             cachefs.delete()

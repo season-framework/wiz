@@ -19,13 +19,13 @@ PATH_PID = os.path.join(PATH_WEBSRC, "wiz.pid")
 @arg('--host', help='0.0.0.0')
 @arg('--port', help='3000')
 @arg('--log', help='log filename')
-def run(host='0.0.0.0', port=None, log=None, bundle=False):
+def run(host='0.0.0.0', port=3000, log=None, bundle=False):
     if os.path.isfile(PATH_APP) == False:
         print("Invalid Project path: wiz structure not found in this folder.")
         return
 
-    if os.path.exists(os.path.join(PATH_WEBSRC, "branch")) == False:
-        os.mkdir(os.path.join(PATH_WEBSRC, "branch"))
+    if os.path.exists(os.path.join(PATH_WEBSRC, "project")) == False:
+        os.mkdir(os.path.join(PATH_WEBSRC, "project"))
 
     if port is not None: 
         port = int(port)
@@ -37,7 +37,9 @@ def run(host='0.0.0.0', port=None, log=None, bundle=False):
 
     def run_ctrl():
         season = importlib.import_module("season")
-        app = season.app(path=PATH_WEBSRC, bundle=bundle)
+        app = season.server(PATH_WEBSRC)
+        wiz = app.wiz()
+        wiz.server.config.boot.bundle = bundle
         os.environ['WERKZEUG_RUN_MAIN'] = 'false'
         app.run(**runconfig)
         
@@ -61,18 +63,16 @@ def run(host='0.0.0.0', port=None, log=None, bundle=False):
 @arg('--project', help='project name')
 @arg('--clean', help='project name')
 def build(project="main", clean=False):
-    fs = season.util.os.FileSystem(os.getcwd())
-    PROJECT_PATH = os.path.join("branch", project)
+    fs = season.util.fs(os.getcwd())
+    PROJECT_PATH = os.path.join("project", project)
     if fs.isdir(PROJECT_PATH) == False:
         print("project '{}' not exists".format(project))
         return
-    app = season.app(path=os.getcwd())
-    wiz = app.wiz()("ide")
-    wiz.branch.checkout(project)
-    builder = wiz.model("workspace/builder")
-    if clean:
-        builder.clean()    
-    builder.build()
+    app = season.server(os.getcwd())
+    wiz = app.wiz()
+    wiz.checkout.checkout(project)
+
+    # TODO: build command
 
 class Daemon:
     def __init__(self, pidfile, target=None, stdout='/dev/null', stderr='/dev/null'):
@@ -171,10 +171,10 @@ class Daemon:
 def runnable(stdout, stderr):
     def run_ctrl():
         season = importlib.import_module("season")
-        app = season.app(path=PATH_WEBSRC)
+        app = season.server(PATH_WEBSRC)
         os.environ['WERKZEUG_RUN_MAIN'] = 'false'
         app.run()
-        
+
     while True:
         try:
             proc = mp.Process(target=run_ctrl)
