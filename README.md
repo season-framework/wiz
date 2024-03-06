@@ -190,6 +190,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.4.1
+
+- [core] fixed library path not included error
+
 ### 2.4.0
 
 - [core] upgrade to flask 3

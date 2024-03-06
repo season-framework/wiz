@@ -14,11 +14,11 @@ def package_files(directory):
         for filename in filenames:
             paths.append(os.path.join(path, filename)[len(PKGPATH) + 1:])
     return paths
+
 extra_files = package_files(os.path.join(PKGPATH, "command"))
-extra_files = extra_files + package_files(os.path.join(PKGPATH, "component"))
-extra_files = extra_files + package_files(os.path.join(PKGPATH, "core"))
-extra_files = extra_files + package_files(os.path.join(PKGPATH, "util"))
 extra_files = extra_files + package_files(os.path.join(PKGPATH, "data"))
+extra_files = extra_files + package_files(os.path.join(PKGPATH, "lib"))
+extra_files = extra_files + package_files(os.path.join(PKGPATH, "util"))
 
 setup(
     name='season',
