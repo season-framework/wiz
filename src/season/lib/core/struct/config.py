@@ -19,9 +19,10 @@ class Config(season.util.stdClass):
         return self.__getattr__(name)
 
     def __getattr__(self, name):
-        name = name + "#" + self.wiz.project()
-        if name in self.__cache__:
-            return self.__cache__[name]
+        cachens = name + "#" + self.wiz.project()
+
+        if cachens in self.__cache__:
+            return self.__cache__[cachens]
 
         class ConfigBase(season.util.stdClass):
             DEFAULT_VALUES = dict()
@@ -49,7 +50,7 @@ class Config(season.util.stdClass):
 
         def build_config(base_config=dict()):
             config = ConfigBase(base_config)
-            self.__cache__[name] = config
+            self.__cache__[cachens] = config
             return config
 
         wiz = self.wiz
@@ -59,15 +60,16 @@ class Config(season.util.stdClass):
         if fs.isfile(config_path) == False:
             return build_config()
 
-        cachens = 'config.code#' + self.wiz.project()
+        cachens = f'config.code#{self.wiz.project()}'
+        cache = wiz.server.cache.get(cachens, dict())
+    
         namespace = config_path
-        if cachens not in wiz.server._cache: wiz.server._cache[cachens] = dict()
-        if namespace in wiz.server._cache[cachens]:
-            _code = wiz.server._cache[cachens][namespace]
+        if namespace in cache:
+            _code = cache[namespace]
         else:
             _code = fs.read(config_path, "")
             _code = compile(_code, config_path, 'exec')
-            wiz.server._cache[cachens][namespace] = _code
+            cache[namespace] = _code
 
         env = dict()
         env['__name__'] = config_path
