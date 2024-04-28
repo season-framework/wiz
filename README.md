@@ -190,6 +190,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.4.3
+
+- [core] util.filesystem bug fixed
+
 ### 2.4.2
 
 - [core] wiz.config bug fixed
