@@ -206,7 +206,7 @@ class Model:
         db = self.orm
         if 'id' not in data and hasattr(db, "id"):
             cls = type(getattr(db, "id"))
-            if cls is not pw.IntegerField and cls is not pw.BigIntegerField:
+            if cls is not pw.IntegerField and cls is not pw.BigIntegerField and cls is not pw.AutoField:
                 obj_id = self.random(self.id_size)
                 if self.id_size == 32:
                     obj_id = str(int(time.time()*1000000)) + self.random(16)
