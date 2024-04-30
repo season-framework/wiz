@@ -85,7 +85,8 @@ class SAML:
             userinfo = auth.get_attributes()
             sessiondata = dict()
             if SAML_ACS is not None:
-                sessiondata = season.util.fn.call(SAML_ACS, wiz=wiz, userinfo=userinfo)
+                compiler = season.util.compiler(SAML_ACS)
+                sessiondata = compiler.call(wiz=wiz, userinfo=userinfo)
             
             redirect = session.get('SAML_REDIRECT', None)
             try:
