@@ -193,7 +193,7 @@ class filesystem:
 
     def use(self, namespace):
         namespace = os.path.join(self.namespace, namespace)
-        fs = FileSystem(self.config.path)
+        fs = filesystem(self.config.path)
         fs.namespace = namespace
         return fs
 
