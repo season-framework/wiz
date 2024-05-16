@@ -11,7 +11,7 @@ SMTP_SENDER = config.smtp_sender
 SMTP_HOST = config.smtp_host
 SMTP_PORT = config.smtp_port
 SMTP_PASSWORD = config.smtp_password
-fs = wiz.workspace("service").fs(os.path.join("config", "smtp"))
+fs = wiz.project.fs(os.path.join("config", "smtp"))
 
 class Model:
     def __init__(self):
