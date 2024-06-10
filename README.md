@@ -13,6 +13,7 @@
 apt install nodejs npm
 npm i -g n
 n stable
+apt purge nodejs npm
 ```
 
 - install wiz python package
@@ -189,6 +190,10 @@ wiz ide upgrade # ide upgrade
     - not required server restart
 
 ## Release Note
+
+### 2.4.3
+
+- [core] util.filesystem bug fixed
 
 ### 2.4.2
 

@@ -30,7 +30,7 @@ class Session:
     def user_id(self):
         config = wiz.model("portal/season/config")
         session_user_id = config.session_user_id
-        return session_user_id()
+        return session_user_id(wiz)
     
     def create(self, key):
         config = wiz.model("portal/season/config")
