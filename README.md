@@ -191,6 +191,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.4.4
+
+- [plugin/workspace] portal framework bug fixed (app/widget create)
+
 ### 2.4.3
 
 - [core] util.filesystem bug fixed
