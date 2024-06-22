@@ -372,6 +372,7 @@ class Model:
                 if key in ["outputPath", "index", "main", "polyfills", "tsConfig", "inlineStyleLanguage"]: continue
                 angularJson["projects"]["build"]["architect"]["build"]["options"][key] = angularBuildOptionsJson[key]
         fs.write("build/angular.json", json.dumps(angularJson, indent=4))
+        fs.copy("build/package.json", "src/angular/package.json")
 
     def _angular(self):
         fs = self.fs()
