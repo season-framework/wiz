@@ -138,6 +138,7 @@ class Model:
 
         fs.write('build/wizbuild.js', Code.ESBUILD)
         fs.write('build/tsconfig.json', Code.TSCONFIG)
+        fs.write('build/tailwind.config.js', Code.TAILWIND)
 
         if fs.exists('build/src/environments') == False:
             fs.makedirs('build/src/environments')
@@ -372,7 +373,12 @@ class Model:
                 if key in ["outputPath", "index", "main", "polyfills", "tsConfig", "inlineStyleLanguage"]: continue
                 angularJson["projects"]["build"]["architect"]["build"]["options"][key] = angularBuildOptionsJson[key]
         fs.write("build/angular.json", json.dumps(angularJson, indent=4))
-        fs.copy("build/package.json", "src/angular/package.json")
+        fs.write("src/angular/angular.json", json.dumps(angularJson, indent=4))
+
+        # build tailwindcss
+        if fs.exists("./build/node_modules/.bin/tailwindcss"):
+            build_base_path = fs.abspath("build")
+            Util.execute(f"cd {build_base_path} && node_modules/.bin/tailwindcss -o tailwind.min.css --minify", False)
 
     def _angular(self):
         fs = self.fs()

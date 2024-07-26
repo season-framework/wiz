@@ -62,3 +62,14 @@ class Model:
     """
 
     STYLES = '@import "styles/styles"'
+
+    TAILWIND = """/** @type {import('tailwindcss').Config} */
+module.exports = {
+content: [
+    "./src/**/*.{html,ts}",
+],
+theme: {
+    extend: {},
+},
+plugins: [],
+}"""

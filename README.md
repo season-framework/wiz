@@ -191,6 +191,25 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.4.5
+
+- [plugin/workspace] package.json update bug fixed
+- [plugin/workspace] angular.json update bug fixed
+- [plugin/workspace] support tailwindcss
+    - npm install tailwindcss (use NPM Packages Menu)
+    - add `tailwind.min.css` at `angular/angular.build.options.json`
+        ```json
+        {
+            "assets": [],
+            "styles": [
+                ...
+                "tailwind.min.css",
+                "src/styles.scss"
+            ],
+            "scripts": []
+        }
+        ```
+
 ### 2.4.4
 
 - [plugin/workspace] portal framework bug fixed (app/widget create)

@@ -73,6 +73,7 @@ def tree():
         children.append(dict(title='server/controller', id='src/controller', type='folder', root_id='src'))
         children.append(dict(title='server/model', id='src/model', type='folder', root_id='src'))
         children.append(dict(title='server/config', id='config', type='folder', root_id='src'))
+        children.append(dict(title='build', id='build', type='folder', root_id='build'))
         wiz.response.status(200, dict(root=root, children=children))
     
     segment = path.split("/")

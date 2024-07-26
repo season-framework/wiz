@@ -13,6 +13,10 @@ def install():
     if out is not None and len(out) > 0: res = res + out.decode('utf-8').strip()
     if err is not None and len(err) > 0: res = res + "\n" + err.decode('utf-8').strip()
     builder.build()
+
+    fs = builder.fs()
+    fs.copy("build/package.json", "src/angular/package.json")
+
     wiz.response.status(200, res)
 
 def uninstall():
@@ -25,6 +29,10 @@ def uninstall():
     if out is not None and len(out) > 0: res = res + out.decode('utf-8').strip()
     if err is not None and len(err) > 0: res = res + "\n" + err.decode('utf-8').strip()
     builder.build()
+
+    fs = builder.fs()
+    fs.copy("build/package.json", "src/angular/package.json")
+    
     wiz.response.status(200, res)
     
 def list(segment):
