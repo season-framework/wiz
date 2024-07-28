@@ -8,9 +8,12 @@ from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 
 Assistant = wiz.ide.plugin.model("assistant")
 guide = wiz.server.config.ide.assistant_guide
+assistant_path = wiz.server.config.ide.assistant_path
+if assistant_path is None:
+    assistant_path = "src/reference"
 
 def reset():
-    assistant = Assistant(path="src/reference")
+    assistant = Assistant(path=assistant_path)
     retriever = assistant.retriever()
     wiz.server.app.wizideretriever = retriever
     wiz.response.status(200)
@@ -28,7 +31,7 @@ def request():
         api_key=openai_key)
 
     if wiz.server.app.wizideretriever is None:
-        assistant = Assistant(path="src/reference")
+        assistant = Assistant(path=assistant_path)
         retriever = assistant.retriever()
         wiz.server.app.wizideretriever = retriever
     else:

@@ -47,6 +47,13 @@ setup(
         'flask==3.0.2',
         'python-socketio==5.11.1',
         'flask-socketio==5.3.6',
+        'langchain', 
+        'langchain-community', 
+        'langchain-openai', 
+        'rank_bm25', 
+        'unstructured', 
+        'python-pptx', 
+        'openpyxl',
         'argh',
         'psutil',
         'GitPython',
@@ -58,7 +65,7 @@ setup(
         'gevent',
         'natsort'
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     classifiers=[
         'License :: OSI Approved :: MIT License'
     ] 
