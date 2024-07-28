@@ -59,6 +59,12 @@
             "id": "utility.app.html2pug",
             "icon": "fa-brands fa-html5",
             "width": 360
+        },
+        {
+            "name": "WIZ Assistant",
+            "id": "utility.app.assistant",
+            "icon": "fa-solid fa-robot",
+            "width": 480
         }
     ],
     "setting": [

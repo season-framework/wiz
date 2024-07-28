@@ -1,0 +1,15 @@
+.side-container
+    .side-heading.area-round
+        h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
+            span WIZ Assistant
+        .ml-auto
+        .btn.btn-sm.btn-primary((click)="reset()")
+            i.fa-solid.fa-refresh
+
+    .side-commit
+        textarea.form-control(type="text" placeholder="message", [(ngModel)]="message", rows=5)
+        button.btn.btn-primary.btn-block.mt-2((click)="send(message)") Send
+    
+    .side-body.p-4(*ngIf="data", [innerHtml]="showdown(data)")
+
+wiz-core-app-widget-loading(*ngIf="loading")

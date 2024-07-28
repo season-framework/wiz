@@ -1,0 +1,7 @@
+{
+    "id": "assistant",
+    "title": "WIZ Assistant",
+    "category": "",
+    "description": "LLM Support",
+    "template": "wiz-utility-app-assistant()"
+}

@@ -138,7 +138,11 @@ class Model:
 
         fs.write('build/wizbuild.js', Code.ESBUILD)
         fs.write('build/tsconfig.json', Code.TSCONFIG)
-        fs.write('build/tailwind.config.js', Code.TAILWIND)
+        if fs.exists('build/tailwind.config.js') == False:
+            fs.write('build/tailwind.config.js', Code.TAILWIND)
+
+        if fs.exists("src/angular/tailwind.config.js"):
+            fs.write('build/tailwind.config.js', fs.read("src/angular/tailwind.config.js"))
 
         if fs.exists('build/src/environments') == False:
             fs.makedirs('build/src/environments')

@@ -27,6 +27,7 @@ export class Component implements OnInit {
         if (path.startsWith('src/route')) return 'server/api';
         if (path.startsWith('src/model')) return 'server/model';
         if (path.startsWith('config')) return 'server/config';
+        if (path.startsWith('src/reference')) return 'reference';
         return null;
     }
 
@@ -41,6 +42,7 @@ export class Component implements OnInit {
         if (node.id == 'src/angular/styles') return 'wiz-folder fa-brands fa-css3-alt';
         if (node.id == 'src/assets') return 'wiz-folder fa-solid fa-images';
         if (node.id == 'src/angular/libs') return 'wiz-folder fa-solid fa-book';
+        if (node.id == 'src/reference') return 'wiz-folder fa-solid fa-book';
         if (node.type == 'folder') {
             if (node.isOpen() && checkopen) return 'wiz-folder fa-regular fa-folder-open';
             else return 'wiz-folder fa-solid fa-folder';

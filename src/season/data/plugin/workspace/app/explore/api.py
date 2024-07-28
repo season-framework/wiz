@@ -8,6 +8,8 @@ import zipfile
 import tempfile
 
 builder = wiz.ide.plugin.model("builder")
+Namespace = wiz.ide.plugin.model("src/build/namespace")
+Annotator = wiz.ide.plugin.model("src/build/annotator")
 fs = wiz.project.fs()
 
 def layout():
@@ -73,7 +75,7 @@ def tree():
         children.append(dict(title='server/controller', id='src/controller', type='folder', root_id='src'))
         children.append(dict(title='server/model', id='src/model', type='folder', root_id='src'))
         children.append(dict(title='server/config', id='config', type='folder', root_id='src'))
-        children.append(dict(title='build', id='build', type='folder', root_id='build'))
+        children.append(dict(title='reference', id='src/reference', type='folder', root_id='src'))
         wiz.response.status(200, dict(root=root, children=children))
     
     segment = path.split("/")
@@ -115,7 +117,7 @@ def tree():
     root = driveItem(path)
     root_dirs = [
         'src/angular', 'src/app/page', 'src/app/component', 'src/app/layout', 
-        'src/angular/libs', 'src/angular/styles', 'src/assets', 'src/route', 'src/controller', 'src/model', 'config']
+        'src/angular/libs', 'src/angular/styles', 'src/assets', 'src/route', 'src/controller', 'src/model', 'config', 'src/reference']
     if path in root_dirs: root['root_id'] = 'src'
     if path == 'src/controller': root['title'] = 'server/controller'
     if path == 'src/model': root['title'] = 'server/model'
@@ -216,6 +218,24 @@ def update(segment):
     path = wiz.request.query("path", True)
     code = wiz.request.query("code", True)
     fs.write(path, code)
+
+    psegment = path.split("/")
+    if psegment[0] == 'src' and psegment[1] == 'app':
+        appid = psegment[2]
+        appjsonpath = os.path.join("src", "app", appid, "app.json")
+        tspath = os.path.join("src", "app", appid, "view.ts")
+
+        if fs.isfile(appjsonpath):
+            tscode = fs.read(tspath, "")
+            appjson = fs.read.json(appjsonpath)
+            appjson['id'] = appid
+            selector = Namespace.selector(appid)
+            cinfo = Annotator.definition.ngComponentDesc(tscode)
+            injector = [f'[{x}]=""' for x in cinfo['inputs']] + [f'({x})=""' for x in cinfo['outputs']]
+            injector = ", ".join(injector)
+            appjson['template'] = selector + "(" + injector + ")"
+            fs.write.json(appjsonpath, appjson)
+
     wiz.response.status(200)
 
 def upload(segment):
