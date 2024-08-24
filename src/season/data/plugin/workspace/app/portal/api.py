@@ -261,6 +261,7 @@ def download(segment):
 def update(segment):
     path = wiz.request.query("path", True)
     code = wiz.request.query("code", "")
+    fs.write(path, code)
 
     psegment = path.split("/")
     if len(psegment) > 3 and psegment[2] in ['app', 'widget']:
@@ -275,18 +276,14 @@ def update(segment):
             appjson = fs.read.json(appjsonpath)
             appjson['id'] = appid
             appjson['type'] = psegment[2]
-
             app_id = f"portal.{modname}.{appid}"
             selector = Namespace.selector(app_id)
             cinfo = Annotator.definition.ngComponentDesc(tscode)
-
             injector = [f'[{x}]=""' for x in cinfo['inputs']] + [f'({x})=""' for x in cinfo['outputs']]
             injector = ", ".join(injector)
             appjson['template'] = selector + "(" + injector + ")"
-
             fs.write.json(appjsonpath, appjson)
 
-    fs.write(path, code)
     wiz.response.status(200)
 
 def upload(segment):

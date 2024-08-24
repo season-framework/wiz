@@ -191,6 +191,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.4.8
+
+- [plugin/workspace] readme tab in portal apps
+
 ### 2.4.7
 
 - [core] add python packages for wiz assitant

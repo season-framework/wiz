@@ -510,6 +510,12 @@ export class AppEditor {
         if (app.id) {
             let tabs: any = [
                 editor.create({
+                    name: 'Readme',
+                    viewref: MonacoEditor,
+                    path: path + "/readme.md",
+                    config: { monaco: { language: 'markdown' } }
+                }),
+                editor.create({
                     name: 'Pug',
                     viewref: MonacoEditor,
                     path: path + "/view.pug",
