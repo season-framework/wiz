@@ -58,9 +58,12 @@ export class Component implements OnInit, AfterViewInit {
         const _type = data.type;
         const _data = data.data;
         let editor = null;
+        let mod_id = null;
+        if (_data.mode === "portal") {
+            mod_id = path.split("/")[2];
+        }
         if (_type === "app") {
             if (_data.mode === "portal") {
-                const mod_id = _data["ng.build"].id.split(".")[1];
                 editor = await this.portalWorkspace.AppEditor(mod_id, _data);
             }
             else editor = this.workspace.AppEditor(_data);
@@ -72,14 +75,12 @@ export class Component implements OnInit, AfterViewInit {
                 if (['txt', 'nsh', 'sql', 'sh'].includes(ext.toLowerCase())) force = true;
             } catch { }
             if (_data.mode === "portal") {
-                const mod_id = _data["ng.build"].id.split(".")[1];
                 editor = await this.portalWorkspace.FileEditor(mod_id, _data);
             }
             else editor = this.workspace.FileEditor(_data, {}, force);
         }
         else if (_type === "route") {
             if (_data.mode === "portal") {
-                const mod_id = _data["ng.build"].id.split(".")[1];
                 editor = await this.portalWorkspace.RouteEditor(mod_id, _data);
             }
             else editor = this.workspace.RouteEditor(_data);
