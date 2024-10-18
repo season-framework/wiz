@@ -34,10 +34,7 @@ export class FileEditor {
             'scss': { viewref: MonacoEditor, config: { monaco: { language: 'scss' } } },
             'json': { viewref: MonacoEditor, config: { monaco: { language: 'json' } } },
             'pug': { viewref: MonacoEditor, config: { monaco: { language: 'pug' } } },
-            'py': { viewref: MonacoEditor, config: { monaco: { language: 'python' } } },
-            'txt': { viewref: MonacoEditor, config: { monaco: { language: 'plaintext' } } },
-            'env': { viewref: MonacoEditor, config: { monaco: { language: 'env' } } },
-            'sql': { viewref: MonacoEditor, config: { monaco: { language: 'sql' } } },
+            'py': { viewref: MonacoEditor, config: { monaco: { language: 'python' } } }
         };
 
         let extension = path.substring(path.lastIndexOf(".") + 1).toLowerCase();
@@ -47,6 +44,7 @@ export class FileEditor {
 
         if (!viewtypes[extension]) {
             viewtypes.__text__ = { viewref: MonacoEditor, config: { monaco: { language: 'plaintext' } } };
+            extension = "__text__";
         }
 
         let { viewref, config } = viewtypes[extension];
@@ -513,12 +511,6 @@ export class AppEditor {
         if (app.id) {
             let tabs: any = [
                 editor.create({
-                    name: 'Readme',
-                    viewref: MonacoEditor,
-                    path: path + "/readme.md",
-                    config: { monaco: { language: 'markdown' } }
-                }),
-                editor.create({
                     name: 'Pug',
                     viewref: MonacoEditor,
                     path: path + "/view.pug",
@@ -547,7 +539,13 @@ export class AppEditor {
                     viewref: MonacoEditor,
                     path: path + "/socket.py",
                     config: { monaco: { language: 'python' } }
-                })
+                }),
+                editor.create({
+                    name: 'Readme',
+                    viewref: MonacoEditor,
+                    path: path + "/readme.md",
+                    config: { monaco: { language: 'markdown' } }
+                }),
             ];
 
             for (let i = 0; i < tabs.length; i++) {
