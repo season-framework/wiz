@@ -5,7 +5,11 @@ import re
 def search():
     root = wiz.request.query("root", True)
     text = wiz.request.query("text", True)
-    pattern = re.compile(text, re.IGNORECASE)
+    strict = wiz.request.query("strict", None)
+    if strict == "true":
+        pattern = re.compile(text)
+    else:
+        pattern = re.compile(text, re.IGNORECASE)
     fs = wiz.project.fs()
     abspath = fs.abspath()
     root_dir = os.path.join(abspath, root)

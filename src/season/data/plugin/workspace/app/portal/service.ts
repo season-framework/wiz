@@ -43,7 +43,8 @@ export class FileEditor {
         if (IS_IMG) viewtypes[extension] = { viewref: ImageViewer, config: {} };
 
         if (!viewtypes[extension]) {
-            return;
+            viewtypes.__text__ = { viewref: MonacoEditor, config: { monaco: { language: 'plaintext' } } };
+            extension = "__text__";
         }
 
         let { viewref, config } = viewtypes[extension];
@@ -510,12 +511,6 @@ export class AppEditor {
         if (app.id) {
             let tabs: any = [
                 editor.create({
-                    name: 'Readme',
-                    viewref: MonacoEditor,
-                    path: path + "/readme.md",
-                    config: { monaco: { language: 'markdown' } }
-                }),
-                editor.create({
                     name: 'Pug',
                     viewref: MonacoEditor,
                     path: path + "/view.pug",
@@ -544,7 +539,13 @@ export class AppEditor {
                     viewref: MonacoEditor,
                     path: path + "/socket.py",
                     config: { monaco: { language: 'python' } }
-                })
+                }),
+                editor.create({
+                    name: 'Readme',
+                    viewref: MonacoEditor,
+                    path: path + "/readme.md",
+                    config: { monaco: { language: 'markdown' } }
+                }),
             ];
 
             for (let i = 0; i < tabs.length; i++) {
