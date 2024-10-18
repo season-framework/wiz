@@ -22,12 +22,13 @@ export class Component implements OnInit {
 
     public async search() {
         const len = this.text.replace(/\s/g, "").length;
-        if (len < 4) return await this.service.alert.show({ title: "Alert", message: "4글자 이상 검색해주세요.", cancel: false, action: "close" });
+        if (len < 3) return await this.service.alert.show({ title: "Alert", message: "3글자 이상 검색해주세요.", cancel: false, action: "close" });
 
         this.list = [];
         await this.loader(true);
         const body = {
             text: this.text,
+            strict: this.strict,
         };
         const targets = ["src", "portal", "config"];
         for (let i = 0; i < targets.length; i++) {
