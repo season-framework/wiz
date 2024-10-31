@@ -69,6 +69,12 @@
     ],
     "setting": [
         {
+            "name": "Terminal",
+            "id": "xterm.app.term",
+            "icon": "fa-solid fa-terminal",
+            "width": 721
+        },
+        {
             "name": "Plugin",
             "id": "core.app.ide",
             "icon": "fa-solid fa-plug",

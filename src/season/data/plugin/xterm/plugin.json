@@ -1,0 +1,6 @@
+{
+    "package": "xterm",
+    "title": "Terminal",
+    "version": "2.4.8",
+    "repo": "https://github.com/season-framework/wiz-plugin-xterm"
+}

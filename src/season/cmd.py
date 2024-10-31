@@ -8,7 +8,6 @@ __package__ = "season"
 from .version import VERSION_STRING
 from .command.service import service
 from .command.daemon import run, server, kill, build
-from .command.plugin import plugin, command
 from .command.create import create
 from .command.ide import ide
 from .command.bundle import bundle
@@ -17,7 +16,7 @@ def main():
     epilog = "Copyright 2021 SEASON CO. LTD. <proin@season.co.kr>. Licensed under the terms of the MIT license. Please see LICENSE in the source code for more information."
     parser = argh.ArghParser(epilog=epilog)
     parser.add_commands([
-        run, server, kill, build, service, plugin, command, create, ide, bundle
+        run, server, kill, build, service, create, ide, bundle
     ])
     parser.add_argument('--version', action='version', version='season ' + VERSION_STRING)
     parser.dispatch()

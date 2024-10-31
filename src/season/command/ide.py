@@ -61,6 +61,12 @@ def ide(action, *args):
                 print("WIZ IDE is not installed")
                 return False
             wiz.ide.build()
+
+        def clean(self):
+            if idefs.exists() == False:
+                print("WIZ IDE is not installed")
+                return False
+            wiz.ide.build.clean()
             
         def __call__(self, name, args):
             cachefs.delete()

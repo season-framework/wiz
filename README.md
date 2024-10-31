@@ -191,6 +191,11 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.4.9
+
+- [plugin/terminal] add xterm as default plugin
+- [ide] upgrade angular 17 to 18
+
 ### 2.4.8
 
 - [plugin/workspace] readme tab in portal apps

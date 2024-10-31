@@ -1,0 +1,17 @@
+{
+    "id": "core.xterm",
+    "title": "Terminal",
+    "viewuri": "",
+    "category": "app",
+    "ng.build": {
+        "id": "core.xterm",
+        "name": "CoreXtermComponent",
+        "path": "./core.xterm/core.xterm.component"
+    },
+    "ng": {
+        "selector": "wiz-core-xterm",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-core-xterm()"
+}
