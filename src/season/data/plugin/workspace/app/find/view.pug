@@ -5,6 +5,7 @@
     
     .side-search.area-round
         input.form-control(type="text" placeholder="search keyword", [(ngModel)]="text", (keyup.enter)="search()")
+        input.form-check-input.cursor-pointer.ml-2(type="checkbox", [(ngModel)]="strict")
         button.btn.btn-primary.ms-2((click)="search()") Search
 
     .side-body
@@ -12,17 +13,21 @@
             tbody(*ngIf="list.length === 0")
                 tr
                     td.text-center No result
-            tbody(*ngFor="let file of list")
+            tbody(*ngFor="let file of list;let i = index")
                 tr.cursor-pointer((click)="load(file)")
                     td.bg-lt
                         i.fa-solid.mr-2([ngClass]="iconMap(file.root)")
                         span {{file.component?file.component:file.filepath}}
-                    td.text-right.bg-lt
+                    td.text-right.bg-lt.nowrap
                         i.fa-solid.fa-pen-to-square.text-muted.mr-2
                         span.text-muted.mr-1 {{file.result.length}}
-                tr.cursor-pointer(*ngFor="let item of file.result;let i = index", (click)="load(file)")
-                    td.p-3(colspan=2)
+                    td.text-right.bg-lt.ml-1((click)="list.splice(i, 1);service.render();")
+                        i.fa-solid.fa-xmark
+                tr.cursor-pointer(*ngFor="let item of file.result.slice(0, 3);let j = index", (click)="load(file)")
+                    td.p-3(colspan=3)
                         span Line:{{item.line}}
                         span.ml-2 ...{{item.fulltext}}...
+                tr(*ngIf="file.result.length > 3")
+                    td.text-center(colspan=4) ...
 
     wiz-core-app-widget-loading(*ngIf="loading")
