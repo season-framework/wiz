@@ -1,0 +1,35 @@
+@font-face {
+    font-family: 'main-eb';
+    font-weight: 700;
+    src: local('Spoqa Han Sans Neo Bold'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Bold.woff2') format('woff2'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Bold.woff') format('woff'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Bold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'main-b';
+    font-weight: 500;
+    src: local('Spoqa Han Sans Neo Medium'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Medium.woff2') format('woff2'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Medium.woff') format('woff'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Medium.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'main-r';
+    font-weight: 400;
+    src: local('Spoqa Han Sans Neo Regular'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Regular.woff2') format('woff2'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Regular.woff') format('woff'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'main-l';
+    font-weight: 300;
+    src: local('Spoqa Han Sans Neo Light'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Light.woff2') format('woff2'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Light.woff') format('woff'),
+        url('/assets/portal/season/font/spoqa/SpoqaHanSansNeo-Light.ttf') format('truetype');
+}

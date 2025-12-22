@@ -1,0 +1,23 @@
+{
+    "mode": "portal",
+    "type": "app",
+    "id": "tab",
+    "title": "Tab",
+    "namespace": "tab",
+    "viewuri": "",
+    "category": "season",
+    "controller": "base",
+    "template": "wiz-portal-season-tab([config]=\"\")",
+    "ng.build": {
+        "id": "portal.season.tab",
+        "name": "PortalSeasonTabComponent",
+        "path": "./portal.season.tab/portal.season.tab.component"
+    },
+    "ng": {
+        "selector": "wiz-portal-season-tab",
+        "inputs": [
+            "config"
+        ],
+        "outputs": []
+    }
+}

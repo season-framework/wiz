@@ -1,0 +1,81 @@
+.form-search {
+    .form-control {
+        border: 1px solid var(--wc-blue);
+        border-radius: 8px;
+    }
+
+    .input-icon-addon {
+        color: var(--wc-blue);
+    }
+}
+
+.form-control,
+.form-select {
+    line-height: 1;
+    color: var(--wc-text) !important;
+
+    &.form-control-round,
+    &.form-select-round {
+        border-radius: 16px;
+        text-align: center;
+    }
+
+    &.form-control-sm,
+    &.form-select-sm {
+        height: 24px;
+        font-size: 12px;
+    }
+
+    &.form-control-lg,
+    &.form-select-lg {
+        height: 42px;
+        font-size: 20px;
+    }
+}
+
+// form group
+.form-group {
+    text-align: left;
+
+    .form-label {
+        font-family: 'main-b';
+        line-height: 1;
+    }
+}
+
+.form-selectgroup {
+    display: block;
+    flex: auto;
+    margin: 0;
+
+    .form-selectgroup-item {
+        margin-right: 4px;
+        margin-bottom: 0;
+        display: inline-block;
+
+        .form-selectgroup-label {
+            display: inline-block;
+            padding: 5px 16px;
+        }
+    }
+}
+
+.area-round {
+
+    .form-control,
+    .form-select,
+    .form-selectgroup-label {
+        border-radius: 16px;
+        text-align: center;
+    }
+
+    .form-control-sm,
+    .form-select-sm {
+        border-radius: 12px;
+    }
+
+    .form-control-lg,
+    .form-select-lg {
+        border-radius: 21px;
+    }
+}

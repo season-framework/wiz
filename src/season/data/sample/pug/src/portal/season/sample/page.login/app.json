@@ -1,0 +1,9 @@
+{
+    "mode": "sample",
+    "id": "page.login",
+    "title": "/login",
+    "namespace": "page.login",
+    "viewuri": "/login",
+    "category": "auth",
+    "preview": "/login"
+}

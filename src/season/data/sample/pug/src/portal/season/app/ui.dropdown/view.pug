@@ -1,0 +1,6 @@
+.dropdown
+    .toggle-button((click)="toggle(); $event.stopPropagation();")
+        ng-container([ngTemplateOutlet]="button")
+    
+    .dropdown-menu.dropdown-menu-end.dropdown-menu-arrow.show([class.show]="isOpen", [style]="menuStyle")
+        ng-container([ngTemplateOutlet]="menu")

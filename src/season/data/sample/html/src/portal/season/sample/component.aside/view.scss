@@ -1,0 +1,210 @@
+aside.navbar-vertical.navbar-expand-lg {
+    display: flex;
+    position: relative;
+    width: 320px;
+    height: 100%;
+    overflow: hidden;
+    flex-direction: column;
+    background: #fff;
+
+    @media (max-width: 768px) {
+        width: 100%;
+        z-index: 99999;
+        padding: 0;
+        border-right: none;
+        height: auto;
+        flex-direction: row;
+        height: 64px;
+        flex: none;
+    }
+
+    .navbar-brand-container {
+        width: 100%;
+        display: flex;
+        text-align: center;
+        background: #fff;
+        height: 96px;
+
+        @media (max-width: 768px) {
+            height: 67px;
+        }
+
+        .navbar-brand {
+            flex: auto;
+
+            img {
+                width: 180px;
+                // max-width: 164px;
+
+                @media (max-width: 768px) {
+                    width: 128px;
+                }
+            }
+        }
+
+        .navbar-toggler {
+            // color: #fff;
+            align-items: flex-end;
+            margin-left: 16px;
+            margin-right: 16px;
+        }
+    }
+
+    .navbar-collapse {
+        width: 100%;
+        flex: auto;
+        overflow-y: hidden;
+        overflow-x: hidden;
+        background-color: #fff;
+
+        @media (max-width: 768px) {
+            height: calc(100% - 64px);
+            position: fixed;
+            top: 64px;
+            left: 0;
+            overflow-y: auto;
+        }
+
+        .navbar-nav {
+            margin: 0;
+            font-size: 14px;
+            overflow-y: auto;
+
+            @media (max-width: 768px) {
+                display: block;
+            }
+
+            a {
+                width: 100%;
+            }
+
+            .nav-item {
+                cursor: pointer;
+                font-family: 'wiz-B';
+                margin-left: 24px;
+
+                @media (max-width: 768px) {
+                    margin-left: 0;
+                }
+
+                .nav-link {
+                    color: #63667B;
+                    font-size: 18px;
+                    padding: 22px 32px;
+
+                    &:hover {
+                        color: var(--wc-blue);
+                    }
+                }
+
+                &.active {
+                    background-color: var(--wc-background);
+                    border-radius: 10px 0 0 10px;
+
+                    .nav-link {
+                        color: var(--wc-blue);
+                    }
+                }
+            }
+
+            .dropdown {
+                &.active {
+                    margin-bottom: 18px;
+
+                    .dropdown-menu {
+                        display: block;
+                    }
+                }
+
+
+                .dropdown-item {
+                    padding-left: 32px;
+
+                    &.active {
+                        color: var(--wc-blue);
+                        background: linear-gradient(to right, rgba(32, 107, 196, .07), var(--wc-background));
+                    }
+
+                    &:hover {
+                        color: var(--wc-blue);
+                        background: linear-gradient(to right, rgba(32, 107, 196, .07), var(--wc-background));
+
+                    }
+                }
+            }
+        }
+    }
+}
+
+.user-profile {
+    padding: 28px;
+    padding-top: 0;
+
+    @media (max-width: 768px) {
+        padding: 24px;
+    }
+
+    .card {
+        box-shadow: none;
+
+        .card-body {
+            padding: 16px 48px;
+        }
+
+        .card-footer {
+            padding: 0;
+            background-color: var(--wc-background);
+        }
+    }
+
+    .clicks {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+
+        a {
+            display: block;
+            width: 100%;
+            color: #63667b;
+            text-align: center;
+
+        }
+
+        .click {
+            cursor: pointer;
+            padding: .75rem;
+            display: inline-block;
+            width: 50%;
+
+            &:hover {
+                background-color: var(--wc-background-hl);
+            }
+        }
+
+        .line {
+            margin: .75rem 0;
+            border-right: 1px solid #63667b;
+        }
+    }
+
+    .userinfo {
+        padding: .25rem;
+        text-align: left;
+
+        .name {
+            font-family: 'wiz-b';
+            color: #2D333F;
+            font-size: 20px;
+        }
+
+        .uclass,
+        .mail {
+            font-size: 12px;
+            color: #9097AD;
+        }
+    }
+}
+
+a {
+    cursor: pointer;
+}

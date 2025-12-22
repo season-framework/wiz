@@ -1,0 +1,60 @@
+aside.navbar.navbar-vertical.navbar-expand-lg.navbar-side
+    .navbar-brand-container
+        button.navbar-toggler(type="button", (click)="isMenuCollapsed = !isMenuCollapsed")
+            span.navbar-toggler-icon
+
+        a.navbar-brand.p-0.m-0(routerLink='/', (click)="isMenuCollapsed = !isMenuCollapsed")
+            .text-center
+                img.m-0(src='/assets/brand/logo-black.svg')
+
+    .collapse.navbar-collapse([ngbCollapse]="isMenuCollapsed")
+        .user-profile(*ngIf="service.auth.status")
+            .card
+                .card-body
+                    .userinfo
+                        .name {{service.auth.session.name}}
+                        .uclass {{service.auth.session.role}}
+                        .mail {{service.auth.session.email}}
+                .card-footer
+                    .clicks
+                        a.click(href='/auth/logout') 로그아웃
+                        a.click(routerLink='/mypage', (click)="isMenuCollapsed = !isMenuCollapsed") 마이페이지
+
+        ul.navbar-nav
+            ng-container(*ngIf="service.auth.show(false)")
+                li.nav-item(routerLink='/login', routerLinkActive="active", (click)="isMenuCollapsed = !isMenuCollapsed")
+                    .d-flex
+                        .nav-link
+                            span.nav-link-title 로그인
+            
+            ng-container(*ngIf="service.auth.show(true)")
+                li.nav-item(routerLink='/main', routerLinkActive="active", (click)="isMenuCollapsed = !isMenuCollapsed")
+                    .d-flex
+                        .nav-link
+                            span.nav-link-title 메인페이지
+
+                li.nav-item.dropdown([ngClass]="{'active': menuActive('/dashboard')}")
+                    .d-flex
+                        a.nav-link(routerLink='/dashboard/home', (click)="isMenuCollapsed = !isMenuCollapsed")
+                            span.nav-link-title 대시보드
+
+                    ul.dropdown-menu
+                        li
+                            a.dropdown-item(routerLink='/dashboard/home', routerLinkActive="active", (click)="isMenuCollapsed = !isMenuCollapsed")
+                                span 메인대시보드
+                        li
+                            a.dropdown-item(routerLink='/dashboard/info', routerLinkActive="active", (click)="isMenuCollapsed = !isMenuCollapsed")
+                                span 정보
+
+            ng-container(*ngIf="service.auth.show('admin')")
+                li.nav-item.dropdown([ngClass]="{'active': menuActive('/admin/')}")
+                    .d-flex
+                        a.nav-link(routerLink='/admin/user', (click)="isMenuCollapsed = !isMenuCollapsed")
+                            span.nav-link-title 관리자메뉴
+                    ul.dropdown-menu
+                        li
+                            a.dropdown-item(routerLink='/admin/user', routerLinkActive="active", (click)="isMenuCollapsed = !isMenuCollapsed")
+                                span 사용자관리
+                        li
+                            a.dropdown-item(routerLink='/admin/system', routerLinkActive="active", (click)="isMenuCollapsed = !isMenuCollapsed")
+                                span 시스템관리

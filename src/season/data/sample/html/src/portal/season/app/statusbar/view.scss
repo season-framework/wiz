@@ -1,0 +1,49 @@
+.view-statusbar {
+    display: flex;
+    align-items: end;
+    width: 100%;
+    background-color: #fff;
+    font-size: 12px;
+    border-top: 1px solid var(--wc-border);
+
+    .view-title {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 24px;
+        font-size: 12px;
+        background: var(--wc-gray);
+        color: #fff;
+        padding: 0 8px;
+
+        &::before {
+            content: "";
+            width: 0;
+            height: 0;
+            position: absolute;
+            right: -20px;
+            border-bottom: 10px solid transparent;
+            border-top: 10px solid transparent;
+            border-left: 10px solid var(--wc-gray);
+            border-right: 10px solid transparent;
+        }
+    }
+
+    .view-message {
+        cursor: pointer;
+
+        .message-item {
+            display: flex;
+            align-items: center;
+            justify-content: end;
+            padding: 0 6px;
+            height: 24px;
+
+            &:hover {
+                background: rgba(0, 0, 0, .1);
+            }
+        }
+
+    }
+}

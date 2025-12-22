@@ -1,0 +1,69 @@
+.wiz-page {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+
+    &.round,
+    .round {
+
+        .form-control,
+        .form-select,
+        .form-selectgroup-label {
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .form-control-sm,
+        .form-select-sm {
+            border-radius: 12px;
+        }
+
+        .form-control-lg,
+        .form-select-lg {
+            border-radius: 21px;
+        }
+    }
+
+    .container {
+        max-width: 1204px;
+    }
+
+    .container-xs {
+        max-width: 860px;
+    }
+
+    .container-sm {
+        max-width: 1024px;
+    }
+
+    .container-lg {
+        max-width: 1440px;
+    }
+
+    .container-xs {
+        max-width: 1920px;
+    }
+
+    .wiz-content {
+        flex: 1;
+        height: 100%;
+        overflow: hidden;
+
+        .wiz-view {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
+    }
+}
+
+.block-page {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 2147483647;
+    background-color: rgba(0, 0, 0, .5);
+}

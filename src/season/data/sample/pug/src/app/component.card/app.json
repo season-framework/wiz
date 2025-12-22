@@ -1,0 +1,22 @@
+{
+    "mode": "component",
+    "id": "component.card",
+    "title": "Card",
+    "namespace": "card",
+    "viewuri": "",
+    "category": "card",
+    "ng.build": {
+        "id": "component.card",
+        "name": "ComponentCardComponent",
+        "path": "./component.card/component.card.component"
+    },
+    "ng": {
+        "selector": "wiz-component-card",
+        "inputs": [
+            "title",
+            "text"
+        ],
+        "outputs": []
+    },
+    "template": "wiz-component-card([title]=\"\", [text]=\"\")"
+}

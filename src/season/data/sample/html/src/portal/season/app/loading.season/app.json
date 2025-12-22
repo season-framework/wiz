@@ -1,0 +1,23 @@
+{
+    "mode": "portal",
+    "type": "app",
+    "id": "loading.season",
+    "title": "\ub85c\ub529/\uc2dc\uc98c",
+    "namespace": "loading.season",
+    "viewuri": "",
+    "category": "loading",
+    "controller": "",
+    "template": "wiz-portal-season-loading-season([height]=\"\")",
+    "ng.build": {
+        "id": "portal.season.loading.season",
+        "name": "PortalSeasonLoadingSeasonComponent",
+        "path": "./portal.season.loading.season/portal.season.loading.season.component"
+    },
+    "ng": {
+        "selector": "wiz-portal-season-loading-season",
+        "inputs": [
+            "height"
+        ],
+        "outputs": []
+    }
+}

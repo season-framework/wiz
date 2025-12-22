@@ -1,0 +1,9 @@
+{
+    "mode": "sample",
+    "id": "component.nav",
+    "title": "Navbar",
+    "namespace": "component.nav",
+    "viewuri": "",
+    "category": "theme",
+    "controller": ""
+}

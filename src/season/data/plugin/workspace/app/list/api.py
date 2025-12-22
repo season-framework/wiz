@@ -64,7 +64,9 @@ def create():
         Git.Repo.clone_from(giturl, fs.abspath(path))
     else:
         copyfs = wiz.ide.fs(os.path.join(season.PATH_LIB, "data"))
-        copyfs.copy("sample", target_path)
+        template_engine = wiz.server.template_engine
+        source_sample = os.path.join("sample", template_engine)
+        copyfs.copy(source_sample, target_path)
 
     if fs.exists(path) == False:
         wiz.response.status(404)

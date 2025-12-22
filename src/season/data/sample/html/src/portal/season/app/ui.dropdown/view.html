@@ -1,0 +1,10 @@
+<div class="dropdown">
+    <div class="toggle-button" (click)="toggle(); $event.stopPropagation();">
+        <ng-container [ngTemplateOutlet]="button"></ng-container>
+    </div>
+    
+    <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow show" [class.show]="isOpen" [style]="menuStyle">
+        <ng-container [ngTemplateOutlet]="menu"></ng-container>
+    </div>
+</div>
+

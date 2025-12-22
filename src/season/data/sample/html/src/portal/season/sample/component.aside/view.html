@@ -1,0 +1,99 @@
+<aside class="navbar navbar-vertical navbar-expand-lg navbar-side">
+    <div class="navbar-brand-container">
+        <button class="navbar-toggler" type="button" (click)="isMenuCollapsed = !isMenuCollapsed">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <a class="navbar-brand p-0 m-0" routerLink="/" (click)="isMenuCollapsed = !isMenuCollapsed">
+            <div class="text-center">
+                <img class="m-0" src="/assets/brand/logo-black.svg">
+            </div>
+        </a>
+    </div>
+
+    <div class="collapse navbar-collapse" [ngbCollapse]="isMenuCollapsed">
+        <div class="user-profile" *ngIf="service.auth.status">
+            <div class="card">
+                <div class="card-body">
+                    <div class="userinfo">
+                        <div class="name">{{service.auth.session.name}}</div>
+                        <div class="uclass">{{service.auth.session.role}}</div>
+                        <div class="mail">{{service.auth.session.email}}</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="clicks">
+                        <a class="click" href="/auth/logout">로그아웃</a>
+                        <a class="click" routerLink="/mypage" (click)="isMenuCollapsed = !isMenuCollapsed">마이페이지</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="navbar-nav">
+            <ng-container *ngIf="service.auth.show(false)">
+                <li class="nav-item" routerLink="/login" routerLinkActive="active" (click)="isMenuCollapsed = !isMenuCollapsed">
+                    <div class="d-flex">
+                        <div class="nav-link">
+                            <span class="nav-link-title">로그인</span>
+                        </div>
+                    </div>
+                </li>
+            </ng-container>
+            
+            <ng-container *ngIf="service.auth.show(true)">
+                <li class="nav-item" routerLink="/main" routerLinkActive="active" (click)="isMenuCollapsed = !isMenuCollapsed">
+                    <div class="d-flex">
+                        <div class="nav-link">
+                            <span class="nav-link-title">메인페이지</span>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown" [ngClass]="{'active': menuActive('/dashboard')}">
+                    <div class="d-flex">
+                        <a class="nav-link" routerLink="/dashboard/home" (click)="isMenuCollapsed = !isMenuCollapsed">
+                            <span class="nav-link-title">대시보드</span>
+                        </a>
+                    </div>
+
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" routerLink="/dashboard/home" routerLinkActive="active" (click)="isMenuCollapsed = !isMenuCollapsed">
+                                <span>메인대시보드</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" routerLink="/dashboard/info" routerLinkActive="active" (click)="isMenuCollapsed = !isMenuCollapsed">
+                                <span>정보</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ng-container>
+
+            <ng-container *ngIf="service.auth.show('admin')">
+                <li class="nav-item dropdown" [ngClass]="{'active': menuActive('/admin/')}">
+                    <div class="d-flex">
+                        <a class="nav-link" routerLink="/admin/user" (click)="isMenuCollapsed = !isMenuCollapsed">
+                            <span class="nav-link-title">관리자메뉴</span>
+                        </a>
+                    </div>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" routerLink="/admin/user" routerLinkActive="active" (click)="isMenuCollapsed = !isMenuCollapsed">
+                                <span>사용자관리</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" routerLink="/admin/system" routerLinkActive="active" (click)="isMenuCollapsed = !isMenuCollapsed">
+                                <span>시스템관리</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ng-container>
+        </ul>
+    </div>
+</aside>
+

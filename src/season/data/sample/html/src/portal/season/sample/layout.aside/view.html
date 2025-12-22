@@ -1,0 +1,15 @@
+<div class="wiz-page">
+    <wiz-component-aside></wiz-component-aside>
+    <div class="wiz-content">
+        <div class="wiz-view">
+            <router-outlet></router-outlet>
+        </div>
+    </div>
+</div>
+
+<wiz-portal-season-alert></wiz-portal-season-alert>
+
+<div class="block-page" *ngIf="service.auth.status === null || service.loading.isshow">
+    <wiz-portal-season-loading-hexa></wiz-portal-season-loading-hexa>
+</div>
+

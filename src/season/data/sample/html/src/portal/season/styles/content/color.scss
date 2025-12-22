@@ -1,0 +1,52 @@
+:root {
+    // component color
+    --wc-scroll-background: #F5F5F5;
+    --wc-scroll-thumb: #ABABAB;
+    --wc-background: #F6F7FB;
+    --wc-background-dark: #DEE4F5;
+    --wc-text: #1e293b;
+    --wc-border: #d9d9d9;
+    --wc-light: rgba(116, 108, 112, .1);
+    --wc-light-1: rgba(116, 108, 112, .05);
+    --wc-light-2: rgba(116, 108, 112, .2);
+    --wc-light-3: rgba(116, 108, 112, .3);
+
+    // namespaces color
+    --wc-red: rgba(235, 82, 103, 1);
+    --wc-red-hover: rgba(235, 82, 103, .9);
+    --wc-red-light: rgba(235, 82, 103, .05);
+
+    --wc-blue: rgba(108, 141, 246, 1);
+    --wc-blue-hover: rgba(108, 141, 246, .9);
+    --wc-blue-light: rgba(108, 141, 246, .05);
+    --wc-blue-light-2: rgba(108, 141, 246, .2);
+    --wc-blue-light-3: rgba(108, 141, 246, .3);
+
+    --wc-gray: rgba(161, 162, 183, 1);
+    --wc-gray-hover: rgba(161, 162, 183, .9);
+    --wc-gray-light: rgba(161, 162, 183, .05);
+
+    --wc-skyblue: rgba(77, 166, 255, 1);
+    --wc-skyblue-hover: rgba(77, 166, 255, .9);
+    --wc-skyblue-light: rgba(77, 166, 255, .05);
+}
+
+.bg-red {
+    background: var(--wc-red);
+    color: #fff;
+}
+
+.bg-red-lt {
+    background: var(--wc-red-light);
+    color: #fff;
+}
+
+.bg-blue {
+    background: var(--wc-blue) !important;
+    color: #fff;
+}
+
+.bg-blue-lt {
+    background: var(--wc-blue-light) !important;
+    color: #fff;
+}

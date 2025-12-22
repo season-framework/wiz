@@ -1,0 +1,23 @@
+nav.navbar.navbar-expand-md
+    .container
+        button.navbar-toggler(type="button", (click)="isMenuCollapsed = !isMenuCollapsed")
+            span.navbar-toggler-icon
+        a.navbar-brand(routerLink="/")
+            img(src='/assets/brand/logo-black.svg')
+        
+        .collapse.navbar-collapse([ngbCollapse]="isMenuCollapsed")
+            .menu-container
+                .wiz-top-menu
+                    .wiz-menu-item
+                        a 회원가입
+                    .wiz-menu-item
+                        a 로그인
+                        
+                .wiz-main-menu
+                    ul.navbar-nav.ms-auto
+                        li.nav-item
+                            a.nav-link(routerLink="/main" routerLinkActive="active") Main
+                        li.nav-item
+                            a.nav-link(routerLink="/xyz/user" routerLinkActive="active") XYZ
+                        li.nav-item
+                            a.nav-link.disabled Disabled

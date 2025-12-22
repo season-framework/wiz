@@ -1,0 +1,123 @@
+.btn {
+    font-family: 'main-eb';
+    cursor: pointer !important;
+
+    // button color
+    &.btn-blue {
+        background: var(--wc-blue);
+        border: 0;
+
+        &:hover {
+            background: var(--wc-blue-hover);
+        }
+    }
+
+    &.btn-blue-lt {
+        border: 1px solid var(--wc-blue);
+        background: var(--wc-blue-lt);
+        color: var(--wc-blue);
+
+        &:hover {
+            background: var(--wc-blue);
+            color: #fff;
+        }
+    }
+
+    &.btn-outline-blue {
+        border-color: var(--wc-blue);
+        color: var(--wc-blue);
+
+        &:hover {
+            background-color: var(--wc-blue);
+            color: #fff;
+        }
+    }
+
+    &.btn-red {
+        background: var(--wc-red);
+        border: 0;
+
+        &:hover {
+            background: var(--wc-red-hover);
+        }
+    }
+
+    &.btn-red-lt {
+        border: 1px solid var(--wc-red);
+        background: var(--wc-red-lt);
+        color: var(--wc-red);
+
+        &:hover {
+            background: var(--wc-red);
+            color: #fff;
+        }
+    }
+
+    &.btn-outline-red {
+        border-color: var(--wc-red);
+        color: var(--wc-red);
+
+        &:hover {
+            background-color: var(--wc-red);
+            color: #fff;
+        }
+    }
+
+    &.btn-gray {
+        background: var(--wc-gray);
+        border: 0;
+        color: #fff;
+
+        &:hover {
+            background: var(--wc-gray-hover);
+        }
+    }
+
+    // button shape
+    &.btn-lg {
+        height: 42px;
+        font-size: 20px;
+    }
+
+    &.btn-sm {
+        height: 24px;
+    }
+
+    &.btn-round {
+        border-radius: 16px;
+
+        &.btn-sm {
+            border-radius: 12px;
+        }
+
+        &.btn-lg {
+            border-radius: 21px;
+        }
+    }
+
+    &.btn-block {
+        width: 100%;
+        display: block;
+    }
+
+    &.btn-white {
+        &:hover {
+            color: var(--wc-text);
+        }
+    }
+}
+
+// area round container options
+.area-round {
+    .btn {
+        border-radius: 16px;
+
+        &.btn-sm {
+            border-radius: 12px;
+        }
+
+        &.btn-lg {
+            border-radius: 21px;
+        }
+    }
+}

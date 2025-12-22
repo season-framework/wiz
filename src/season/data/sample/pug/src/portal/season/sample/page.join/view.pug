@@ -1,0 +1,160 @@
+.login-view
+    .div
+        .container
+            .logo.text-center(routerLink="/auth/login")
+                img(src="/assets/brand/logo-white.png")
+            
+            .card.join-card.mt-4(*ngIf="step === -1")
+                .card-body.py-5
+                    .form-group.mb-3
+                        .underline-text-input-group
+                            input#mail.underline-text-input-field(
+                                type="input", 
+                                placeholder="이메일", 
+                                autocomplete="off", 
+                                [(ngModel)]="data.mail", 
+                                (keyup.enter)="check(data.mail)", 
+                                [disabled]="status !== 0")
+                            label.underline-text-input-label 이메일
+                        .mt-2.text-muted(*ngIf="status === 0") * 기관 이메일을 사용하지 않는 경우 기능 사용에 제약이 있을 수 있습니다.
+
+                    .mt-4.text-center(*ngIf="status === 0")
+                        button.btn.btn-blue.btn-block((click)="check(data.mail)") 가입확인
+                    
+                    .mt-2.text-center(*ngIf="status === 0")
+                        span.text-muted.mr-2 이미 회원이신가요?
+                        a.text-muted(routerLink="/auth/login") 로그인 하러가기
+
+                    .form-group.mb-3(*ngIf="status !== 0")
+                        .underline-text-input-group
+                            input#verify-code.underline-text-input-field(
+                                type="input",
+                                placeholder="이메일",
+                                autocomplete="off",
+                                [(ngModel)]="data.code",
+                                (keyup.enter)="verify(data.mail, data.code)")
+                            label.underline-text-input-label 인증코드
+
+                    .text-center.mt-4(*ngIf="status === 1")
+                        button.btn.btn-blue.btn-block((click)="verify(data.mail, data.code)") 이메일 인증
+                        .addition-info.mt-2.text-center
+                            a((click)="resend(data.mail)") 인증 메일 다시 보내기
+
+            .card.join-card.mt-4(*ngIf="step >= 0")
+                .card-body.py-5
+                    .form-group(*ngIf="step === 0")
+                        .login-heading
+                            .login-form-icon
+                                i.fa-solid.fa-user
+                            .text-muted
+                                span 회원가입을 위해 연락처 정보를 입력해주세요
+
+                        .underline-text-input-group.mb-3
+                            input#mail.underline-text-input-field(
+                                type="email", 
+                                autocomplete="off", 
+                                placeholder="이메일",
+                                disabled="",
+                                [(ngModel)]="userdata.mail")
+                            label.underline-text-input-label 이메일
+
+                        .underline-text-onlyform-input-group.mb-3
+                            input#name.underline-text-input-field(
+                                type="text", 
+                                placeholder="이름을 입력하세요.", 
+                                autocomplete="off",
+                                [(ngModel)]="userdata.name")
+                            label.underline-text-input-label 이름*
+                            .mt-2.text-muted * 실명으로 가입하지 않을 경우 데이터 제공신청 등 일부 서비스에 대해 불이익이 있을 수 있습니다.
+                            
+                        .underline-text-onlyform-input-group.mb-3
+                            input#contactnumber1.underline-text-input-field(
+                                type="tel", 
+                                placeholder="연락처를 입력하세요.", 
+                                autocomplete="off",
+                                [(ngModel)]="userdata.tel")
+                            label.underline-text-input-label 연락처*
+
+                        .underline-text-onlyform-input-group.mb-3
+                            input#contactnumber2.underline-text-input-field(
+                                type="tel", 
+                                placeholder="휴대폰 번호를 입력하세요.", 
+                                autocomplete="off",
+                                [(ngModel)]="userdata.mobile")
+                            label.underline-text-input-label 휴대전화*
+
+                        .underline-text-onlyform-input-group.mb-3
+                            input#fax.underline-text-input-field(
+                                type="tel", 
+                                placeholder="fax 번호를 입력하세요.", 
+                                autocomplete="off",
+                                [(ngModel)]="userdata.fax")
+                            label.underline-text-input-label FAX
+
+                        .text-center
+                            button.btn.btn-blue.btn-block((click)="step1()")
+                                span 다음으로
+                                i.fa-solid.fa-arrow-right.ml-2
+
+                    .form-group(*ngIf="step === 1")
+                        .login-heading
+                            .login-form-icon
+                                i.fa-solid.fa-building
+                            .text-muted
+                                span 서비스 이용을 위해 소속된 기관 정보를 입력해주세요
+
+                        .underline-text-onlyform-input-group.mb-3
+                            input#mail.underline-text-input-field(
+                                type="text", 
+                                autocomplete="off", 
+                                placeholder="기관명",
+                                [(ngModel)]="userdata.institute")
+                            label.underline-text-input-label 기관명
+
+                        .underline-text-onlyform-input-group.mb-3
+                            input#department.underline-text-input-field(
+                                type="text", 
+                                placeholder="부서를 입력하세요.", 
+                                autocomplete="off",
+                                [(ngModel)]="userdata.department")
+                            label.underline-text-input-label 부서
+                            
+                        .underline-text-onlyform-input-group.mb-3
+                            input#position.underline-text-input-field(
+                                type="text", 
+                                placeholder="직책을 입력하세요." 
+                                autocomplete="off",
+                                [(ngModel)]="userdata.title")
+                            label.underline-text-input-label 직책
+
+                        .text-center
+                            button.btn.btn-blue.btn-block((click)="step2()")
+                                span 다음으로
+                                i.fa-solid.fa-arrow-right.ml-2
+
+                    .form-group(*ngIf="step === 2")
+                        .login-heading
+                            .login-form-icon
+                                i.fa-solid.fa-key
+                            .text-muted
+                                span 비밀번호를 설정해주세요
+
+                        .underline-text-onlyform-input-group.mb-3
+                            input#password.underline-text-input-field(
+                                type="password", 
+                                placeholder="8-16자 영문 대소문자,숫자,특수문자를 사용하세요.", 
+                                autocomplete="off",
+                                [(ngModel)]="userdata.password")
+                            label.underline-text-input-label 비밀번호*
+
+                        .underline-text-onlyform-input-group.mb-3
+                            input#pw_rp.underline-text-input-field(
+                                type="password", 
+                                placeholder="비밀번호를 다시 입력하세요.", 
+                                autocomplete="off",
+                                (keyup.enter)="join()",
+                                [(ngModel)]="userdata.password_repeat")
+                            label.underline-text-input-label 비밀번호 확인*
+
+                        .text-center
+                            button.btn.btn-blue.btn-block((click)="join()") 설정하기
