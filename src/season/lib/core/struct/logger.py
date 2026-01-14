@@ -30,7 +30,7 @@ class Logger:
             sys.stdout.flush()
             
             try:
-                if wiz is not None and wiz.project.dev():
+                if wiz is not None:
                     project = wiz.project()
                     wiz.server.app.socketio.emit("log", logdata + "\n", namespace=wiz.uri.ide("ide"), to=project)
             except Exception as e:

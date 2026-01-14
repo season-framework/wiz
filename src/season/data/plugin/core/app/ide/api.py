@@ -260,3 +260,7 @@ def build(segment):
     wiz.ide.build()
     wiz.server.cache.clear()
     wiz.response.status(200)
+
+def cache_clear():
+    wiz.server.cache.clear()
+    wiz.response.status(200)

@@ -54,38 +54,6 @@ class Project:
 
     def fs(self, *args):
         return season.util.filesystem(self.path(*args))
-
-    def dev(self, *args):
-        wiz = self.wiz
-        if len(args) == 0:
-            try:
-                try:
-                    is_dev = wiz.request.cookies("season-wiz-devmode", "false")
-                except:
-                    is_dev = "false"
-                if is_dev == "false":
-                    is_dev = False
-                else: 
-                    is_dev = True
-
-                if self._project not in ['main']:
-                    is_dev = True
-            except:
-                is_dev = False
-        else:
-            DEVMODE = args[0]
-            wiz = self.wiz
-            if DEVMODE == True: 
-                DEVMODE = "true"
-                is_dev = True
-            else: 
-                DEVMODE = "false"
-                is_dev = False
-            param = dict()
-            param["season-wiz-devmode"] = DEVMODE
-            wiz.response.cookies.set(**param)
-            
-        return is_dev
     
     def __call__(self, project=None):
         if project is None:

@@ -44,13 +44,6 @@ class IdeHandler:
     def __call__(self):
         wiz = self.wiz
 
-        # if request dev
-        dev = wiz.ide.request.query("dev", None)
-        if dev is not None:
-            if dev == "false" : wiz.project.dev(False)
-            else: wiz.project.dev(True)
-            wiz.response.redirect(wiz.uri.ide() + "/ide")
-
         # if request project
         project = wiz.ide.request.query("project", None)
         if project is not None and len(project) > 0:
