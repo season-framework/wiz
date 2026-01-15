@@ -1,4 +1,29 @@
-const fs = require('fs');
+ult;
+    }
+
+    static dependencies(code) {
+	            const result = {};
+	            const pattern = /@dependencies\(([^\)]*)\)/gs;
+	            const matches = code.matchAll(pattern);
+	            
+	            for (const match of matches) {
+			                let data = match[1].replace(/'/g, '').replace(/"/g, '').replace(/,/g, '').replace(/ /g, '');
+						            const keyValuePattern = /(.*):(.*)/;
+						            const kvMatches = data.match(keyValuePattern);
+						            if (kvMatches) {
+								                    result[kvMatches[1]] = kvMatches[2];
+								                }
+						        }
+	            return result;
+	        }
+
+    static ngComponentDesc(code) {
+	            const res = { inputs: [], outputs: [] };
+	            
+	            // @Input() 추출
+	    //         const inputPattern = /@Input\(\)([^=\:\n\;]*)/g;
+	    //                 let match;
+	    //                      const fs = require('fs');
 const path = require('path');
 const { spawn, execSync } = require('child_process');
 const chokidar = require('chokidar');
@@ -18,32 +43,7 @@ class AnnotatorDefinition {
                 result[kvMatches[1]] = kvMatches[2];
             }
         }
-        return result;
-    }
-
-    static dependencies(code) {
-        const result = {};
-        const pattern = /@dependencies\(([^\)]*)\)/gs;
-        const matches = code.matchAll(pattern);
-        
-        for (const match of matches) {
-            let data = match[1].replace(/'/g, '').replace(/"/g, '').replace(/,/g, '').replace(/ /g, '');
-            const keyValuePattern = /(.*):(.*)/;
-            const kvMatches = data.match(keyValuePattern);
-            if (kvMatches) {
-                result[kvMatches[1]] = kvMatches[2];
-            }
-        }
-        return result;
-    }
-
-    static ngComponentDesc(code) {
-        const res = { inputs: [], outputs: [] };
-        
-        // @Input() 추출
-        const inputPattern = /@Input\(\)([^=\:\n\;]*)/g;
-        let match;
-        while ((match = inputPattern.exec(code)) !== null) {
+        return res   while ((match = inputPattern.exec(code)) !== null) {
             res.inputs.push(match[1].replace(/ /g, ''));
         }
         
@@ -156,8 +156,6 @@ class AnnotatorInjection {
     }
 
     static imports(code, imports) {
-        if (!imports) return code;
-        
         const patterns = [
             /"@wiz\.imports\((.*)\)"/g,
             /'@wiz\.imports\((.*)\)'/g
@@ -466,26 +464,52 @@ class Builder {
         }
 
         const relativePath = path.relative(projectRoot, srcPath);
+        let buildPath = null;
         
         // src/angular 또는 src/ 디렉토리 내의 파일인지 확인
         if (relativePath.startsWith('src/angular/')) {
-            const buildPath = path.join(buildSrcDir, relativePath.substring('src/angular/'.length));
-            if (this.fileExists(srcPath)) {
-                this.ensureDir(path.dirname(buildPath));
-                this.copyFile(srcPath, buildPath);
-            }
+            buildPath = path.join(buildSrcDir, relativePath.substring('src/angular/'.length));
         } else if (relativePath.startsWith('src/')) {
-            const buildPath = path.join(buildSrcDir, relativePath.substring('src/'.length));
-            if (this.fileExists(srcPath)) {
-                this.ensureDir(path.dirname(buildPath));
-                this.copyFile(srcPath, buildPath);
-            }
+            buildPath = path.join(buildSrcDir, relativePath.substring('src/'.length));
         } else if (relativePath.startsWith('config/')) {
             // config 파일은 그대로 복사
-            const buildPath = path.join(this.buildDir, relativePath);
-            if (this.fileExists(srcPath)) {
-                this.ensureDir(path.dirname(buildPath));
-                this.copyFile(srcPath, buildPath);
+            buildPath = path.join(this.buildDir, relativePath);
+        }
+        
+        if (buildPath && this.fileExists(srcPath)) {
+            this.ensureDir(path.dirname(buildPath));
+            this.copyFile(srcPath, buildPath);
+            
+            // SCSS/CSS 파일의 경우, ngc-esbuild가 감지할 수 있도록 처리
+            if (srcPath.endsWith('.scss') || srcPath.endsWith('.css')) {
+                // 파일을 다시 쓰기하여 타임스탬프 업데이트 (ngc-esbuild가 감지하도록)
+                const content = this.readFile(buildPath);
+                this.writeFile(buildPath, content);
+                
+                // 관련 컴포넌트 TypeScript 파일 찾기
+                const dir = path.dirname(buildPath);
+                
+                // view.ts 파일 찾기 (view.ts가 component.ts로 변환되므로)
+                const viewTs = path.join(dir, 'view.ts');
+                if (this.fileExists(viewTs)) {
+                    // 약간의 지연 후 터치 (파일 시스템 이벤트가 확실히 발생하도록)
+                    setTimeout(() => {
+                        const tsContent = this.readFile(viewTs);
+                        this.writeFile(viewTs, tsContent);
+                    }, 300);
+                }
+                
+                // component.ts 파일들 찾기
+                const files = this.listDir(dir);
+                for (const file of files) {
+                    if (file.endsWith('.component.ts')) {
+                        const componentTs = path.join(dir, file);
+                        setTimeout(() => {
+                            const tsContent = this.readFile(componentTs);
+                            this.writeFile(componentTs, tsContent);
+                        }, 300);
+                    }
+                }
             }
         }
     }
@@ -772,14 +796,48 @@ class Builder {
         let tsTargets = [];
         if (changedFiles && changedFiles.length > 0) {
             // 변경된 파일만 처리
+            const processedDirs = new Set();
             for (const changedFile of changedFiles) {
                 const srcPath = path.resolve(changedFile);
                 const projectRoot = path.resolve(this.projectRoot);
                 if (!srcPath.startsWith(projectRoot)) continue;
                 
                 const relativePath = path.relative(projectRoot, srcPath);
-                if (relativePath.startsWith('src/') && relativePath.endsWith('.ts')) {
-                    // build/src로 변환
+                
+                // SCSS/CSS 파일이 변경되면 관련 TypeScript 파일도 처리
+                if (relativePath.startsWith('src/') && (relativePath.endsWith('.scss') || relativePath.endsWith('.css'))) {
+                    // SCSS 파일의 디렉토리에서 view.ts 또는 component.ts 찾기
+                    const scssDir = path.dirname(relativePath);
+                    let buildDir = scssDir;
+                    if (scssDir.startsWith('src/angular/')) {
+                        buildDir = path.join('build', 'src', scssDir.substring('src/angular/'.length));
+                    } else if (scssDir.startsWith('src/')) {
+                        buildDir = path.join('build', 'src', scssDir.substring('src/'.length));
+                    }
+                    const fullBuildDir = this.abspath(buildDir);
+                    
+                    // view.ts 찾기
+                    const viewTs = path.join(fullBuildDir, 'view.ts');
+                    if (this.fileExists(viewTs)) {
+                        const dirKey = path.dirname(viewTs);
+                        if (!processedDirs.has(dirKey)) {
+                            tsTargets.push(viewTs.replace(/\.ts$/, ''));
+                            processedDirs.add(dirKey);
+                        }
+                    }
+                    
+                    // component.ts 찾기
+                    const basename = path.basename(relativePath, path.extname(relativePath));
+                    const componentTs = path.join(fullBuildDir, basename + '.component.ts');
+                    if (this.fileExists(componentTs)) {
+                        const dirKey = path.dirname(componentTs);
+                        if (!processedDirs.has(dirKey)) {
+                            tsTargets.push(componentTs.replace(/\.ts$/, ''));
+                            processedDirs.add(dirKey);
+                        }
+                    }
+                } else if (relativePath.startsWith('src/') && relativePath.endsWith('.ts')) {
+                    // TypeScript 파일 변경
                     let buildPath = relativePath;
                     if (relativePath.startsWith('src/angular/')) {
                         buildPath = path.join('build', 'src', relativePath.substring('src/angular/'.length));
@@ -1122,8 +1180,61 @@ class Builder {
                 this.reconstruct(changedFiles);
                 this.build(changedFiles);
                 
+                // SCSS 파일이 변경된 경우, ngc-esbuild가 감지하도록 관련 TypeScript 파일 터치
+                const hasScssChange = changedFiles.some(f => f.endsWith('.scss') || f.endsWith('.css'));
+                if (hasScssChange) {
+                    // 관련 TypeScript 파일들을 찾아서 터치
+                    for (const changedFile of changedFiles) {
+                        if (changedFile.endsWith('.scss') || changedFile.endsWith('.css')) {
+                            const srcPath = path.resolve(changedFile);
+                            const projectRoot = path.resolve(this.projectRoot);
+                            if (!srcPath.startsWith(projectRoot)) continue;
+                            
+                            const relativePath = path.relative(projectRoot, srcPath);
+                            if (relativePath.startsWith('src/')) {
+                                let buildPath = relativePath;
+                                if (relativePath.startsWith('src/angular/')) {
+                                    buildPath = path.join('build', 'src', relativePath.substring('src/angular/'.length));
+                                } else if (relativePath.startsWith('src/')) {
+                                    buildPath = path.join('build', 'src', relativePath.substring('src/'.length));
+                                }
+                                
+                                const buildDir = path.dirname(this.abspath(buildPath));
+                                
+                                // view.ts 파일 찾아서 터치 (view.ts가 component.ts로 변환되므로)
+                                const viewTs = path.join(buildDir, 'view.ts');
+                                if (this.fileExists(viewTs)) {
+                                    // view.ts를 다시 읽어서 쓰기 (타임스탬프 업데이트)
+                                    // 지연 시간을 늘려서 파일 시스템 이벤트가 확실히 발생하도록
+                                    setTimeout(() => {
+                                        const content = this.readFile(viewTs);
+                                        this.writeFile(viewTs, content);
+                                    }, 300);
+                                }
+                                
+                                // component.ts 파일들 찾아서 터치
+                                const files = this.listDir(buildDir);
+                                for (const file of files) {
+                                    if (file.endsWith('.component.ts')) {
+                                        const componentTs = path.join(buildDir, file);
+                                        setTimeout(() => {
+                                            const content = this.readFile(componentTs);
+                                            this.writeFile(componentTs, content);
+                                        }, 300);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                this.bundle();
+                
                 if (changedFiles.some(f => f.endsWith('.py'))) {
-                  fetch(`http://localhost:${this.port}${this.baseuri}/ide/api/core.app.ide/cache_clear`);
+                    const wiz_url = `http://localhost:${this.port}${this.baseuri}/ide/api/core.app.ide/cache_clear`;
+                    await fetch(wiz_url);
+                    // let res = await fetch(wiz_url);
+                    // res = await res.json();
                 }
             } catch (error) {
                 console.error('[Builder] Build error:', error);
@@ -1245,3 +1356,4 @@ if (require.main === module) {
 }
 
 module.exports = Builder;
+
