@@ -22,13 +22,12 @@ export class Component implements OnInit {
 
     public async search() {
         const len = this.text.replace(/\s/g, "").length;
-        if (len < 3) return await this.service.alert.show({ title: "Alert", message: "3글자 이상 검색해주세요.", cancel: false, action: "close" });
-
+        if (len < 4) return await this.service.alert.show({ title: "Alert", message: "4글자 이상 검색해주세요.", cancel: false, action: "close" });
+        
         this.list = [];
         await this.loader(true);
         const body = {
             text: this.text,
-            strict: this.strict,
         };
         const targets = ["src", "portal", "config"];
         for (let i = 0; i < targets.length; i++) {
@@ -57,12 +56,9 @@ export class Component implements OnInit {
         const _type = data.type;
         const _data = data.data;
         let editor = null;
-        let mod_id = null;
-        if (_data.mode === "portal") {
-            mod_id = path.split("/")[2];
-        }
         if (_type === "app") {
             if (_data.mode === "portal") {
+                const mod_id = _data["ng.build"].id.split(".")[1];
                 editor = await this.portalWorkspace.AppEditor(mod_id, _data);
             }
             else editor = this.workspace.AppEditor(_data);
@@ -74,12 +70,14 @@ export class Component implements OnInit {
                 if (['txt', 'nsh', 'sql', 'sh'].includes(ext.toLowerCase())) force = true;
             } catch { }
             if (_data.mode === "portal") {
+                const mod_id = _data["ng.build"].id.split(".")[1];
                 editor = await this.portalWorkspace.FileEditor(mod_id, _data);
             }
             else editor = this.workspace.FileEditor(_data, {}, force);
         }
         else if (_type === "route") {
             if (_data.mode === "portal") {
+                const mod_id = _data["ng.build"].id.split(".")[1];
                 editor = await this.portalWorkspace.RouteEditor(mod_id, _data);
             }
             else editor = this.workspace.RouteEditor(_data);
