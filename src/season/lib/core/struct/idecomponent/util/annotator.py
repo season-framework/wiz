@@ -4,7 +4,7 @@ from .namespace import Namespace
 class Definition:
     def directives(self, code):
         result = dict()
-        pattern = re.compile('@directives\(([^\)]*)\)', re.DOTALL)
+        pattern = re.compile(r'@directives\(([^\)]*)\)', re.DOTALL)
         res = pattern.findall(code)
         for data in res:
             data = data.replace("'", '').replace('"', '').replace(',', '').replace(' ', '')
@@ -16,7 +16,7 @@ class Definition:
 
     def dependencies(self, code):
         result = dict()
-        pattern = re.compile('@dependencies\(([^\)]*)\)', re.DOTALL)
+        pattern = re.compile(r'@dependencies\(([^\)]*)\)', re.DOTALL)
         res = pattern.findall(code)
         for data in res:
             data = data.replace("'", '').replace('"', '').replace(',', '').replace(' ', '')
@@ -28,7 +28,7 @@ class Definition:
 
     def directives(self, code):
         result = dict()
-        pattern = re.compile('@directives\(([^\)]*)\)', re.DOTALL)
+        pattern = re.compile(r'@directives\(([^\)]*)\)', re.DOTALL)
         res = pattern.findall(code)
         for data in res:
             data = data.replace("'", '').replace('"', '').replace(',', '').replace(' ', '')
@@ -44,14 +44,14 @@ class Definition:
             val = match_obj.group(1).replace(" ", "")
             res['inputs'].append(val)
             return val
-        pattern = re.compile('@Input\(\)([^=\:\n\;]*)')
+        pattern = re.compile(r'@Input\(\)([^=\:\n\;]*)')
         re.sub(pattern, convert, code)
         
         def convert(match_obj):
             val = match_obj.group(1).replace(" ", "")
             res['outputs'].append(val)
             return val
-        pattern = re.compile('@Output\(\)([^=\:\n\;]*)')
+        pattern = re.compile(r'@Output\(\)([^=\:\n\;]*)')
         re.sub(pattern, convert, code)
         
         return res
@@ -135,7 +135,7 @@ class Injection:
         def convert(match_obj):
             val1 = match_obj.group(1)
             return ""
-        pattern = re.compile('@dependencies\(([^\)]*)\)', re.DOTALL)
+        pattern = re.compile(r'@dependencies\(([^\)]*)\)', re.DOTALL)
         code = re.sub(pattern, convert, code)
         return code
     
@@ -143,7 +143,7 @@ class Injection:
         def convert(match_obj):
             val1 = match_obj.group(1)
             return ""
-        pattern = re.compile('@directives\(([^\)]*)\)', re.DOTALL)
+        pattern = re.compile(r'@directives\(([^\)]*)\)', re.DOTALL)
         code = re.sub(pattern, convert, code)
         return code
 
