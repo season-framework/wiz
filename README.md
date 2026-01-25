@@ -191,6 +191,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.4.15
+
+- [ide] npm package version upgrade
+
 ### 2.4.14
 
 - [ide] rollback bug fixed
