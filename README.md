@@ -191,9 +191,14 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.4.13
+
+- [ide] rollback functional upgrades in 2.4.12
+
 ### 2.4.12
 
 - [core] python 3.14 bug fixed
+- [ide] logger, wiz create by pug/html engine; Fix: bundle wiz.config bug fixed, session_user_id bug fixed
 
 ### 2.4.11
 
