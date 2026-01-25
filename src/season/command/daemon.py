@@ -15,6 +15,15 @@ PATH_PUBLIC = os.path.join(PATH_WEBSRC, 'public')
 PATH_APP = os.path.join(PATH_PUBLIC, 'app.py')
 PATH_PID = os.path.join(PATH_WEBSRC, "wiz.pid")
 
+def run_ctrl(PATH_WEBSRC, bundle, runconfig):
+    import importlib
+    season = importlib.import_module("season")
+    app = season.server(PATH_WEBSRC)
+    wiz = app.wiz()
+    wiz.server.config.boot.bundle = bundle
+    os.environ['WERKZEUG_RUN_MAIN'] = 'false'
+    app.run(**runconfig)
+
 @arg('--bundle', help='run as bundle')
 @arg('--host', help='0.0.0.0')
 @arg('--port', help='3000')
@@ -34,31 +43,23 @@ def run(host='0.0.0.0', port=3000, log=None, bundle=False):
     else: bundle = True
 
     runconfig = dict(host=host, port=port, log=log)
-
-    def run_ctrl():
-        season = importlib.import_module("season")
-        app = season.server(PATH_WEBSRC)
-        wiz = app.wiz()
-        wiz.server.config.boot.bundle = bundle
-        os.environ['WERKZEUG_RUN_MAIN'] = 'false'
-        app.run(**runconfig)
         
     ostype = platform.system().lower()
     if ostype == 'linux':
         while True:
             try:
-                proc = mp.Process(target=run_ctrl)
+                proc = mp.Process(target=run_ctrl, args=(PATH_WEBSRC, bundle, runconfig))
                 proc.start()
                 proc.join()
             except KeyboardInterrupt:
                 for child in psutil.Process(proc.pid).children(recursive=True):
                     child.kill()
                 return
-            except:
+            except Exception as e:
                 time.sleep(1)
                 pass
     else:
-        run_ctrl()
+        run_ctrl(PATH_WEBSRC, bundle, runconfig)
 
 @arg('--project', help='project name')
 @arg('--clean', help='project name')

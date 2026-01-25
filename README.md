@@ -191,6 +191,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.4.12
+
+- [core] python 3.14 bug fixed
+
 ### 2.4.11
 
 - [core] python 3.14 bug fixed
