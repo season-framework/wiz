@@ -191,6 +191,14 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.4.11
+
+- [core] python 3.14 bug fixed
+
+### 2.4.10
+
+- [ide] package.json update
+
 ### 2.4.9
 
 - [plugin/terminal] add xterm as default plugin

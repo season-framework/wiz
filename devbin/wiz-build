@@ -16,26 +16,6 @@ then
             # create dev project
             rm -rf "$WIZ_GIT_PATH/dev"
             wiz create dev
-
-            cd dev
-            wiz plugin remove core
-            wiz plugin remove git
-            wiz plugin remove portal
-            wiz plugin remove utility
-            wiz plugin remove workspace
-            wiz plugin add https://github.com/season-framework/wiz-plugin-core
-            wiz plugin add https://github.com/season-framework/wiz-plugin-git
-            wiz plugin add https://github.com/season-framework/wiz-plugin-portal-framework
-            wiz plugin add https://github.com/season-framework/wiz-plugin-utility
-            wiz plugin add https://github.com/season-framework/wiz-plugin-workspace
-            cd ..
-            ;;
-
-        patch)
-            cd dev
-            wiz plugin remove core workspace utility portal git
-            wiz plugin add https://github.com/season-framework/wiz-plugin-core  https://github.com/season-framework/wiz-plugin-workspace https://github.com/season-framework/wiz-plugin-git https://github.com/season-framework/wiz-plugin-portal-framework https://github.com/season-framework/wiz-plugin-utility
-            cd ..
             ;;
 
         dump)
@@ -53,46 +33,6 @@ then
             find src/season/data -name "shortcut.plugin.ts" -type f -delete
             ;;
 
-        git)
-            VERSION=$2
-            cd dev
-            
-            cd ide
-            git add -A .
-            git commit -m "$VERSION"
-            git push
-            cd ..
-
-            cd plugin
-            
-            cd core
-            git add -A .
-            git commit -m "$VERSION"
-            git push
-            cd ..
-
-            cd git
-            git add -A .
-            git commit -m "$VERSION"
-            git push
-            cd ..
-
-            cd utility
-            git add -A .
-            git commit -m "$VERSION"
-            git push
-            cd ..
-
-            cd workspace
-            git add -A .
-            git commit -m "$VERSION"
-            git push
-            cd ..
-
-            cd ..
-            cd ..
-            ;;
-
         build)
             VERSION=$2
             rm -rf dist
@@ -102,7 +42,7 @@ then
             ;;
 
         *)
-            echo "wiz-build [ init | patch | dump | git ]"
+            echo "wiz-build [ init | dump | build <version> ]"
             ;;
     esac
 else
