@@ -1,0 +1,22 @@
+{
+    "title": "Main Page",
+    "mode": "page",
+    "namespace": "main",
+    "category": "general",
+    "id": "page.main",
+    "ng.build": {
+        "id": "page.main",
+        "name": "PageMainComponent",
+        "path": "./page.main/page.main.component"
+    },
+    "viewuri": "/main/:id?",
+    "layout": "layout.navbar",
+    "preview": "/main/user",
+    "ng": {
+        "selector": "wiz-page-main",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-page-main()",
+    "controller": ""
+}

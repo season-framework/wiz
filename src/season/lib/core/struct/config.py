@@ -55,7 +55,12 @@ class Config(season.util.stdClass):
 
         wiz = self.wiz
 
-        fs = wiz.project.fs("config")
+        # Bundle 모드일 때는 server.path.config를 직접 사용, 아닐 때는 project 내의 config 사용
+        if wiz.server.config.boot.bundle:
+            import os
+            fs = wiz.project.fs(os.path.join("bundle", "config"))
+        else:
+            fs = wiz.project.fs("config")
         config_path = name + '.py'
         if fs.isfile(config_path) == False:
             return build_config()

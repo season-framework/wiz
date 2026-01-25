@@ -1,0 +1,13 @@
+{
+    "package": "season",
+    "title": "Season Core",
+    "version": "1.2.4",
+    "use_styles": true,
+    "use_assets": true,
+    "use_app": true,
+    "use_libs": true,
+    "use_sample": true,
+    "use_route": true,
+    "use_controller": true,
+    "use_model": true
+}

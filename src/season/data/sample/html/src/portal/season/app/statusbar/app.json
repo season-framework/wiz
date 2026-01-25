@@ -1,0 +1,23 @@
+{
+    "mode": "portal",
+    "type": "app",
+    "id": "statusbar",
+    "title": "Statusbar",
+    "namespace": "statusbar",
+    "viewuri": "",
+    "category": "season",
+    "controller": "",
+    "template": "wiz-portal-season-statusbar([config]=\"\")",
+    "ng.build": {
+        "id": "portal.season.statusbar",
+        "name": "PortalSeasonStatusbarComponent",
+        "path": "./portal.season.statusbar/portal.season.statusbar.component"
+    },
+    "ng": {
+        "selector": "wiz-portal-season-statusbar",
+        "inputs": [
+            "config"
+        ],
+        "outputs": []
+    }
+}

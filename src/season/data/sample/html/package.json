@@ -1,0 +1,12 @@
+{
+  "name": "wiz-main",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node builder.js",
+    "watch": "node builder.js --watch"
+  },
+  "dependencies": {
+    "@angular/cli": "^17.2.2",
+    "chokidar": "^3.5.3"
+  }
+}

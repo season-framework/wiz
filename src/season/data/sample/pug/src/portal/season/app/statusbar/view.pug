@@ -1,0 +1,22 @@
+.view-statusbar([ngClass]="statusColor()")
+    .view-title(*ngIf="title.text")
+        i.mr-2(*ngIf="title.icon", [ngClass]="title.icon")
+        span {{title.text}}
+    
+    .ml-auto
+    
+    .view-message(*ngIf="alert.data.length == 1")
+        .message-item((click)="alert.data[0].hide(1000);")
+            span {{ alert.data[0].message }}
+            .spinner-border.spinner-border-sm.ml-2
+
+    .view-message(*ngIf="alert.data.length > 1", (click)="alertToggle()")
+        ng-container(*ngIf="!statusOpened")
+            .message-item
+                span {{ alert.display() }}
+                .spinner-border.spinner-border-sm.ml-2
+
+        ng-container(*ngIf="statusOpened")
+            .message-item(*ngFor="let log of alert.load()", (click)="log.hide(1000); $event.stopPropagation();")
+                span {{log.message}}
+                .spinner-border.spinner-border-sm.ml-2

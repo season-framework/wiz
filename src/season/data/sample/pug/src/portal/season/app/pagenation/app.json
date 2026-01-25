@@ -1,0 +1,28 @@
+{
+    "mode": "portal",
+    "id": "pagenation",
+    "title": "Pagenation",
+    "namespace": "pagenation",
+    "viewuri": "",
+    "category": "season",
+    "controller": "",
+    "ng.build": {
+        "id": "portal.season.pagenation",
+        "name": "PortalSeasonPagenationComponent",
+        "path": "./portal.season.pagenation/portal.season.pagenation.component"
+    },
+    "ng": {
+        "selector": "wiz-portal-season-pagenation",
+        "inputs": [
+            "current",
+            "start",
+            "end",
+            "maxlength"
+        ],
+        "outputs": [
+            "pageMove"
+        ]
+    },
+    "template": "wiz-portal-season-pagenation([current]=\"\", [start]=\"\", [end]=\"\", [maxlength]=\"\", (pageMove)=\"\")",
+    "type": "app"
+}

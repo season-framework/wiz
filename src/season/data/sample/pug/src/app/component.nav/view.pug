@@ -1,0 +1,19 @@
+nav.navbar.navbar-expand-lg.bg-light
+    .container-fluid
+        a.navbar-brand(routerLink="/") {{title}}
+        
+        button.navbar-toggler(type="button", (click)="isMenuCollapsed = !isMenuCollapsed")
+            span.navbar-toggler-icon
+        
+        .collapse.navbar-collapse([ngbCollapse]="isMenuCollapsed")
+            ul.navbar-nav.me-auto.mb-2.mb-lg-0
+                li.nav-item
+                    a.nav-link(routerLink="/main" routerLinkActive="active") Main
+                li.nav-item
+                    a.nav-link(routerLink="/xyz/user" routerLinkActive="active") XYZ
+                li.nav-item
+                    a.nav-link.disabled Disabled
+            
+            .d-flex
+                input.form-control.me-2(type="search" placeholder="Search" aria-label="Search", [(ngModel)]="view.data", (keyup.enter)="view.click()")
+                button.btn.btn-outline-success(type="submit", (click)="view.click()") Search

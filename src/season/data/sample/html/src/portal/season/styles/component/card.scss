@@ -1,0 +1,56 @@
+.card {
+    --wiz-card-rounded: 12px;
+    --wiz-card-border-color: var(--wc-blue);
+    border-radius: var(--wiz-card-rounded);
+
+    >*:first-child {
+        border-top-left-radius: var(--wiz-card-rounded);
+        border-top-right-radius: var(--wiz-card-rounded);
+    }
+
+    >*:last-child {
+        border-bottom-left-radius: var(--wiz-card-rounded);
+        border-bottom-right-radius: var(--wiz-card-rounded);
+    }
+
+    &.card-hover {
+
+        &::before,
+        &::after {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transition: opacity .38s ease-in-out, transform .35s ease-in-out;
+            content: '';
+            opacity: 0;
+            pointer-events: none;
+            border-radius: var(--wiz-card-rounded);
+        }
+
+        &::before {
+            transform: scale3d(0, 1, 1);
+            transform-origin: left top;
+            border-top: 1px solid var(--wiz-card-border-color);
+            border-bottom: 1px solid var(--wiz-card-border-color);
+        }
+
+        &::after {
+            transform: scale3d(1, 0, 1);
+            transform-origin: right top;
+            border-right: 1px solid var(--wiz-card-border-color);
+            border-left: 1px solid var(--wiz-card-border-color);
+        }
+
+        &:hover,
+        &:focus {
+
+            &::before,
+            &::after {
+                transform: scale3d(1, 1, 1);
+                opacity: 1;
+            }
+        }
+    }
+}

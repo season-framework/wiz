@@ -1,0 +1,16 @@
+.pagenation {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.btn {
+    border-radius: 32px;
+    width: 24px;
+    height: 24px;
+    margin: 0 3px;
+
+    &.disabled {
+        opacity: 0.2;
+    }
+}

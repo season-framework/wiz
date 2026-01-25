@@ -1,0 +1,22 @@
+{
+    "title": "Xyz Page",
+    "mode": "page",
+    "namespace": "page.xyz",
+    "category": "general",
+    "id": "page.xyz",
+    "ng.build": {
+        "id": "page.xyz",
+        "name": "PageXyzComponent",
+        "path": "./page.xyz/page.xyz.component"
+    },
+    "layout": "layout.navbar",
+    "viewuri": "/xyz/:page",
+    "ng": {
+        "selector": "wiz-page-xyz",
+        "inputs": [],
+        "outputs": []
+    },
+    "template": "wiz-page-xyz()",
+    "preview": "/xyz/wiz",
+    "controller": "base"
+}

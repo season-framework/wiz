@@ -1,0 +1,23 @@
+{
+    "mode": "portal",
+    "type": "app",
+    "id": "viewer.tree",
+    "title": "Tree Viewer",
+    "namespace": "viewer.tree",
+    "viewuri": "",
+    "category": "viewer",
+    "controller": "",
+    "template": "wiz-portal-season-viewer-tree([config]=\"\")",
+    "ng.build": {
+        "id": "portal.season.viewer.tree",
+        "name": "PortalSeasonViewerTreeComponent",
+        "path": "./portal.season.viewer.tree/portal.season.viewer.tree.component"
+    },
+    "ng": {
+        "selector": "wiz-portal-season-viewer-tree",
+        "inputs": [
+            "config"
+        ],
+        "outputs": []
+    }
+}

@@ -1,0 +1,298 @@
+.login-view {
+    background: #6C8DF6;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    overflow: hidden;
+
+    @media(max-width:768px) {
+        padding: 24px;
+        display: block;
+    }
+
+    .div {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+    }
+
+    .container {
+        max-width: 900px;
+        padding-top: 48px;
+        padding-bottom: 48px;
+    }
+
+    .logo {
+        padding-bottom: 24px;
+
+        img {
+            width: 100%;
+            max-width: 350px;
+
+            @media(max-width:768px) {
+                padding-left: 24px;
+                padding-right: 24px;
+                display: block;
+            }
+        }
+    }
+
+    .cards {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 48px;
+
+        .card {
+            margin: 12px;
+            text-align: center;
+            width: 100%;
+            max-width: 460px;
+            display: flex;
+
+            .card-body {
+                padding: 48px;
+            }
+
+            .card-footer {
+                background-color: #DEE4F5;
+                font-size: 12px;
+                border-radius: 0 0 5px 5px;
+                padding: 12px 72px;
+            }
+        }
+    }
+
+    .addition-info {
+        margin-top: 24px;
+        font-size: 14px;
+        display: block;
+
+        a {
+            color: var(--wiz-color-text);
+            cursor: pointer;
+
+            &:hover {
+                color: #6380de;
+            }
+        }
+    }
+
+    .underline-text-input-group {
+        position: relative;
+        padding: 15px 0 0;
+        margin-top: 10px;
+        width: 100%;
+
+        input {
+            line-height: 36px;
+        }
+
+        .underline-text-input-label {
+            position: absolute;
+            top: 0;
+            display: block;
+            transition: 0.2s;
+            font-size: 15px;
+            color: var(--wiz-color-black);
+            font-weight: 700;
+        }
+
+        .underline-text-input-field {
+            width: 100%;
+            border: 0;
+            border-bottom: 2px solid var(--wiz-color-gray);
+            outline: 0;
+            font-size: 18px;
+            color: #707070;
+            padding: 7px 0;
+            background: transparent;
+            transition: border-color 0.2s;
+
+            &::placeholder {
+                font-size: 13px;
+                color: transparent;
+            }
+
+            &:placeholder-shown~.underline-text-input-label {
+                font-size: 18px;
+                cursor: text;
+                top: 20px;
+                color: var(--wiz-color-gray);
+            }
+        }
+
+        .underline-text-input-field:focus {
+            ~.underline-text-input-label {
+                position: absolute;
+                top: 0;
+                display: block;
+                transition: 0.2s;
+                font-size: 15px;
+                color: var(--wiz-color-blue);
+                font-weight: 700;
+            }
+
+            padding-bottom: 6px;
+            font-weight: 700;
+            border-width: 3px;
+            border-color: var(--wiz-color-blue);
+        }
+
+        /* reset input */
+        .underline-text-input-field {
+
+            &:required,
+            &:invalid {
+                box-shadow: none;
+            }
+        }
+    }
+
+    .underline-text-onlyform-input-group {
+        position: relative;
+        padding: 15px 0 6px 0;
+        margin-top: 10px;
+        width: 100%;
+
+        input {
+            line-height: 36px;
+        }
+
+        .underline-text-input-label {
+            position: absolute;
+            top: 0;
+            display: block;
+            font-size: 15px;
+            color: #000000;
+            font-weight: 700;
+        }
+
+        font-weight: 700;
+        border-width: 3px;
+        border-color: var(--wiz-color-gray);
+
+        .underline-text-input-field {
+            width: 100%;
+            border: 0;
+            border-bottom: 2px solid var(--wiz-color-gray);
+            outline: 0;
+            font-size: 18px;
+            color: #707070;
+            padding: 7px 0;
+            background: transparent;
+            transition: border-color 0.2s;
+
+            &::placeholder {
+                font-size: 13px;
+                color: var(--wiz-color-gray);
+            }
+        }
+
+        .underline-text-input-field:focus {
+            ~.underline-text-input-label {
+                position: absolute;
+                top: 0;
+                display: block;
+                transition: 0.2s;
+                font-size: 15px;
+                color: var(--wiz-color-blue);
+                font-weight: 700;
+            }
+
+            padding-bottom: 6px;
+            font-weight: 300;
+            border-width: 3px;
+            border-color: var(--wiz-color-blue);
+        }
+    }
+
+    .error-focus {
+        .underline-text-input-field:focus {
+            ~.underline-text-input-label {
+                color: var(--wiz-color-highlight) !important;
+            }
+
+            border-color: var(--wiz-color-highlight) !important;
+
+            &::placeholder {
+                color: var(--wiz-color-sub-red) !important;
+            }
+        }
+    }
+
+    .error-msg {
+        color: red;
+        font-size: 12px;
+    }
+
+    .btn {
+        padding: 14px 16px;
+        border-radius: 10px;
+        height: auto;
+    }
+
+    .kafe-login {
+        img {
+            max-width: 247px;
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    .btn-kafe {
+        background-color: #2bb7eb;
+        color: white;
+        border: none;
+
+        &:hover {
+            background-color: #27a4d1;
+        }
+    }
+}
+
+.join-card {
+    .card-body {
+        width: 70%;
+        min-width: 300px;
+        max-width: 470px;
+        margin: 0 auto;
+    }
+}
+
+.addition-info {
+    font-size: 14px;
+
+    a {
+        &:hover {
+            color: #6380de;
+        }
+    }
+}
+
+.btn-ins {
+    background-color: #EFF4FE;
+}
+
+.only-label {
+    font-size: 15px;
+    color: #000;
+    font-weight: 700;
+}
+
+.kafe-logo {
+    max-width: 247px;
+}
+
+a.text-muted {
+    text-decoration: underline;
+}

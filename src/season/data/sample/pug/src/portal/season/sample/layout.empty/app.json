@@ -1,0 +1,9 @@
+{
+    "mode": "sample",
+    "id": "layout.empty",
+    "title": "Empty",
+    "namespace": "layout.empty",
+    "viewuri": "",
+    "category": "theme",
+    "controller": ""
+}

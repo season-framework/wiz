@@ -1,0 +1,71 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'main-eb';
+    border-bottom: none;
+}
+
+blockquote p {
+    margin: 0 !important;
+}
+
+.text-lowercase {
+    text-transform: lowercase !important
+}
+
+.text-uppercase {
+    text-transform: uppercase !important
+}
+
+.text-capitalize {
+    text-transform: capitalize !important
+}
+
+.text-left {
+    text-align: left !important
+}
+
+.text-right {
+    text-align: right !important
+}
+
+.text-center {
+    text-align: center !important
+}
+
+.text-bold {
+    font-family: 'main-b';
+}
+
+.text-extrabold {
+    font-family: 'main-eb';
+}
+
+.text-wrap {
+    word-wrap: break-word;
+    white-space: initial;
+}
+
+.text-nowrap {
+    white-space: nowrap;
+}
+
+.text-noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.text-blue {
+    color: var(--wc-blue);
+}
+
+.text-red {
+    color: var(--wc-red);
+}

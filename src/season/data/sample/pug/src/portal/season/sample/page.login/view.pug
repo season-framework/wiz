@@ -1,0 +1,32 @@
+.login-view
+    .logo(routerLink="/")
+        img(src="/assets/brand/logo-white.svg")
+
+    .cards
+        .card
+            .card-body
+                .underline-text-input-group
+                    input.underline-text-input-field(
+                        type="text", 
+                        placeholder="아이디를 입력하세요", 
+                        autocomplete="off",
+                        [(ngModel)]="data.username")
+                    label.underline-text-input-label 아이디
+
+                .underline-text-input-group.mt-3
+                    input.underline-text-input-field(
+                        type="password", 
+                        placeholder="비밀번호를 입력하세요", 
+                        autocomplete="off", 
+                        (keyup.enter)="login()",
+                        [(ngModel)]="data.password")
+                    label.underline-text-input-label 비밀번호
+
+                .form-footer
+                    button.btn.btn-blue.btn-block((click)="login()") 로그인
+
+                .addition-info
+                    .ml-auto
+                    a(routerLink="/auth/signup") 회원가입
+                    span.mr-1.ml-1(style="color:#e5e5e5") |
+                    a((click)="alert('준비중입니다', 'warning')") 비밀번호 찾기

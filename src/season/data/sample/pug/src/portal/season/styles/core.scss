@@ -1,0 +1,76 @@
+@import "content/font";
+@import "content/text";
+@import "content/color";
+@import "content/layout";
+@import "content/ckeditor";
+
+@import "layout/margin";
+@import "layout/padding";
+@import "layout/display";
+@import "layout/page";
+
+@import "form/control";
+@import "form/group";
+
+@import "component/card";
+@import "component/button";
+
+
+html,
+body,
+app-root {
+    font-family: 'main-r';
+    background: var(--wc-background);
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: block;
+}
+
+router-outlet {
+    display: none;
+}
+
+iframe {
+    border: none;
+    width: 100%;
+}
+
+*::-webkit-scrollbar-track {
+    background-color: var(--wc-scroll-background);
+}
+
+*::-webkit-scrollbar {
+    height: 10px !important;
+    width: 10px !important;
+    background-color: var(--wc-scroll-background);
+}
+
+*::-webkit-scrollbar-thumb {
+    border-radius: 0;
+    background-color: var(--wc-scroll-thumb);
+    background-image: -webkit-linear-gradient(45deg,
+            rgba(255, 255, 255, .2) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, .2) 50%,
+            rgba(255, 255, 255, .2) 75%,
+            transparent 75%,
+            transparent);
+}
+
+.border-bottom {
+    border-bottom: 1px solid var(--wc-border);
+}
+
+.border-top {
+    border-top: 1px solid var(--wc-border);
+}
+
+.alert {
+    line-height: 1;
+}
+
+.sortable-ghost {
+    background-color: var(--wc-border);
+}
