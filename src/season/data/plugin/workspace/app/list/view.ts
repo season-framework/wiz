@@ -14,6 +14,7 @@ export class Component implements OnInit {
     public isCreate: boolean = false;
     public data: any = [];
     public info: any = { id: "" };
+    public isdev = wiz.dev();
 
     constructor(private service: Service) { }
 

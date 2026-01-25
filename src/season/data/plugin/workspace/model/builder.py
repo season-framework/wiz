@@ -136,12 +136,7 @@ class Model:
         if fs.exists("config") == False:
             fs.makedirs("config")
 
-        # template 정보 읽기
-        template = wiz.server.template_engine
-        
-        # wizbuild.js는 항상 pug 컴파일 로직 포함
         fs.write('build/wizbuild.js', Code.ESBUILD)
-        
         fs.write('build/tsconfig.json', Code.TSCONFIG)
         if fs.exists('build/tailwind.config.js') == False:
             fs.write('build/tailwind.config.js', Code.TAILWIND)
@@ -168,12 +163,7 @@ class Model:
         # copy src
         fs.copy("src/angular/main.ts", "build/src/main.ts")
         fs.copy("src/angular/wiz.ts", "build/src/wiz.ts")
-        
-        # template에 따라 index 파일 복사
-        if template == 'pug':
-            fs.copy("src/angular/index.pug", "build/src/index.pug")
-        else:
-            fs.copy("src/angular/index.html", "build/src/index.html")
+        fs.copy("src/angular/index.pug", "build/src/index.pug")
 
         fs.copy("src/angular/app", "build/src/app")
         fs.copy("src/app", "build/src/app")
@@ -239,9 +229,6 @@ class Model:
     def _build(self):
         fs = self.fs()
         baseuri = wiz.uri.ide()
-        
-        # template 정보 읽기
-        template = wiz.server.template_engine
 
         # build apps
         apps = []
@@ -327,18 +314,17 @@ class Model:
         imports = ",\n".join(["        " + x for x in imports])
         declarations = "AppComponent,\n" + ",\n".join(["        " + x for x in declarations])
 
-        # build pug (pug 모드일 때만)
-        if template == 'pug':
-            targets = self._search("build/src", result=[], extension=".pug")
-            for target in targets:
-                code = fs.read(target + ".pug")
-                filename = target.split("/")[-1]
-                if filename == 'view':
-                    app_id = target.split("/")[-2]
-                    code = self.pug(code, baseuri=baseuri, app_id=app_id)
-                else:
-                    code = self.pug(code, baseuri=baseuri)
-                fs.write(target + ".pug", code)
+        # build pug
+        targets = self._search("build/src", result=[], extension=".pug")
+        for target in targets:
+            code = fs.read(target + ".pug")
+            filename = target.split("/")[-1]
+            if filename == 'view':
+                app_id = target.split("/")[-2]
+                code = self.pug(code, baseuri=baseuri, app_id=app_id)
+            else:
+                code = self.pug(code, baseuri=baseuri)
+            fs.write(target + ".pug", code)
         
         # build typescript
         targets = self._search("build/src/app", result=[], extension=".ts")
@@ -375,13 +361,12 @@ class Model:
                 code = self.typescript(code, baseuri=baseuri)
             fs.write(target + ".ts", code)
 
-        # build pug files (pug 모드일 때만)
-        if template == 'pug':
-            targets = self._search("build/src", result=[], extension=".pug")
-            if len(targets) > 0:
-                targets = " ".join(targets)
-                build_base_path = fs.abspath()
-                Util.execute(f"cd {build_base_path} && node build/wizbuild {targets}")
+        # build pug files
+        targets = self._search("build/src", result=[], extension=".pug")
+        if len(targets) > 0:
+            targets = " ".join(targets)
+            build_base_path = fs.abspath()
+            Util.execute(f"cd {build_base_path} && node build/wizbuild {targets}")
         
         # build angular json
         angularJson = fs.read.json("src/angular/angular.json", dict())

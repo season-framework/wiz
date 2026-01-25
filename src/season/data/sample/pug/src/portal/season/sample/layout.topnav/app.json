@@ -1,8 +1,0 @@
-{
-    "mode": "portal",
-    "id": "layout.topnav",
-    "title": "Topnav",
-    "namespace": "layout.topnav",
-    "viewuri": "",
-    "category": "theme"
-}

@@ -3,6 +3,7 @@
         h3.nowrap.m-0(style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;")
             span Workspace
         .ml-auto
+        a.btn.btn-primary.btn-sm.pr-2.pl-2(href="?dev={{!isdev}}") {{isdev ? 'develop' : 'product'}}
 
     .editor-info(*ngIf="isCreate")
         .area-round.editor-info-container

@@ -1,9 +1,0 @@
-{
-    "mode": "sample",
-    "id": "page.join",
-    "title": "/join",
-    "namespace": "page.join",
-    "viewuri": "/join",
-    "category": "auth",
-    "preview": "/join"
-}

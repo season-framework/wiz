@@ -11,12 +11,6 @@ class Server:
         
         self.cache = season.util.Cache() # system cache
         
-        template_engine = "pug"
-        try: template_engine = self.config.build.template
-        except: pass
-        if template_engine not in ['pug', 'html']: template_engine = 'pug'
-        self.template_engine = template_engine
-        
         logging.getLogger('werkzeug').disabled = True
 
         # create app server & set env

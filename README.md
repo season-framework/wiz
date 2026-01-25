@@ -191,6 +191,10 @@ wiz ide upgrade # ide upgrade
 
 ## Release Note
 
+### 2.4.14
+
+- [ide] rollback bug fixed
+
 ### 2.4.13
 
 - [ide] rollback functional upgrades in 2.4.12

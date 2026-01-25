@@ -1,5 +1,4 @@
 import os
-import sys
 import season
 
 class Logger:
@@ -18,19 +17,17 @@ class Logger:
                     if os.path.exists(logpath) == False:
                         f = open(logpath, "w")
                         f.write("")
-                        f.flush()
                         f.close()
                     f = open(logpath, "a")
                     f.write(logdata + "\n")
-                    f.flush()
                     f.close()
                 except:
                     pass
-            print(logdata)
-            sys.stdout.flush()
+            else:
+                print(logdata)
             
             try:
-                if wiz is not None:
+                if wiz is not None and wiz.project.dev():
                     project = wiz.project()
                     wiz.server.app.socketio.emit("log", logdata + "\n", namespace=wiz.uri.ide("ide"), to=project)
             except Exception as e:

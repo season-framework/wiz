@@ -13,6 +13,24 @@
             "width": 240
         },
         {
+            "name": "Portal Framework",
+            "id": "workspace.app.portal",
+            "icon": "fa-solid fa-layer-group",
+            "width": 240
+        }
+    ],
+    "sub": [],
+    "app": [
+        {
+            "name": "Preview",
+            "id": "workspace.app.preview",
+            "icon": "fa-solid fa-eye",
+            "width": 360,
+            "event": {
+                "binding": "service.event.bind($event.id, $event.data)"
+            }
+        },
+        {
             "name": "NPM Package",
             "id": "workspace.app.npm",
             "icon": "fa-solid fa-boxes-packing",
@@ -47,24 +65,6 @@
             "id": "utility.app.assistant",
             "icon": "fa-solid fa-robot",
             "width": 480
-        }
-    ],
-    "sub": [],
-    "app": [
-        {
-            "name": "Portal Framework",
-            "id": "workspace.app.portal",
-            "icon": "fa-solid fa-layer-group",
-            "width": 240
-        },
-        {
-            "name": "Preview",
-            "id": "workspace.app.preview",
-            "icon": "fa-solid fa-eye",
-            "width": 360,
-            "event": {
-                "binding": "service.event.bind($event.id, $event.data)"
-            }
         }
     ],
     "setting": [

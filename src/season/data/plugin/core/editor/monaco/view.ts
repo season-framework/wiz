@@ -74,10 +74,40 @@ export class Component implements OnInit {
                     range,
                 },
                 {
+                    label: 'imto',
+                    kind: monaco.languages.CompletionItemKind.Function,
+                    documentation: 'import toastr from "toastr";',
+                    insertText: 'import toastr from "toastr";',
+                    range,
+                },
+                {
                     label: 'public.service',
                     kind: monaco.languages.CompletionItemKind.Function,
                     documentation: 'public service: Service,',
                     insertText: 'service\: Service,',
+                    range,
+                },
+                {
+                    label: 'public.change.detector.ref',
+                    kind: monaco.languages.CompletionItemKind.Function,
+                    documentation: 'public ref: ChangeDetectorRef,',
+                    insertText: 'ref\: ChangeDetectorRef,',
+                    range,
+                },
+                {
+                    label: 'imds',
+                    kind: monaco.languages.CompletionItemKind.Function,
+                    documentation: 'import destructured package',
+                    insertText: 'import \{ ${1} \} from "${2}";',
+                    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+                    range,
+                },
+                {
+                    label: 'imdf',
+                    kind: monaco.languages.CompletionItemKind.Function,
+                    documentation: 'import default package',
+                    insertText: 'import ${1} from "${2}";',
+                    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
                     range,
                 },
             ];
@@ -240,32 +270,6 @@ export class Component implements OnInit {
                 };
             }
         });
-        monaco.languages.registerCompletionItemProvider('html', {
-            provideCompletionItems: function (model, position) {
-                const textUntilPosition = model.getValueInRange({
-                    startLineNumber: 1,
-                    startColumn: 1,
-                    endLineNumber: position.lineNumber,
-                    endColumn: position.column,
-                });
-                const t = textUntilPosition.split("\n").slice(-1)[0];
-                const ngmatch = t.match(/ng/);
-                const routermatch = t.match(/router/);
-                if (!ngmatch && !routermatch) {
-                    return { suggestions: [] };
-                }
-                const word = model.getWordUntilPosition(position);
-                const range = {
-                    startLineNumber: position.lineNumber,
-                    endLineNumber: position.lineNumber,
-                    startColumn: word.startColumn,
-                    endColumn: word.endColumn,
-                };
-                return {
-                    suggestions: createPugRecommend(range),
-                };
-            }
-        });
         monaco.languages.registerCompletionItemProvider('python', {
             provideCompletionItems: function (model, position) {
                 const textUntilPosition = model.getValueInRange({
@@ -294,8 +298,7 @@ export class Component implements OnInit {
     }
 
     private addComponentClick(editor) {
-        const languageId = editor.getModel().getLanguageId();
-        if (!["pug", "html"].includes(languageId)) return;
+        if (editor.getModel().getLanguageId() != 'pug') return;
 
         editor.onMouseDown(async ({ event, target }) => {
             const { metaKey, altKey } = event;
@@ -305,6 +308,7 @@ export class Component implements OnInit {
             if (!r) return;
             const mode = r[0].split("-")[1];
             const appId = r[0].split("-").slice(1).join(".");
+
 
             const { code, data } = await wiz.call("load", { id: appId });
             if (code !== 200) return;
