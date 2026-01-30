@@ -1,14 +1,76 @@
-# WIZ IDE
+<div align="center">
 
-- WIZ is IDE for web development
-- Using angular more easy
+# WIZ Framework
 
-![screenshot](https://github.com/season-framework/wiz/blob/main/screenshot/wiz.gif)
+**Modern Full-Stack Web Development Framework**
 
-## Installation
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![PyPI](https://img.shields.io/badge/pypi-season-blue)](https://pypi.org/project/season/)
+[![Angular](https://img.shields.io/badge/angular-18-red)](https://angular.io/)
 
-- install nodejs, npm, angular
+[Features](#-features) •
+[Quick Start](#-quick-start) •
+[Documentation](#-documentation) •
+[Examples](#-examples) •
+[Contributing](#-contributing)
 
+![WIZ IDE Screenshot](./screenshot/wiz.gif)
+
+</div>
+
+---
+
+## 📖 Overview
+
+**WIZ** is a powerful full-stack web development framework that combines Python backend with Angular frontend, providing an integrated development environment (IDE) for rapid web application development. Built on Flask and Angular, WIZ simplifies the development workflow with its intuitive web-based IDE and comprehensive plugin system.
+
+### Why WIZ?
+
+- 🚀 **Rapid Development** - Create full-stack applications with minimal boilerplate
+- 🎨 **Web-Based IDE** - Develop directly in your browser with a modern, feature-rich IDE
+- 🔌 **Plugin Architecture** - Extend functionality with a powerful plugin system
+- 📦 **Built-in Tools** - Git integration, npm/pip management, live preview, and more
+- 🌐 **Full-Stack** - Python backend (Flask) + Angular frontend seamlessly integrated
+- 🔧 **Flexible Configuration** - Easy project configuration and management
+
+## ✨ Features
+
+### Core Features
+- **Web-Based IDE** - Full-featured development environment accessible through your browser
+- **Hot Reload** - Instant preview of changes during development
+- **Multiple Projects** - Manage multiple projects within a single workspace
+- **Component Generator** - Quickly scaffold pages, components, and services
+- **API Development** - Streamlined backend API development with Flask
+- **Portal Framework** - Create and manage reusable module packages
+
+### Built-in Tools
+- 📁 **File Explorer** - Browse and manage project files
+- 💻 **Code Editor** - Monaco-based editor with syntax highlighting and autocomplete
+- 🔍 **Search & Replace** - Powerful search across your entire project
+- 🌳 **Git Integration** - Version control directly in the IDE
+- 📦 **Package Management** - npm and pip package management UI
+- 🖼️ **Asset Preview** - Preview images and other assets
+- 🤖 **AI Assistant** - GPT-powered coding assistant (optional)
+
+### Developer Experience
+- **TypeScript Support** - Full TypeScript support for Angular development
+- **Pug Templates** - Option to use Pug for cleaner HTML templates
+- **TailwindCSS** - Built-in support for TailwindCSS
+- **Socket.IO** - Real-time communication support
+- **WSGI Compatible** - Production-ready WSGI deployment
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.8 or higher
+- Node.js 14 or higher
+- npm
+
+### Installation
+
+1. **Install Node.js and npm** (if not already installed):
 ```bash
 apt install nodejs npm
 npm i -g n
@@ -16,489 +78,235 @@ n stable
 apt purge nodejs npm
 ```
 
-- install wiz python package
-
+2. **Install WIZ**:
 ```bash
-pip install season             # install
-pip install season --upgrade   # upgrade lastest
+pip install season             # Install
+pip install season --upgrade   # Upgrade to latest
 ```
 
-## Usage
-
-- create project and start web server
+### Create Your First Project
 
 ```bash
+# Create a new project
 cd <workspace>
 wiz create myapp
 cd myapp
+
+# Start development server
 wiz run --port 3000
-# `http://127.0.0.1:3000/wiz` on your web browser
+
+# Open your browser to http://127.0.0.1:3000/wiz
 ```
 
-- start server as daemon
+### Development Mode
 
 ```bash
-wiz server start # start daemon server
-wiz server stop  # stop daemon server
+# Start development server with custom settings
+wiz run --host=0.0.0.0 --port=3000 --log=wiz.log
 ```
 
-- regist system service for linux
+### Production Mode
 
 ```bash
-# run on wiz project root directory
+# Start as daemon
+wiz server start
+wiz server stop
+wiz server restart
+
+# Register as system service (Linux)
 wiz service regist myapp
 wiz service start myapp
 ```
 
-- upgrade ide from command line
+### Upgrade
 
 ```bash
-pip install season --upgrade # upgrade core
-wiz ide upgrade # ide upgrade
+pip install season --upgrade  # Upgrade core framework
+wiz ide upgrade               # Upgrade IDE components
 ```
 
-## WIZ CLI
-
-### Create Project
-- `wiz create [Project Name]`
-    - Example
-        ```bash
-        wiz create myapp
-        ```
-
-### plugin commands
-- `wiz command <plugin name> args`
-    - Example
-        ```bash
-        wiz command workspace build main
-        ```
-
-### Daemon API
-- `wiz run --host=<host> --port=<port> --log=<log file path>`
-    - Flag
-        | Flag | Syntax | Description |
-        |---|---|---|
-        | --port | wiz run [action] --port=PORT | Web server port, Default 3000 |
-        | --host | wiz run [action] --host=HOST | Web server host, Default 0.0.0.0 |
-        | --log | wiz run [action] --log=PATH | Log file path, Default None |
-    - Example
-        ```bash
-        wiz run --port=3000
-        wiz run --port=3000 --host=0.0.0.0
-        wiz run --port 3000 --log wiz.log
-        ```
-
-- `wiz server [action] --log=<log file path> --force`
-    - Action
-        | Action | Syntax | Description |
-        |---|---|---|
-        | start | wiz server start [flags] | Start wiz server as daemon |
-        | stop | wiz server stop [flags] | Stop wiz server daemon |
-        | restart | wiz server restart [flags] | Restart wiz server daemon |
-    - Flag
-        | Flag | Syntax | Description |
-        |---|---|---|
-        | --log | wiz server [action] --log=PATH | Log file path, Default None |
-        | --force | wiz server start --force | Force start daemon |
-    - Example
-        ```bash
-        wiz server start --force
-        wiz server stop
-        wiz server restart
-        ```
-
-### Service API
-- `wiz service list`
-    - Example
-        ```bash
-        wiz service list
-        ```
-
-- `wiz service regist [name] [port]`
-    - Same AS
-        - `install`
-    - Example
-        ```bash
-        wiz service regist myapp
-        # or
-        wiz service install myapp src 3001
-        # or
-        wiz service install myapp bundle 3001
-        ```
-
-- `wiz service unregist [name]`
-    - Same AS
-        - `uninstall`, `remove`, `delete`, `rm`
-    - Example
-        ```bash
-        wiz service unregist myapp
-        # or
-        wiz service remove myapp
-        ```
-
-- `wiz service status [name]`
-    - Example
-        ```bash
-        wiz service status myapp
-        ```
-
-- `wiz service start [name]`
-    - Example
-        ```bash
-        wiz service start myapp
-        wiz service start # start all services
-        ```
-
-- `wiz service stop [name]`
-    - Example
-        ```bash
-        wiz service stop myapp
-        wiz service stop  # stop all services
-        ```
-
-- `wiz service restart [name]`
-    - Example
-        ```bash
-        wiz service restart myapp
-        wiz service restart  # restart all services
-        ```
+## 📚 Documentation
+
+Comprehensive documentation is available in multiple languages:
+
+- **[English Documentation](docs/en/)** - Complete guide in English
+  - [Usage Guide](docs/en/usage-guide.md) - Getting started and development guide
+  - [Architecture](docs/en/architecture.md) - Framework design and internals
+  - [API Reference](docs/en/api/README.md) - Complete API documentation
+  - [Examples](docs/en/examples.md) - Practical examples and tutorials
+
+- **[한국어 문서](docs/kr/)** - 한국어 완전 가이드
+  - [사용 가이드](docs/kr/usage-guide.md) - 시작 및 개발 가이드
+  - [아키텍처](docs/kr/architecture.md) - 프레임워크 설계 및 내부 구조
+  - [API 레퍼런스](docs/kr/api/README.md) - 전체 API 문서
+  - [예제 모음](docs/kr/examples.md) - 실전 예제 및 튜토리얼
+
+## 💻 CLI Reference
+
+### Project Management
 
-### Bundle Project
-- `wiz bundle --project=<Project Name>`
-    - Example
-        ```bash
-        wiz bundle # bundle main project
-        wiz bundle --project=main
-        ```
-    - Output
-        - `<workspace>/bundle` file created after run bundle api
-        - run using command `wiz run --bundle`
-        - or adding services using `wiz service install <myservice> bundle`
-
-## Version Policy
+#### Create Project
+```bash
+wiz create [Project Name]
+```
 
-> x.y.z
+#### Run Project
+```bash
+# Development server
+wiz run --host=<host> --port=<port> --log=<log file path>
 
-- `x`: major update
-    - upgrade not supported
-- `y`: minor update
-    - support command upgrade
-    - core function changed
-    - required server restart
-- `z`: ui update
-    - support upgrade from web ui
-    - not required server restart
+# Available flags:
+# --port: Web server port (default: 3000)
+# --host: Web server host (default: 0.0.0.0)
+# --log: Log file path (default: None)
+```
 
-## Release Note
+#### Bundle Project
+```bash
+wiz bundle                    # Bundle main project
+wiz bundle --project=main     # Bundle specific project
+```
 
-### 2.4.15
+### Daemon Management
 
-- [ide] npm package version upgrade
+```bash
+wiz server start [--log=PATH] [--force]   # Start daemon
+wiz server stop                            # Stop daemon
+wiz server restart                         # Restart daemon
+```
 
-### 2.4.14
+### Service Management (Linux)
 
-- [ide] rollback bug fixed
+```bash
+wiz service list                          # List all services
+wiz service regist <name> [port]          # Register service
+wiz service unregist <name>               # Unregister service
+wiz service status <name>                 # Check service status
+wiz service start [name]                  # Start service(s)
+wiz service stop [name]                   # Stop service(s)
+wiz service restart [name]                # Restart service(s)
+```
 
-### 2.4.13
+### Plugin Commands
 
-- [ide] rollback functional upgrades in 2.4.12
+```bash
+wiz command <plugin name> <args>          # Execute plugin command
+```
 
-### 2.4.12
+## 🎯 Examples
 
-- [core] python 3.14 bug fixed
-- [ide] logger, wiz create by pug/html engine; Fix: bundle wiz.config bug fixed, session_user_id bug fixed
+### Creating a Simple API
 
-### 2.4.11
+```python
+# In your controller file (e.g., controller/api.py)
+def index(wiz):
+    return wiz.response.json({"message": "Hello, WIZ!"})
+```
 
-- [core] python 3.14 bug fixed
+### Creating an Angular Component
 
-### 2.4.10
+Use the built-in IDE to:
+1. Navigate to the workspace explorer
+2. Click "New Component"
+3. Enter component details
+4. The framework automatically generates the component structure
 
-- [ide] package.json update
+For more examples, see the [Examples Documentation](docs/en/examples.md).
 
-### 2.4.9
+## 🏗️ Architecture
 
-- [plugin/terminal] add xterm as default plugin
-- [ide] upgrade angular 17 to 18
-
-### 2.4.8
-
-- [plugin/workspace] readme tab in portal apps
-
-### 2.4.7
-
-- [core] add python packages for wiz assitant
-
-### 2.4.6
-
-- [plugin/workspace] selector not created bug fixed
-- [plugin/workspace] support tailwind config file
-- [plugin/utility] WIZ Assistant (GPT)
-    - System Setting - IDE Option
-        ```python
-        openai_key = "GPT KEY"
-        openai_model = "gpt-4o" 
-        assistant_guide = "소스코드 작성시에는 탭사이즈는 4로 만들어줘. pug 작성시에는 body 하위 코드만 작성해줘."
-        assistant_path = "src/reference"
-
-        def acl(wiz):
-            ip = wiz.request.ip()
-        ```
-    - System Setting - IDE Menu
-        ```json
-        {
-            "name": "WIZ Assistant",
-            "id": "utility.app.assistant",
-            "icon": "fa-solid fa-robot",
-            "width": 480
-        }
-        ```
-
-### 2.4.5
-
-- [plugin/workspace] package.json update bug fixed
-- [plugin/workspace] angular.json update bug fixed
-- [plugin/workspace] support tailwindcss
-    - npm install tailwindcss (use NPM Packages Menu)
-    - add `tailwind.min.css` at `angular/angular.build.options.json`
-        ```json
-        {
-            "assets": [],
-            "styles": [
-                ...
-                "tailwind.min.css",
-                "src/styles.scss"
-            ],
-            "scripts": []
-        }
-        ```
-
-### 2.4.4
-
-- [plugin/workspace] portal framework bug fixed (app/widget create)
-
-### 2.4.3
-
-- [core] util.filesystem bug fixed
-
-### 2.4.2
-
-- [core] wiz.config bug fixed
-
-### 2.4.1
-
-- [core] fixed library path not included error
-
-### 2.4.0
-
-- [core] upgrade to flask 3
-- [core] enhanced 3rd-party plugin concept
-- [core] `branch` renamed as `project` 
-- [core] util function structure changed (eg. `season.util.os.FileSystem` to `season.util.fs`)
-- [core] support plugin command (3rd-party command)
-- [core] support plugin filter (customized route)
-- [core] project and ide structure changed
-- [core] remove `workspace` object (changed to `wiz.project` or `wiz.ide`)
-- [plugins] update wiz api changes
-
-### 2.3.x
-
-- major issues
-    - move build logic to ide plugin
-    - add bundle structure
-    - localize angular cli
-    - add linux service cli
-    - add statusbar at bottom of ide
-- [core] move build logic to ide plugin
-- [core] add bundle structure
-- [core] localize angular cli
-- [core] add linux service cli
-- [core] add statusbar at bottom of ide
-- [plugin] define `model` at plugin
-- [plugin/workspace] angular build logic changed
-- [plugin/workspace] integrated portal framework plugin at workspace
-- [plugin/workspace] build portal framework on builder model
-- [plugin/workspace] portal framework controller bug fixed
-- [plugin/workspace] portal framework editore in command
-- [plugin/core] update auto complete in monaco editor
-- [core] upgrade to `angular 17`
-- [core] cache bug fixed (conflict branch)
-- [core] command change (bundle -> pkg)
-- [core] change requirement for python old version support
-- [plugin/workspace] create widget bug at portal module fixed
-- [core] add dependency (flask-socketio)
-- [core] upgrade to `angular 16`
-- [core] color changed
-- [core] add build command
-- [plugin/workspace] tree view component changed
-- [plugin/git] commit bug fixed
-- [core] wiz.response stream api
-- [plugin/workspace] bug at app create fixed
-- [core] cache added for wiz config
-- [core] cache added for wiz components (model, controller, api)
-- [core] bundle command added
-- [core] service command upgraded (add bundle option)
-- [core] service command upgraded (add port option)
-- [core] boot config changed
-- [core] boot config changed
-- [plugin/workspace] portal framework widget create bug fixed
-- [plugin/workspace] statusbar bug fixed
-- [plugin/workspace] npm plugin bug fixed
-- [core] default plugin config bug fixed (portal framework)
-- [core] assets path bug fixed
-- [core] bundle path bug fixed
-- [plugin/workspace] config list bug fixed
-- [plugin/workspace] app.json bug fixed
-
-### 2.2.x
-
-- major issues
-    - ide overlay menu
-    - shortcut config (plugin & user customized)
-- [plugin/portal] add portal framework plugin
-- [plugin/workspace] refresh list bug fixed
-- [core] ide monaco editor bug fixed
-- [plugin/workspace] Usability improvements
-- [plugin/core] Auto Complete keyword
-- [core] toastr on build error 
-- [plugin/workspace] hidden portal framework on route
-- [plugin/workspace] image viewer
-- [core] angular version upgrade
-- [core] typescript dependencies bug fixed
-
-### 2.1.x
-
-- major issues
-    - ide plugin concept changed
-    - ide layout changed
-    - ide config concept added
-- [plugin/core] move to app link in monaco editor
-- [plugin/core] add core plugins upgrade button
-- [plugin/core] add restart server button
-- [plugin/workspace] add app/route editor service
-- [plugin/workspace] preview bug fixed
-- [plugin/workspace] page namespace bug fixed
-- [plugin/workspace] set default code if component.ts not exists
-- [plugin/workspace] import & create app bug fixed
-- [plugin/core] remove useless log
-- [plugin/workspace] config folder bug fixed
-- [plugin] bug fixed (remove unused file)
-- [plugin/workspace] add route build
-- [plugin/workspace] remove useless log
-- [plugin] `core` plugin updated
-- [core] add `lib/plugin` object
-- [command] bug fixed
-
-### 2.0.x
-
-- major issues
-    - upgrade base project to angular 14.2.0
-    - UI/UX full changed
-    - Drag and Drop Interface
-    - git branch to project (multiple project in workspace)
-    - Enhanced IDE Plugin and easily develop 3rd party apps
-    - support pip and npm on ui
-- ide socket
-- auto install `@angular/cli`
-- angular 15
-- flask response bug fixed (on filesend)
-- wiz bundle mode
-- update wiz server command (multiprocess)
-- config bug fixed
-- socketio bug fixed (ide controller)
-- threading bug fixed (flask, socketio)
-
-### 1.0.x
-
-- major issue
-    - clean code
-    - full changed ide
-    - remove season-flask concept
-    - enhanced performance
-    - logging for wiz concept
-    - upgrade plugin structure
-    - config structure changed
-    - stable version for git merge
-- add `wiz server start --log <file>` method 
-- print bug fixed
-- add daemon server command
-- Socket.IO transport
-- server starting log
-- auto remove invalid character on update
-- WSGI Bug Fixed
-- remove dukpy (windows install bug)
-- support macosx
-
-### 0.5.x
-
-- support plugin storage
-- port scan when wiz project created
-- wiz based online plugin development env
-- support programmable api for plugins
-- remove useless resources
-- socketio config (config/socketio.py)
-- packages version bug fixed (jinja2, werkzeug)
-- add src folder for tracing plugin code
-- check installed function (wiz.installed())
-- forced dev mode in dev branch (if not master)
-- wiz `resource_handler` updated
-- add function response(flask_resp) and pil_image at `response`
-- add babel script option
-- add `wiz.path()` function
-- git merge bug fixed
-- update wiz theme render logic
-- git merge logic changed
-- wiz instance as global in wiz api
-- add `match` api at wiz instance
-
-### 0.4.x
-
-- Integrate WIZ & Season Flask
-- support git flow
-- workspace structure changed
-- base code workspace changed (mysql to filesystem)
-- UI upgrade
-- support installer
-- developer/production mode
-    - developer: enabled socketio logger on every pages
-    - production: disabled socketio logger
-- dictionary bug fixed in App HTML
-- history display ui changed (workspace)
-- app browse in route workspace
-- add cache clean in workspace
-- git bug changed (if author is not set, default user to `wiz`)
-- full size log viewer
-- keyword changed
-- cache bug fixed
-- socketio performance upgrade 
-- wiz.js embeded
-- WIZ API (js) changed (async mode)
-
-### 0.3.x
-
-- add socket.io 
-- framework on build
-- command run modified (add pattern, ignores)
-- change Framework Object
-
-### 0.2.x
-
-- framework structure upgraded
-- command line tool function changed
-- submodule structure added
-- logging 
-- simplify public directory structure
-- add response.template_from_string function
-- add response.template function
-- add variable expression change option
-- interface loader update
-- config onerror changed 
-- add response.abort
-- error handler in controller `__error__`
-- response redirect update (relative module path)
-- logger upgrade (file trace bug fixed)
-- logger upgrade (log executed file trace)
-- logger upgrade (code trace)
-- error handler bug fixed
-- apache wsgi bug fixed (public/app.py)
-- apache wsgi bug fixed
+WIZ follows a modular architecture:
+
+```
+project/
+├── app/                    # Angular applications
+│   ├── component.ts        # Component logic
+│   ├── view.pug           # Component template (Pug)
+│   └── view.html          # Component template (HTML)
+├── controller/            # Backend controllers
+├── model/                 # Data models
+├── route/                 # Custom routes
+├── portal/                # Reusable modules
+└── config/                # Configuration files
+```
+
+For detailed architecture information, see [Architecture Documentation](docs/en/architecture.md).
+
+## 🔌 Plugin System
+
+WIZ supports a powerful plugin system for extending functionality:
+
+- **Core Plugins** - Essential IDE functionality
+- **Workspace Plugins** - Project management and file operations
+- **Git Plugins** - Version control integration
+- **Utility Plugins** - Additional tools and features
+- **Custom Plugins** - Create your own plugins
+
+## 📋 Version Policy
+
+WIZ follows semantic versioning (`x.y.z`):
+
+- **`x` (Major)**: Breaking changes - upgrade not supported
+- **`y` (Minor)**: New features - requires server restart
+- **`z` (Patch)**: UI updates - can be upgraded without restart
+
+## 📝 Release Notes
+
+See [RELEASES.md](RELEASES.md) for the latest updates and complete version history.
+
+Quick links to version-specific releases:
+- [Version 2.4.x (Current)](releases/v2.4.md) - Angular 18, TailwindCSS, AI Assistant
+- [Version 2.3.x](releases/v2.3.md) - Bundle structure, Angular 17
+- [Version 2.2.x](releases/v2.2.md) - IDE overlay menu
+- [Version 2.1.x](releases/v2.1.md) - IDE plugin concept
+- [Version 2.0.x](releases/v2.0.md) - Angular 14, UI/UX redesign
+- [Version 1.0.x and earlier](releases/v1.0.md) - Legacy releases
+
+## 🤝 Contributing
+
+We welcome contributions! Please feel free to submit issues and pull requests.
+
+### Development Setup
+
+1. Clone the repository
+```bash
+git clone https://github.com/season-framework/wiz.git
+cd wiz
+```
+
+2. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+3. Run in development mode
+```bash
+cd src
+python -m season.cmd run
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Built with [Flask](https://flask.palletsprojects.com/) and [Angular](https://angular.io/)
+- Code editor powered by [Monaco Editor](https://microsoft.github.io/monaco-editor/)
+- Terminal powered by [xterm.js](https://xtermjs.org/)
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/season-framework/wiz/issues)
+- **Documentation**: [docs/](docs/)
+
+---
+
+<div align="center">
+
+Made with ❤️ by the WIZ Framework Team
+
+[⬆ Back to Top](#wiz-framework)
+
+</div>
+
