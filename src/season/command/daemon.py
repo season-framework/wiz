@@ -29,51 +29,50 @@ def run_ctrl(PATH_WEBSRC, bundle, runconfig):
 @arg('--port', help='3000')
 @arg('--log', help='log filename')
 def run(host='0.0.0.0', port=3000, log=None, bundle=False):
+    """
+    Run WIZ Development Server
+    
+    Usage:
+        wiz run                    - Run server on 0.0.0.0:3000
+        wiz run --port=8080        - Run server on custom port
+        wiz run --host=127.0.0.1   - Run server on specific host
+        wiz run --bundle           - Run in bundle mode
+        wiz run --log=server.log   - Run with log file
+    """
     if os.path.isfile(PATH_APP) == False:
         print("Invalid Project path: wiz structure not found in this folder.")
         return
 
-    if os.path.exists(os.path.join(PATH_WEBSRC, "project")) == False:
-        os.mkdir(os.path.join(PATH_WEBSRC, "project"))
+    try:
+        if os.path.exists(os.path.join(PATH_WEBSRC, "project")) == False:
+            os.mkdir(os.path.join(PATH_WEBSRC, "project"))
 
-    if port is not None: 
-        port = int(port)
-    
-    if bundle is None or bundle is False: bundle = False
-    else: bundle = True
-
-    runconfig = dict(host=host, port=port, log=log)
+        if port is not None: 
+            port = int(port)
         
-    ostype = platform.system().lower()
-    if ostype == 'linux':
-        while True:
-            try:
-                proc = mp.Process(target=run_ctrl, args=(PATH_WEBSRC, bundle, runconfig))
-                proc.start()
-                proc.join()
-            except KeyboardInterrupt:
-                for child in psutil.Process(proc.pid).children(recursive=True):
-                    child.kill()
-                return
-            except Exception as e:
-                time.sleep(1)
-                pass
-    else:
-        run_ctrl(PATH_WEBSRC, bundle, runconfig)
+        if bundle is None or bundle is False: bundle = False
+        else: bundle = True
 
-@arg('--project', help='project name')
-@arg('--clean', help='project name')
-def build(project="main", clean=False):
-    fs = season.util.fs(os.getcwd())
-    PROJECT_PATH = os.path.join("project", project)
-    if fs.isdir(PROJECT_PATH) == False:
-        print("project '{}' not exists".format(project))
-        return
-    app = season.server(os.getcwd())
-    wiz = app.wiz()
-    wiz.checkout.checkout(project)
-
-    # TODO: build command
+        runconfig = dict(host=host, port=port, log=log)
+            
+        ostype = platform.system().lower()
+        if ostype == 'linux':
+            while True:
+                try:
+                    proc = mp.Process(target=run_ctrl, args=(PATH_WEBSRC, bundle, runconfig))
+                    proc.start()
+                    proc.join()
+                except KeyboardInterrupt:
+                    for child in psutil.Process(proc.pid).children(recursive=True):
+                        child.kill()
+                    return
+                except Exception as e:
+                    time.sleep(1)
+                    pass
+        else:
+            run_ctrl(PATH_WEBSRC, bundle, runconfig)
+    except Exception as e:
+        print(f"Error: {e}")
 
 class Daemon:
     def __init__(self, pidfile, target=None, stdout='/dev/null', stderr='/dev/null'):
@@ -191,10 +190,31 @@ def runnable(stdout, stderr):
         
 @arg('--force', help='force run')
 @arg('--log', help='log file path')
-@arg('action', default=None, help="start|stop|restart")
+@arg('action', nargs='?', default=None, help="start | stop | restart")
 def server(action, force=False, log=None):
+    """
+    WIZ Server Daemon Management
+    
+    Usage:
+        wiz server start             - Start server as daemon
+        wiz server stop              - Stop server daemon
+        wiz server restart           - Restart server daemon
+        wiz server start --log=path  - Start with log file
+        wiz server start --force     - Force start (remove stale PID)
+    """
     if os.path.isfile(PATH_APP) == False:
         print("Invalid Project path: wiz structure not found in this folder.")
+        return
+
+    if action is None:
+        print("WIZ Server Daemon Management")
+        print("")
+        print("Usage:")
+        print("  wiz server start             - Start server as daemon")
+        print("  wiz server stop              - Stop server daemon")
+        print("  wiz server restart           - Restart server daemon")
+        print("  wiz server start --log=path  - Start with log file")
+        print("  wiz server start --force     - Force start (remove stale PID)")
         return
 
     if log is None: log = '/dev/null'
@@ -219,7 +239,10 @@ def server(action, force=False, log=None):
         print(f"WIZ server started")
         daemon.start()
     else:
-        print(f"`wiz server` not support `{action}`. (start|stop|restart)")
+        print(f"Unknown action: {action}")
+        print("")
+        print("Available actions: start, stop, restart")
 
 def kill():
+    """Kill all WIZ processes"""
     os.system("kill -9 $(ps -ef | grep python | grep wiz | awk '{print $2}')")

@@ -159,14 +159,56 @@ WantedBy=multi-user.target
         t.add_rows(services)
         print(t.draw())
         
+    def help(self):
+        print("WIZ Service Management (Linux only)")
+        print("")
+        print("Usage:")
+        print("  wiz service regist <name> [port] [bundle]  - Register service")
+        print("  wiz service unregist <name>                - Unregister service")
+        print("  wiz service start [name]                   - Start service(s)")
+        print("  wiz service stop [name]                    - Stop service(s)")
+        print("  wiz service restart [name]                 - Restart service(s)")
+        print("  wiz service status <name>                  - Show service status")
+        print("  wiz service list                           - List all services")
+        
     def __call__(self, name, args):
         fn = getattr(self, name)
         fn(*args)
         
-@arg('action', default=None, help="regist | status")
+@arg('action', nargs='?', default=None, help="regist | unregist | start | stop | restart | status | list")
 def service(action, *args):
+    """
+    WIZ Service Management (Linux only)
+    
+    Usage:
+        wiz service regist <name> [port] [bundle]  - Register service
+        wiz service unregist <name>                - Unregister service
+        wiz service start [name]                   - Start service(s)
+        wiz service stop [name]                    - Stop service(s)
+        wiz service restart [name]                 - Restart service(s)
+        wiz service status <name>                  - Show service status
+        wiz service list                           - List all services
+    """
     if platform.system() != 'Linux':
-        print("Regist service function only support linux")
-        return    
+        print("Service management is only supported on Linux")
+        return
+    
     cmd = ServiceCommand()
-    cmd(action, args)
+    
+    # Show help if action is None or invalid
+    if action is None:
+        cmd.help()
+        return
+    
+    if not hasattr(cmd, action):
+        print(f"Unknown action: {action}")
+        print("")
+        cmd.help()
+        return
+    
+    try:
+        cmd(action, args)
+    except Exception as e:
+        print(f"Error: {e}")
+        print("")
+        cmd.help()

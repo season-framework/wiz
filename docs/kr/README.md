@@ -17,7 +17,20 @@ WIZ 프레임워크를 시작하기 위한 완전한 가이드입니다.
 - **포털 사용**: 재사용 가능한 모듈 패키지 활용
 - **빌드 및 배포**: 프로덕션 환경 배포 방법
 
-### 2. [아키텍처](architecture.md)
+### 2. [명령어 가이드](command.md)
+WIZ CLI 명령어에 대한 완전한 레퍼런스입니다.
+
+- **기본 명령어**: create, run, build, server, bundle, kill
+- **IDE 관리**: ide install, remove, upgrade, build, clean
+- **서비스 관리**: service regist, start, stop, restart, status, list
+- **프로젝트 관리**: project build, create, delete, list, export
+- **앱 관리**: project app create, delete, list
+- **컨트롤러 관리**: project controller create, delete, list
+- **라우트 관리**: project route create, delete, list
+- **패키지 관리**: project package create, delete, list
+- **NPM 관리**: project npm install, uninstall, list
+
+### 3. [아키텍처](architecture.md)
 WIZ 프레임워크의 내부 구조와 설계 원칙을 설명합니다.
 
 - **개요**: WIZ 프레임워크 소개
@@ -32,7 +45,7 @@ WIZ 프레임워크의 내부 구조와 설계 원칙을 설명합니다.
 - **데이터 플로우**: 요청-응답 흐름
 - **확장성 및 보안**: 스케일링 및 보안 고려사항
 
-### 3. [API 레퍼런스](api/README.md)
+### 4. [API 레퍼런스](api/README.md)
 WIZ 프레임워크의 전체 API 상세 문서입니다.
 
 #### 백엔드 API (Python)
@@ -46,7 +59,7 @@ WIZ 프레임워크의 전체 API 상세 문서입니다.
 #### 프론트엔드 API (TypeScript)
 - **[Service API](api/service-api.md)** - Angular 컴포넌트 서비스
 
-### 4. [예제 모음](examples.md)
+### 5. [예제 모음](examples.md)
 실전 예제를 통한 학습 가이드입니다.
 
 - 기본 페이지 생성

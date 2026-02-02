@@ -1,13 +1,17 @@
 import season
 import os
+import zipfile
+import subprocess
+import datetime
+import time
 from .base import BaseCommand
 
 
 class ProjectCommand(BaseCommand):
-    """프로젝트 기본 명령어"""
+    """Project core commands"""
     
     def build(self, project="main", clean=False):
-        """프로젝트 빌드"""
+        """Build project"""
         if not self._validate_project_path():
             return
         
@@ -82,7 +86,7 @@ class ProjectCommand(BaseCommand):
             except Exception as e:
                  print(f"Warning: Failed to update app.json: {e}")
 
-            # workspace 플러그인에서 builder 모델 로드
+            # Load builder model from workspace plugin
             builder = wiz.ide.plugin("workspace").model("builder", mode="context")
             
             if clean:
@@ -97,7 +101,7 @@ class ProjectCommand(BaseCommand):
             raise e
     
     def create(self, project="demo", uri=None, path=None):
-        """프로젝트 생성"""
+        """Create project"""
         if not self._validate_project_path():
             return
         
@@ -118,8 +122,41 @@ class ProjectCommand(BaseCommand):
                 print(f"Cloning from git: {uri}")
                 os.system(f"git clone {uri} {project_path}")
             elif path:
-                print(f"Copying from path: {path}")
-                self.fs.copy(path, project_path)
+                # Extract if .wizproject file
+                if path.endswith('.wizproject'):
+                    if not os.path.isfile(path):
+                        print(f"File '{path}' not found.")
+                        return
+                    
+                    print(f"Extracting from .wizproject: {path}")
+                    self.fs.makedirs(project_path)
+                    abs_project_path = self.fs.abspath(project_path)
+                    
+                    try:
+                        with zipfile.ZipFile(path, 'r') as zipdata:
+                            zipdata.extractall(abs_project_path)
+                        print(f"Extracted to '{project_path}'")
+                        
+                        # Run pip install if requirements.txt exists
+                        requirements_path = os.path.join(abs_project_path, "requirements.txt")
+                        if os.path.isfile(requirements_path):
+                            print("Installing Python dependencies from requirements.txt...")
+                            result = subprocess.run(
+                                f"pip install -r {requirements_path}",
+                                shell=True,
+                                capture_output=True,
+                                text=True
+                            )
+                            if result.returncode == 0:
+                                print("Python dependencies installed successfully.")
+                            else:
+                                print(f"Warning: pip install failed: {result.stderr}")
+                    except Exception as e:
+                        print(f"Failed to extract .wizproject: {e}")
+                        return
+                else:
+                    print(f"Copying from path: {path}")
+                    self.fs.copy(path, project_path)
             else:
                 print("Creating default demo project...")
                 sample_path = os.path.join(season.PATH_LIB, "data", "sample")
@@ -143,7 +180,7 @@ class ProjectCommand(BaseCommand):
             print(f"Create failed: {e}")
     
     def delete(self, project=None):
-        """프로젝트 삭제"""
+        """Delete project"""
         if not self._validate_project_path():
             return
         
@@ -162,7 +199,7 @@ class ProjectCommand(BaseCommand):
         print(f"Project '{project}' deleted successfully.")
     
     def list(self):
-        """프로젝트 목록 조회"""
+        """List projects"""
         if not self._validate_project_path():
             return
         
@@ -177,7 +214,7 @@ class ProjectCommand(BaseCommand):
                 print(f"  - {p}")
     
     def clean(self, project="main"):
-        """프로젝트 캐시 정리"""
+        """Clean project cache"""
         if not self._validate_project_path():
             return
         
@@ -186,3 +223,80 @@ class ProjectCommand(BaseCommand):
         if self.fs.isdir(cache_path):
             self.fs.remove(cache_path)
         print(f"Project '{project}' cache cleaned.")
+    
+    def export(self, project="main", output=None):
+        """Export project as .wizproject file"""
+        if not self._validate_project_path():
+            return
+        
+        project_path = self._get_project_path(project)
+        if not self.fs.isdir(project_path):
+            print(f"Project '{project}' does not exist.")
+            return
+        
+        # Set output filename
+        if output is None:
+            output = f"{project}.wizproject"
+        elif not output.endswith('.wizproject'):
+            output = f"{output}.wizproject"
+        
+        abs_project_path = self.fs.abspath(project_path)
+        
+        print(f"Exporting project '{project}'...")
+        
+        # Generate requirements.txt
+        requirements_path = os.path.join(abs_project_path, "requirements.txt")
+        print("Generating requirements.txt...")
+        try:
+            p = subprocess.Popen("pip freeze", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err = p.communicate()
+            if out:
+                with open(requirements_path, 'w') as f:
+                    f.write(out.decode('utf-8'))
+                print(f"requirements.txt created at project root.")
+        except Exception as e:
+            print(f"Warning: Failed to generate requirements.txt: {e}")
+        
+        # Create zip file
+        print(f"Creating {output}...")
+        
+        # Folders to include
+        contains = ["src", "portal", "config", ".git"]
+        # Root files to include
+        root_files = ["requirements.txt", "package.json"]
+        
+        try:
+            with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED) as zipdata:
+                for folder, subfolders, files in os.walk(abs_project_path):
+                    # Check if folder should be included
+                    check = False
+                    for contain in contains:
+                        contain_path = os.path.join(abs_project_path, contain)
+                        if folder.startswith(contain_path) or folder == abs_project_path:
+                            check = True
+                            break
+                    
+                    if folder == abs_project_path:
+                        check = True
+                    
+                    if not check:
+                        continue
+                    
+                    for file in files:
+                        file_path = os.path.join(folder, file)
+                        rel_path = os.path.relpath(file_path, abs_project_path)
+                        
+                        # Include only specified files from root, or files from specified folders
+                        if folder == abs_project_path:
+                            if file in root_files:
+                                zipdata.write(file_path, rel_path)
+                        else:
+                            # Check if file is in specified folder
+                            for contain in contains:
+                                if rel_path.startswith(contain):
+                                    zipdata.write(file_path, rel_path)
+                                    break
+            
+            print(f"Project '{project}' exported to '{output}' successfully.")
+        except Exception as e:
+            print(f"Export failed: {e}")

@@ -317,6 +317,305 @@ def on_message(data):
     wiz.response.send({"echo": data})
 ```
 
+### 4. WebSocket (socket.py) Detailed Guide
+
+#### 4.1 Socket Controller Overview
+
+`socket.py` is a WebSocket handler for real-time bidirectional communication in the WIZ framework. It is built on Flask-SocketIO, and each app component has an independent WebSocket namespace.
+
+**Namespace Structure:**
+```
+/wiz/app/{project}/{app_id}
+```
+
+Example: `/wiz/app/main/page.dashboard`
+
+#### 4.2 Socket Controller Class Structure
+
+A Socket Controller is implemented by defining a `Controller` class.
+
+```python
+class Controller:
+    def __init__(self, server):
+        """
+        Socket Controller initialization
+        
+        Parameters:
+            server: WIZ server instance
+        """
+        self.server = server
+
+    def connect(self):
+        """Called when client connects"""
+        pass
+
+    def disconnect(self, flask, io):
+        """Called when client disconnects"""
+        sid = flask.request.sid  # Client session ID
+        pass
+
+    def join(self, data, io):
+        """Room join event"""
+        io.join(data)  # Join using data as room name
+
+    def leave(self, data, io):
+        """Room leave event"""
+        io.leave(data)  # Leave using data as room name
+
+    def custom_event(self, data, io):
+        """Custom event"""
+        # data: Data sent from client
+        # io: SocketHandler instance
+        io.emit("response", {"message": "received"})
+```
+
+#### 4.3 Available Parameters
+
+The following parameters are available in Controller methods:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `server` | Server | WIZ server instance |
+| `wiz` | Wiz | WIZ core object (access to model, project, session, etc.) |
+| `socketio` | SocketIO | Flask-SocketIO instance |
+| `flask_socketio` | module | flask_socketio module |
+| `flask` | module | Flask module (access to request.sid, etc.) |
+| `io` | SocketHandler | Socket handler (emit, join, leave, etc.) |
+| `data` | any | Data sent from client |
+
+#### 4.4 SocketHandler (io) API
+
+Methods available in the SocketHandler class provided via the `io` parameter:
+
+```python
+# Send message
+io.emit(event, data, to=None, room=None, broadcast=False)
+# - event: Event name
+# - data: Data to send
+# - to: Specific client SID
+# - room: Specific room
+# - broadcast: Broadcast to all
+
+# Send general message
+io.send(message, to=None, room=None)
+
+# Join room
+io.join(room, sid=None)
+io.join_room(room, sid=None)  # Alias
+
+# Leave room
+io.leave(room, sid=None)
+io.leave_room(room, sid=None)  # Alias
+
+# Send status message
+io.status(channel='message', to=None, type='status', **msg)
+
+# Get list of clients in room
+clients = io.clients(room)  # [(sid, eio_sid), ...]
+
+# Get list of all rooms
+rooms = io.rooms()
+```
+
+#### 4.5 Practical Examples
+
+**Chat Server Implementation:**
+
+```python
+class Controller:
+    def __init__(self, server):
+        self.server = server
+
+    def connect(self):
+        print("New client connected")
+
+    def disconnect(self, flask, io):
+        sid = flask.request.sid
+        print(f"Client {sid} disconnected")
+
+    def join(self, data, io, flask, wiz):
+        """Join chat room"""
+        # Session verification
+        wiz.session = wiz.model("portal/season/session")
+        session = wiz.session.use()
+        user = session.get()
+        
+        if not user:
+            return  # Unauthenticated user
+        
+        room = data.get('room', 'default')
+        io.join(room)
+        
+        # Join notification
+        io.emit("user_joined", {
+            "user": user.get('username'),
+            "room": room
+        }, room=room)
+
+    def leave(self, data, io, flask, wiz):
+        """Leave chat room"""
+        room = data.get('room', 'default')
+        io.leave(room)
+        io.emit("user_left", {"room": room}, room=room)
+
+    def message(self, data, io, wiz):
+        """Send message"""
+        wiz.session = wiz.model("portal/season/session")
+        session = wiz.session.use()
+        user = session.get()
+        
+        room = data.get('room', 'default')
+        message = data.get('message', '')
+        
+        io.emit("new_message", {
+            "user": user.get('username', 'Anonymous'),
+            "message": message,
+            "timestamp": wiz.project.timestamp()
+        }, room=room)
+```
+
+**Real-time Log Broadcasting:**
+
+```python
+class Controller:
+    def __init__(self, server):
+        self.server = server
+
+    def wplog(self, data, io, wiz):
+        """Send workflow log to specific client"""
+        project = wiz.project()
+        socketNamespace = f"/wiz/app/{project}/page.main"
+
+        for log in data:
+            event = log['event']
+            to = log['id']  # Target client SID
+            io.emit(event, log, to=to, namespace=socketNamespace)
+
+    def broadcast_log(self, data, io):
+        """Send log to all clients"""
+        io.emit("log", data)  # All clients in current namespace
+```
+
+**Socket Controller with Authentication:**
+
+```python
+class Controller:
+    def __init__(self, server):
+        self.server = server
+
+    def _check_auth(self, wiz):
+        """Authentication verification helper"""
+        wiz.session = wiz.model("portal/season/session")
+        struct = wiz.model("portal/dizest/struct")
+        config = struct.config
+        try:
+            config.acl()
+            return True
+        except:
+            return False
+
+    def join(self, data, io, wiz):
+        if not self._check_auth(wiz):
+            return  # Ignore on auth failure
+        io.join(data)
+
+    def leave(self, data, io, wiz):
+        if not self._check_auth(wiz):
+            return
+        io.leave(data)
+
+    def secure_action(self, data, io, wiz):
+        if not self._check_auth(wiz):
+            io.emit("error", {"message": "Unauthorized"})
+            return
+        
+        # Perform authenticated operation
+        io.emit("success", {"data": "secure data"})
+```
+
+#### 4.6 Using WebSocket from Frontend
+
+**Using Socket.IO in view.ts:**
+
+```typescript
+import { OnInit, OnDestroy } from '@angular/core';
+import { Service } from '@wiz/libs/portal/season/service';
+
+export class Component implements OnInit, OnDestroy {
+    constructor(public service: Service) { }
+
+    public socket: any;
+
+    public async ngOnInit() {
+        await this.service.init();
+        
+        // Socket.IO connection
+        this.socket = this.service.socket.create();
+        
+        // Register event listeners
+        this.socket.on("new_message", (data) => {
+            console.log("Received:", data);
+        });
+        
+        this.socket.on("user_joined", (data) => {
+            console.log(`${data.user} joined ${data.room}`);
+        });
+        
+        // Join room
+        this.socket.emit("join", { room: "general" });
+    }
+
+    public sendMessage(message: string) {
+        this.socket.emit("message", {
+            room: "general",
+            message: message
+        });
+    }
+
+    public ngOnDestroy() {
+        // Disconnect on component destruction
+        if (this.socket) {
+            this.socket.emit("leave", { room: "general" });
+            this.socket.disconnect();
+        }
+    }
+}
+```
+
+#### 4.7 Socket Controller Execution Process
+
+In the WIZ framework, Socket Controllers are executed through the following process:
+
+1. **Server Startup**: `season.lib.binding.socket.Socket` class is initialized
+2. **socket.py File Discovery**: Search for `socket.py` files under each project's `bundle/src/app/`
+3. **Controller Class Loading**: Dynamically load class using `season.util.compiler`
+4. **Event Binding**: Register all Controller class methods as Socket.IO events
+5. **Namespace Assignment**: Automatically create namespace in format `/wiz/app/{project}/{app_id}`
+
+**Internal Operation Flow:**
+
+```
+Client event triggered
+    ↓
+Socket.IO event handler called
+    ↓
+wrapper function prepares parameters (wiz, io, flask, data, etc.)
+    ↓
+Controller method called via season.util.compiler
+    ↓
+Only required parameters injected based on method signature
+    ↓
+Method execution and response
+```
+
+#### 4.8 Important Notes
+
+1. **Method Naming Convention**: Methods starting and ending with `__` are not registered as events
+2. **Parameter Injection**: Only parameters defined in method signature are injected (declare only what you need)
+3. **Exception Handling**: Exceptions are logged to server logs
+4. **Build Required**: After modifying socket.py, build is required (copied to bundle folder)
+5. **Namespace Isolation**: Each app's Socket has an independent namespace
+
 ### 3. Access Page
 
 After building, access this URL:

@@ -6,41 +6,35 @@ from .base import BaseCommand
 from .core import ProjectCommand
 from .app import AppCommand
 from .controller import ControllerCommand
-from .model import ModelCommand
 from .route import RouteCommand
 from .npm import NpmCommand
-from .pip_cmd import PipCommand
-from .portal import PortalCommand
+from .package import PackageCommand
 
 PATH_FRAMEWORK = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 
-# 명령어 인스턴스들
+# Command instances
 _project_cmd = ProjectCommand()
 _app_cmd = AppCommand()
 _controller_cmd = ControllerCommand()
-_model_cmd = ModelCommand()
 _route_cmd = RouteCommand()
 _npm_cmd = NpmCommand()
-_pip_cmd = PipCommand()
-_portal_cmd = PortalCommand()
+_package_cmd = PackageCommand()
 
-# 서브커맨드 매핑
+# Subcommand mapping
 _subcommands = {
     'app': _app_cmd,
     'controller': _controller_cmd,
-    'model': _model_cmd,
     'route': _route_cmd,
     'npm': _npm_cmd,
-    'pip': _pip_cmd,
-    'portal': _portal_cmd,
+    'package': _package_cmd,
 }
 
-# 프로젝트 기본 액션
-_project_actions = ['build', 'create', 'delete', 'list', 'info', 'sync', 'clean']
+# Project core actions
+_project_actions = ['build', 'create', 'delete', 'list', 'info', 'sync', 'clean', 'export']
 
 
-@arg('subcommand', help="app | controller | model | route | npm | pip | portal | build | create | delete | list | info | sync | clean")
+@arg('subcommand', help="app | controller | route | npm | package | build | create | delete | list | export | clean")
 @arg('action', nargs='?', help="action for subcommand (create, delete, list, update, etc.)")
 @arg('--project', help='project name')
 @arg('--uri', help='git repository URI')
@@ -119,7 +113,7 @@ def project(subcommand, action, *, project=None, uri=None, path=None,
         wiz project portal info --name=myportal
     """
     
-    # 프로젝트 기본 액션인 경우
+    # Handle project core actions
     if subcommand in _project_actions:
         fn = getattr(_project_cmd, subcommand)
         if subcommand == 'build':
@@ -136,13 +130,15 @@ def project(subcommand, action, *, project=None, uri=None, path=None,
             fn(project=project or "main")
         elif subcommand == 'clean':
             fn(project=project or "main")
+        elif subcommand == 'export':
+            fn(project=project or "main", output=output)
         return
     
-    # 서브커맨드 처리
+    # Handle subcommands
     if subcommand not in _subcommands:
         print(f"Unknown subcommand: {subcommand}")
-        print("Available subcommands: app, controller, model, route, npm, pip, portal")
-        print("Available actions: build, create, delete, list, info, sync, clean")
+        print("Available subcommands: app, controller, route, npm, portal")
+        print("Available actions: build, create, delete, list, export, clean")
         return
     
     cmd = _subcommands[subcommand]
@@ -159,7 +155,7 @@ def project(subcommand, action, *, project=None, uri=None, path=None,
     
     fn = getattr(cmd, action)
     
-    # 각 서브커맨드별 파라미터 전달
+    # Pass parameters for each subcommand
     if subcommand == 'app':
         if action == 'create':
             fn(namespace=namespace, package=package, template=template)
@@ -182,37 +178,21 @@ def project(subcommand, action, *, project=None, uri=None, path=None,
     
     elif subcommand == 'controller':
         if action == 'create':
-            fn(name=name, package=package, template=template)
+            fn(namespace=namespace, package=package, template=template)
         elif action == 'delete':
-            fn(name=name, package=package)
+            fn(namespace=namespace, package=package)
         elif action == 'list':
             fn(package=package)
-        elif action == 'update':
-            fn(name=name, package=package)
-        else:
-            fn()
-    
-    elif subcommand == 'model':
-        if action == 'create':
-            fn(name=name, package=package, template=template)
-        elif action == 'delete':
-            fn(name=name, package=package)
-        elif action == 'list':
-            fn(package=package)
-        elif action == 'update':
-            fn(name=name, package=package)
         else:
             fn()
     
     elif subcommand == 'route':
         if action == 'create':
-            fn(name=name, package=package, route_path=path or "/", methods=methods, template=template)
+            fn(namespace=namespace, package=package, route_path=path, methods=methods, template=template)
         elif action == 'delete':
-            fn(name=name, package=package)
+            fn(namespace=namespace, package=package)
         elif action == 'list':
             fn(package=package)
-        elif action == 'update':
-            fn(name=name, package=package)
         else:
             fn()
     
@@ -228,28 +208,12 @@ def project(subcommand, action, *, project=None, uri=None, path=None,
         else:
             fn()
     
-    elif subcommand == 'pip':
-        if action == 'install':
-            fn(package=package, version=version)
-        elif action == 'uninstall':
-            fn(package=package)
-        elif action == 'list':
-            fn()
-        elif action == 'export':
-            fn(output=output or "requirements.txt")
-        elif action == 'import':
-            fn(input_file=input or "requirements.txt")
-        else:
-            fn()
-    
-    elif subcommand == 'portal':
+    elif subcommand == 'package':
         if action == 'create':
-            fn(name=name)
+            fn(namespace=namespace)
         elif action == 'delete':
-            fn(name=name)
+            fn(namespace=namespace)
         elif action == 'list':
             fn()
-        elif action == 'info':
-            fn(name=name)
         else:
             fn()

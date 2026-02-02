@@ -2,7 +2,6 @@ import os
 
 from season import util
 from season.lib.server import Server as server
-# from season.lib.plugin import Plugin as plugin
 
 from .version import VERSION_STRING as VERSION
 version = __version__ = __VERSION__ = VERSION

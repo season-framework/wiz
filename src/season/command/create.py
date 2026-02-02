@@ -16,37 +16,67 @@ def portchecker(port):
         pass
     return False
 
-@arg('projectname', default='sample-project', help='project name')
+@arg('projectname', nargs='?', default=None, help='project name')
 def create(projectname):
-    PATH_PROJECT = os.path.join(os.getcwd(), projectname)
-    if os.path.isdir(PATH_PROJECT):
-        print("Already exists project path '{}'".format(PATH_PROJECT))
+    """
+    Create a new WIZ workspace
+    
+    Usage:
+        wiz create <projectname>    - Create new workspace with given name
+    
+    Example:
+        wiz create myapp            - Creates 'myapp' workspace
+    """
+    if projectname is None:
+        print("Project name is required.")
+        print("")
+        print("Usage:")
+        print("  wiz create <projectname>    - Create new workspace")
+        print("")
+        print("Example:")
+        print("  wiz create myapp            - Creates 'myapp' workspace")
         return
     
-    fs = season.util.fs(PATH_PROJECT)
-
-    print("create project...")
-    PATH_PUBLIC_SRC = os.path.join(PATH_FRAMEWORK, 'data', "websrc")
-    fs.copy(PATH_PUBLIC_SRC, PATH_PROJECT)
-
-    startport = 3000
-    while portchecker(startport):
-        startport = startport + 1
+    PATH_PROJECT = os.path.join(os.getcwd(), projectname)
+    if os.path.isdir(PATH_PROJECT):
+        print(f"Already exists project path '{PATH_PROJECT}'")
+        return
     
-    data = fs.read(os.path.join('config', 'boot.py'))
-    data = data.replace("__PORT__", str(startport))
-    fs.write(os.path.join('config', 'boot.py'), data)
+    try:
+        fs = season.util.fs(PATH_PROJECT)
 
-    print("install ide...")
-    fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "ide"), "ide")
-    fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "plugin"), "plugin")
+        print("Creating workspace...")
+        PATH_PUBLIC_SRC = os.path.join(PATH_FRAMEWORK, 'data', "websrc")
+        fs.copy(PATH_PUBLIC_SRC, PATH_PROJECT)
 
-    fs.makedirs(os.path.join(PATH_PROJECT, "project"))
-    
-    print("build ide...")
-    app = season.server(PATH_PROJECT)
-    wiz = app.wiz()
-    wiz.ide.build.clean()
-    wiz.ide.build()
+        startport = 3000
+        while portchecker(startport):
+            startport = startport + 1
+        
+        data = fs.read(os.path.join('config', 'boot.py'))
+        data = data.replace("__PORT__", str(startport))
+        fs.write(os.path.join('config', 'boot.py'), data)
+
+        print("Installing IDE...")
+        fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "ide"), "ide")
+        fs.copy(os.path.join(PATH_FRAMEWORK, 'data', "plugin"), "plugin")
+
+        fs.makedirs(os.path.join(PATH_PROJECT, "project"))
+        
+        print("Building IDE...")
+        app = season.server(PATH_PROJECT)
+        wiz = app.wiz()
+        wiz.ide.build.clean()
+        wiz.ide.build()
+
+        print(f"Workspace '{projectname}' created successfully.")
+        print(f"  Path: {PATH_PROJECT}")
+        print(f"  Port: {startport}")
+        print("")
+        print("To start the server:")
+        print(f"  cd {projectname}")
+        print(f"  wiz run")
+    except Exception as e:
+        print(f"Create failed: {e}")
 
     

@@ -17,7 +17,20 @@ Complete guide to getting started with the WIZ framework.
 - **Using Portals**: Leveraging reusable module packages
 - **Build and Deployment**: Deploying to production environments
 
-### 2. [Architecture](architecture.md)
+### 2. [Command Guide](command.md)
+Complete reference for WIZ CLI commands.
+
+- **Basic Commands**: create, run, build, server, bundle, kill
+- **IDE Management**: ide install, remove, upgrade, build, clean
+- **Service Management**: service regist, start, stop, restart, status, list
+- **Project Management**: project build, create, delete, list, export
+- **App Management**: project app create, delete, list
+- **Controller Management**: project controller create, delete, list
+- **Route Management**: project route create, delete, list
+- **Package Management**: project package create, delete, list
+- **NPM Management**: project npm install, uninstall, list
+
+### 3. [Architecture](architecture.md)
 Explains the internal structure and design principles of the WIZ framework.
 
 - **Overview**: Introduction to the WIZ framework
@@ -32,7 +45,7 @@ Explains the internal structure and design principles of the WIZ framework.
 - **Data Flow**: Request-response flow
 - **Scalability and Security**: Scaling and security considerations
 
-### 3. [API Reference](api/README.md)
+### 4. [API Reference](api/README.md)
 Complete API documentation for the WIZ framework.
 
 #### Backend API (Python)
@@ -46,7 +59,7 @@ Complete API documentation for the WIZ framework.
 #### Frontend API (TypeScript)
 - **[Service API](api/service-api.md)** - Angular component service
 
-### 4. [Examples](examples.md)
+### 5. [Examples](examples.md)
 Learning guide through practical examples.
 
 - Basic page creation

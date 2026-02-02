@@ -4,10 +4,10 @@ from .base import BaseCommand
 
 
 class AppCommand(BaseCommand):
-    """App 관리 명령어"""
+    """App management commands"""
     
     def list(self, project="main", package=None):
-        """앱 목록 조회"""
+        """List apps"""
         if not self._validate_project_path():
             return
         
@@ -23,12 +23,12 @@ class AppCommand(BaseCommand):
     
     def create(self, namespace=None, project="main", package=None, engine="html", mode="page"):
         """
-        앱 생성
-        - namespace: 앱 네임스페이스 (예: main.dashboard)
-        - project: 프로젝트명 (기본: main)
-        - package: 포탈 패키지명 (없으면 src/app, 있으면 portal/<package>/app)
-        - engine: 템플릿 엔진 (html, pug)
-        - mode: 앱 모드 (page, component, layout)
+        Create app
+        - namespace: App namespace (e.g., main.dashboard)
+        - project: Project name (default: main)
+        - package: Portal package name (if empty: src/app, if set: portal/<package>/app)
+        - engine: Template engine (html, pug)
+        - mode: App mode (page, component, layout)
         """
         if not self._validate_project_path():
             return
@@ -47,7 +47,7 @@ class AppCommand(BaseCommand):
         print(f"Creating app '{namespace}' at '{app_path}'...")
         self.fs.makedirs(app_path)
         
-        # app.json 생성
+        # Create app.json
         app_data = {
             "mode": mode,
             "id": namespace,
@@ -60,7 +60,7 @@ class AppCommand(BaseCommand):
         }
         self.fs.write(os.path.join(app_path, "app.json"), json.dumps(app_data, indent=4))
         
-        # view.ts 생성
+        # Create view.ts
         view_ts = """import { OnInit, Input } from '@angular/core';
 
 export class Component implements OnInit {
@@ -71,7 +71,7 @@ export class Component implements OnInit {
 }"""
         self.fs.write(os.path.join(app_path, "view.ts"), view_ts)
         
-        # view.[engine] 생성
+        # Create view.[engine]
         if engine == 'pug':
              self.fs.write(os.path.join(app_path, "view.pug"), "div\n    span {{title}}")
         else:
@@ -80,7 +80,7 @@ export class Component implements OnInit {
         print(f"App '{namespace}' created successfully.")
     
     def delete(self, namespace=None, project="main", package=None):
-        """앱 삭제"""
+        """Delete app"""
         if not self._validate_project_path():
             return
         

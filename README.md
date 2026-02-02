@@ -29,6 +29,7 @@
 
 - 🚀 **Rapid Development** - Create full-stack applications with minimal boilerplate
 - 🎨 **Web-Based IDE** - Develop directly in your browser with a modern, feature-rich IDE
+- 🤖 **MCP & AI Agent Ready** - CLI commands designed for AI-powered automation
 - 🔌 **Plugin Architecture** - Extend functionality with a powerful plugin system
 - 📦 **Built-in Tools** - Git integration, npm/pip management, live preview, and more
 - 🌐 **Full-Stack** - Python backend (Flask) + Angular frontend seamlessly integrated
@@ -143,28 +144,48 @@ Comprehensive documentation is available in multiple languages:
 
 ## 💻 CLI Reference
 
+### Basic Commands
+
+```bash
+wiz create <name>              # Create new workspace
+wiz run [--port=PORT]          # Start development server
+wiz bundle [--project=NAME]    # Create production bundle
+wiz kill                       # Kill all WIZ processes
+```
+
 ### Project Management
 
-#### Create Project
 ```bash
-wiz create [Project Name]
+wiz project list                              # List all projects
+wiz project build --project=main              # Build project
+wiz project create --project=dev              # Create new project
+wiz project delete --project=dev              # Delete project
+wiz project export --project=main --output=backup.wizproject
 ```
 
-#### Run Project
-```bash
-# Development server
-wiz run --host=<host> --port=<port> --log=<log file path>
+### App Management
 
-# Available flags:
-# --port: Web server port (default: 3000)
-# --host: Web server host (default: 0.0.0.0)
-# --log: Log file path (default: None)
+```bash
+wiz project app list --project=main           # List apps
+wiz project app create --project=main --app=page.home --engine=pug
+wiz project app delete --project=main --app=page.home
 ```
 
-#### Bundle Project
+### Controller & Route Management
+
 ```bash
-wiz bundle                    # Bundle main project
-wiz bundle --project=main     # Bundle specific project
+wiz project controller list --project=main    # List controllers
+wiz project controller create --project=main --controller=api
+wiz project route list --project=main         # List routes
+wiz project route create --project=main --route=custom --path=/api/v1
+```
+
+### Package & NPM Management
+
+```bash
+wiz project package list --project=main       # List portal packages
+wiz project npm install --project=main --package=lodash
+wiz project npm list --project=main           # List npm packages
 ```
 
 ### Daemon Management
@@ -187,11 +208,39 @@ wiz service stop [name]                   # Stop service(s)
 wiz service restart [name]                # Restart service(s)
 ```
 
-### Plugin Commands
+### IDE Commands
 
 ```bash
-wiz command <plugin name> <args>          # Execute plugin command
+wiz ide install                           # Install IDE
+wiz ide upgrade                           # Upgrade IDE
+wiz ide build                             # Build IDE
+wiz ide clean                             # Clean IDE cache
 ```
+
+For complete CLI documentation, see [Command Guide (English)](docs/en/command.md) | [명령어 가이드 (한국어)](docs/kr/command.md)
+
+## 🤖 MCP & AI Agent Integration
+
+WIZ v2.5+ provides CLI commands designed for seamless integration with AI agents and MCP (Model Context Protocol) servers:
+
+```bash
+# AI agents can programmatically manage projects
+wiz project list                              # Discover available projects
+wiz project app list --project=main           # List all components
+wiz project app create --project=main --app=page.dashboard --engine=pug
+wiz project build --project=main --clean      # Build with clean cache
+
+# Export/Import for project portability
+wiz project export --project=main --output=project.wizproject
+wiz project create --project=new --path=project.wizproject
+```
+
+**Key Benefits for AI Automation:**
+- ✅ Structured command output for machine parsing
+- ✅ Comprehensive project lifecycle management
+- ✅ Modular subcommand architecture
+- ✅ Export/Import support for project sharing
+- ✅ All commands accessible without web IDE
 
 ## 🎯 Examples
 
@@ -255,7 +304,8 @@ WIZ follows semantic versioning (`x.y.z`):
 See [RELEASES.md](RELEASES.md) for the latest updates and complete version history.
 
 Quick links to version-specific releases:
-- [Version 2.4.x (Current)](releases/v2.4.md) - Angular 18, TailwindCSS, AI Assistant
+- [Version 2.5.x (Current)](releases/v2.5.md) - MCP/Agent Ready CLI, Project Management Tools
+- [Version 2.4.x](releases/v2.4.md) - Angular 18, TailwindCSS, AI Assistant
 - [Version 2.3.x](releases/v2.3.md) - Bundle structure, Angular 17
 - [Version 2.2.x](releases/v2.2.md) - IDE overlay menu
 - [Version 2.1.x](releases/v2.1.md) - IDE plugin concept

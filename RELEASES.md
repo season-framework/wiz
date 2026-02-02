@@ -15,18 +15,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## 📦 Current Release - Version 2.4.x
+## 📦 Current Release - Version 2.5.x
 
-### Latest: [2.4.15] - January 25, 2026
+### Latest: [2.5.0] - February 2, 2026
 
 **Highlights:**
-- npm package version upgrade
-- Python 3.14 compatibility fixes
-- Angular 18 upgrade (2.4.9)
-- TailwindCSS support (2.4.5)
-- WIZ Assistant (GPT) integration (2.4.6)
+- 🤖 **MCP & AI Agent Ready** - Enhanced CLI commands for AI-powered automation
+- 🛠️ **Comprehensive CLI Tools** - `wiz project` with modular subcommands
+- 📦 **Project Management** - app, controller, route, package, npm subcommands
+- 📁 **Export/Import** - .wizproject file support for project portability
+- 📚 **Enhanced Documentation** - Complete command reference and WebSocket guide
 
-**[View Full Release Notes →](releases/v2.4.md)**
+**[View Full Release Notes →](releases/v2.5.md)**
 
 ---
 
@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Release Date | Highlights | Release Notes |
 |---------|-------------|-----------|---------------|
-| **2.5.x** | 2026-02-02 ~ (Developing) | CLI Project Tools, Core Optimization | [View Details](releases/v2.5.0.md) |
+| **2.5.x** | 2026-02-02 ~ | MCP/Agent Ready CLI, Project Management Tools | [View Details](releases/v2.5.md) |
 | **2.4.x** | 2024-03-03 ~ 2026-01-25 | Angular 18, TailwindCSS, AI Assistant | [View Details](releases/v2.4.md) |
 | **2.3.x** | 2023-05-24 ~ 2023-12-14 | Bundle structure, Angular 17, Linux service CLI | [View Details](releases/v2.3.md) |
 | **2.2.x** | 2023-01-08 ~ 2023-05-03 | IDE overlay menu, shortcut config | [View Details](releases/v2.2.md) |
@@ -57,7 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 🎯 Quick Links
 
-- **[Latest Stable](releases/v2.4.md)** - Current production release
+- **[Latest Stable](releases/v2.5.md)** - Current production release (v2.5.x)
+- **[Command Reference](docs/en/command.md)** - Complete CLI command documentation
 - **[Migration Guides](docs/en/architecture.md)** - Upgrade between major versions
 - **[Contributing](README.md#-contributing)** - How to contribute to the project
 - **[Issue Tracker](https://github.com/season-framework/wiz/issues)** - Report bugs or request features

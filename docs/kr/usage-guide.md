@@ -317,6 +317,305 @@ def on_message(data):
     wiz.response.send({"echo": data})
 ```
 
+### 4. WebSocket (socket.py) 상세 가이드
+
+#### 4.1 Socket Controller 개요
+
+`socket.py`는 WIZ 프레임워크에서 실시간 양방향 통신을 위한 WebSocket 핸들러입니다. Flask-SocketIO 기반으로 구현되어 있으며, 각 앱 컴포넌트마다 독립적인 WebSocket 네임스페이스를 가집니다.
+
+**네임스페이스 구조:**
+```
+/wiz/app/{project}/{app_id}
+```
+
+예: `/wiz/app/main/page.dashboard`
+
+#### 4.2 Socket Controller 클래스 구조
+
+Socket Controller는 `Controller` 클래스를 정의하여 구현합니다.
+
+```python
+class Controller:
+    def __init__(self, server):
+        """
+        Socket Controller 초기화
+        
+        Parameters:
+            server: WIZ 서버 인스턴스
+        """
+        self.server = server
+
+    def connect(self):
+        """클라이언트 연결 시 호출"""
+        pass
+
+    def disconnect(self, flask, io):
+        """클라이언트 연결 해제 시 호출"""
+        sid = flask.request.sid  # 클라이언트 세션 ID
+        pass
+
+    def join(self, data, io):
+        """룸 참가 이벤트"""
+        io.join(data)  # data를 룸 이름으로 사용하여 참가
+
+    def leave(self, data, io):
+        """룸 퇴장 이벤트"""
+        io.leave(data)  # data를 룸 이름으로 사용하여 퇴장
+
+    def custom_event(self, data, io):
+        """사용자 정의 이벤트"""
+        # data: 클라이언트에서 전송한 데이터
+        # io: SocketHandler 인스턴스
+        io.emit("response", {"message": "received"})
+```
+
+#### 4.3 사용 가능한 파라미터
+
+Controller 메서드에서는 다음 파라미터들을 사용할 수 있습니다:
+
+| 파라미터 | 타입 | 설명 |
+|----------|------|------|
+| `server` | Server | WIZ 서버 인스턴스 |
+| `wiz` | Wiz | WIZ 코어 객체 (model, project, session 등 접근) |
+| `socketio` | SocketIO | Flask-SocketIO 인스턴스 |
+| `flask_socketio` | module | flask_socketio 모듈 |
+| `flask` | module | Flask 모듈 (request.sid 등 접근) |
+| `io` | SocketHandler | 소켓 핸들러 (emit, join, leave 등) |
+| `data` | any | 클라이언트에서 전송한 데이터 |
+
+#### 4.4 SocketHandler (io) API
+
+`io` 파라미터로 제공되는 SocketHandler 클래스의 메서드:
+
+```python
+# 메시지 전송
+io.emit(event, data, to=None, room=None, broadcast=False)
+# - event: 이벤트 이름
+# - data: 전송할 데이터
+# - to: 특정 클라이언트 SID
+# - room: 특정 룸
+# - broadcast: 전체 브로드캐스트
+
+# 일반 메시지 전송
+io.send(message, to=None, room=None)
+
+# 룸 참가
+io.join(room, sid=None)
+io.join_room(room, sid=None)  # 별칭
+
+# 룸 퇴장
+io.leave(room, sid=None)
+io.leave_room(room, sid=None)  # 별칭
+
+# 상태 메시지 전송
+io.status(channel='message', to=None, type='status', **msg)
+
+# 룸 내 클라이언트 목록 조회
+clients = io.clients(room)  # [(sid, eio_sid), ...]
+
+# 모든 룸 목록 조회
+rooms = io.rooms()
+```
+
+#### 4.5 실전 예제
+
+**채팅 서버 구현:**
+
+```python
+class Controller:
+    def __init__(self, server):
+        self.server = server
+
+    def connect(self):
+        print("New client connected")
+
+    def disconnect(self, flask, io):
+        sid = flask.request.sid
+        print(f"Client {sid} disconnected")
+
+    def join(self, data, io, flask, wiz):
+        """채팅방 참가"""
+        # 세션 검증
+        wiz.session = wiz.model("portal/season/session")
+        session = wiz.session.use()
+        user = session.get()
+        
+        if not user:
+            return  # 인증되지 않은 사용자
+        
+        room = data.get('room', 'default')
+        io.join(room)
+        
+        # 참가 알림
+        io.emit("user_joined", {
+            "user": user.get('username'),
+            "room": room
+        }, room=room)
+
+    def leave(self, data, io, flask, wiz):
+        """채팅방 퇴장"""
+        room = data.get('room', 'default')
+        io.leave(room)
+        io.emit("user_left", {"room": room}, room=room)
+
+    def message(self, data, io, wiz):
+        """메시지 전송"""
+        wiz.session = wiz.model("portal/season/session")
+        session = wiz.session.use()
+        user = session.get()
+        
+        room = data.get('room', 'default')
+        message = data.get('message', '')
+        
+        io.emit("new_message", {
+            "user": user.get('username', 'Anonymous'),
+            "message": message,
+            "timestamp": wiz.project.timestamp()
+        }, room=room)
+```
+
+**실시간 로그 브로드캐스트:**
+
+```python
+class Controller:
+    def __init__(self, server):
+        self.server = server
+
+    def wplog(self, data, io, wiz):
+        """워크플로우 로그를 특정 클라이언트에게 전송"""
+        project = wiz.project()
+        socketNamespace = f"/wiz/app/{project}/page.main"
+
+        for log in data:
+            event = log['event']
+            to = log['id']  # 대상 클라이언트 SID
+            io.emit(event, log, to=to, namespace=socketNamespace)
+
+    def broadcast_log(self, data, io):
+        """모든 클라이언트에게 로그 전송"""
+        io.emit("log", data)  # 현재 네임스페이스의 모든 클라이언트
+```
+
+**인증이 필요한 Socket Controller:**
+
+```python
+class Controller:
+    def __init__(self, server):
+        self.server = server
+
+    def _check_auth(self, wiz):
+        """인증 검증 헬퍼"""
+        wiz.session = wiz.model("portal/season/session")
+        struct = wiz.model("portal/dizest/struct")
+        config = struct.config
+        try:
+            config.acl()
+            return True
+        except:
+            return False
+
+    def join(self, data, io, wiz):
+        if not self._check_auth(wiz):
+            return  # 인증 실패 시 무시
+        io.join(data)
+
+    def leave(self, data, io, wiz):
+        if not self._check_auth(wiz):
+            return
+        io.leave(data)
+
+    def secure_action(self, data, io, wiz):
+        if not self._check_auth(wiz):
+            io.emit("error", {"message": "Unauthorized"})
+            return
+        
+        # 인증된 작업 수행
+        io.emit("success", {"data": "secure data"})
+```
+
+#### 4.6 프론트엔드에서 WebSocket 사용
+
+**view.ts에서 Socket.IO 사용:**
+
+```typescript
+import { OnInit, OnDestroy } from '@angular/core';
+import { Service } from '@wiz/libs/portal/season/service';
+
+export class Component implements OnInit, OnDestroy {
+    constructor(public service: Service) { }
+
+    public socket: any;
+
+    public async ngOnInit() {
+        await this.service.init();
+        
+        // Socket.IO 연결
+        this.socket = this.service.socket.create();
+        
+        // 이벤트 리스너 등록
+        this.socket.on("new_message", (data) => {
+            console.log("Received:", data);
+        });
+        
+        this.socket.on("user_joined", (data) => {
+            console.log(`${data.user} joined ${data.room}`);
+        });
+        
+        // 룸 참가
+        this.socket.emit("join", { room: "general" });
+    }
+
+    public sendMessage(message: string) {
+        this.socket.emit("message", {
+            room: "general",
+            message: message
+        });
+    }
+
+    public ngOnDestroy() {
+        // 컴포넌트 파괴 시 연결 해제
+        if (this.socket) {
+            this.socket.emit("leave", { room: "general" });
+            this.socket.disconnect();
+        }
+    }
+}
+```
+
+#### 4.7 Socket Controller 실행 과정
+
+WIZ 프레임워크에서 Socket Controller는 다음과 같은 과정으로 실행됩니다:
+
+1. **서버 시작 시**: `season.lib.binding.socket.Socket` 클래스가 초기화됨
+2. **socket.py 파일 탐색**: 각 프로젝트의 `bundle/src/app/` 하위에서 `socket.py` 파일 검색
+3. **Controller 클래스 로드**: `season.util.compiler`를 사용하여 동적으로 클래스 로드
+4. **이벤트 바인딩**: Controller 클래스의 모든 메서드를 Socket.IO 이벤트로 등록
+5. **네임스페이스 할당**: `/wiz/app/{project}/{app_id}` 형태의 네임스페이스 자동 생성
+
+**내부 동작 흐름:**
+
+```
+클라이언트 이벤트 발생
+    ↓
+Socket.IO 이벤트 핸들러 호출
+    ↓
+wrapper 함수에서 파라미터 준비 (wiz, io, flask, data 등)
+    ↓
+season.util.compiler를 통해 Controller 메서드 호출
+    ↓
+메서드 시그니처에 따라 필요한 파라미터만 주입
+    ↓
+메서드 실행 및 응답
+```
+
+#### 4.8 주의사항
+
+1. **메서드 이름 규칙**: `__`로 시작하고 끝나는 메서드는 이벤트로 등록되지 않음
+2. **파라미터 주입**: 메서드 시그니처에 정의된 파라미터만 주입됨 (필요한 것만 선언)
+3. **예외 처리**: 예외 발생 시 서버 로그에 기록됨
+4. **빌드 필요**: socket.py 변경 후 반드시 빌드 필요 (bundle 폴더에 복사됨)
+5. **네임스페이스 격리**: 각 앱의 Socket은 독립된 네임스페이스를 가짐
+
 ### 3. 페이지 접속
 
 빌드 후 다음 URL로 접속:

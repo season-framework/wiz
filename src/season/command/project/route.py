@@ -1,16 +1,17 @@
 import os
+import json
 from .base import BaseCommand
 
 
 class RouteCommand(BaseCommand):
-    """Route 관리 명령어"""
+    """Route management commands"""
     
-    def list(self, package=None):
-        """라우트 목록 조회"""
+    def list(self, project="main", package=None):
+        """List routes"""
         if not self._validate_project_path():
             return
         
-        base_path = self._get_route_base_path(package)
+        base_path = self._get_route_base_path(project, package)
         if not self.fs.isdir(base_path):
             print(f"No routes found in '{base_path}'.")
             return
@@ -20,83 +21,72 @@ class RouteCommand(BaseCommand):
         for r in routes:
             print(f"  - {r}")
     
-    def create(self, name=None, package=None, route_path="/", methods=None, template="default"):
-        """라우트 생성"""
+    def create(self, namespace=None, project="main", package=None, route_path=None, methods=None, template="default"):
+        """Create route"""
         if not self._validate_project_path():
             return
         
-        if name is None:
-            print("Route name is required. (--name=api)")
+        if namespace is None:
+            print("Route namespace is required. (--namespace=api)")
             return
         
-        base_path = self._get_route_base_path(package)
-        file_path = os.path.join(base_path, f"{name}.py")
+        base_path = self._get_route_base_path(project, package)
+        route_dir = os.path.join(base_path, namespace)
         
-        if self.fs.exists(file_path):
-            print(f"Route '{name}' already exists.")
+        if self.fs.isdir(route_dir):
+            print(f"Route '{namespace}' already exists.")
             return
         
-        self.fs.makedirs(base_path)
+        print(f"Creating route '{namespace}'...")
+        self.fs.makedirs(route_dir)
         
+        # Create app.json
+        app_data = {
+            "id": namespace,
+            "title": namespace,
+            "route": route_path if route_path else namespace,
+            "viewuri": "",
+            "category": ""
+        }
+        self.fs.write(os.path.join(route_dir, "app.json"), json.dumps(app_data, indent=4))
+        
+        # Create route.py
         methods = methods or "GET,POST"
         route_template = '''"""
 Route: {name}
 Path: {path}
 Methods: {methods}
 """
-
-def route(wiz):
-    request = wiz.request
-    response = wiz.response
-    
-    # Route logic here
-    
-    return response.status(200)
+segment = wiz.request.match("/{route}/<action>/<path:path>")
+action = segment.action
+value = wiz.request.get("value")
+wiz.response.status(200, value)
 '''
         
-        print(f"Creating route '{name}'...")
-        self.fs.write(file_path, route_template.format(name=name, path=route_path, methods=methods))
-        print(f"Route '{name}' created successfully.")
+        self.fs.write(os.path.join(route_dir, "route.py"), route_template.format(
+            name=namespace, 
+            path=route_path if route_path else namespace, 
+            methods=methods,
+            route=route_path if route_path else namespace
+        ))
+        print(f"Route '{namespace}' created successfully.")
     
-    def delete(self, name=None, package=None):
-        """라우트 삭제"""
+    def delete(self, namespace=None, project="main", package=None):
+        """Delete route"""
         if not self._validate_project_path():
             return
         
-        if name is None:
-            print("Route name is required.")
+        if namespace is None:
+            print("Route namespace is required.")
             return
         
-        base_path = self._get_route_base_path(package)
-        file_path = os.path.join(base_path, f"{name}.py")
+        base_path = self._get_route_base_path(project, package)
+        route_dir = os.path.join(base_path, namespace)
         
-        if not self.fs.exists(file_path):
-            print(f"Route '{name}' does not exist.")
+        if not self.fs.isdir(route_dir):
+            print(f"Route '{namespace}' does not exist.")
             return
         
-        print(f"Deleting route '{name}'...")
-        self.fs.remove(file_path)
-        print(f"Route '{name}' deleted successfully.")
-    
-    def update(self, name=None, package=None, content=None):
-        """라우트 업데이트"""
-        if not self._validate_project_path():
-            return
-        
-        if name is None:
-            print("Route name is required.")
-            return
-        
-        base_path = self._get_route_base_path(package)
-        file_path = os.path.join(base_path, f"{name}.py")
-        
-        if not self.fs.exists(file_path):
-            print(f"Route '{name}' does not exist.")
-            return
-        
-        if content:
-            print(f"Updating route '{name}'...")
-            self.fs.write(file_path, content)
-            print(f"Route '{name}' updated successfully.")
-        else:
-            print("Content is required for update.")
+        print(f"Deleting route '{namespace}'...")
+        self.fs.remove(route_dir)
+        print(f"Route '{namespace}' deleted successfully.")
