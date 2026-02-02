@@ -11,12 +11,13 @@ from .command.daemon import run, server, kill, build
 from .command.create import create
 from .command.ide import ide
 from .command.bundle import bundle
+from .command.project import project
 
 def main():
     epilog = "Copyright 2021 SEASON CO. LTD. <proin@season.co.kr>. Licensed under the terms of the MIT license. Please see LICENSE in the source code for more information."
     parser = argh.ArghParser(epilog=epilog)
     parser.add_commands([
-        run, server, kill, build, service, create, ide, bundle
+        run, server, kill, build, service, create, ide, bundle, project
     ])
     parser.add_argument('--version', action='version', version='season ' + VERSION_STRING)
     parser.dispatch()

@@ -4,11 +4,11 @@ import json
 import re
 import time
 
-Code = wiz.ide.plugin.model("src/code")
-Util = wiz.ide.plugin.model("src/util")
+Code = wiz.ide.plugin("workspace").model("src/code")
+Util = wiz.ide.plugin("workspace").model("src/util")
 
-Annotator = wiz.ide.plugin.model("src/build/annotator")
-Namespace = wiz.ide.plugin.model("src/build/namespace")
+Annotator = wiz.ide.plugin("workspace").model("src/build/annotator")
+Namespace = wiz.ide.plugin("workspace").model("src/build/namespace")
 
 class Model:
     def __init__(self, path=None):
@@ -64,7 +64,7 @@ class Model:
         self.bundle()
 
         wiz.server.cache.clear()
-        Route = wiz.ide.plugin.model("route")()
+        Route = wiz.ide.plugin("workspace").model("route")()
         Route.build()
 
         if Util.is_work_finish(fs, timestamp) is False:
@@ -76,12 +76,12 @@ class Model:
         fs.remove("bundle")
         fs.makedirs("bundle")
 
-        fs.copy("build/dist/build", "bundle/www")
-        fs.copy("build/src/assets", "bundle/src/assets")
-        fs.copy("build/src/controller", "bundle/src/controller")
-        fs.copy("build/src/model", "bundle/src/model")
-        fs.copy("build/src/route", "bundle/src/route")
-        fs.copy("config", "bundle/config")
+        if fs.exists("build/dist/build"): fs.copy("build/dist/build", "bundle/www")
+        if fs.exists("build/src/assets"): fs.copy("build/src/assets", "bundle/src/assets")
+        if fs.exists("build/src/controller"): fs.copy("build/src/controller", "bundle/src/controller")
+        if fs.exists("build/src/model"): fs.copy("build/src/model", "bundle/src/model")
+        if fs.exists("build/src/route"): fs.copy("build/src/route", "bundle/src/route")
+        if fs.exists("config"): fs.copy("config", "bundle/config")
 
         appfiles = self._search("build/src/app", result=[])
 
@@ -165,14 +165,14 @@ class Model:
         fs.copy("src/angular/wiz.ts", "build/src/wiz.ts")
         fs.copy("src/angular/index.pug", "build/src/index.pug")
 
-        fs.copy("src/angular/app", "build/src/app")
-        fs.copy("src/app", "build/src/app")
-        fs.copy("src/assets", "build/src/assets")
-        fs.copy("src/controller", "build/src/controller")
-        fs.copy("src/model", "build/src/model")
-        fs.copy("src/route", "build/src/route")
-        fs.copy("src/angular/libs", "build/src/libs")
-        fs.copy("src/angular/styles", "build/src/styles")
+        if fs.exists("src/angular/app"): fs.copy("src/angular/app", "build/src/app")
+        if fs.exists("src/app"): fs.copy("src/app", "build/src/app")
+        if fs.exists("src/assets"): fs.copy("src/assets", "build/src/assets")
+        if fs.exists("src/controller"): fs.copy("src/controller", "build/src/controller")
+        if fs.exists("src/model"): fs.copy("src/model", "build/src/model")
+        if fs.exists("src/route"): fs.copy("src/route", "build/src/route")
+        if fs.exists("src/angular/libs"): fs.copy("src/angular/libs", "build/src/libs")
+        if fs.exists("src/angular/styles"): fs.copy("src/angular/styles", "build/src/styles")
 
         # build portal
         def buildApp(module, mode="app"):

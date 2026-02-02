@@ -1,4 +1,5 @@
 import os
+import copy
 import season
 from .request import Request
 from .idecomponent.build import Build
@@ -28,7 +29,7 @@ class Plugin:
                 plugins.append(plugin)
         return plugins
     
-    def model(self, namespace):
+    def model(self, namespace, mode=None):
         wiz = self.wiz
         fs = self.fs(self.name, "model")
 
@@ -42,16 +43,29 @@ class Plugin:
             code = compile(code, fs.abspath(namespace + ".py"), 'exec')
             cache[namespace] = code
 
+        if mode == 'context':
+            wiz_ctx = copy.copy(wiz)
+            wiz_ctx.ide = copy.copy(wiz.ide)
+            wiz_ctx.ide.plugin = Plugin(wiz_ctx, self.name)
+            wiz = wiz_ctx
+        
         logger = wiz.logger(f"model/{namespace}")
         model = season.util.compiler().build(code, name=fs.abspath(namespace + ".py"), logger=logger, wiz=wiz).fn
         return model['Model']
     
-    def command(self, namespace):
+    def command(self, namespace, mode=None):
         wiz = self.wiz
         fs = self.fs(self.name)
         code = fs.read(f"command.py")
         code = compile(code, fs.abspath("command.py"), 'exec')
         logger = wiz.logger(self.name + "/command")
+
+        if mode == 'context':
+            wiz_ctx = copy.copy(wiz)
+            wiz_ctx.ide = copy.copy(wiz.ide)
+            wiz_ctx.ide.plugin = Plugin(wiz_ctx, self.name)
+            wiz = wiz_ctx
+
         command = season.util.compiler().build(code, name=fs.abspath("command.py"), logger=logger, wiz=wiz).fn
         return command[namespace]
     

@@ -1,6 +1,6 @@
 import re
 
-Namespace = wiz.ide.plugin.model("src/build/namespace")
+Namespace = wiz.ide.plugin("workspace").model("src/build/namespace")
 
 class Definition:
     def directives(self, code):
