@@ -17,7 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 📦 Current Release - Version 2.5.x
 
-### Latest: [2.5.0] - February 2, 2026
+### Latest: [2.5.1] - February 3, 2026
+
+**Highlights:**
+- 🔧 **Development Mode Fix** - Automatic cache clearing on HTTP requests in dev mode
+
+### [2.5.0] - February 2, 2026
 
 **Highlights:**
 - 🤖 **MCP & AI Agent Ready** - Enhanced CLI commands for AI-powered automation
@@ -36,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Release Date | Highlights | Release Notes |
 |---------|-------------|-----------|---------------|
-| **2.5.x** | 2026-02-02 ~ | MCP/Agent Ready CLI, Project Management Tools | [View Details](releases/v2.5.md) |
+| **2.5.x** | 2026-02-02 ~ 2026-02-03 | MCP/Agent Ready CLI, Project Management Tools | [View Details](releases/v2.5.md) |
 | **2.4.x** | 2024-03-03 ~ 2026-01-25 | Angular 18, TailwindCSS, AI Assistant | [View Details](releases/v2.4.md) |
 | **2.3.x** | 2023-05-24 ~ 2023-12-14 | Bundle structure, Angular 17, Linux service CLI | [View Details](releases/v2.3.md) |
 | **2.2.x** | 2023-01-08 ~ 2023-05-03 | IDE overlay menu, shortcut config | [View Details](releases/v2.2.md) |

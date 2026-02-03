@@ -70,6 +70,9 @@ class HTTP:
         def request_handler(*args, **kwargs):
             wiz = server.wiz()
 
+            if wiz.project.dev():
+                wiz.server.cache.clear()
+
             request_uri = wiz.request.uri()
             handler = None
 
