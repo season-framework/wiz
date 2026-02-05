@@ -9,6 +9,11 @@ def install():
     package = wiz.request.query("package", True)
     output = subprocess.run([python_executable, "-m", "pip", "install", str(package), "--upgrade"], capture_output=True)
     wiz.response.status(200, str(output.stdout.decode("utf-8")))
+    
+def uninstall():
+    package = wiz.request.query("package", True)
+    output = subprocess.run([python_executable, "-m", "pip", "uninstall", str(package), "-y"], capture_output=True)
+    wiz.response.status(200, str(output.stdout.decode("utf-8")))
 
 def list(segment):
     output = subprocess.run([python_executable, "-m", "pip", "freeze"], capture_output=True)
