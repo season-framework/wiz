@@ -33,6 +33,24 @@ export class Component implements OnInit {
         await this.loader(false);
     }
 
+    public async uninstall(keyword: string) {
+        if (!keyword) return;
+        const res = await this.service.alert.show({
+            title: 'Uninstall',
+            message: `Are you sure to uninstall '${keyword}' package?`,
+            status: 'error',
+            action: "Uninstall",
+            actionBtn: "error",
+            cancel: true,
+        });
+        if (!res) return;
+        await this.loader(true);
+        let { data } = await wiz.call("uninstall", { package: keyword });
+        this.service.log(data);
+        await this.load();
+        await this.loader(false);
+    }
+
     public async load() {
         await this.loader(true);
         let { data } = await wiz.call("list");

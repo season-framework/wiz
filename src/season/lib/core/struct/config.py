@@ -55,7 +55,11 @@ class Config(season.util.stdClass):
 
         wiz = self.wiz
 
-        fs = wiz.project.fs("config")
+        if wiz.server.config.boot.bundle:
+            import os
+            fs = wiz.project.fs(os.path.join("bundle", "config"))
+        else:
+            fs = wiz.project.fs("config")
         config_path = name + '.py'
         if fs.isfile(config_path) == False:
             return build_config()
