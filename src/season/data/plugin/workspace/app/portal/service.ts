@@ -34,7 +34,10 @@ export class FileEditor {
             'scss': { viewref: MonacoEditor, config: { monaco: { language: 'scss' } } },
             'json': { viewref: MonacoEditor, config: { monaco: { language: 'json' } } },
             'pug': { viewref: MonacoEditor, config: { monaco: { language: 'pug' } } },
-            'py': { viewref: MonacoEditor, config: { monaco: { language: 'python' } } }
+            'py': { viewref: MonacoEditor, config: { monaco: { language: 'python' } } },
+            'txt': { viewref: MonacoEditor, config: { monaco: { language: 'plaintext' } } },
+            'env': { viewref: MonacoEditor, config: { monaco: { language: 'env' } } },
+            'sql': { viewref: MonacoEditor, config: { monaco: { language: 'sql' } } },
         };
 
         let extension = path.substring(path.lastIndexOf(".") + 1).toLowerCase();
