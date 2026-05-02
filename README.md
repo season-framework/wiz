@@ -19,6 +19,7 @@
 
 </div>
 
+
 ---
 
 ## 📖 Overview
@@ -58,7 +59,7 @@
 - **TypeScript Support** - Full TypeScript support for Angular development
 - **Pug Templates** - Option to use Pug for cleaner HTML templates
 - **TailwindCSS** - Built-in support for TailwindCSS
-- **Socket.IO** - Real-time communication support
+- **Socket.IO** - Real-time communication support with dynamic server-side socket rebinding
 - **WSGI Compatible** - Production-ready WSGI deployment
 
 ## 🚀 Quick Start
@@ -304,7 +305,7 @@ WIZ follows semantic versioning (`x.y.z`):
 See [RELEASES.md](RELEASES.md) for the latest updates and complete version history.
 
 Quick links to version-specific releases:
-- [Version 2.5.x (Current)](releases/v2.5.md) - MCP/Agent Ready CLI, Project Management Tools
+- [Version 2.5.x (Current)](releases/v2.5.md) - Dynamic Socket.IO Rebinding, MCP/Agent Ready CLI, Project Management Tools
 - [Version 2.4.x](releases/v2.4.md) - Angular 18, TailwindCSS, AI Assistant
 - [Version 2.3.x](releases/v2.3.md) - Bundle structure, Angular 17
 - [Version 2.2.x](releases/v2.2.md) - IDE overlay menu
@@ -359,4 +360,3 @@ Made with ❤️ by the WIZ Framework Team
 [⬆ Back to Top](#wiz-framework)
 
 </div>
-
