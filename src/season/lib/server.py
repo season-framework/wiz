@@ -25,7 +25,7 @@ class Server:
         
         # bind events http / socketio
         season.lib.binding.http(self)
-        season.lib.binding.socket(self)
+        self.app.socketio_binding = season.lib.binding.socket(self)
 
     def run(self, **kwargs):
         config = self.config

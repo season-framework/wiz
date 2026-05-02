@@ -1,3 +1,6 @@
+.github/
+.vscode/
+
 test/
 dev/
 

@@ -70,6 +70,10 @@ class Model:
         if Util.is_work_finish(fs, timestamp) is False:
             self.build()
             return
+
+        socketio_binding = wiz.server.app.socketio_binding
+        if socketio_binding is not None:
+            socketio_binding.rebind_project(project=wiz.project())
     
     def bundle(self):
         fs = self.fs()
